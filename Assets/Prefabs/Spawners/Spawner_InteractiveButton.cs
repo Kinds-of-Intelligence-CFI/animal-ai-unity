@@ -11,7 +11,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
    void OnTriggerEnter(Collider other) // when the player enters the trigger area.
    {
     Rigidbody rigidPrefab;
-    rigidPrebab = Instantiate(Prefab, transform.position, transform.rotation) as Rigidbody; // spawn the reward.
+    rigidPrefab = Instantiate(Prefab, transform.position, transform.rotation) as Rigidbody; // spawn the reward.
    }
 
 }
