@@ -6,12 +6,12 @@ public class Spawner_InteractiveButton : MonoBehaviour
 {
     /// variables
     public Rigidbody Prefab; // the reward to spawn when the player interacts with the button.
-    public Rigidbody spawnPoint; // the spawn point for the reward.
+    public Transform spawnPoint; // the spawn point for the reward.
 
    void OnTriggerEnter(Collider other) // when the player enters the trigger area.
    {
-    Rigidbody rigidPrefab;
-    rigidPrefab = Instantiate(Prefab, transform.position, transform.rotation) as Rigidbody; // spawn the reward.
+    Rigidbody rigidPrefab; // create variable of Rigidbody of the reward.
+    rigidPrefab = Instantiate(Prefab, spawnPoint.position, spawnPoint.rotation) as Rigidbody; // spawn the reward.
    }
 
 }
