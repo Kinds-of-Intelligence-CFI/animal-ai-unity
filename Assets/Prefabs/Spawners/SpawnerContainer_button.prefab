@@ -1,5 +1,166 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &69126197599775415
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6096492504937741502}
+  - component: {fileID: 6364612249110475441}
+  - component: {fileID: 2125234090702784248}
+  - component: {fileID: 386712188329315151}
+  - component: {fileID: 1550225514215970201}
+  - component: {fileID: 4411327201455442471}
+  m_Layer: 0
+  m_Name: Cube
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6096492504937741502
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 69126197599775415}
+  m_LocalRotation: {x: 0.51056594, y: 0.489206, z: -0.48920605, w: 0.51056576}
+  m_LocalPosition: {x: 0.0011, y: 0.0002, z: 0.0152}
+  m_LocalScale: {x: 0.003570873, y: 0.016245168, z: 0.019014576}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 767204073983472995}
+  m_Father: {fileID: 2207009692206006086}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &6364612249110475441
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 69126197599775415}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &2125234090702784248
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 69126197599775415}
+  m_Enabled: 0
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &386712188329315151
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 69126197599775415}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!54 &1550225514215970201
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 69126197599775415}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!114 &4411327201455442471
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 69126197599775415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee7f270f6d01feb4e9b96d4199611336, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Prefab: {fileID: 54054735976619294, guid: f3d2126090ed23744bf83d0faf1f3280, type: 3}
+  spawnPoint: {fileID: 767204073983472995}
+--- !u!1 &454769178861505118
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 767204073983472995}
+  m_Layer: 0
+  m_Name: spawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &767204073983472995
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 454769178861505118}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 14.6, y: 1.61, z: -3.27}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6096492504937741502}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1440634380255410173
 GameObject:
   m_ObjectHideFlags: 0
@@ -193,7 +354,7 @@ GameObject:
   - component: {fileID: 6131923203368588723}
   - component: {fileID: 6131923203369719667}
   - component: {fileID: -2901181462991391087}
-  - component: {fileID: 6629666505054455364}
+  - component: {fileID: 2453022677861688354}
   m_Layer: 0
   m_Name: SpawnerContainer_button
   m_TagString: GoalSpawner
@@ -284,7 +445,7 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 6518531625559660688, guid: 88591febaae3ee74ea14930c3abe5428, type: 3}
---- !u!114 &6629666505054455364
+--- !u!114 &2453022677861688354
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -299,30 +460,30 @@ MonoBehaviour:
   rotationRange: {x: 0, y: 0}
   sizeMin: {x: 1, y: 1, z: 1}
   sizeMax: {x: 1, y: 1, z: 1}
-  canRandomizeColor: 0
-  ratioSize: {x: 1, y: 1, z: 1}
+  canRandomizeColor: 1
+  ratioSize: {x: 0, y: 0, z: 0}
   sizeAdjustement: 0.999
   textureUVOverride: 0
   typicalOrigin: 0
   spawnObjects:
-  - {fileID: 703623700356385717, guid: efdf89976edbdaa42aee9b9c7013c916, type: 3}
+  - {fileID: 5989473352299177113, guid: 8ed7d9a1894cfcb4db68a8984ae4b256, type: 3}
   initialSpawnSize: 1
   ripenedSpawnSize: 1
   variableSize: 0
   variableSpawnPosition: 0
   sphericalSpawnRadius: 0
-  defaultSpawnPosition: {x: 0, y: 0.55, z: 0}
-  timeToRipen: 0
-  timeBetweenSpawns: 0.5
-  delaySeconds: 10
+  defaultSpawnPosition: {x: 0.05, y: 1.04, z: 0}
+  timeToRipen: 1
+  timeBetweenSpawns: 1
+  delaySeconds: 0
   spawnCount: 1
-  colourOverride: {r: 0, g: 0.7882353, b: 1, a: 1}
+  colourOverride: {r: 0, g: 0, b: 0, a: 0}
   objSpawnSeed: 0
-  spawnSizeSeed: 1
+  spawnSizeSeed: 0
   stockpiling: 1
-  doorOpenDelay: 12
+  doorOpenDelay: -1
   infiniteDoorOpens: 1
-  timeUntilDoorOpens: 2.5
+  timeUntilDoorOpens: 1.5
   timeUntilDoorCloses: 1.5
   minDoorOpenTime: 1.4
 --- !u!1001 &1813374922185316525
