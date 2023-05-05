@@ -4,19 +4,14 @@ using UnityEngine;
 
 public class Spawner_InteractiveButton : MonoBehaviour
 {
-    /// variables
-    public Rigidbody Prefab; // the reward to spawn when the player interacts with the button.
-    public Transform spawnPoint; // the spawn point for the reward.
+   public SpawnerStockpiler spawnerStockpiler; // reference to the spawner script (SpawnerStockpiler.cs)
 
-   private void OnTriggerEnter(Collider other) // when the player enters the trigger area.
-   {
-    Rigidbody rigidPrefab; // create variable of Rigidbody of the reward.
-    rigidPrefab = Instantiate(Prefab, spawnPoint.position, spawnPoint.rotation) as Rigidbody; // spawn the reward.
-   }
-
-   private void onTriggerExit(Collider other) // when the player leaves the trigger area.
-   {
-    Destroy(Prefab); // destroy the reward.
-   }
-
+    private void OnTriggerEnter(Collider other) // when the agent enters the trigger zone (button)
+    {
+        if (other.CompareTag("agent")) // if the agent enters the trigger zone (button)
+        {
+            spawnerStockpiler.triggerActivated = true; // then enable the spawner script (SpawnerStockpiler.cs)
+        
+        }
+    }
 }

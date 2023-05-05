@@ -5,6 +5,9 @@ using UnityEngine;
 
 public class SpawnerStockpiler : GoalSpawner
 {
+
+    // for enabling this script when the agent enters the trigger zone (button). The script will not run otherwise when pressed play.
+    public bool triggerActivated = false;
     public override void SetInitialValue(float v) { base.SetInitialValue(Mathf.Max(Mathf.Min(v, 1f), 0.2f)); }
     public override void SetFinalValue(float v) { base.SetFinalValue(Mathf.Max(Mathf.Min(v, 1f), 0.2f)); }
     public bool stockpiling = true;
@@ -58,12 +61,21 @@ public class SpawnerStockpiler : GoalSpawner
 
     private void FixedUpdate()
     {
-        if (waitingList.Count > 0 && freeToMaterialise(ripenedSpawnSize)) {
-            print("waitingList.Count: " + waitingList.Count);
-            BallGoal newGoal = waitingList.Dequeue();
-            print("post-Dequeue() waitingList.Count: " + waitingList.Count);
-            print("materialising newGoal: " + newGoal.name);
-            immaterialStorageChange(newGoal, true);
+        if (triggerActivated) {
+
+            // Debug.Log("triggerActivated"); 
+
+            if (waitingList.Count > 0 && freeToMaterialise(ripenedSpawnSize)) 
+            {
+                print("waitingList.Count: " + waitingList.Count);
+                BallGoal newGoal = waitingList.Dequeue();
+                print("post-Dequeue() waitingList.Count: " + waitingList.Count);
+                print("materialising newGoal: " + newGoal.name);
+                immaterialStorageChange(newGoal, true);
+            }
+        }
+        else {
+            //  Debug.Log("trigger NOT activated");
         }
     }
 
