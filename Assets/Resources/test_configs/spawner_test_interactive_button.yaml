@@ -16,7 +16,7 @@ arenas:
       colors:
       - !RGB {r: 80, g: 0, b: 60}
     - !Item
-      name: SpawnerContainer
+      name: SpawnerDispenser
       positions:
       - !Vector3 {x: 25, y: 0, z: 25}
       initialValues: [0.7, 2]

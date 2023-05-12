@@ -38,8 +38,9 @@ public class SpawnerStockpiler : GoalSpawner
     private int apparentSpawnCount; // = spawnCount + len(waitingList), i.e. goals yet-to-materialise
 
     // Start is called before the first frame update
-    public override void Awake()
+    public override void Awake() 
     {
+        
         base.Awake();
         if (stockpiling)
         {

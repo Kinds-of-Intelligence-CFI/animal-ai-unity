@@ -313,11 +313,12 @@ MonoBehaviour:
   defaultSpawnPosition: {x: 0, y: 3.65, z: 0}
   timeToRipen: 0
   timeBetweenSpawns: 0.5
-  delaySeconds: 10
+  delaySeconds: 1
   spawnCount: 10
   colourOverride: {r: 0, g: 0.7882353, b: 1, a: 1}
   objSpawnSeed: 0
   spawnSizeSeed: 1
+  triggerActivated: 1
   stockpiling: 1
   doorOpenDelay: 12
   infiniteDoorOpens: 1

@@ -47,11 +47,6 @@ public class TrainingArena : MonoBehaviour
     public void ResetArena() // @TODO: add functionality so that for the interactive button, the triggered (spawned) reward is destroyed when the player/agent resets the arena.
     {
         Debug.Log("Resetting Arena");
-
-        if (triggerActivated){
-            Debug.Log("trigger was activated and is now being reset");
-            triggerActivated = false;
-        }
         foreach (GameObject holder in transform.FindChildrenWithTag("spawnedObjects"))
         {
             holder.SetActive(false);

@@ -232,6 +232,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spawnerStockpiler: {fileID: 6629666505054455364, guid: ce5a25432c06c184e848968dfac329dc, type: 3}
+  spawnerDisperser: {fileID: 6629666505054455364, guid: 2647b94027143164f8f1f4851d148d1f, type: 3}
 --- !u!1001 &2400991117071955604
 PrefabInstance:
   m_ObjectHideFlags: 0
