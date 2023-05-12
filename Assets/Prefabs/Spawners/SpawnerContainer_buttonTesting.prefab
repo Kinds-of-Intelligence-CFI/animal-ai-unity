@@ -319,7 +319,7 @@ MonoBehaviour:
   objSpawnSeed: 0
   spawnSizeSeed: 0
   triggerActivated: 0
-  stockpiling: 0
+  stockpiling: 1
   doorOpenDelay: -1
   infiniteDoorOpens: 1
   timeUntilDoorOpens: 1.5

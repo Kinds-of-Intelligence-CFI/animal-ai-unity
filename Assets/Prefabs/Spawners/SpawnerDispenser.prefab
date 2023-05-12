@@ -318,7 +318,7 @@ MonoBehaviour:
   colourOverride: {r: 0, g: 0.7882353, b: 1, a: 1}
   objSpawnSeed: 0
   spawnSizeSeed: 1
-  triggerActivated: 1
+  triggerActivated: 0
   stockpiling: 1
   doorOpenDelay: 12
   infiniteDoorOpens: 1
