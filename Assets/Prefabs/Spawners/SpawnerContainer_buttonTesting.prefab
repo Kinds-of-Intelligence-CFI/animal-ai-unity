@@ -193,9 +193,9 @@ GameObject:
   - component: {fileID: 6131923203368588723}
   - component: {fileID: 6131923203369719667}
   - component: {fileID: -2901181462991391087}
-  - component: {fileID: 6629666505054455364}
+  - component: {fileID: 2453022677861688354}
   m_Layer: 0
-  m_Name: SpawnerContainer
+  m_Name: SpawnerContainer_buttonTesting
   m_TagString: GoalSpawner
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -283,7 +283,7 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 6518531625559660688, guid: 88591febaae3ee74ea14930c3abe5428, type: 3}
---- !u!114 &6629666505054455364
+--- !u!114 &2453022677861688354
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -298,30 +298,30 @@ MonoBehaviour:
   rotationRange: {x: 0, y: 0}
   sizeMin: {x: 1, y: 1, z: 1}
   sizeMax: {x: 1, y: 1, z: 1}
-  canRandomizeColor: 0
-  ratioSize: {x: 1, y: 1, z: 1}
+  canRandomizeColor: 1
+  ratioSize: {x: 0, y: 0, z: 0}
   sizeAdjustement: 0.999
   textureUVOverride: 0
   typicalOrigin: 0
   spawnObjects:
-  - {fileID: 703623700356385717, guid: efdf89976edbdaa42aee9b9c7013c916, type: 3}
+  - {fileID: 5989473352299177113, guid: 8ed7d9a1894cfcb4db68a8984ae4b256, type: 3}
   initialSpawnSize: 1
   ripenedSpawnSize: 1
   variableSize: 0
   variableSpawnPosition: 0
   sphericalSpawnRadius: 0
-  defaultSpawnPosition: {x: 0, y: 0.55, z: 0}
-  timeToRipen: 0
-  timeBetweenSpawns: 0.5
-  delaySeconds: 10
+  defaultSpawnPosition: {x: 0.05, y: 1.04, z: 0}
+  timeToRipen: 1
+  timeBetweenSpawns: 1
+  delaySeconds: 0
   spawnCount: 1
-  colourOverride: {r: 0, g: 0.7882353, b: 1, a: 1}
+  colourOverride: {r: 0, g: 0, b: 0, a: 0}
   objSpawnSeed: 0
-  spawnSizeSeed: 1
+  spawnSizeSeed: 0
   triggerActivated: 1
-  stockpiling: 1
-  doorOpenDelay: 1
+  stockpiling: 0
+  doorOpenDelay: -1
   infiniteDoorOpens: 1
-  timeUntilDoorOpens: 2.5
+  timeUntilDoorOpens: 1.5
   timeUntilDoorCloses: 1.5
   minDoorOpenTime: 1.4

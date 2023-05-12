@@ -10,7 +10,7 @@ arenas:
       - !Vector3 {x: 10, y: 0, z: 20}
       rotations: [90]
     - !Item
-      name: SpawnerContainer_button
+      name: SpawnerContainer
       positions:
       - !Vector3 {x: 25, y: 0, z: 25}
       initialValues: [0.7, 2]

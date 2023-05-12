@@ -63,7 +63,7 @@ public class SpawnerStockpiler : GoalSpawner
     {
         if (triggerActivated) {
 
-            // Debug.Log("triggerActivated"); 
+            Debug.Log("triggerActivated"); 
 
             if (waitingList.Count > 0 && freeToMaterialise(ripenedSpawnSize)) 
             {
@@ -75,7 +75,7 @@ public class SpawnerStockpiler : GoalSpawner
             }
         }
         else {
-            //  Debug.Log("trigger NOT activated");
+            Debug.Log("trigger NOT activated");
         }
     }
 
