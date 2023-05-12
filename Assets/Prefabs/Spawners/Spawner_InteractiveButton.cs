@@ -10,8 +10,12 @@ public class Spawner_InteractiveButton : MonoBehaviour
     {
         if (other.CompareTag("agent")) // if the agent enters the trigger zone (button)
         {
+            Debug.Log("trigger activated"); // print "Button pressed" in the console
             spawnerStockpiler.triggerActivated = true; // then enable the spawner script (SpawnerStockpiler.cs)
-        
+        }
+        else
+        {
+            Debug.Log("trigger not activated"); // print "Button not pressed" in the console
         }
     }
 }
