@@ -10,6 +10,8 @@ public class Spawner_InteractiveButton : MonoBehaviour
     public Vector3 moveOffset; // the offset values to apply
     public float moveDuration = 1f; // duration of the move animation in seconds
     public float resetDuration = 1f; // duration of the reset animation in seconds
+    public GameObject signPosterToInstantiate; // reference to the sign poster prefab
+    public bool showSignPoster = false; // toggle to show the sign poster n top of the button prefab
 
     private void OnTriggerEnter(Collider other) // when the agent enters the trigger zone (button)
     {
@@ -21,11 +23,22 @@ public class Spawner_InteractiveButton : MonoBehaviour
 
             // Start the MoveAndReset coroutine
             StartCoroutine(MoveAndReset());
+
+            if (showSignPoster == true) // if the toggle is true
+            {
+                InstantiatePrefabOnTop(); // then instantiate the sign poster prefab
+            }
         }
         else
         {
             Debug.Log("trigger not activated"); // print "Button not pressed" in the console
         }
+    }
+
+    private void InstantiatePrefabOnTop()
+    {
+        Vector3 prefabPosition = transform.position + Vector3.up * (transform.localScale.y / 2 + signPosterToInstantiate.transform.localScale.y / 2); // calculate the position of the prefab to instantiate
+        Instantiate(signPosterToInstantiate, prefabPosition, Quaternion.identity, transform); // instantiate the prefab after calculating the position
     }
 
     private IEnumerator MoveAndReset()
