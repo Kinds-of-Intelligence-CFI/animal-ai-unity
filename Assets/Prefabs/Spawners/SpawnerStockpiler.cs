@@ -7,6 +7,9 @@ public class SpawnerStockpiler : GoalSpawner
 {
 
     // for enabling this script when the agent enters the trigger zone (button). The script will not run otherwise when pressed play.
+    
+    
+    //[Header("Interactive Button")]
     public bool triggerActivated = false;
     public override void SetInitialValue(float v) { base.SetInitialValue(Mathf.Max(Mathf.Min(v, 1f), 0.2f)); }
     public override void SetFinalValue(float v) { base.SetFinalValue(Mathf.Max(Mathf.Min(v, 1f), 0.2f)); }
@@ -16,6 +19,7 @@ public class SpawnerStockpiler : GoalSpawner
     public bool infiniteDoorOpens = false; // assuming not using
     public float timeUntilDoorOpens = 1.5f;
     public float timeUntilDoorCloses = 1.5f;
+
     public override void SetTimeBetweenDoorOpens(float v) {
         // first, check if set to -1 (or < 0); this means "open indefinitely"
         if (v < 0) { infiniteDoorOpens = false; return; }
@@ -64,7 +68,7 @@ public class SpawnerStockpiler : GoalSpawner
     {
         if (triggerActivated) {
 
-            Debug.Log("triggerActivated"); 
+            Debug.Log("trigger Activated and commence spawning"); 
 
             if (waitingList.Count > 0 && freeToMaterialise(ripenedSpawnSize)) 
             {
@@ -76,7 +80,7 @@ public class SpawnerStockpiler : GoalSpawner
             }
         }
         else {
-            Debug.Log("trigger NOT activated");
+            Debug.Log("trigger NOT activated. DEBUG required.");
         }
     }
 

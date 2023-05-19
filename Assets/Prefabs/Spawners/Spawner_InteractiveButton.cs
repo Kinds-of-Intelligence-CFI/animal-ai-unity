@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Spawner_InteractiveButton : MonoBehaviour
 {
+    public bool triggerActivated = false; // toggle to activate the trigger
     public SpawnerStockpiler spawnerStockpiler; // reference to the spawner script (SpawnerStockpiler.cs)
     public SpawnerStockpiler spawnerDisperser; // reference to the spawner script (SpawnerDisperser.cs)
     public GameObject childObjectToMove; // reference to the child object you want to move
@@ -11,13 +12,21 @@ public class Spawner_InteractiveButton : MonoBehaviour
     public float moveDuration = 1f; // duration of the move animation in seconds
     public float resetDuration = 1f; // duration of the reset animation in seconds
     public GameObject signPosterToInstantiate; // reference to the sign poster prefab
-    public bool showSignPoster = false; // toggle to show the sign poster n top of the button prefab
+    public bool showSignPoster = false; // toggle to show the sign poster n top of the button prefab 
 
-    private void OnTriggerEnter(Collider other) // when the agent enters the trigger zone (button)
+    void Start()
     {
-        if (other.CompareTag("agent")) // if the agent enters the trigger zone (button)
+        spawnerStockpiler.triggerActivated = false; 
+        spawnerDisperser.triggerActivated = false; 
+
+        UpdatePrefabVisibility(); // update the prefab visibility
+    }
+
+    private void OnTriggerEnter(Collider other) 
+    {
+        if (other.CompareTag("agent"))
         {
-            Debug.Log("trigger activated"); // print "Button pressed" in the console
+            Debug.Log("trigger activated");
             spawnerStockpiler.triggerActivated = true; // then enable the spawner script (SpawnerStockpiler.cs)
             spawnerDisperser.triggerActivated = true; // then enable the spawner script (SpawnerDisperser.cs)
 
@@ -31,7 +40,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
         }
         else
         {
-            Debug.Log("trigger not activated"); // print "Button not pressed" in the console
+            Debug.Log("trigger not activated");
         }
     }
 
@@ -48,12 +57,12 @@ public class Spawner_InteractiveButton : MonoBehaviour
 
         // Move the child object
         Vector3 targetPosition = originalPosition + moveOffset;
-        float startTime = Time.time;
+        float startTime = Time.time; 
         while (Time.time < startTime + moveDuration)
         {
-            float t = (Time.time - startTime) / moveDuration;
+            float t = (Time.time - startTime) / moveDuration; // calculate the time
             childObjectToMove.transform.position = Vector3.Lerp(originalPosition, targetPosition, t);
-            yield return null;
+            yield return null; // wait for a frame
         }
         childObjectToMove.transform.position = targetPosition;
 
@@ -69,5 +78,13 @@ public class Spawner_InteractiveButton : MonoBehaviour
             yield return null;
         }
         childObjectToMove.transform.position = originalPosition;
+    }
+
+     private void UpdatePrefabVisibility() // update the prefab visibility for sign poster
+    {
+        if (signPosterToInstantiate != null)
+        {
+            signPosterToInstantiate.SetActive(showSignPoster);
+        }
     }
 }

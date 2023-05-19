@@ -320,7 +320,7 @@ MonoBehaviour:
   spawnSizeSeed: 1
   triggerActivated: 0
   stockpiling: 1
-  doorOpenDelay: 12
+  doorOpenDelay: 1
   infiniteDoorOpens: 1
   timeUntilDoorOpens: 2.5
   timeUntilDoorCloses: 1.5
