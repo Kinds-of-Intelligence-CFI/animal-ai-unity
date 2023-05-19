@@ -16,17 +16,17 @@ public class Spawner_InteractiveButton : MonoBehaviour
 
     void Start()
     {
-        spawnerStockpiler.triggerActivated = false; 
-        spawnerDisperser.triggerActivated = false; 
+        spawnerStockpiler.triggerActivated = false;
+        spawnerDisperser.triggerActivated = false;
 
         UpdatePrefabVisibility(); // update the prefab visibility
     }
 
-    private void OnTriggerEnter(Collider other) 
+    private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("agent"))
         {
-            Debug.Log("trigger activated");
+            Debug.Log("Trigger activated. Debug coming from Spawner_InteractiveButton.cs");
             spawnerStockpiler.triggerActivated = true; // then enable the spawner script (SpawnerStockpiler.cs)
             spawnerDisperser.triggerActivated = true; // then enable the spawner script (SpawnerDisperser.cs)
 
@@ -40,7 +40,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
         }
         else
         {
-            Debug.Log("trigger not activated");
+            Debug.Log("Trigger NOT activated. Debug coming from Spawner_InteractiveButton.cs");
         }
     }
 
@@ -57,7 +57,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
 
         // Move the child object
         Vector3 targetPosition = originalPosition + moveOffset;
-        float startTime = Time.time; 
+        float startTime = Time.time;
         while (Time.time < startTime + moveDuration)
         {
             float t = (Time.time - startTime) / moveDuration; // calculate the time
@@ -80,7 +80,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
         childObjectToMove.transform.position = originalPosition;
     }
 
-     private void UpdatePrefabVisibility() // update the prefab visibility for sign poster
+    private void UpdatePrefabVisibility() // update the prefab visibility for sign poster
     {
         if (signPosterToInstantiate != null)
         {

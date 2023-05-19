@@ -324,6 +324,4 @@ MonoBehaviour:
   infiniteDoorOpens: 1
   timeUntilDoorOpens: 2.5
   timeUntilDoorCloses: 1.5
-  spawnerStockpiler: {fileID: 0}
-  spawnerDisperser: {fileID: 0}
   minDoorOpenTime: 1.4
