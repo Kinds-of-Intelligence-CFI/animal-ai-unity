@@ -5,19 +5,21 @@ using UnityEngine;
 public class Spawner_InteractiveButton : MonoBehaviour
 {
     // Encapsulated fields with public get and private set
-    public int ButtonPressCount { get; private set; } = 0;
-    public GameObject LastSpawnedReward { get; private set; }
-    public Dictionary<GameObject, int> RewardSpawnCounts { get; private set; } = new Dictionary<GameObject, int>();
+    public int ButtonPressCount { get; private set; } = 0; // number of times the button has been pressed
+    public GameObject LastSpawnedReward { get; private set; } // the last spawned reward
+    public Dictionary<GameObject, int> RewardSpawnCounts { get; private set; } = new Dictionary<GameObject, int>(); // dictionary of rewards and their spawn counts
 
-    [SerializeField] private GameObject childObjectToMove;
+    [SerializeField] private GameObject childObjectToMove; // the object that will move (butto)
     [SerializeField] private Vector3 moveOffset;
     [SerializeField] private float moveDuration = 1f;
     [SerializeField] private float resetDuration = 1f;
-    [SerializeField] private Transform rewardSpawnPoint;
+    [SerializeField] private Transform rewardSpawnPoint; // where to spawn the reward
     [SerializeField] private GameObject objectToControl; // signposter
     [SerializeField] private bool showObject; // show the signposter prefab?
-    [SerializeField] private List<GameObject> rewards;
-    [SerializeField] private List<int> rewardWeights;
+    [SerializeField] private List<GameObject> rewards; // list of rewards to spawn
+    [SerializeField] private List<int> rewardWeights; // the higher the weight, the more likely the reward will be spawned
+
+    [SerializeField] private Transform objectToControlSpawnPoint; // where to spawn the signposter
 
     private float lastInteractionTime;
     private float totalInteractionInterval = 0f;
@@ -46,6 +48,12 @@ public class Spawner_InteractiveButton : MonoBehaviour
                 RewardSpawnCounts[rewardToSpawn] = 0;
             }
             RewardSpawnCounts[rewardToSpawn]++;
+
+            // Spawn the objectToControl if it should be shown
+            if (showObject && objectToControl != null)
+            {
+                Instantiate(objectToControl, objectToControlSpawnPoint.transform.position, Quaternion.identity);
+            }
 
             float currentInteractionTime = Time.time;
             totalInteractionInterval += currentInteractionTime - lastInteractionTime;
