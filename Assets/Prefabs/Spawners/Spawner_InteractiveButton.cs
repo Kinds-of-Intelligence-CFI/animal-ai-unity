@@ -16,8 +16,8 @@ public class Spawner_InteractiveButton : MonoBehaviour
 
     void Start()
     {
-        spawnerStockpiler.triggerActivated = false;
-        spawnerDisperser.triggerActivated = false;
+        //spawnerStockpiler.triggerActivated = false;
+        //spawnerDisperser.triggerActivated = false;
 
         UpdatePrefabVisibility(); // update the prefab visibility
     }
@@ -26,8 +26,9 @@ public class Spawner_InteractiveButton : MonoBehaviour
     {
         if (other.CompareTag("agent"))
         {
+            triggerActivated = true;
             Debug.Log("Trigger activated. Debug coming from Spawner_InteractiveButton.cs");
-            spawnerStockpiler.triggerActivated = true; // then enable the spawner script (SpawnerStockpiler.cs)
+            spawnerStockpiler.Activate(); // then enable the spawner script (SpawnerStockpiler.cs)
             spawnerDisperser.triggerActivated = true; // then enable the spawner script (SpawnerDisperser.cs)
 
             // Start the MoveAndReset coroutine

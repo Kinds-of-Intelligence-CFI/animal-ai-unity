@@ -9,8 +9,6 @@ using Random = UnityEngine.Random;
 
 public class TrainingArena : MonoBehaviour
 {
-    [HideInInspector]
-    public bool triggerActivated = false;
     public ListOfPrefabs prefabs = new ListOfPrefabs();
     public GameObject spawnedObjectsHolder;
     public int maxSpawnAttemptsForAgent = 100;

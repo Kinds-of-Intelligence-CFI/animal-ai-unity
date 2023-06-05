@@ -313,7 +313,7 @@ MonoBehaviour:
   defaultSpawnPosition: {x: 0, y: 0.55, z: 0}
   timeToRipen: 0
   timeBetweenSpawns: 0.5
-  delaySeconds: 1
+  delaySeconds: 0
   spawnCount: 1
   colourOverride: {r: 0, g: 0.7882353, b: 1, a: 1}
   objSpawnSeed: 0

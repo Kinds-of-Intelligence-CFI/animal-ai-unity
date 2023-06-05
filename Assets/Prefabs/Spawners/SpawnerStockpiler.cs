@@ -62,11 +62,16 @@ public class SpawnerStockpiler : GoalSpawner
         canRandomizeColor = true;
     }
 
+    public void Activate()
+    {
+        triggerActivated = true;
+        // Add spawning logic here, or call the function that starts the spawning process.
+    }
+
     private void FixedUpdate()
     {
         if (triggerActivated)
         {
-
             Debug.Log("Trigger activated and commencing spawning. Debug coming from SpawnerStockpiler.cs");
 
             if (waitingList.Count > 0 && freeToMaterialise(ripenedSpawnSize))
@@ -76,6 +81,7 @@ public class SpawnerStockpiler : GoalSpawner
                 print("post-Dequeue() waitingList.Count: " + waitingList.Count);
                 print("materialising newGoal: " + newGoal.name);
                 immaterialStorageChange(newGoal, true);
+                Activate();
             }
         }
         else
