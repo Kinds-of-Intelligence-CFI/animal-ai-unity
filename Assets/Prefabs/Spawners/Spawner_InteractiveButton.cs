@@ -4,40 +4,54 @@ using UnityEngine;
 
 public class Spawner_InteractiveButton : MonoBehaviour
 {
-    public bool triggerActivated = false; // toggle to activate the trigger
-    public SpawnerStockpiler spawnerStockpiler; // reference to the spawner script (SpawnerStockpiler.cs)
-    public SpawnerStockpiler spawnerDisperser; // reference to the spawner script (SpawnerDisperser.cs)
-    public GameObject childObjectToMove; // reference to the child object you want to move
-    public Vector3 moveOffset; // the offset values to apply
-    public float moveDuration = 1f; // duration of the move animation in seconds
-    public float resetDuration = 1f; // duration of the reset animation in seconds
-    public GameObject signPosterToInstantiate; // reference to the sign poster prefab
-    public bool showSignPoster = false; // toggle to show the sign poster n top of the button prefab 
+    // Encapsulated fields with public get and private set
+    public int ButtonPressCount { get; private set; } = 0;
+    public GameObject LastSpawnedReward { get; private set; }
+    public Dictionary<GameObject, int> RewardSpawnCounts { get; private set; } = new Dictionary<GameObject, int>();
+
+    [SerializeField] private GameObject childObjectToMove;
+    [SerializeField] private Vector3 moveOffset;
+    [SerializeField] private float moveDuration = 1f;
+    [SerializeField] private float resetDuration = 1f;
+    [SerializeField] private Transform rewardSpawnPoint;
+    [SerializeField] private GameObject objectToControl; // signposter
+    [SerializeField] private bool showObject; // show the signposter prefab?
+    [SerializeField] private List<GameObject> rewards;
+    [SerializeField] private List<int> rewardWeights;
+
+    private float lastInteractionTime;
+    private float totalInteractionInterval = 0f;
 
     void Start()
     {
-        //spawnerStockpiler.triggerActivated = false;
-        //spawnerDisperser.triggerActivated = false;
-
-        UpdatePrefabVisibility(); // update the prefab visibility
+        lastInteractionTime = Time.time;
+        UpdateObjectVisibility(); // update the object visibility
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("agent"))
         {
-            triggerActivated = true;
-            Debug.Log("Trigger activated. Debug coming from Spawner_InteractiveButton.cs");
-            spawnerStockpiler.Activate(); // then enable the spawner script (SpawnerStockpiler.cs)
-            spawnerDisperser.triggerActivated = true; // then enable the spawner script (SpawnerDisperser.cs)
+            ButtonPressCount++;
 
             // Start the MoveAndReset coroutine
             StartCoroutine(MoveAndReset());
 
-            if (showSignPoster == true) // if the toggle is true
+            GameObject rewardToSpawn = ChooseReward();
+            Instantiate(rewardToSpawn, rewardSpawnPoint.transform.position, Quaternion.identity);
+            LastSpawnedReward = rewardToSpawn;
+
+            if (!RewardSpawnCounts.ContainsKey(rewardToSpawn))
             {
-                InstantiatePrefabOnTop(); // then instantiate the sign poster prefab
+                RewardSpawnCounts[rewardToSpawn] = 0;
             }
+            RewardSpawnCounts[rewardToSpawn]++;
+
+            float currentInteractionTime = Time.time;
+            totalInteractionInterval += currentInteractionTime - lastInteractionTime;
+            lastInteractionTime = currentInteractionTime;
+
+            Debug.Log("Trigger activated. Debug coming from Spawner_InteractiveButton.cs");
         }
         else
         {
@@ -45,32 +59,27 @@ public class Spawner_InteractiveButton : MonoBehaviour
         }
     }
 
-    private void InstantiatePrefabOnTop()
+    private void UpdateObjectVisibility()
     {
-        Vector3 prefabPosition = transform.position + Vector3.up * (transform.localScale.y / 2 + signPosterToInstantiate.transform.localScale.y / 2); // calculate the position of the prefab to instantiate
-        Instantiate(signPosterToInstantiate, prefabPosition, Quaternion.identity, transform); // instantiate the prefab after calculating the position
+        if (objectToControl != null)
+        {
+            objectToControl.SetActive(showObject);
+        }
     }
 
     private IEnumerator MoveAndReset()
     {
-        // Store the original position
         Vector3 originalPosition = childObjectToMove.transform.position;
-
-        // Move the child object
         Vector3 targetPosition = originalPosition + moveOffset;
         float startTime = Time.time;
         while (Time.time < startTime + moveDuration)
         {
-            float t = (Time.time - startTime) / moveDuration; // calculate the time
+            float t = (Time.time - startTime) / moveDuration;
             childObjectToMove.transform.position = Vector3.Lerp(originalPosition, targetPosition, t);
-            yield return null; // wait for a frame
+            yield return null;
         }
         childObjectToMove.transform.position = targetPosition;
 
-        // Wait for a moment (optional, remove this line if not needed)
-        // yield return new WaitForSeconds(1f);
-
-        // Reset the position
         startTime = Time.time;
         while (Time.time < startTime + resetDuration)
         {
@@ -81,11 +90,31 @@ public class Spawner_InteractiveButton : MonoBehaviour
         childObjectToMove.transform.position = originalPosition;
     }
 
-    private void UpdatePrefabVisibility() // update the prefab visibility for sign poster
+    private GameObject ChooseReward()
     {
-        if (signPosterToInstantiate != null)
+        int totalWeight = 0;
+        foreach (int weight in rewardWeights)
         {
-            signPosterToInstantiate.SetActive(showSignPoster);
+            totalWeight += weight;
         }
+
+        int randomValue = Random.Range(0, totalWeight);
+        for (int i = 0; i < rewards.Count; i++)
+        {
+            if (randomValue < rewardWeights[i])
+            {
+                return rewards[i];
+            }
+            randomValue -= rewardWeights[i];
+        }
+        return rewards[rewards.Count - 1];
+    }
+
+    public float GetAverageInteractionInterval()
+    {
+        if (ButtonPressCount == 0)
+            return 0;
+
+        return totalInteractionInterval / ButtonPressCount;
     }
 }

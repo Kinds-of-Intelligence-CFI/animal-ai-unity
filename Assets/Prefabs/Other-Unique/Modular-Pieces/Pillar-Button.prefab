@@ -152,6 +152,37 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 9048329326465777461, guid: 8e8ff0348706f49459ec4d5df8bf0bdc, type: 3}
+--- !u!1 &7959733063395049132
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7321951510414112991}
+  m_Layer: 0
+  m_Name: rewardSpawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7321951510414112991
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7959733063395049132}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.0924, y: -0.0627, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2799182668062544255}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8243600400130407102
 GameObject:
   m_ObjectHideFlags: 0
@@ -262,15 +293,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee7f270f6d01feb4e9b96d4199611336, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  triggerActivated: 0
-  spawnerStockpiler: {fileID: 6629666505054455364, guid: ce5a25432c06c184e848968dfac329dc, type: 3}
-  spawnerDisperser: {fileID: 6629666505054455364, guid: 2647b94027143164f8f1f4851d148d1f, type: 3}
   childObjectToMove: {fileID: 3284075630407977925}
   moveOffset: {x: 0.09, y: 0, z: 0}
   moveDuration: 1
   resetDuration: 1
-  signPosterToInstantiate: {fileID: 7150004164178407081, guid: b19f8e36bd5ca73489a251d8daa9acea, type: 3}
-  showSignPoster: 0
+  rewardSpawnPoint: {fileID: 7321951510414112991}
+  objectToControl: {fileID: 7150004164178407081, guid: b19f8e36bd5ca73489a251d8daa9acea, type: 3}
+  showObject: 0
+  rewards:
+  - {fileID: 4351206490586746944, guid: 8ed7d9a1894cfcb4db68a8984ae4b256, type: 3}
+  - {fileID: 1815161577820678, guid: efdf89976edbdaa42aee9b9c7013c916, type: 3}
+  - {fileID: 1311020654520240, guid: f3d2126090ed23744bf83d0faf1f3280, type: 3}
+  rewardWeights: 14000000320000001e000000
 --- !u!1001 &2400991117071955604
 PrefabInstance:
   m_ObjectHideFlags: 0
