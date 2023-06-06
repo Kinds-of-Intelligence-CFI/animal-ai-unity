@@ -9,7 +9,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
     public GameObject LastSpawnedReward { get; private set; } // the last spawned reward
     public Dictionary<GameObject, int> RewardSpawnCounts { get; private set; } = new Dictionary<GameObject, int>(); // dictionary of rewards and their spawn counts
 
-    [SerializeField] private GameObject childObjectToMove; // the object that will move (butto)
+    [SerializeField] private GameObject childObjectToMove; // the object that will move (button)
     [SerializeField] private Vector3 moveOffset;
     [SerializeField] private float moveDuration = 1f;
     [SerializeField] private float resetDuration = 1f;
