@@ -4,56 +4,70 @@ using UnityEngine;
 
 public class Spawner_InteractiveButton : MonoBehaviour
 {
-    // Encapsulated fields with public get and private set
-    public int ButtonPressCount { get; private set; } = 0; // number of times the button has been pressed
-    public GameObject LastSpawnedReward { get; private set; } // the last spawned reward
-    public Dictionary<GameObject, int> RewardSpawnCounts { get; private set; } = new Dictionary<GameObject, int>(); // dictionary of rewards and their spawn counts
+    // Public properties to track button press counts, last spawned reward, and reward spawn counts
+    public int ButtonPressCount { get; private set; }
+    public GameObject LastSpawnedReward { get; private set; }
+    public Dictionary<GameObject, int> RewardSpawnCounts { get; private set; } = new Dictionary<GameObject, int>();
 
-    [SerializeField] private GameObject childObjectToMove; // the object that will move (button)
+    // Serialized fields for customizing button and reward behavior in Unity Editor
+    [SerializeField] private GameObject childObjectToMove;
     [SerializeField] private Vector3 moveOffset;
     [SerializeField] private float moveDuration = 1f;
     [SerializeField] private float resetDuration = 1f;
-    [SerializeField] private Transform rewardSpawnPoint; // where to spawn the reward
-    [SerializeField] private GameObject objectToControl; // signposter
-    [SerializeField] private bool showObject; // show the signposter prefab?
-    [SerializeField] private List<GameObject> rewards; // list of rewards to spawn
-    [SerializeField] private List<int> rewardWeights; // the higher the weight, the more likely the reward will be spawned
-
-    [SerializeField] private Transform objectToControlSpawnPoint; // where to spawn the signposter
+    [SerializeField] private Transform rewardSpawnPoint;
+    [SerializeField] private GameObject objectToControl;
+    [SerializeField] private bool showObject;
+    [SerializeField] private List<GameObject> rewards;
+    [SerializeField] private List<int> rewardWeights;
+    [SerializeField] private Transform objectToControlSpawnPoint;
 
     private float lastInteractionTime;
     private float totalInteractionInterval = 0f;
 
-    // Delegate and event for reward spawn
-    public delegate void OnRewardSpawned(GameObject reward);
-    public static event OnRewardSpawned RewardSpawned;
+    public delegate void OnRewardSpawned(GameObject reward); // Define a delegate type for the event
+    public static event OnRewardSpawned RewardSpawned; // Define the event
 
     void Start()
     {
         lastInteractionTime = Time.time;
-        UpdateObjectVisibility(); // update the object visibility
+        UpdateObjectVisibility(); // Set the object to be visible or not based on the showObject flag
     }
 
     private void OnTriggerEnter(Collider other)
+
+    // Interaction logic: button press count, start moving button, choose reward, spawn reward
+    // calculate interaction time, log information, spawn objectToControl (if any)
     {
         if (other.CompareTag("agent"))
         {
-            GameObject rewardToSpawn = ChooseReward();
-            LastSpawnedReward = Instantiate(rewardToSpawn, rewardSpawnPoint.transform.position, Quaternion.identity);
-            RewardSpawned?.Invoke(LastSpawnedReward); // Notify listeners about new reward
-
             ButtonPressCount++;
-
-            // Start the MoveAndReset coroutine
             StartCoroutine(MoveAndReset());
 
-            if (!RewardSpawnCounts.ContainsKey(rewardToSpawn))
+            if (rewards == null || rewards.Count == 0)
             {
-                RewardSpawnCounts[rewardToSpawn] = 0;
+                Debug.LogError("No rewards are set to be spawned.");
+                return;
             }
-            RewardSpawnCounts[rewardToSpawn]++;
 
-            // Spawn the objectToControl if it should be shown
+            GameObject rewardToSpawn = ChooseReward();
+
+            if (rewardToSpawn == null)
+            {
+                Debug.LogError("Failed to choose a reward to spawn.");
+                return;
+            }
+
+            LastSpawnedReward = Instantiate(rewardToSpawn, rewardSpawnPoint.transform.position, Quaternion.identity);
+
+            if (RewardSpawnCounts.TryGetValue(rewardToSpawn, out var count))
+            {
+                RewardSpawnCounts[rewardToSpawn] = count + 1;
+            }
+            else
+            {
+                RewardSpawnCounts[rewardToSpawn] = 1;
+            }
+
             if (showObject && objectToControl != null)
             {
                 Instantiate(objectToControl, objectToControlSpawnPoint.transform.position, Quaternion.identity);
@@ -65,7 +79,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
 
             Debug.Log("Trigger activated. Debug coming from Spawner_InteractiveButton.cs");
 
-
+            RewardSpawned?.Invoke(LastSpawnedReward);
         }
         else
         {
@@ -74,6 +88,8 @@ public class Spawner_InteractiveButton : MonoBehaviour
     }
 
     private void UpdateObjectVisibility()
+
+    // Check for objectToControl and set its visibility
     {
         if (objectToControl != null)
         {
@@ -82,34 +98,50 @@ public class Spawner_InteractiveButton : MonoBehaviour
     }
 
     private IEnumerator MoveAndReset()
+
+    // Coroutine to animate button press (move button and reset its position)
     {
         Vector3 originalPosition = childObjectToMove.transform.position;
         Vector3 targetPosition = originalPosition + moveOffset;
         float startTime = Time.time;
-        while (Time.time < startTime + moveDuration)
+
+        while (MoveToTarget(originalPosition, targetPosition, startTime, moveDuration))
         {
-            float t = (Time.time - startTime) / moveDuration;
-            childObjectToMove.transform.position = Vector3.Lerp(originalPosition, targetPosition, t);
             yield return null;
         }
         childObjectToMove.transform.position = targetPosition;
 
         startTime = Time.time;
-        while (Time.time < startTime + resetDuration)
+        while (MoveToTarget(targetPosition, originalPosition, startTime, resetDuration))
         {
-            float t = (Time.time - startTime) / resetDuration;
-            childObjectToMove.transform.position = Vector3.Lerp(targetPosition, originalPosition, t);
             yield return null;
         }
         childObjectToMove.transform.position = originalPosition;
     }
 
-    private GameObject ChooseReward()
+    private bool MoveToTarget(Vector3 origin, Vector3 target, float startTime, float duration)
+
+    // Move the button from origin to target in duration seconds
     {
-        int totalWeight = 0;
-        foreach (int weight in rewardWeights)
+        float t = (Time.time - startTime) / duration;
+        childObjectToMove.transform.position = Vector3.Lerp(origin, target, t);
+        return Time.time < startTime + duration;
+    }
+
+    private GameObject ChooseReward()
+
+    // Chooses and returns reward based on the defined reward weights
+    {
+        if (rewards == null || rewards.Count == 0 || rewardWeights == null || rewardWeights.Count == 0 || rewards.Count != rewardWeights.Count)
         {
-            totalWeight += weight;
+            Debug.LogError("Invalid rewards or reward weights setup.");
+            return null;
+        }
+
+        int totalWeight = 0;
+        for (int i = 0; i < rewardWeights.Count; i++)
+        {
+            totalWeight += rewardWeights[i];
         }
 
         int randomValue = Random.Range(0, totalWeight);
@@ -125,6 +157,8 @@ public class Spawner_InteractiveButton : MonoBehaviour
     }
 
     public float GetAverageInteractionInterval()
+
+    // Calculate and return average interaction interval
     {
         if (ButtonPressCount == 0)
             return 0;
