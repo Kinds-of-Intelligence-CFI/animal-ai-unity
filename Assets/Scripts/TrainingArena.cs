@@ -30,6 +30,8 @@ public class TrainingArena : MonoBehaviour
 
     private bool _firstReset = true;
 
+    private List<GameObject> spawnedRewards = new List<GameObject>();
+
     internal void Awake()
     {
         _builder = new ArenaBuilder(gameObject,
@@ -40,6 +42,20 @@ public class TrainingArena : MonoBehaviour
         _agent = FindObjectsOfType<TrainingAgent>(true)[0];
         _agentDecisionInterval = _agent.GetComponentInChildren<DecisionRequester>().DecisionPeriod;
         _fades = blackScreens.GetFades();
+
+        // Subscribe to the reward spawn event from spawner_InteractiveButton.cs
+        Spawner_InteractiveButton.RewardSpawned += OnRewardSpawned;
+    }
+
+    private void OnDestroy()
+    {
+        // Unsubscribe when the object is destroyed to avoid memory leaks
+        Spawner_InteractiveButton.RewardSpawned -= OnRewardSpawned;
+    }
+
+    private void OnRewardSpawned(GameObject reward)
+    {
+        spawnedRewards.Add(reward);
     }
 
     public void ResetArena() // @TODO: add functionality so that for the interactive button, the triggered (spawned) reward is destroyed when the player/agent resets the arena.
@@ -53,7 +69,8 @@ public class TrainingArena : MonoBehaviour
 
         //Each time reset is called we cycle through the defined arenaIDs
         maxarenaID = _environmentManager.getMaxArenaID();// Should perform this check once (after environmentManager is initialized).
-        if(maxarenaID > 0 && !_firstReset){
+        if (maxarenaID > 0 && !_firstReset)
+        {
             arenaID = (arenaID + 1) % maxarenaID;
         }
 
@@ -69,7 +86,7 @@ public class TrainingArena : MonoBehaviour
         _arenaConfiguration.SetGameObject(prefabs.GetList());
         _builder.Spawnables = _arenaConfiguration.spawnables;
         _arenaConfiguration.toUpdate = false;
-        _agent.MaxStep  = 0; //We never time the environment out unless agent health goes to 0
+        _agent.MaxStep = 0; //We never time the environment out unless agent health goes to 0
         _agent.timeLimit = _arenaConfiguration.T * _agentDecisionInterval;
 
         _builder.Build();
@@ -80,6 +97,12 @@ public class TrainingArena : MonoBehaviour
         {
             Random.InitState(_arenaConfiguration.randomSeed);
         }
+
+        foreach (var reward in spawnedRewards)
+        {
+            Destroy(reward);
+        }
+        spawnedRewards.Clear(); // Clear the list
     }
 
     public void UpdateLigthStatus()

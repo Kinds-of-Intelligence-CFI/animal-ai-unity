@@ -24,6 +24,10 @@ public class Spawner_InteractiveButton : MonoBehaviour
     private float lastInteractionTime;
     private float totalInteractionInterval = 0f;
 
+    // Delegate and event for reward spawn
+    public delegate void OnRewardSpawned(GameObject reward);
+    public static event OnRewardSpawned RewardSpawned;
+
     void Start()
     {
         lastInteractionTime = Time.time;
@@ -34,14 +38,14 @@ public class Spawner_InteractiveButton : MonoBehaviour
     {
         if (other.CompareTag("agent"))
         {
+            GameObject rewardToSpawn = ChooseReward();
+            LastSpawnedReward = Instantiate(rewardToSpawn, rewardSpawnPoint.transform.position, Quaternion.identity);
+            RewardSpawned?.Invoke(LastSpawnedReward); // Notify listeners about new reward
+
             ButtonPressCount++;
 
             // Start the MoveAndReset coroutine
             StartCoroutine(MoveAndReset());
-
-            GameObject rewardToSpawn = ChooseReward();
-            Instantiate(rewardToSpawn, rewardSpawnPoint.transform.position, Quaternion.identity);
-            LastSpawnedReward = rewardToSpawn;
 
             if (!RewardSpawnCounts.ContainsKey(rewardToSpawn))
             {
@@ -60,6 +64,8 @@ public class Spawner_InteractiveButton : MonoBehaviour
             lastInteractionTime = currentInteractionTime;
 
             Debug.Log("Trigger activated. Debug coming from Spawner_InteractiveButton.cs");
+
+
         }
         else
         {
