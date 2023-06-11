@@ -18,7 +18,6 @@ public class TrainingAgent : Agent, IPrefab
     [HideInInspector]
     public int numberOfGoalsCollected = 0;
     public ProgressBar progBar;
-
     private Rigidbody _rigidBody;
     private bool _isGrounded;
     private ContactPoint _lastContactPoint;
@@ -35,12 +34,15 @@ public class TrainingAgent : Agent, IPrefab
     private bool _nextUpdateEpisodeEnd = false;
     private float _freezeDelay = 0f;
     public float GetFreezeDelay() { return _freezeDelay; }
-    public void SetFreezeDelay(float v) {
+    public void SetFreezeDelay(float v)
+    {
         _freezeDelay = Mathf.Clamp(v, 0f, v);
-        if (v != 0f) {
+        if (v != 0f)
+        {
             // intended for single use per-episode (at beginning)
             Debug.Log("starting coroutine unfreezeCountdown() with wait seconds == " + GetFreezeDelay());
-            StartCoroutine(unfreezeCountdown());
+            StopCoroutine("unfreezeCountdown"); // stop any existing countdown. This line ensures that any previous countdown is stopped before starting a new one.
+            StartCoroutine(unfreezeCountdown()); // start a new countdown if and only if the new delay is not zero.
         }
     }
     public bool IsFrozen() { return (_freezeDelay > 0f); }
@@ -77,36 +79,42 @@ public class TrainingAgent : Agent, IPrefab
         UpdateHealth(_rewardPerStep);//Updates health and adds the reward in mlagents
     }
 
-    public void UpdateHealthNextStep(float updateAmount, bool andEndEpisode = false){
+    public void UpdateHealthNextStep(float updateAmount, bool andEndEpisode = false)
+    {
         /// <summary>
         /// ML-Agents doesn't guarantee behaviour if an episode ends outside of OnActionReceived
         /// Therefore we queue any health updates to happen on the next action step.
         /// </summary>
         _nextUpdateHealth += updateAmount;
-        if(andEndEpisode){ _nextUpdateEpisodeEnd = true;}
+        if (andEndEpisode) { _nextUpdateEpisodeEnd = true; }
     }
 
-    public void UpdateHealth(float updateAmount, bool andEndEpisode = false){
+    public void UpdateHealth(float updateAmount, bool andEndEpisode = false)
+    {
         /// <summary>
         /// Update the health of the agent and reset any queued updates
         /// If health reaches 0 or the episode is queued to end then call EndEpisode().
         /// </summary>
-        if (!IsFrozen()) {
+        if (!IsFrozen())
+        {
             health += 100 * updateAmount; //health = 100*reward
             health += 100 * _nextUpdateHealth;
             _nextUpdateHealth = 0;
             AddReward(updateAmount);
         }
         _currentScore = GetCumulativeReward();
-        if ( health > _maxHealth ){
+        if (health > _maxHealth)
+        {
             health = _maxHealth;
         }
-        else if ( health <= 0 ){
+        else if (health <= 0)
+        {
             health = 0;
             EndEpisode();
             return;
         }
-        if (andEndEpisode || _nextUpdateEpisodeEnd){
+        if (andEndEpisode || _nextUpdateEpisodeEnd)
+        {
             _nextUpdateEpisodeEnd = false;
             EndEpisode();
         }
@@ -147,7 +155,7 @@ public class TrainingAgent : Agent, IPrefab
         _rigidBody.AddForce(directionToGo.normalized * speed * 100f * Time.fixedDeltaTime, ForceMode.Acceleration);
     }
 
-    public override void Heuristic(in ActionBuffers actionsOut) 
+    public override void Heuristic(in ActionBuffers actionsOut)
     {
         var discreteActionsOut = actionsOut.DiscreteActions;
         discreteActionsOut[0] = 0;
@@ -168,11 +176,12 @@ public class TrainingAgent : Agent, IPrefab
         {
             discreteActionsOut[1] = 2;
         }
-   }
+    }
 
     public override void OnEpisodeBegin()
     {
         Debug.Log("Episode Begin");
+        StopCoroutine("unfreezeCountdown"); // when a new episode starts, any existing unfreeze countdown is cancelled.
         _previousScore = _currentScore;
         numberOfGoalsCollected = 0;
         _arena.ResetArena();
@@ -259,7 +268,8 @@ public class TrainingAgent : Agent, IPrefab
     }
 
 
-    private IEnumerator unfreezeCountdown() {
+    private IEnumerator unfreezeCountdown()
+    {
         yield return new WaitForSeconds(GetFreezeDelay());
 
         Debug.Log("unfreezing!");
