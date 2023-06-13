@@ -77,13 +77,13 @@ public class Spawner_InteractiveButton : MonoBehaviour
             totalInteractionInterval += currentInteractionTime - lastInteractionTime;
             lastInteractionTime = currentInteractionTime;
 
-            Debug.Log("Trigger activated. Debug coming from Spawner_InteractiveButton.cs");
+            // Debug.Log("Trigger activated. Debug coming from Spawner_InteractiveButton.cs");
 
             RewardSpawned?.Invoke(LastSpawnedReward);
         }
         else
         {
-            Debug.Log("Trigger NOT activated. Debug coming from Spawner_InteractiveButton.cs");
+            // Debug.Log("Trigger NOT activated. Debug coming from Spawner_InteractiveButton.cs");
         }
     }
 
