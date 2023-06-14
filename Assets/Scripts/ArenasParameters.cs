@@ -49,6 +49,8 @@ namespace ArenasParameters
         public List<float> timesBetweenDoorOpens = null;
         public List<float> frozenAgentDelays = null;
 
+        public List<float> moveDurations = null;
+
         public Spawnable(GameObject obj)
         {
             name = obj.name;
@@ -81,6 +83,7 @@ namespace ArenasParameters
             doorDelays              = yamlItem.doorDelays;
             timesBetweenDoorOpens   = yamlItem.timesBetweenDoorOpens;
             frozenAgentDelays       = yamlItem.frozenAgentDelays;
+            moveDurations           = yamlItem.moveDurations;
         }
 
         internal List<Vector3> initVec3sFromRGBs(List<YAMLDefs.RGB> yamlList) {

@@ -50,6 +50,7 @@ public class Item{
     public List<float> doorDelays { get; set; } = new List<float>(); // SpawnerDispenser/Container only
     public List<float> timesBetweenDoorOpens { get; set; } = new List<float>(); // " "
     public List<float> frozenAgentDelays { get; set; } = new List<float>(); // Agent only
+    public List<float> moveDurations { get; set; } = new List<float>(); // InteractiveButton only
 }
 
 //Not needed - can just use the Unity Vector3 implementation directly

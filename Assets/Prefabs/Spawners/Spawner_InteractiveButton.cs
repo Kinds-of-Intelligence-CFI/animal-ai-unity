@@ -12,8 +12,8 @@ public class Spawner_InteractiveButton : MonoBehaviour
     // Serialized fields for customizing button and reward behavior in Unity Editor
     [SerializeField] private GameObject childObjectToMove;
     [SerializeField] private Vector3 moveOffset;
-    [SerializeField] private float moveDuration = 1f;
-    [SerializeField] private float resetDuration = 1f;
+    [SerializeField] public float moveDuration;
+    [SerializeField] private float resetDuration;
     [SerializeField] private Transform rewardSpawnPoint;
     [SerializeField] private GameObject objectToControl;
     [SerializeField] private bool showObject;
@@ -77,7 +77,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
             totalInteractionInterval += currentInteractionTime - lastInteractionTime;
             lastInteractionTime = currentInteractionTime;
 
-            // Debug.Log("Trigger activated. Debug coming from Spawner_InteractiveButton.cs");
+            //Debug.Log("Trigger activated. Debug coming from Spawner_InteractiveButton.cs");
 
             RewardSpawned?.Invoke(LastSpawnedReward);
         }
@@ -97,10 +97,11 @@ public class Spawner_InteractiveButton : MonoBehaviour
         }
     }
 
-    private IEnumerator MoveAndReset()
+    public IEnumerator MoveAndReset()
 
     // Coroutine to animate button press (move button and reset its position)
     {
+        Debug.Log($"At the start of MoveAndReset, moveDuration is: {moveDuration}"); // New debug log
         Vector3 originalPosition = childObjectToMove.transform.position;
         Vector3 targetPosition = originalPosition + moveOffset;
         float startTime = Time.time;
@@ -117,9 +118,10 @@ public class Spawner_InteractiveButton : MonoBehaviour
             yield return null;
         }
         childObjectToMove.transform.position = originalPosition;
+        Debug.Log($"At the end of MoveAndReset, moveDuration is: {moveDuration}"); // New debug log
     }
 
-    private bool MoveToTarget(Vector3 origin, Vector3 target, float startTime, float duration)
+    public bool MoveToTarget(Vector3 origin, Vector3 target, float startTime, float duration)
 
     // Move the button from origin to target in duration seconds
     {

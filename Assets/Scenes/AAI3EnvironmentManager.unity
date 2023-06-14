@@ -455,7 +455,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   arena: {fileID: 1540725604319108, guid: cb05c844a0de0cd4880c39b9a1aedeef, type: 3}
   uiCanvas: {fileID: 1822920678}
-  configFile: test_configs/example1
+  configFile: test_configs/spawner_test
   maximumResolution: 512
   minimumResolution: 4
   defaultResolution: 84
