@@ -47,6 +47,8 @@ namespace ArenaBuilders
         public void AddToGoodGoalsMultiSpawned(Goal ggm) { _goodGoalsMultiSpawned.Add(ggm); updateGoodGoalsMulti(); }
         public void AddToGoodGoalsMultiSpawned(GameObject ggm) { _goodGoalsMultiSpawned.Add(ggm.GetComponent<Goal>()); updateGoodGoalsMulti(); }
 
+        public List<float> moveDurations = new List<float>(); // testing
+
         /// Buffer to allow space around instantiated objects
         // public Vector3 safeSpawnBuffer = Vector3.zero;
 
@@ -64,7 +66,7 @@ namespace ArenaBuilders
                                             .GetComponent<Transform>();
             _rangeX = spawnArenaTransform.localScale.x;
             _rangeZ = spawnArenaTransform.localScale.z;
-            _agent = _arena.Find("AAI3Agent").Find("Agent").gameObject;;
+            _agent = _arena.Find("AAI3Agent").Find("Agent").gameObject; ;
             _agentCollider = _agent.GetComponent<Collider>();
             _agentRigidbody = _agent.GetComponent<Rigidbody>();
             _spawnedObjectsHolder = spawnedObjectsHolder;
@@ -148,7 +150,9 @@ namespace ArenaBuilders
             List<float> ripenTimes = spawnable.ripenTimes;
             List<float> doorDelays = spawnable.doorDelays;
             List<float> timesBetweenDoorOpens = spawnable.timesBetweenDoorOpens;
+            List<float> moveDurations = spawnable.moveDurations; // testing
 
+            int numberOfMoveDurations = optionalCount(moveDurations); // testing
             int numberOfPositions = positions.Count;
             int numberOfRotations = rotations.Count;
             int numberOfSizes = sizes.Count;
@@ -165,6 +169,10 @@ namespace ArenaBuilders
             int numberOfDoorDelays = optionalCount(doorDelays);
             int numberOfTimesBetweenDoorOpens = optionalCount(timesBetweenDoorOpens);
 
+            Debug.Log($"MoveDurations count: {moveDurations.Count}");  // log the count
+            if (moveDurations.Count > 0)
+                Debug.Log($"First MoveDuration: {moveDurations[0]}");
+
 
             int[] ns = new int[] {
                 numberOfPositions,      numberOfRotations,
@@ -174,7 +182,7 @@ namespace ArenaBuilders
                 numberOfChangeRates,    numberOfSpawnCounts,
                 numberOfSpawnColors,    numberOfTimesBetweenSpawns,
                 numberOfRipenTimes,     numberOfDoorDelays,
-                numberOfTimesBetweenDoorOpens,
+                numberOfTimesBetweenDoorOpens, numberOfMoveDurations,
             };
             int n = ns.Max();
 
@@ -185,25 +193,29 @@ namespace ArenaBuilders
                                                                 spawnedObjectsHolder.transform,
                                                                 false);
                 gameObjectInstance.SetLayer(1);
-                Vector3 position            = k < ns[0] ? positions[k] : -Vector3.one;
-                float rotation              = k < ns[1] ? rotations[k] : -1;
-                Vector3 size                = k < ns[2] ? sizes[k] : -Vector3.one;
-                Vector3 color               = k < ns[3] ? colors[k] : -Vector3.one;
+                Vector3 position = k < ns[0] ? positions[k] : -Vector3.one;
+                float rotation = k < ns[1] ? rotations[k] : -1;
+                Vector3 size = k < ns[2] ? sizes[k] : -Vector3.one;
+                Vector3 color = k < ns[3] ? colors[k] : -Vector3.one;
                 // for optional parameters, use default values
                 // @TO-DO default values should be stored somewhere more obvious and global !
-                string symbolName           = k < ns[4] ? symbolNames[k] : null;
-                float delay                 = k < ns[5] ? delays[k] : 0;
-                bool tree                   = (spawnable.name.Contains("Tree")); // for SpawnerTree only
-                bool ripen_or_grow          = (spawnable.name.StartsWith("Anti") || spawnable.name.StartsWith("Grow") || tree);
-                float initialValue          = k < ns[6] ? initialValues[k] : (tree?0.2f:(ripen_or_grow?0.5f:2.5f));
-                float finalValue            = k < ns[7] ? finalValues[k] : (tree?1f:(ripen_or_grow?2.5f:0.5f));
-                float changeRate            = k < ns[8] ? changeRates[k] : -0.005f;
-                int spawnCount              = k < ns[9] ? spawnCounts[k] : -1;
-                Vector3 spawnColor          = k < ns[10]? spawnColors[k] : -Vector3.one; // special case to leave as default (HDR) spawn color
-                float timeBetweenSpawns     = k < ns[11]? timesBetweenSpawns[k] : (tree?4f:1.5f);
-                float ripenTime             = k < ns[12]? ripenTimes[k] : 6f;
-                float doorDelay             = k < ns[13]? doorDelays[k] : 10f;
-                float timeBetweenDoorOpens  = k < ns[14]? timesBetweenDoorOpens[k] : -1f;
+                string symbolName = k < ns[4] ? symbolNames[k] : null;
+                float delay = k < ns[5] ? delays[k] : 0;
+                bool tree = (spawnable.name.Contains("Tree")); // for SpawnerTree only
+                bool ripen_or_grow = (spawnable.name.StartsWith("Anti") || spawnable.name.StartsWith("Grow") || tree);
+                float initialValue = k < ns[6] ? initialValues[k] : (tree ? 0.2f : (ripen_or_grow ? 0.5f : 2.5f));
+                float finalValue = k < ns[7] ? finalValues[k] : (tree ? 1f : (ripen_or_grow ? 2.5f : 0.5f));
+                float changeRate = k < ns[8] ? changeRates[k] : -0.005f;
+                int spawnCount = k < ns[9] ? spawnCounts[k] : -1;
+                Vector3 spawnColor = k < ns[10] ? spawnColors[k] : -Vector3.one; // special case to leave as default (HDR) spawn color
+                float timeBetweenSpawns = k < ns[11] ? timesBetweenSpawns[k] : (tree ? 4f : 1.5f);
+                float ripenTime = k < ns[12] ? ripenTimes[k] : 6f;
+                float doorDelay = k < ns[13] ? doorDelays[k] : 10f;
+                float timeBetweenDoorOpens = k < ns[14] ? timesBetweenDoorOpens[k] : -1f;
+                float moveDuration = k < ns[15] ? moveDurations[k] : 1.0f; // use 1.0 as the default value
+
+                Debug.Log($"MoveDuration for {k}th object: {moveDuration}");
+
                 // group together in dictionary so can pass as one argument to Spawner
                 // (means we won't have to keep updating the arguments of Spawner function
                 // each time we add to optional parameters)
@@ -219,6 +231,7 @@ namespace ArenaBuilders
                     {nameof(ripenTime),             ripenTime},
                     {nameof(doorDelay),             doorDelay},
                     {nameof(timeBetweenDoorOpens),  timeBetweenDoorOpens},
+                    {nameof(moveDuration),          moveDuration} // add moveDuration to the optionals dictionary
                 };
 
                 PositionRotation spawnPosRot = SamplePositionRotation(gameObjectInstance,
@@ -234,7 +247,7 @@ namespace ArenaBuilders
 
         // count of parameter entries in a list
         // used for optional YAML parameters where list could be null
-        private int optionalCount<T>(List<T> paramList) { return (paramList!=null) ? paramList.Count: 0; }
+        private int optionalCount<T>(List<T> paramList) { return (paramList != null) ? paramList.Count : 0; }
 
         private void SpawnAgent(Spawnable agentSpawnableFromUser)
         {
@@ -250,10 +263,11 @@ namespace ArenaBuilders
             rotation = (agentSpawnableFromUser == null || !agentSpawnableFromUser.rotations.Any()) ?
                              -1 : agentSpawnableFromUser.rotations[0];
             // extra check for skins because optional param is not always initialised as a List<string> in Spawnable class
-            if (agentSpawnableFromUser != null && agentSpawnableFromUser.skins == null) {
+            if (agentSpawnableFromUser != null && agentSpawnableFromUser.skins == null)
+            {
                 agentSpawnableFromUser.skins = new List<string>();
             }
-            skin     = (agentSpawnableFromUser == null || !agentSpawnableFromUser.skins.Any()) ?
+            skin = (agentSpawnableFromUser == null || !agentSpawnableFromUser.skins.Any()) ?
                              "random" : agentSpawnableFromUser.skins[0];
 
             // extra check for freeze delay for same reason as above w/skins
@@ -300,11 +314,21 @@ namespace ArenaBuilders
                     _goodGoalsMultiSpawned.Add(gameObjectInstance.GetComponent<Goal>());
                 }
                 // check for optional symbol name for SignPosterboards
-                if (optionals["symbolName"] != null) {
+                if (optionals["symbolName"] != null)
+                {
                     AssignSymbolName(gameObjectInstance, (string)optionals["symbolName"], color);
                 }
+
+                if (optionals.ContainsKey("moveDuration") && gameObjectInstance.TryGetComponent(out Spawner_InteractiveButton IB))
+                {
+                    Debug.Log($"moveDuration in optionals: {optionals["moveDuration"]}");
+                    IB.moveDuration = (float)optionals["moveDuration"];
+                    Debug.Log($"After setting, moveDuration is: {IB.moveDuration}");
+                }
+
                 // check for optional spawnColor for Spawner objects
-                if (optionals["spawnColor"] != null && gameObjectInstance.TryGetComponent(out GoalSpawner GS)) {
+                if (optionals["spawnColor"] != null && gameObjectInstance.TryGetComponent(out GoalSpawner GS))
+                {
                     GS.SetSpawnColor((Vector3)optionals["spawnColor"]);
                 }
                 // now check all floats relating to timing of changes
@@ -322,17 +346,20 @@ namespace ArenaBuilders
                     { "timeBetweenDoorOpens",   new List<Type> { typeof(SpawnerStockpiler)} },  // Dispensers/Containers only!
                 };
                 float v;
-                foreach (string paramKey in paramValidTypeLookup.Keys) {
+                foreach (string paramKey in paramValidTypeLookup.Keys)
+                {
                     // try each valid type that we might be able to assign to
-                    if (optionals[paramKey] != null) {
-                        foreach (Type U in paramValidTypeLookup[paramKey]) {
+                    if (optionals[paramKey] != null)
+                    {
+                        foreach (Type U in paramValidTypeLookup[paramKey])
+                        {
                             Component component = new Component();
                             // see if gameObjectInstance has got the relevant component
                             if (gameObjectInstance.TryGetComponent(U, out component))
                             {
                                 //Debug.Log(paramKey + ", " + optionals[paramKey] + ", " + component.ToString());
                                 //Debug.Log(optionals[paramKey].GetType());
-                                v = Convert.ToSingle(optionals[paramKey]); 
+                                v = Convert.ToSingle(optionals[paramKey]);
                                 AssignTimingNumber(paramKey, v, component);
                             }
                         }
@@ -347,7 +374,8 @@ namespace ArenaBuilders
         }
 
         // calls SetSymbol on SignPosterboard if such a component can be found - overrides colour setting also
-        private void AssignSymbolName(GameObject gameObjectInstance, string sName, Vector3 color) {
+        private void AssignSymbolName(GameObject gameObjectInstance, string sName, Vector3 color)
+        {
             SignPosterboard SP = gameObjectInstance.GetComponent<SignPosterboard>();
             if (SP != null)
             {
@@ -358,7 +386,8 @@ namespace ArenaBuilders
         }
 
         // calls correct Setter method according to arg paramName and corresponding method-name
-        private void AssignTimingNumber<T>(string paramName, float value, T component) {
+        private void AssignTimingNumber<T>(string paramName, float value, T component)
+        {
             paramName = paramName[0].ToString().ToUpper() + paramName.Substring(1); // "delay" -> "Delay" and so on...
             MethodInfo SetMethod = component.GetType().GetMethod("Set" + (paramName));
             //Debug.Log("Trying to invoke method with name: " + "Set" + (paramName));
