@@ -9,5 +9,5 @@ Developed **originally** using Unity 2020.3.9f1, Mlagents 2.1.0-exp.1 (ml-agents
 ## Version History
 
 - v4.0.0
-  - Upgraded Unity Game Engine Editor to 2021.3.21f1
-  - Various minor bug fixes
+  - Upgraded Unity Game Engine Editor to 2021.3.21f1.
+  - Various minor bug fixes.
