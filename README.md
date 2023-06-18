@@ -1,6 +1,6 @@
 # AnimalAI
 
-Animal-AI-Version 3.0.2 Unity Project
+AnimalAI3 Unity Project
 
 This repo is for the Unity project for AnimalAI in case you would like to make improvements to the environment. The main AnimalAI repo is at [https://github.com/Kinds-of-Intelligence-CFI/animal-ai](https://github.com/Kinds-of-Intelligence-CFI/animal-ai).
 
