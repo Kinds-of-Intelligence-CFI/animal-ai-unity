@@ -34,14 +34,15 @@ public class TrainingAgent : Agent, IPrefab
     private bool _nextUpdateEpisodeEnd = false;
     private float _freezeDelay = 0f;
     public float GetFreezeDelay() { return _freezeDelay; }
+    private bool _isCountdownActive = false; // add this flag
+
     public void SetFreezeDelay(float v)
     {
         _freezeDelay = Mathf.Clamp(v, 0f, v);
-        if (v != 0f)
+        if (v != 0f && !_isCountdownActive)
         {
             // intended for single use per-episode (at beginning)
             Debug.Log("starting coroutine unfreezeCountdown() with wait seconds == " + GetFreezeDelay());
-            StopCoroutine("unfreezeCountdown"); // stop any existing countdown. This line ensures that any previous countdown is stopped before starting a new one.
             StartCoroutine(unfreezeCountdown()); // start a new countdown if and only if the new delay is not zero.
         }
     }
@@ -181,13 +182,16 @@ public class TrainingAgent : Agent, IPrefab
     public override void OnEpisodeBegin()
     {
         Debug.Log("Episode Begin");
-        StopCoroutine("unfreezeCountdown"); // when a new episode starts, any existing unfreeze countdown is cancelled.
+        StopCoroutine("unfreezeCountdown"); // When a new episode starts, any existing unfreeze countdown is cancelled.
         _previousScore = _currentScore;
         numberOfGoalsCollected = 0;
         _arena.ResetArena();
         _rewardPerStep = timeLimit > 0 ? -1f / timeLimit : 0; // No step reward for infinite episode by default
         _isGrounded = false;
         health = _maxHealth;
+
+        // Initiate the freeze for the agent. Fix for erratic behaviour.
+        SetFreezeDelay(GetFreezeDelay());
     }
 
 
@@ -270,9 +274,11 @@ public class TrainingAgent : Agent, IPrefab
 
     private IEnumerator unfreezeCountdown()
     {
+        _isCountdownActive = true; // countdown is active now
         yield return new WaitForSeconds(GetFreezeDelay());
 
         Debug.Log("unfreezing!");
-        SetFreezeDelay(0f); yield return null;
+        SetFreezeDelay(0f);
+        _isCountdownActive = false; // countdown is no longer active
     }
 }

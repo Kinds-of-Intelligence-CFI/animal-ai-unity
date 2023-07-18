@@ -9,4 +9,4 @@ arenas:
       positions:
       - !Vector3 {x: 20, y: 0, z: 1}
       rotations: [0]
-      frozenAgentDelays: [3]
+      frozenAgentDelays: [10]
