@@ -53,6 +53,10 @@ public class PlayerControls : MonoBehaviour
         {
             _agent.EndEpisode();
         }
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            Application.Quit();
+        }
         if (Input.GetKeyDown(KeyCode.F9))
         {
             _screenshotCam.Activate();
