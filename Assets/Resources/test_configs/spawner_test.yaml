@@ -13,7 +13,7 @@ arenas:
       name: Pillar-Button
       positions:
       - !Vector3 {x: 25, y: 0, z: 30}
-      moveDurations: [20]
+      moveDurations: [5.0]
 
 
       

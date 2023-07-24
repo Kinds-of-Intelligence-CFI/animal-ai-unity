@@ -321,6 +321,7 @@ namespace ArenaBuilders
 
                 if (optionals.ContainsKey("moveDuration") && gameObjectInstance.TryGetComponent(out Spawner_InteractiveButton IB))
                 {
+                    Debug.Log($"Before setting, moveDuration is: {IB.moveDuration}");
                     Debug.Log($"moveDuration in optionals: {optionals["moveDuration"]}");
                     IB.moveDuration = (float)optionals["moveDuration"];
                     Debug.Log($"After setting, moveDuration is: {IB.moveDuration}");
