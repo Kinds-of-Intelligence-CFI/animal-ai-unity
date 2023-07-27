@@ -89,6 +89,11 @@ public class TrainingArena : MonoBehaviour
         _agent.MaxStep = 0; //We never time the environment out unless agent health goes to 0
         _agent.timeLimit = _arenaConfiguration.T * _agentDecisionInterval;
 
+        foreach (var spawnable in _builder.Spawnables)
+        {
+            Debug.Log($"In ResetArena, moveDurations for {spawnable.name}: {string.Join(", ", spawnable.moveDurations)}");
+        }
+
         _builder.Build();
         _arenaConfiguration.lightsSwitch.Reset();
         _firstReset = false;

@@ -210,9 +210,9 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8243600400130407102}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.0174, z: -0.003}
-  m_LocalScale: {x: 0.046356644, y: 0.010954675, z: 0.046356644}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.017400004, z: -0.0029999788}
+  m_LocalScale: {x: 0.046356652, y: 0.010954675, z: 0.046356652}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2799182668062544255}
@@ -295,7 +295,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   childObjectToMove: {fileID: 3284075630407977925}
   moveOffset: {x: 0.09, y: 0, z: 0}
-  moveDuration: 1
   resetDuration: 1
   rewardSpawnPoint: {fileID: 7321951510414112991}
   objectToControl: {fileID: 7150004164178407081, guid: b19f8e36bd5ca73489a251d8daa9acea, type: 3}

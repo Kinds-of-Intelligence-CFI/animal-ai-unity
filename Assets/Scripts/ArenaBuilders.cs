@@ -319,12 +319,15 @@ namespace ArenaBuilders
                     AssignSymbolName(gameObjectInstance, (string)optionals["symbolName"], color);
                 }
 
-                if (optionals.ContainsKey("moveDuration") && gameObjectInstance.TryGetComponent(out Spawner_InteractiveButton IB))
+                // check for optional moveDuration for Spawner_InteractiveButton objects
+                if (optionals.ContainsKey("moveDuration"))
                 {
-                    Debug.Log($"Before setting, moveDuration is: {IB.moveDuration}");
-                    Debug.Log($"moveDuration in optionals: {optionals["moveDuration"]}");
-                    IB.moveDuration = (float)optionals["moveDuration"];
-                    Debug.Log($"After setting, moveDuration is: {IB.moveDuration}");
+                    var spawnerInteractiveButton = gameObjectInstance.GetComponentInChildren<Spawner_InteractiveButton>();
+                    if (spawnerInteractiveButton != null)
+                    {
+                        spawnerInteractiveButton.MoveDuration = (float)optionals["moveDuration"];  // Update here
+                        Debug.Log($"After setting from YAML, MoveDuration for {gameObjectInstance.name} is: {spawnerInteractiveButton.MoveDuration}");
+                    }
                 }
 
                 // check for optional spawnColor for Spawner objects

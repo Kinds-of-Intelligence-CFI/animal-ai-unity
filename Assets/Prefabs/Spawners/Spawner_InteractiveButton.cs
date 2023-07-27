@@ -12,7 +12,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
     // Serialized fields for customizing button and reward behavior in Unity Editor
     [SerializeField] private GameObject childObjectToMove;
     [SerializeField] private Vector3 moveOffset;
-    [SerializeField] public float moveDuration;
+    private float _moveDuration;  // Change this to a private variable
     [SerializeField] private float resetDuration;
     [SerializeField] private Transform rewardSpawnPoint;
     [SerializeField] private GameObject objectToControl;
@@ -26,6 +26,12 @@ public class Spawner_InteractiveButton : MonoBehaviour
 
     public delegate void OnRewardSpawned(GameObject reward); // Define a delegate type for the event
     public static event OnRewardSpawned RewardSpawned; // Define the event
+
+    public float MoveDuration  // Add a public property for getting and setting the move duration
+    {
+        get { return _moveDuration; }
+        set { _moveDuration = value; }
+    }
 
     void Start()
     {
@@ -101,12 +107,12 @@ public class Spawner_InteractiveButton : MonoBehaviour
 
     // Coroutine to animate button press (move button and reset its position)
     {
-        Debug.Log($"At the start of MoveAndReset, moveDuration is: {moveDuration}"); // New debug log
+        Debug.Log($"At the start of MoveAndReset, moveDuration is: {MoveDuration}"); // New debug log
         Vector3 originalPosition = childObjectToMove.transform.position;
         Vector3 targetPosition = originalPosition + moveOffset;
         float startTime = Time.time;
 
-        while (MoveToTarget(originalPosition, targetPosition, startTime, moveDuration))
+        while (MoveToTarget(originalPosition, targetPosition, startTime, MoveDuration))
         {
             yield return null;
         }
@@ -118,16 +124,16 @@ public class Spawner_InteractiveButton : MonoBehaviour
             yield return null;
         }
         childObjectToMove.transform.position = originalPosition;
-        Debug.Log($"At the end of MoveAndReset, moveDuration is: {moveDuration}"); // New debug log
+        Debug.Log($"At the end of MoveAndReset, MoveDuration is: {MoveDuration}"); // New debug log
     }
 
     public bool MoveToTarget(Vector3 origin, Vector3 target, float startTime, float duration)
 
     // Move the button from origin to target in duration seconds
     {
-        float t = (Time.time - startTime) / duration;
+        float t = (Time.time - startTime) / MoveDuration;
         childObjectToMove.transform.position = Vector3.Lerp(origin, target, t);
-        return Time.time < startTime + duration;
+        return Time.time < startTime + MoveDuration;
     }
 
     private GameObject ChooseReward()
