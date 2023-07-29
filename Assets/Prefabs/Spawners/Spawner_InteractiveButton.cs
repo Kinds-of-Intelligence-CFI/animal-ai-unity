@@ -12,8 +12,8 @@ public class Spawner_InteractiveButton : MonoBehaviour
     // Serialized fields for customizing button and reward behavior in Unity Editor
     [SerializeField] private GameObject childObjectToMove;
     [SerializeField] private Vector3 moveOffset;
-    private float _moveDuration;  // Change this to a private variable
-    [SerializeField] private float resetDuration;
+    private float _moveDuration;
+    private float _resetDuration;
     [SerializeField] private Transform rewardSpawnPoint;
     [SerializeField] private GameObject objectToControl;
     [SerializeField] private bool showObject;
@@ -23,14 +23,19 @@ public class Spawner_InteractiveButton : MonoBehaviour
 
     private float lastInteractionTime;
     private float totalInteractionInterval = 0f;
+    public delegate void OnRewardSpawned(GameObject reward);
+    public static event OnRewardSpawned RewardSpawned;
 
-    public delegate void OnRewardSpawned(GameObject reward); // Define a delegate type for the event
-    public static event OnRewardSpawned RewardSpawned; // Define the event
-
-    public float MoveDuration  // Add a public property for getting and setting the move duration
+    public float MoveDuration
     {
         get { return _moveDuration; }
         set { _moveDuration = value; }
+    }
+
+    public float ResetDuration
+    {
+        get { return _resetDuration; }
+        set { _resetDuration = value; }
     }
 
     void Start()
@@ -107,7 +112,6 @@ public class Spawner_InteractiveButton : MonoBehaviour
 
     // Coroutine to animate button press (move button and reset its position)
     {
-        Debug.Log($"At the start of MoveAndReset, moveDuration is: {MoveDuration}"); // New debug log
         Vector3 originalPosition = childObjectToMove.transform.position;
         Vector3 targetPosition = originalPosition + moveOffset;
         float startTime = Time.time;
@@ -119,12 +123,11 @@ public class Spawner_InteractiveButton : MonoBehaviour
         childObjectToMove.transform.position = targetPosition;
 
         startTime = Time.time;
-        while (MoveToTarget(targetPosition, originalPosition, startTime, resetDuration))
+        while (MoveToTarget(targetPosition, originalPosition, startTime, ResetDuration))
         {
             yield return null;
         }
         childObjectToMove.transform.position = originalPosition;
-        Debug.Log($"At the end of MoveAndReset, MoveDuration is: {MoveDuration}"); // New debug log
     }
 
     public bool MoveToTarget(Vector3 origin, Vector3 target, float startTime, float duration)

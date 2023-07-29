@@ -47,7 +47,7 @@ namespace ArenaBuilders
         public void AddToGoodGoalsMultiSpawned(Goal ggm) { _goodGoalsMultiSpawned.Add(ggm); updateGoodGoalsMulti(); }
         public void AddToGoodGoalsMultiSpawned(GameObject ggm) { _goodGoalsMultiSpawned.Add(ggm.GetComponent<Goal>()); updateGoodGoalsMulti(); }
 
-        public List<float> moveDurations = new List<float>(); // testing
+       
 
         /// Buffer to allow space around instantiated objects
         // public Vector3 safeSpawnBuffer = Vector3.zero;
@@ -55,7 +55,6 @@ namespace ArenaBuilders
         /// The list of Spawnables the ArenaBuilder will attempt to spawn at each reset
         [HideInInspector]
         public List<Spawnable> Spawnables { get; set; }
-
 
         public ArenaBuilder(GameObject arenaGameObject, GameObject spawnedObjectsHolder,
                             int maxSpawnAttemptsForPrefabs, int maxSpawnAttemptsForAgent)
@@ -150,9 +149,9 @@ namespace ArenaBuilders
             List<float> ripenTimes = spawnable.ripenTimes;
             List<float> doorDelays = spawnable.doorDelays;
             List<float> timesBetweenDoorOpens = spawnable.timesBetweenDoorOpens;
-            List<float> moveDurations = spawnable.moveDurations; // testing
+            List<float> moveDurations = spawnable.moveDurations;
+            List<float> resetDurations = spawnable.resetDurations;
 
-            int numberOfMoveDurations = optionalCount(moveDurations); // testing
             int numberOfPositions = positions.Count;
             int numberOfRotations = rotations.Count;
             int numberOfSizes = sizes.Count;
@@ -168,11 +167,8 @@ namespace ArenaBuilders
             int numberOfRipenTimes = optionalCount(ripenTimes);
             int numberOfDoorDelays = optionalCount(doorDelays);
             int numberOfTimesBetweenDoorOpens = optionalCount(timesBetweenDoorOpens);
-
-            Debug.Log($"MoveDurations count: {moveDurations.Count}");  // log the count
-            if (moveDurations.Count > 0)
-                Debug.Log($"First MoveDuration: {moveDurations[0]}");
-
+            int numberOfMoveDurations = optionalCount(moveDurations);
+            int numberOfResetDurations = optionalCount(resetDurations);
 
             int[] ns = new int[] {
                 numberOfPositions,      numberOfRotations,
@@ -183,6 +179,7 @@ namespace ArenaBuilders
                 numberOfSpawnColors,    numberOfTimesBetweenSpawns,
                 numberOfRipenTimes,     numberOfDoorDelays,
                 numberOfTimesBetweenDoorOpens, numberOfMoveDurations,
+                numberOfResetDurations
             };
             int n = ns.Max();
 
@@ -212,9 +209,8 @@ namespace ArenaBuilders
                 float ripenTime = k < ns[12] ? ripenTimes[k] : 6f;
                 float doorDelay = k < ns[13] ? doorDelays[k] : 10f;
                 float timeBetweenDoorOpens = k < ns[14] ? timesBetweenDoorOpens[k] : -1f;
-                float moveDuration = k < ns[15] ? moveDurations[k] : 1.0f; // use 1.0 as the default value
-
-                Debug.Log($"MoveDuration for {k}th object: {moveDuration}");
+                float moveDuration = k < ns[15] ? moveDurations[k] : 1.0f;
+                float resetDuration = k < ns[16] ? resetDurations[k] : 1.0f;
 
                 // group together in dictionary so can pass as one argument to Spawner
                 // (means we won't have to keep updating the arguments of Spawner function
@@ -231,7 +227,8 @@ namespace ArenaBuilders
                     {nameof(ripenTime),             ripenTime},
                     {nameof(doorDelay),             doorDelay},
                     {nameof(timeBetweenDoorOpens),  timeBetweenDoorOpens},
-                    {nameof(moveDuration),          moveDuration} // add moveDuration to the optionals dictionary
+                    {nameof(moveDuration),          moveDuration},
+                    {nameof(resetDuration),         resetDuration},
                 };
 
                 PositionRotation spawnPosRot = SamplePositionRotation(gameObjectInstance,
@@ -320,13 +317,16 @@ namespace ArenaBuilders
                 }
 
                 // check for optional moveDuration for Spawner_InteractiveButton objects
-                if (optionals.ContainsKey("moveDuration"))
+                if (optionals.ContainsKey("moveDuration") || optionals.ContainsKey("resetDuration"))
                 {
                     var spawnerInteractiveButton = gameObjectInstance.GetComponentInChildren<Spawner_InteractiveButton>();
                     if (spawnerInteractiveButton != null)
                     {
-                        spawnerInteractiveButton.MoveDuration = (float)optionals["moveDuration"];  // Update here
-                        Debug.Log($"After setting from YAML, MoveDuration for {gameObjectInstance.name} is: {spawnerInteractiveButton.MoveDuration}");
+                        spawnerInteractiveButton.MoveDuration = (float)optionals["moveDuration"];
+                    }
+                    if (optionals.ContainsKey("resetDuration"))
+                    {
+                        spawnerInteractiveButton.ResetDuration = (float)optionals["resetDuration"];
                     }
                 }
 
