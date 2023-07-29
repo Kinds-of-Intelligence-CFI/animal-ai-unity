@@ -4,12 +4,10 @@ using UnityEngine;
 
 public class Spawner_InteractiveButton : MonoBehaviour
 {
-    // Public properties to track button press counts, last spawned reward, and reward spawn counts
     public int ButtonPressCount { get; private set; }
     public GameObject LastSpawnedReward { get; private set; }
     public Dictionary<GameObject, int> RewardSpawnCounts { get; private set; } = new Dictionary<GameObject, int>();
 
-    // Serialized fields for customizing button and reward behavior in Unity Editor
     [SerializeField] private GameObject childObjectToMove;
     [SerializeField] private Vector3 moveOffset;
     private float _moveDuration;
@@ -21,6 +19,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
     [SerializeField] private List<int> rewardWeights;
     [SerializeField] private Transform objectToControlSpawnPoint;
 
+    private bool IsMoving = false;
     private float lastInteractionTime;
     private float totalInteractionInterval = 0f;
     public delegate void OnRewardSpawned(GameObject reward);
@@ -45,62 +44,20 @@ public class Spawner_InteractiveButton : MonoBehaviour
     }
 
     private void OnTriggerEnter(Collider other)
-
-    // Interaction logic: button press count, start moving button, choose reward, spawn reward
-    // calculate interaction time, log information, spawn objectToControl (if any)
     {
         if (other.CompareTag("agent"))
         {
+            if (IsMoving)
+            {
+                return;
+            }
+
             ButtonPressCount++;
             StartCoroutine(MoveAndReset());
-
-            if (rewards == null || rewards.Count == 0)
-            {
-                Debug.LogError("No rewards are set to be spawned.");
-                return;
-            }
-
-            GameObject rewardToSpawn = ChooseReward();
-
-            if (rewardToSpawn == null)
-            {
-                Debug.LogError("Failed to choose a reward to spawn.");
-                return;
-            }
-
-            LastSpawnedReward = Instantiate(rewardToSpawn, rewardSpawnPoint.transform.position, Quaternion.identity);
-
-            if (RewardSpawnCounts.TryGetValue(rewardToSpawn, out var count))
-            {
-                RewardSpawnCounts[rewardToSpawn] = count + 1;
-            }
-            else
-            {
-                RewardSpawnCounts[rewardToSpawn] = 1;
-            }
-
-            if (showObject && objectToControl != null)
-            {
-                Instantiate(objectToControl, objectToControlSpawnPoint.transform.position, Quaternion.identity);
-            }
-
-            float currentInteractionTime = Time.time;
-            totalInteractionInterval += currentInteractionTime - lastInteractionTime;
-            lastInteractionTime = currentInteractionTime;
-
-            //Debug.Log("Trigger activated. Debug coming from Spawner_InteractiveButton.cs");
-
-            RewardSpawned?.Invoke(LastSpawnedReward);
-        }
-        else
-        {
-            // Debug.Log("Trigger NOT activated. Debug coming from Spawner_InteractiveButton.cs");
         }
     }
 
     private void UpdateObjectVisibility()
-
-    // Check for objectToControl and set its visibility
     {
         if (objectToControl != null)
         {
@@ -109,9 +66,9 @@ public class Spawner_InteractiveButton : MonoBehaviour
     }
 
     public IEnumerator MoveAndReset()
-
-    // Coroutine to animate button press (move button and reset its position)
     {
+        IsMoving = true;
+
         Vector3 originalPosition = childObjectToMove.transform.position;
         Vector3 targetPosition = originalPosition + moveOffset;
         float startTime = Time.time;
@@ -128,20 +85,61 @@ public class Spawner_InteractiveButton : MonoBehaviour
             yield return null;
         }
         childObjectToMove.transform.position = originalPosition;
+
+        SpawnReward();
+
+        IsMoving = false;
     }
 
     public bool MoveToTarget(Vector3 origin, Vector3 target, float startTime, float duration)
-
-    // Move the button from origin to target in duration seconds
     {
-        float t = (Time.time - startTime) / MoveDuration;
+        float t = (Time.time - startTime) / duration;
         childObjectToMove.transform.position = Vector3.Lerp(origin, target, t);
-        return Time.time < startTime + MoveDuration;
+        return Time.time < startTime + duration;
+    }
+
+    private void SpawnReward()
+    {
+        if (rewards == null || rewards.Count == 0)
+        {
+            Debug.LogError("No rewards are set to be spawned.");
+            return;
+        }
+
+        GameObject rewardToSpawn = ChooseReward();
+
+        if (rewardToSpawn == null)
+        {
+            Debug.LogError("Failed to choose a reward to spawn.");
+            return;
+        }
+
+        LastSpawnedReward = Instantiate(rewardToSpawn, rewardSpawnPoint.transform.position, Quaternion.identity);
+
+        if (RewardSpawnCounts.TryGetValue(rewardToSpawn, out var count))
+        {
+            RewardSpawnCounts[rewardToSpawn] = count + 1;
+        }
+        else
+        {
+            RewardSpawnCounts[rewardToSpawn] = 1;
+        }
+
+        if (showObject && objectToControl != null)
+        {
+            Instantiate(objectToControl, objectToControlSpawnPoint.transform.position, Quaternion.identity);
+        }
+
+        float currentInteractionTime = Time.time;
+        totalInteractionInterval += currentInteractionTime - lastInteractionTime;
+        lastInteractionTime = currentInteractionTime;
+
+        //Debug.Log("Trigger activated. Debug coming from Spawner_InteractiveButton.cs");
+
+        RewardSpawned?.Invoke(LastSpawnedReward);
     }
 
     private GameObject ChooseReward()
-
-    // Chooses and returns reward based on the defined reward weights
     {
         if (rewards == null || rewards.Count == 0 || rewardWeights == null || rewardWeights.Count == 0 || rewards.Count != rewardWeights.Count)
         {
@@ -168,8 +166,6 @@ public class Spawner_InteractiveButton : MonoBehaviour
     }
 
     public float GetAverageInteractionInterval()
-
-    // Calculate and return average interaction interval
     {
         if (ButtonPressCount == 0)
             return 0;
