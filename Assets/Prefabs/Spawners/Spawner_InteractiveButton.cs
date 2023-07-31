@@ -25,6 +25,8 @@ public class Spawner_InteractiveButton : MonoBehaviour
     public delegate void OnRewardSpawned(GameObject reward);
     public static event OnRewardSpawned RewardSpawned;
 
+    public float SpawnProbability { get; set; } = 1f;
+
     public float MoveDuration
     {
         get { return _moveDuration; }
@@ -106,37 +108,40 @@ public class Spawner_InteractiveButton : MonoBehaviour
             return;
         }
 
-        GameObject rewardToSpawn = ChooseReward();
-
-        if (rewardToSpawn == null)
+        if (Random.value <= SpawnProbability)
         {
-            Debug.LogError("Failed to choose a reward to spawn.");
-            return;
+            GameObject rewardToSpawn = ChooseReward();
+
+            if (rewardToSpawn == null)
+            {
+                Debug.LogError("Failed to choose a reward to spawn.");
+                return;
+            }
+
+            LastSpawnedReward = Instantiate(rewardToSpawn, rewardSpawnPoint.transform.position, Quaternion.identity);
+
+            if (RewardSpawnCounts.TryGetValue(rewardToSpawn, out var count))
+            {
+                RewardSpawnCounts[rewardToSpawn] = count + 1;
+            }
+            else
+            {
+                RewardSpawnCounts[rewardToSpawn] = 1;
+            }
+
+            if (showObject && objectToControl != null)
+            {
+                Instantiate(objectToControl, objectToControlSpawnPoint.transform.position, Quaternion.identity);
+            }
+
+            float currentInteractionTime = Time.time;
+            totalInteractionInterval += currentInteractionTime - lastInteractionTime;
+            lastInteractionTime = currentInteractionTime;
+
+            //Debug.Log("Trigger activated. Debug coming from Spawner_InteractiveButton.cs");
+
+            RewardSpawned?.Invoke(LastSpawnedReward);
         }
-
-        LastSpawnedReward = Instantiate(rewardToSpawn, rewardSpawnPoint.transform.position, Quaternion.identity);
-
-        if (RewardSpawnCounts.TryGetValue(rewardToSpawn, out var count))
-        {
-            RewardSpawnCounts[rewardToSpawn] = count + 1;
-        }
-        else
-        {
-            RewardSpawnCounts[rewardToSpawn] = 1;
-        }
-
-        if (showObject && objectToControl != null)
-        {
-            Instantiate(objectToControl, objectToControlSpawnPoint.transform.position, Quaternion.identity);
-        }
-
-        float currentInteractionTime = Time.time;
-        totalInteractionInterval += currentInteractionTime - lastInteractionTime;
-        lastInteractionTime = currentInteractionTime;
-
-        //Debug.Log("Trigger activated. Debug coming from Spawner_InteractiveButton.cs");
-
-        RewardSpawned?.Invoke(LastSpawnedReward);
     }
 
     private GameObject ChooseReward()

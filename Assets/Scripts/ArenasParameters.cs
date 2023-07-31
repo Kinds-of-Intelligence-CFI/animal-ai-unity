@@ -48,9 +48,11 @@ namespace ArenasParameters
         public List<float> doorDelays = null;
         public List<float> timesBetweenDoorOpens = null;
         public List<float> frozenAgentDelays = null;
+
         // InteractiveButton // 
         public List<float> moveDurations = null;
         public List<float> resetDurations = null;
+        public float SpawnProbability { get; private set; } = 1f;
 
         public Spawnable(GameObject obj)
         {
@@ -87,6 +89,7 @@ namespace ArenasParameters
             // InteractiveButton //
             moveDurations = yamlItem.moveDurations;
             resetDurations = yamlItem.resetDurations;
+            SpawnProbability = yamlItem.spawnProbability;
         }
 
         internal List<Vector3> initVec3sFromRGBs(List<YAMLDefs.RGB> yamlList)

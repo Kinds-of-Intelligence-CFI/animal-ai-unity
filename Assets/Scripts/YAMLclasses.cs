@@ -57,6 +57,7 @@ namespace YAMLDefs
         public List<float> frozenAgentDelays { get; set; } = new List<float>(); // Agent only
         public List<float> moveDurations { get; set; } = new List<float>(); // InteractiveButton only
         public List<float> resetDurations { get; set; } = new List<float>(); // InteractiveButton only
+        public float spawnProbability { get; set; } = 1f; // InteractiveButton only
     }
 
     public class RGB

@@ -15,6 +15,7 @@ arenas:
       - !Vector3 {x: 25, y: 0, z: 30}
       moveDurations: [0.1]
       resetDurations: [1.0]
+      spawnProbability: 0.5
 
 
       

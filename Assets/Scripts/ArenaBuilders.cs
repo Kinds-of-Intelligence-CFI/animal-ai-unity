@@ -47,8 +47,6 @@ namespace ArenaBuilders
         public void AddToGoodGoalsMultiSpawned(Goal ggm) { _goodGoalsMultiSpawned.Add(ggm); updateGoodGoalsMulti(); }
         public void AddToGoodGoalsMultiSpawned(GameObject ggm) { _goodGoalsMultiSpawned.Add(ggm.GetComponent<Goal>()); updateGoodGoalsMulti(); }
 
-       
-
         /// Buffer to allow space around instantiated objects
         // public Vector3 safeSpawnBuffer = Vector3.zero;
 
@@ -211,6 +209,7 @@ namespace ArenaBuilders
                 float timeBetweenDoorOpens = k < ns[14] ? timesBetweenDoorOpens[k] : -1f;
                 float moveDuration = k < ns[15] ? moveDurations[k] : 1.0f;
                 float resetDuration = k < ns[16] ? resetDurations[k] : 1.0f;
+                float spawnProbability = spawnable.SpawnProbability;
 
                 // group together in dictionary so can pass as one argument to Spawner
                 // (means we won't have to keep updating the arguments of Spawner function
@@ -229,6 +228,7 @@ namespace ArenaBuilders
                     {nameof(timeBetweenDoorOpens),  timeBetweenDoorOpens},
                     {nameof(moveDuration),          moveDuration},
                     {nameof(resetDuration),         resetDuration},
+                    {nameof(spawnProbability),      spawnProbability}
                 };
 
                 PositionRotation spawnPosRot = SamplePositionRotation(gameObjectInstance,
@@ -317,7 +317,7 @@ namespace ArenaBuilders
                 }
 
                 // check for optional moveDuration for Spawner_InteractiveButton objects
-                if (optionals.ContainsKey("moveDuration") || optionals.ContainsKey("resetDuration"))
+                if (optionals.ContainsKey("moveDuration") || optionals.ContainsKey("resetDuration") || optionals.ContainsKey("spawnProbability"))
                 {
                     var spawnerInteractiveButton = gameObjectInstance.GetComponentInChildren<Spawner_InteractiveButton>();
                     if (spawnerInteractiveButton != null)
@@ -327,6 +327,10 @@ namespace ArenaBuilders
                     if (optionals.ContainsKey("resetDuration"))
                     {
                         spawnerInteractiveButton.ResetDuration = (float)optionals["resetDuration"];
+                    }
+                    if (optionals.ContainsKey("spawnProbability"))
+                    {
+                        spawnerInteractiveButton.SpawnProbability = spawnable.SpawnProbability;
                     }
                 }
 
