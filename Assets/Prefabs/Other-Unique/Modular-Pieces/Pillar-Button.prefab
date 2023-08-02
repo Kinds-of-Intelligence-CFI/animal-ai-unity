@@ -295,7 +295,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   childObjectToMove: {fileID: 3284075630407977925}
   moveOffset: {x: 0.09, y: 0, z: 0}
-  resetDuration: 1
   rewardSpawnPoint: {fileID: 7321951510414112991}
   objectToControl: {fileID: 7150004164178407081, guid: b19f8e36bd5ca73489a251d8daa9acea, type: 3}
   showObject: 0
@@ -303,7 +302,7 @@ MonoBehaviour:
   - {fileID: 4351206490586746944, guid: 8ed7d9a1894cfcb4db68a8984ae4b256, type: 3}
   - {fileID: 1815161577820678, guid: efdf89976edbdaa42aee9b9c7013c916, type: 3}
   - {fileID: 1311020654520240, guid: f3d2126090ed23744bf83d0faf1f3280, type: 3}
-  rewardWeights: 14000000320000001e000000
+  rewardWeights: 000000000000000064000000
   objectToControlSpawnPoint: {fileID: 1212440655105317655}
 --- !u!1001 &2400991117071955604
 PrefabInstance:

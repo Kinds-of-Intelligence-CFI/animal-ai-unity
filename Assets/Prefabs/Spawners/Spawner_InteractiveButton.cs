@@ -4,35 +4,31 @@ using UnityEngine;
 
 public class Spawner_InteractiveButton : MonoBehaviour
 {
-    public int ButtonPressCount { get; private set; }
-    public GameObject LastSpawnedReward { get; private set; }
-    public Dictionary<GameObject, int> RewardSpawnCounts { get; private set; } = new Dictionary<GameObject, int>();
-
-    [SerializeField] private GameObject childObjectToMove;
-    [SerializeField] private Vector3 moveOffset;
-    private float _moveDuration;
-    private float _resetDuration;
-    [SerializeField] private Transform rewardSpawnPoint;
-    [SerializeField] private GameObject objectToControl;
-    [SerializeField] private bool showObject;
-    [SerializeField] private List<GameObject> rewards;
-    [SerializeField] private List<int> rewardWeights;
-    [SerializeField] private Transform objectToControlSpawnPoint;
-
     private bool IsMoving = false;
     private float lastInteractionTime;
     private float totalInteractionInterval = 0f;
+    public int ButtonPressCount { get; private set; }
+    public GameObject LastSpawnedReward { get; private set; }
+    public Dictionary<GameObject, int> RewardSpawnCounts { get; private set; } = new Dictionary<GameObject, int>();
+    [SerializeField] private GameObject childObjectToMove;
+    [SerializeField] private Vector3 moveOffset;
+    [SerializeField] private Transform rewardSpawnPoint;
+    [SerializeField] private GameObject objectToControl;
+    [SerializeField] private Transform objectToControlSpawnPoint;
+    [SerializeField] private bool showObject;
+    [SerializeField] private List<GameObject> rewards;
+    [SerializeField] private List<int> rewardWeights;
     public delegate void OnRewardSpawned(GameObject reward);
     public static event OnRewardSpawned RewardSpawned;
 
+    private float _moveDuration;
+    private float _resetDuration;
     public float SpawnProbability { get; set; } = 1f;
-
     public float MoveDuration
     {
         get { return _moveDuration; }
         set { _moveDuration = value; }
     }
-
     public float ResetDuration
     {
         get { return _resetDuration; }
