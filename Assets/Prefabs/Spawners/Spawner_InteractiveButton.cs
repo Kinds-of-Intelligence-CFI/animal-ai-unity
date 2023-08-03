@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class Spawner_InteractiveButton : MonoBehaviour
 {
@@ -17,7 +18,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
     [SerializeField] private Transform objectToControlSpawnPoint;
     [SerializeField] private bool showObject;
     [SerializeField] private List<GameObject> rewards;
-    [SerializeField] private List<int> rewardWeights;
+    [SerializeField] private List<float> rewardWeights;
     public delegate void OnRewardSpawned(GameObject reward);
     public static event OnRewardSpawned RewardSpawned;
 
@@ -35,10 +36,40 @@ public class Spawner_InteractiveButton : MonoBehaviour
         set { _resetDuration = value; }
     }
 
+    public List<string> RewardNames { get; set; }
+    public List<float> RewardWeights { get; set; }
+    public List<GameObject> Rewards { get; set; }
+
     void Start()
     {
         lastInteractionTime = Time.time;
         UpdateObjectVisibility(); // Set the object to be visible or not based on the showObject flag
+        Rewards = new List<GameObject>();
+        if (RewardNames != null && RewardNames.Count > 0)
+        {
+            rewards = RewardNames.Select(name =>
+            {
+                GameObject reward = Resources.Load<GameObject>(name);
+                if (reward == null)
+                {
+                    Debug.LogError($"Failed to load reward: {name}");
+                }
+                return reward;
+            }).ToList();
+        }
+
+        rewardWeights = RewardWeights;
+
+        Debug.Log("Rewards count: " + Rewards.Count);
+        Debug.Log("RewardWeights count: " + rewardWeights.Count);
+        foreach (GameObject reward in Rewards)
+        {
+            Debug.Log("Reward: " + reward.name);
+        }
+        foreach (int weight in rewardWeights)
+        {
+            Debug.Log("Weight: " + weight);
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -98,7 +129,9 @@ public class Spawner_InteractiveButton : MonoBehaviour
 
     private void SpawnReward()
     {
-        if (rewards == null || rewards.Count == 0)
+        Debug.Log("Rewards count in SpawnReward(): " + (Rewards != null ? Rewards.Count.ToString() : "null"));
+
+        if (Rewards == null || Rewards.Count == 0)
         {
             Debug.LogError("No rewards are set to be spawned.");
             return;
@@ -140,31 +173,34 @@ public class Spawner_InteractiveButton : MonoBehaviour
         }
     }
 
-    private GameObject ChooseReward()
+    GameObject ChooseReward()
     {
-        if (rewards == null || rewards.Count == 0 || rewardWeights == null || rewardWeights.Count == 0 || rewards.Count != rewardWeights.Count)
+        Debug.Log("ChooseReward() method called.");
+        Debug.Log("rewards: " + (rewards == null ? "null" : rewards.Count.ToString()));
+        Debug.Log("rewardWeights: " + (rewardWeights == null ? "null" : rewardWeights.Count.ToString()));
+        if (rewards == null || rewardWeights == null || rewards.Count != rewardWeights.Count)
         {
             Debug.LogError("Invalid rewards or reward weights setup.");
             return null;
         }
 
-        int totalWeight = 0;
-        for (int i = 0; i < rewardWeights.Count; i++)
-        {
-            totalWeight += rewardWeights[i];
-        }
+        float totalWeight = rewardWeights.Sum();
+        float randomNumber = Random.Range(0, totalWeight);
+        float cumulativeWeight = 0;
 
-        int randomValue = Random.Range(0, totalWeight);
         for (int i = 0; i < rewards.Count; i++)
         {
-            if (randomValue < rewardWeights[i])
+            cumulativeWeight += rewardWeights[i];
+            if (randomNumber <= cumulativeWeight)
             {
                 return rewards[i];
             }
-            randomValue -= rewardWeights[i];
         }
-        return rewards[rewards.Count - 1];
+
+        Debug.LogError("Failed to choose a reward to spawn.");
+        return null;
     }
+
 
     public float GetAverageInteractionInterval()
     {

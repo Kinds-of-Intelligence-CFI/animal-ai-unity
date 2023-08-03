@@ -53,6 +53,8 @@ namespace ArenasParameters
         public List<float> moveDurations = null;
         public List<float> resetDurations = null;
         public float SpawnProbability { get; private set; } = 1f;
+        public List<string> RewardNames { get; private set; }
+        public List<float> RewardWeights { get; private set; }
 
         public Spawnable(GameObject obj)
         {
@@ -90,6 +92,8 @@ namespace ArenasParameters
             moveDurations = yamlItem.moveDurations;
             resetDurations = yamlItem.resetDurations;
             SpawnProbability = yamlItem.spawnProbability;
+            RewardNames = yamlItem.rewardNames;
+            RewardWeights = yamlItem.rewardWeights;
         }
 
         internal List<Vector3> initVec3sFromRGBs(List<YAMLDefs.RGB> yamlList)

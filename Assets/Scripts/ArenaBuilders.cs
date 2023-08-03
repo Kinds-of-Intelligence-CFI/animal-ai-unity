@@ -228,7 +228,9 @@ namespace ArenaBuilders
                     {nameof(timeBetweenDoorOpens),  timeBetweenDoorOpens},
                     {nameof(moveDuration),          moveDuration},
                     {nameof(resetDuration),         resetDuration},
-                    {nameof(spawnProbability),      spawnProbability}
+                    {nameof(spawnProbability),      spawnProbability},
+                    { "rewardNames",                spawnable.RewardNames },
+                    { "rewardWeights",              spawnable.RewardWeights }
                 };
 
                 PositionRotation spawnPosRot = SamplePositionRotation(gameObjectInstance,
@@ -317,7 +319,7 @@ namespace ArenaBuilders
                 }
 
                 // check for optional moveDuration for Spawner_InteractiveButton objects
-                if (optionals.ContainsKey("moveDuration") || optionals.ContainsKey("resetDuration") || optionals.ContainsKey("spawnProbability"))
+                if (optionals.ContainsKey("moveDuration") || optionals.ContainsKey("resetDuration") || optionals.ContainsKey("spawnProbability") || optionals.ContainsKey("rewardNames") || optionals.ContainsKey("rewardWeights"))
                 {
                     var spawnerInteractiveButton = gameObjectInstance.GetComponentInChildren<Spawner_InteractiveButton>();
                     if (spawnerInteractiveButton != null)
@@ -332,16 +334,26 @@ namespace ArenaBuilders
                     {
                         spawnerInteractiveButton.SpawnProbability = spawnable.SpawnProbability;
                     }
-                }
+                    if (optionals.ContainsKey("rewardNames") && optionals.ContainsKey("rewardWeights"))
+                    {
+                        spawnerInteractiveButton.RewardNames = (List<string>)optionals["rewardNames"];
+                        spawnerInteractiveButton.RewardWeights = (List<float>)optionals["rewardWeights"];
 
-                // check for optional spawnColor for Spawner objects
-                if (optionals["spawnColor"] != null && gameObjectInstance.TryGetComponent(out GoalSpawner GS))
-                {
-                    GS.SetSpawnColor((Vector3)optionals["spawnColor"]);
-                }
-                // now check all floats relating to timing of changes
-                // each float param has a list of "acceptable types" to which it applies
-                Dictionary<string, List<Type>> paramValidTypeLookup = new Dictionary<string, List<Type>> {
+                        Debug.Log("Set RewardNames and RewardWeights:");
+                        for (int i = 0; i < spawnerInteractiveButton.RewardNames.Count; i++)
+                        {
+                            Debug.Log($"Reward: {spawnerInteractiveButton.RewardNames[i]}, Weight: {spawnerInteractiveButton.RewardWeights[i]}");
+                        }
+                    }
+
+                    // check for optional spawnColor for Spawner objects
+                    if (optionals["spawnColor"] != null && gameObjectInstance.TryGetComponent(out GoalSpawner GS))
+                    {
+                        GS.SetSpawnColor((Vector3)optionals["spawnColor"]);
+                    }
+                    // now check all floats relating to timing of changes
+                    // each float param has a list of "acceptable types" to which it applies
+                    Dictionary<string, List<Type>> paramValidTypeLookup = new Dictionary<string, List<Type>> {
 
                     { "delay",                  new List<Type> { typeof(DecayGoal), typeof(SizeChangeGoal), typeof(GoalSpawner)} },
                     { "initialValue",           new List<Type> { typeof(DecayGoal), typeof(SizeChangeGoal), typeof(GoalSpawner)} },
@@ -353,31 +365,32 @@ namespace ArenaBuilders
                     { "doorDelay",              new List<Type> { typeof(SpawnerStockpiler)} }, // Dispensers/Containers only!
                     { "timeBetweenDoorOpens",   new List<Type> { typeof(SpawnerStockpiler)} },  // Dispensers/Containers only!
                 };
-                float v;
-                foreach (string paramKey in paramValidTypeLookup.Keys)
-                {
-                    // try each valid type that we might be able to assign to
-                    if (optionals[paramKey] != null)
+                    float v;
+                    foreach (string paramKey in paramValidTypeLookup.Keys)
                     {
-                        foreach (Type U in paramValidTypeLookup[paramKey])
+                        // try each valid type that we might be able to assign to
+                        if (optionals[paramKey] != null)
                         {
-                            Component component = new Component();
-                            // see if gameObjectInstance has got the relevant component
-                            if (gameObjectInstance.TryGetComponent(U, out component))
+                            foreach (Type U in paramValidTypeLookup[paramKey])
                             {
-                                //Debug.Log(paramKey + ", " + optionals[paramKey] + ", " + component.ToString());
-                                //Debug.Log(optionals[paramKey].GetType());
-                                v = Convert.ToSingle(optionals[paramKey]);
-                                AssignTimingNumber(paramKey, v, component);
+                                Component component = new Component();
+                                // see if gameObjectInstance has got the relevant component
+                                if (gameObjectInstance.TryGetComponent(U, out component))
+                                {
+                                    //Debug.Log(paramKey + ", " + optionals[paramKey] + ", " + component.ToString());
+                                    //Debug.Log(optionals[paramKey].GetType());
+                                    v = Convert.ToSingle(optionals[paramKey]);
+                                    AssignTimingNumber(paramKey, v, component);
+                                }
                             }
                         }
                     }
                 }
-            }
-            else
-            {
-                gameObjectInstance.SetActive(false);
-                GameObject.Destroy(gameObjectInstance);
+                else
+                {
+                    gameObjectInstance.SetActive(false);
+                    GameObject.Destroy(gameObjectInstance);
+                }
             }
         }
 

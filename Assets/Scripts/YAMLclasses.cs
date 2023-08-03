@@ -58,6 +58,8 @@ namespace YAMLDefs
         public List<float> moveDurations { get; set; } = new List<float>(); // InteractiveButton only
         public List<float> resetDurations { get; set; } = new List<float>(); // InteractiveButton only
         public float spawnProbability { get; set; } = 1f; // InteractiveButton only
+        public List<string> rewardNames { get; set; } = new List<string>();
+        public List<float> rewardWeights { get; set; } = new List<float>();
     }
 
     public class RGB
