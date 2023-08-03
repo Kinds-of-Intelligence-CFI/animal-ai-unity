@@ -35,7 +35,6 @@ public class Spawner_InteractiveButton : MonoBehaviour
         get { return _resetDuration; }
         set { _resetDuration = value; }
     }
-
     public List<string> RewardNames { get; set; }
     public List<float> RewardWeights { get; set; }
     public List<GameObject> Rewards { get; set; }
@@ -44,10 +43,10 @@ public class Spawner_InteractiveButton : MonoBehaviour
     {
         lastInteractionTime = Time.time;
         UpdateObjectVisibility(); // Set the object to be visible or not based on the showObject flag
-        Rewards = new List<GameObject>();
+
         if (RewardNames != null && RewardNames.Count > 0)
         {
-            rewards = RewardNames.Select(name =>
+            Rewards = RewardNames.Select(name =>
             {
                 GameObject reward = Resources.Load<GameObject>(name);
                 if (reward == null)
@@ -66,7 +65,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
         {
             Debug.Log("Reward: " + reward.name);
         }
-        foreach (int weight in rewardWeights)
+        foreach (float weight in rewardWeights)
         {
             Debug.Log("Weight: " + weight);
         }
@@ -92,6 +91,13 @@ public class Spawner_InteractiveButton : MonoBehaviour
         {
             objectToControl.SetActive(showObject);
         }
+    }
+
+    public bool MoveToTarget(Vector3 origin, Vector3 target, float startTime, float duration)
+    {
+        float t = (Time.time - startTime) / duration;
+        childObjectToMove.transform.position = Vector3.Lerp(origin, target, t);
+        return Time.time < startTime + duration;
     }
 
     public IEnumerator MoveAndReset()
@@ -120,11 +126,34 @@ public class Spawner_InteractiveButton : MonoBehaviour
         IsMoving = false;
     }
 
-    public bool MoveToTarget(Vector3 origin, Vector3 target, float startTime, float duration)
+    private GameObject ChooseReward()
     {
-        float t = (Time.time - startTime) / duration;
-        childObjectToMove.transform.position = Vector3.Lerp(origin, target, t);
-        return Time.time < startTime + duration;
+        Debug.Log("ChooseReward() method called.");
+        Debug.Log("Rewards: " + (Rewards == null ? "null" : Rewards.Count.ToString()));
+        Debug.Log("rewardWeights: " + (rewardWeights == null ? "null" : rewardWeights.Count.ToString()));
+
+        if (Rewards == null || rewardWeights == null || Rewards.Count != rewardWeights.Count)
+        {
+            Debug.LogError("Invalid rewards or reward weights setup.");
+            return null;
+        }
+
+        float totalWeight = rewardWeights.Sum();
+        float randomNumber = Random.Range(0, totalWeight - float.Epsilon);
+        float cumulativeWeight = 0;
+
+        for (int i = 0; i < Rewards.Count; i++)
+        {
+            cumulativeWeight += rewardWeights[i];
+            if (randomNumber <= cumulativeWeight)
+            {
+                return Rewards[i];
+            }
+        }
+
+        // If no reward is selected within the loop (which should not happen), return the last reward
+        Debug.LogError("Failed to choose a reward to spawn.");
+        return Rewards[Rewards.Count - 1];
     }
 
     private void SpawnReward()
@@ -172,35 +201,6 @@ public class Spawner_InteractiveButton : MonoBehaviour
             RewardSpawned?.Invoke(LastSpawnedReward);
         }
     }
-
-    GameObject ChooseReward()
-    {
-        Debug.Log("ChooseReward() method called.");
-        Debug.Log("rewards: " + (rewards == null ? "null" : rewards.Count.ToString()));
-        Debug.Log("rewardWeights: " + (rewardWeights == null ? "null" : rewardWeights.Count.ToString()));
-        if (rewards == null || rewardWeights == null || rewards.Count != rewardWeights.Count)
-        {
-            Debug.LogError("Invalid rewards or reward weights setup.");
-            return null;
-        }
-
-        float totalWeight = rewardWeights.Sum();
-        float randomNumber = Random.Range(0, totalWeight);
-        float cumulativeWeight = 0;
-
-        for (int i = 0; i < rewards.Count; i++)
-        {
-            cumulativeWeight += rewardWeights[i];
-            if (randomNumber <= cumulativeWeight)
-            {
-                return rewards[i];
-            }
-        }
-
-        Debug.LogError("Failed to choose a reward to spawn.");
-        return null;
-    }
-
 
     public float GetAverageInteractionInterval()
     {

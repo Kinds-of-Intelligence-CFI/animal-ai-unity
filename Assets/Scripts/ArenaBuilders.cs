@@ -7,7 +7,6 @@ using UnityEngineExtensions;
 using Holders;
 using PrefabInterface;
 using ArenasParameters;
-
 namespace ArenaBuilders
 {
     /// <summary>
@@ -22,7 +21,6 @@ namespace ArenaBuilders
     /// </summary>
     public class ArenaBuilder
     {
-
         /// Range of values X and Y can take (basically the size of the arena)
         private float _rangeX;
         private float _rangeZ;
@@ -89,7 +87,6 @@ namespace ArenaBuilders
 
         private void InstantiateSpawnables(GameObject spawnedObjectsHolder)
         {
-
             Debug.Log("Spawnables has " + Spawnables.Capacity + " entries");
             List<Spawnable> agentSpawnablesFromUser = Spawnables.Where(x => x.gameObject != null
                                                                 && x.gameObject.CompareTag("agent"))
@@ -300,7 +297,6 @@ namespace ArenaBuilders
                                      Vector3 color,
                                      Dictionary<string, object> optionals = null)
         {
-            // Debug.Log("Spawning: " + spawnable.name);
             if (spawnLocRot != null)
             {
                 gameObjectInstance.transform.localPosition = spawnLocRot.Position;
@@ -318,7 +314,7 @@ namespace ArenaBuilders
                     AssignSymbolName(gameObjectInstance, (string)optionals["symbolName"], color);
                 }
 
-                // check for optional moveDuration for Spawner_InteractiveButton objects
+                // check for optionals for Spawner_InteractiveButton objects
                 if (optionals.ContainsKey("moveDuration") || optionals.ContainsKey("resetDuration") || optionals.ContainsKey("spawnProbability") || optionals.ContainsKey("rewardNames") || optionals.ContainsKey("rewardWeights"))
                 {
                     var spawnerInteractiveButton = gameObjectInstance.GetComponentInChildren<Spawner_InteractiveButton>();
@@ -338,12 +334,6 @@ namespace ArenaBuilders
                     {
                         spawnerInteractiveButton.RewardNames = (List<string>)optionals["rewardNames"];
                         spawnerInteractiveButton.RewardWeights = (List<float>)optionals["rewardWeights"];
-
-                        Debug.Log("Set RewardNames and RewardWeights:");
-                        for (int i = 0; i < spawnerInteractiveButton.RewardNames.Count; i++)
-                        {
-                            Debug.Log($"Reward: {spawnerInteractiveButton.RewardNames[i]}, Weight: {spawnerInteractiveButton.RewardWeights[i]}");
-                        }
                     }
 
                     // check for optional spawnColor for Spawner objects
@@ -444,7 +434,7 @@ namespace ArenaBuilders
                                                             gameObjectBoundingBox,
                                                             Quaternion.Euler(rotationOut),
                                                             1 << 0);
-                canSpawn = IsSpotFree(colliders, gameObjectInstance.CompareTag("agent"), gameObjectInstance.name.Contains("Zone")); //@To-DO maybe find a better way to do this zone name-check
+                canSpawn = IsSpotFree(colliders, gameObjectInstance.CompareTag("agent"), gameObjectInstance.name.Contains("Zone"));
                 k++;
 
             }
@@ -457,7 +447,6 @@ namespace ArenaBuilders
 
         private bool IsSpotFree(Collider[] colliders, bool isAgent, bool isZone = false)
         {
-            //if (isZone) Debug.Log("IsZone set to TRUE");
             if (isZone) return colliders.Length == 0 ||
                     (colliders.All(collider => collider.isTrigger || !collider.gameObject.CompareTag("arena")) && !isAgent);
             else return colliders.Length == 0 ||

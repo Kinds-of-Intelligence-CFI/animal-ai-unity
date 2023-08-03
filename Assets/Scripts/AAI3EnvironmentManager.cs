@@ -7,7 +7,7 @@ using Unity.MLAgents.Sensors;
 using Unity.MLAgents.SideChannels;
 using Unity.MLAgents.Policies;
 using ArenasParameters;
-using UnityEngineExtensions;//for arena.transform.FindChildWithTag - @TODO check necessary/good practice.
+using UnityEngineExtensions;
 using YamlDotNet.Serialization;
 
 /// Training scene must start automatically on launch by training process
@@ -29,7 +29,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
     public int defaultRaysPerSide = 2;
     public int defaultRayMaxDegrees = 60;
     public int defaultDecisionPeriod = 3;
-    public GameObject playerControls; //Just for camera and reset controls ...@TODO Don't think this should be a GameObject in the scene and linked there (carried over from v2.0)
+    public GameObject playerControls; //Just for camera and reset controls.
 
     [HideInInspector]
     public bool playerMode = true;
@@ -48,12 +48,12 @@ public class AAI3EnvironmentManager : MonoBehaviour
         _arenasParametersSideChannel.NewArenasParametersReceived += _arenasConfigurations.UpdateWithConfigurationsReceived;
 
         SideChannelManager.RegisterSideChannel(_arenasParametersSideChannel);
-        
+
         //Get all commandline arguments and update starting parameters
         Dictionary<string, int> environmentParameters = RetrieveEnvironmentParameters();
         int paramValue;
         bool playerMode = (environmentParameters.TryGetValue("playerMode", out paramValue) ? paramValue : 1) > 0;
-        bool useCamera = (environmentParameters.TryGetValue("useCamera", out paramValue) ? paramValue: 0) > 0;
+        bool useCamera = (environmentParameters.TryGetValue("useCamera", out paramValue) ? paramValue : 0) > 0;
         int resolution = environmentParameters.TryGetValue("resolution", out paramValue) ? paramValue : defaultResolution;
         bool grayscale = (environmentParameters.TryGetValue("grayscale", out paramValue) ? paramValue : 0) > 0;
         bool useRayCasts = (environmentParameters.TryGetValue("useRayCasts", out paramValue) ? paramValue : 0) > 0;
@@ -66,25 +66,29 @@ public class AAI3EnvironmentManager : MonoBehaviour
         {
             Debug.Log("Using UnityEditor default configuration");
             playerMode = true;
-            useCamera= true;
+            useCamera = true;
             resolution = 84;
             grayscale = false;
             useRayCasts = true;
             raysPerSide = 2;
             //If in editor mode load whichever config is specified in configFile field in editor
-            if(configFile != ""){
+            if (configFile != "")
+            {
                 var configYAML = Resources.Load<TextAsset>(configFile);
-                if(configYAML!=null){//If config file
+                if (configYAML != null)
+                {//If config file
                     var YAMLReader = new YAMLDefs.YAMLReader();
                     var parsed = YAMLReader.deserializer.Deserialize<YAMLDefs.ArenaConfig>(configYAML.ToString());
                     _arenasConfigurations.UpdateWithYAML(parsed);
                 }
-                else{//If directory, then load all config files in the directory.
+                else
+                {//If directory, then load all config files in the directory.
                     var configYAMLS = Resources.LoadAll<TextAsset>(configFile);
                     var YAMLReader = new YAMLDefs.YAMLReader();
-                    foreach(TextAsset config in configYAMLS){
+                    foreach (TextAsset config in configYAMLS)
+                    {
                         var parsed = YAMLReader.deserializer.Deserialize<YAMLDefs.ArenaConfig>(config.ToString());
-                        _arenasConfigurations.AddAdditionalArenas(parsed); 
+                        _arenasConfigurations.AddAdditionalArenas(parsed);
                     }
                 }
             }
@@ -94,32 +98,38 @@ public class AAI3EnvironmentManager : MonoBehaviour
 
         _instantiatedArena = new TrainingArena();
         InstantiateArenas();//Instantiate every new arena with agent and objects. Agents are currently deactivated until we set the sensors.
-        
+
         //Add playerControls if in play mode
         playerControls.SetActive(playerMode);
         uiCanvas.GetComponent<Canvas>().enabled = playerMode;
-        
+
         //Destroy the sensors that aren't being used and update the values of those that are
-        //HACK - mlagents automatically registers cameras when the agent script is initialised so have to:
+        // mlagents automatically registers cameras when the agent script is initialised so have to:
         //  1) use FindObjectsOfType as this returns deactivated objects
         //  2) start with agent deactivated and then set active after editing sensors
         //  3) use DestroyImmediate so that it is destroyed before agent is initialised
         // also sets agent decision period and the correct behaviour type for play mode
-        foreach(Agent a in FindObjectsOfType<Agent>(true)){
+        foreach (Agent a in FindObjectsOfType<Agent>(true))
+        {
             a.GetComponentInChildren<DecisionRequester>().DecisionPeriod = decisionPeriod;
-            if(!useRayCasts){
+            if (!useRayCasts)
+            {
                 DestroyImmediate(a.GetComponentInChildren<RayPerceptionSensorComponent3D>());
             }
-            else{
+            else
+            {
                 ChangeRayCasts(a.GetComponentInChildren<RayPerceptionSensorComponent3D>(), raysPerSide, rayMaxDegrees);
             }
-            if(!useCamera){
+            if (!useCamera)
+            {
                 DestroyImmediate(a.GetComponentInChildren<CameraSensorComponent>());
             }
-            else{
+            else
+            {
                 ChangeResolution(a.GetComponentInChildren<CameraSensorComponent>(), resolution, resolution, grayscale);
             }
-            if(playerMode){
+            if (playerMode)
+            {
                 //The following does nothing under normal execution - but when loading the built version
                 //with the play script it sets the BehaviorType back to Heursitic 
                 //from default as loading this autotamically attaches Academy for training (since mlagents 0.16.0)
@@ -131,18 +141,19 @@ public class AAI3EnvironmentManager : MonoBehaviour
         //Enable the agent now that their sensors have been set.
         _instantiatedArena._agent.gameObject.SetActive(true);
 
-        Debug.Log("Environment loaded with options:" + 
-            "\n  PlayerMode: " + playerMode + 
-            "\n  useCamera: " + useCamera + 
-            "\n  Resolution: " + resolution + 
+        Debug.Log("Environment loaded with options:" +
+            "\n  PlayerMode: " + playerMode +
+            "\n  useCamera: " + useCamera +
+            "\n  Resolution: " + resolution +
             "\n  grayscale: " + grayscale +
             "\n  useRayCasts: " + useRayCasts +
             "\n  raysPerSide: " + raysPerSide +
-            "\n  rayMaxDegrees: " + rayMaxDegrees            
+            "\n  rayMaxDegrees: " + rayMaxDegrees
             );
     }
 
-    public int getMaxArenaID(){
+    public int getMaxArenaID()
+    {
         return _arenasConfigurations.configurations.Count;
     }
 
@@ -257,17 +268,17 @@ public class AAI3EnvironmentManager : MonoBehaviour
         }
     }
 
-    public static byte[] ReadFully (Stream stream)
+    public static byte[] ReadFully(Stream stream)
     {
         byte[] buffer = new byte[32768];
         using (MemoryStream ms = new MemoryStream())
         {
             while (true)
             {
-                int read = stream.Read (buffer, 0, buffer.Length);
+                int read = stream.Read(buffer, 0, buffer.Length);
                 if (read <= 0)
                     return ms.ToArray();
-                ms.Write (buffer, 0, read);
+                ms.Write(buffer, 0, read);
             }
         }
     }

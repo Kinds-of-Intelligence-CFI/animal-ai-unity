@@ -73,8 +73,10 @@ namespace ArenasParameters
             rotations = yamlItem.rotations;
             sizes = yamlItem.sizes;
             colors = initVec3sFromRGBs(yamlItem.colors);
+
             // ======== EXTRA/OPTIONAL PARAMETERS ========
             // use for SignPosterboard symbols, Decay/SizeChange rates, Dispenser settings, etc.
+
             skins = yamlItem.skins;
             symbolNames = yamlItem.symbolNames;
             delays = yamlItem.delays;
@@ -122,9 +124,7 @@ namespace ArenasParameters
         public string protoString = "";// @TODO Check functionality with new yaml loaders
         public int randomSeed = 0;
 
-        public ArenaConfiguration()
-        {
-        }
+        public ArenaConfiguration() { }
 
         public ArenaConfiguration(ListOfPrefabs listPrefabs)
         {
@@ -147,7 +147,7 @@ namespace ArenasParameters
             List<int> blackouts = yamlArena.blackouts;
             lightsSwitch = new LightsSwitch(T, blackouts);
             toUpdate = true;
-            protoString = yamlArena.ToString();//This is holdover from dodgy proto check @TODO UDPATE
+            protoString = yamlArena.ToString();
 
             randomSeed = yamlArena.random_seed;
         }

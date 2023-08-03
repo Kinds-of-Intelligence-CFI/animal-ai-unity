@@ -42,6 +42,7 @@ namespace YAMLDefs
 
         // ======== EXTRA/OPTIONAL PARAMETERS ========
         // use for SignPosterboard symbols, Decay/SizeChange rates, Dispenser settings, etc.
+
         public List<string> skins { get; set; } = new List<string>(); // Agent only
         public List<string> symbolNames { get; set; } = new List<string>(); // SignPosterboard only
         public List<float> delays { get; set; } = new List<float>(); // all uniques except Posterboard
@@ -58,8 +59,8 @@ namespace YAMLDefs
         public List<float> moveDurations { get; set; } = new List<float>(); // InteractiveButton only
         public List<float> resetDurations { get; set; } = new List<float>(); // InteractiveButton only
         public float spawnProbability { get; set; } = 1f; // InteractiveButton only
-        public List<string> rewardNames { get; set; } = new List<string>();
-        public List<float> rewardWeights { get; set; } = new List<float>();
+        public List<string> rewardNames { get; set; } = new List<string>(); // InteractiveButton only
+        public List<float> rewardWeights { get; set; } = new List<float>(); // InteractiveButton only
     }
 
     public class RGB
