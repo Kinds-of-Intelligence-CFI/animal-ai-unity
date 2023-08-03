@@ -55,6 +55,7 @@ namespace ArenasParameters
         public float SpawnProbability { get; private set; } = 1f;
         public List<string> RewardNames { get; private set; }
         public List<float> RewardWeights { get; private set; }
+        public Vector3 rewardSpawnPos { get; private set; }
 
         public Spawnable(GameObject obj)
         {
@@ -96,6 +97,7 @@ namespace ArenasParameters
             SpawnProbability = yamlItem.spawnProbability;
             RewardNames = yamlItem.rewardNames;
             RewardWeights = yamlItem.rewardWeights;
+            rewardSpawnPos = yamlItem.rewardSpawnPos;
         }
 
         internal List<Vector3> initVec3sFromRGBs(List<YAMLDefs.RGB> yamlList)

@@ -207,6 +207,7 @@ namespace ArenaBuilders
                 float moveDuration = k < ns[15] ? moveDurations[k] : 1.0f;
                 float resetDuration = k < ns[16] ? resetDurations[k] : 1.0f;
                 float spawnProbability = spawnable.SpawnProbability;
+                Vector3 rewardSpawnPos = spawnable.rewardSpawnPos;
 
                 // group together in dictionary so can pass as one argument to Spawner
                 // (means we won't have to keep updating the arguments of Spawner function
@@ -226,8 +227,9 @@ namespace ArenaBuilders
                     {nameof(moveDuration),          moveDuration},
                     {nameof(resetDuration),         resetDuration},
                     {nameof(spawnProbability),      spawnProbability},
-                    { "rewardNames",                spawnable.RewardNames },
-                    { "rewardWeights",              spawnable.RewardWeights }
+                    { "rewardNames",                spawnable.RewardNames},
+                    { "rewardWeights",              spawnable.RewardWeights},
+                    { "rewardSpawnPos",             rewardSpawnPos}
                 };
 
                 PositionRotation spawnPosRot = SamplePositionRotation(gameObjectInstance,
@@ -330,10 +332,11 @@ namespace ArenaBuilders
                     {
                         spawnerInteractiveButton.SpawnProbability = spawnable.SpawnProbability;
                     }
-                    if (optionals.ContainsKey("rewardNames") && optionals.ContainsKey("rewardWeights"))
+                    if (optionals.ContainsKey("rewardNames") && optionals.ContainsKey("rewardWeights") && optionals.ContainsKey("rewardSpawnPos"))
                     {
                         spawnerInteractiveButton.RewardNames = (List<string>)optionals["rewardNames"];
                         spawnerInteractiveButton.RewardWeights = (List<float>)optionals["rewardWeights"];
+                        spawnerInteractiveButton.RewardSpawnPos = (Vector3)optionals["rewardSpawnPos"];
                     }
 
                     // check for optional spawnColor for Spawner objects

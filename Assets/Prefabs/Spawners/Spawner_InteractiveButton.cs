@@ -13,7 +13,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
     public Dictionary<GameObject, int> RewardSpawnCounts { get; private set; } = new Dictionary<GameObject, int>();
     [SerializeField] private GameObject childObjectToMove;
     [SerializeField] private Vector3 moveOffset;
-    [SerializeField] private Transform rewardSpawnPoint;
+    // [SerializeField] private Transform rewardSpawnPoint;
     [SerializeField] private GameObject objectToControl;
     [SerializeField] private Transform objectToControlSpawnPoint;
     [SerializeField] private bool showObject;
@@ -38,6 +38,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
     public List<string> RewardNames { get; set; }
     public List<float> RewardWeights { get; set; }
     public List<GameObject> Rewards { get; set; }
+    public Vector3 RewardSpawnPos { get; set; }
 
     void Start()
     {
@@ -176,7 +177,14 @@ public class Spawner_InteractiveButton : MonoBehaviour
                 return;
             }
 
-            LastSpawnedReward = Instantiate(rewardToSpawn, rewardSpawnPoint.transform.position, Quaternion.identity);
+            Vector3 spawnPosition = rewardSpawnPoint.position; // Use the default spawn position
+
+            if (RewardSpawnPos != Vector3.zero) // If a specific spawn position is set, use it instead
+            {
+                spawnPosition = RewardSpawnPos;
+            }
+
+            LastSpawnedReward = Instantiate(rewardToSpawn, spawnPosition, Quaternion.identity);
 
             if (RewardSpawnCounts.TryGetValue(rewardToSpawn, out var count))
             {
@@ -196,11 +204,10 @@ public class Spawner_InteractiveButton : MonoBehaviour
             totalInteractionInterval += currentInteractionTime - lastInteractionTime;
             lastInteractionTime = currentInteractionTime;
 
-            //Debug.Log("Trigger activated. Debug coming from Spawner_InteractiveButton.cs");
-
             RewardSpawned?.Invoke(LastSpawnedReward);
         }
     }
+
 
     public float GetAverageInteractionInterval()
     {
