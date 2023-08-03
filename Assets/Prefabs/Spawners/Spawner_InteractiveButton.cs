@@ -13,15 +13,14 @@ public class Spawner_InteractiveButton : MonoBehaviour
     public Dictionary<GameObject, int> RewardSpawnCounts { get; private set; } = new Dictionary<GameObject, int>();
     [SerializeField] private GameObject childObjectToMove;
     [SerializeField] private Vector3 moveOffset;
-    // [SerializeField] private Transform rewardSpawnPoint;
+    [SerializeField] private Transform rewardSpawnPoint;
     [SerializeField] private GameObject objectToControl;
-    [SerializeField] private Transform objectToControlSpawnPoint;
+    private Transform objectToControlSpawnPoint;
     [SerializeField] private bool showObject;
-    [SerializeField] private List<GameObject> rewards;
-    [SerializeField] private List<float> rewardWeights;
+    private List<GameObject> rewards;
+    private List<float> rewardWeights;
     public delegate void OnRewardSpawned(GameObject reward);
     public static event OnRewardSpawned RewardSpawned;
-
     private float _moveDuration;
     private float _resetDuration;
     public float SpawnProbability { get; set; } = 1f;

@@ -300,7 +300,7 @@ MonoBehaviour:
   objectToControlSpawnPoint: {fileID: 1212440655105317655}
   showObject: 0
   rewards: []
-  rewardWeights: 
+  rewardWeights: []
 --- !u!1001 &2400991117071955604
 PrefabInstance:
   m_ObjectHideFlags: 0
