@@ -49,6 +49,14 @@ namespace ArenasParameters
         public List<float> timesBetweenDoorOpens = null;
         public List<float> frozenAgentDelays = null;
 
+        // InteractiveButton // 
+        public List<float> moveDurations = null;
+        public List<float> resetDurations = null;
+        public float SpawnProbability { get; private set; } = 1f;
+        public List<string> RewardNames { get; private set; }
+        public List<float> RewardWeights { get; private set; }
+        public Vector3 rewardSpawnPos { get; private set; }
+
         public Spawnable(GameObject obj)
         {
             name = obj.name;
@@ -58,34 +66,45 @@ namespace ArenasParameters
             sizes = new List<Vector3>();
             colors = new List<Vector3>();
         }
-        
+
         internal Spawnable(YAMLDefs.Item yamlItem)
         {
-            name                    = yamlItem.name;
-            positions               = yamlItem.positions;
-            rotations               = yamlItem.rotations;
-            sizes                   = yamlItem.sizes;
-            colors                  = initVec3sFromRGBs(yamlItem.colors);
+            name = yamlItem.name;
+            positions = yamlItem.positions;
+            rotations = yamlItem.rotations;
+            sizes = yamlItem.sizes;
+            colors = initVec3sFromRGBs(yamlItem.colors);
+
             // ======== EXTRA/OPTIONAL PARAMETERS ========
             // use for SignPosterboard symbols, Decay/SizeChange rates, Dispenser settings, etc.
-            skins                   = yamlItem.skins;
-            symbolNames             = yamlItem.symbolNames;
-            delays                  = yamlItem.delays;
-            initialValues           = yamlItem.initialValues;
-            finalValues             = yamlItem.finalValues;
-            changeRates             = yamlItem.changeRates;
-            spawnCounts             = yamlItem.spawnCounts;
-            spawnColors             = initVec3sFromRGBs(yamlItem.spawnColors);
-            timesBetweenSpawns      = yamlItem.timesBetweenSpawns;
-            ripenTimes              = yamlItem.ripenTimes;
-            doorDelays              = yamlItem.doorDelays;
-            timesBetweenDoorOpens   = yamlItem.timesBetweenDoorOpens;
-            frozenAgentDelays       = yamlItem.frozenAgentDelays;
+
+            skins = yamlItem.skins;
+            symbolNames = yamlItem.symbolNames;
+            delays = yamlItem.delays;
+            initialValues = yamlItem.initialValues;
+            finalValues = yamlItem.finalValues;
+            changeRates = yamlItem.changeRates;
+            spawnCounts = yamlItem.spawnCounts;
+            spawnColors = initVec3sFromRGBs(yamlItem.spawnColors);
+            timesBetweenSpawns = yamlItem.timesBetweenSpawns;
+            ripenTimes = yamlItem.ripenTimes;
+            doorDelays = yamlItem.doorDelays;
+            timesBetweenDoorOpens = yamlItem.timesBetweenDoorOpens;
+            frozenAgentDelays = yamlItem.frozenAgentDelays;
+            // InteractiveButton //
+            moveDurations = yamlItem.moveDurations;
+            resetDurations = yamlItem.resetDurations;
+            SpawnProbability = yamlItem.spawnProbability;
+            RewardNames = yamlItem.rewardNames;
+            RewardWeights = yamlItem.rewardWeights;
+            rewardSpawnPos = yamlItem.rewardSpawnPos;
         }
 
-        internal List<Vector3> initVec3sFromRGBs(List<YAMLDefs.RGB> yamlList) {
+        internal List<Vector3> initVec3sFromRGBs(List<YAMLDefs.RGB> yamlList)
+        {
             List<Vector3> cList = new List<Vector3>();
-            foreach (YAMLDefs.RGB c in yamlList) {
+            foreach (YAMLDefs.RGB c in yamlList)
+            {
                 cList.Add(new Vector3(c.r, c.g, c.b));
             }
             return cList;
@@ -107,9 +126,7 @@ namespace ArenasParameters
         public string protoString = "";// @TODO Check functionality with new yaml loaders
         public int randomSeed = 0;
 
-        public ArenaConfiguration()
-        {
-        }
+        public ArenaConfiguration() { }
 
         public ArenaConfiguration(ListOfPrefabs listPrefabs)
         {
@@ -132,7 +149,7 @@ namespace ArenasParameters
             List<int> blackouts = yamlArena.blackouts;
             lightsSwitch = new LightsSwitch(T, blackouts);
             toUpdate = true;
-            protoString = yamlArena.ToString();//This is holdover from dodgy proto check @TODO UDPATE
+            protoString = yamlArena.ToString();
 
             randomSeed = yamlArena.random_seed;
         }
@@ -158,7 +175,7 @@ namespace ArenasParameters
         {
             configurations = new Dictionary<int, ArenaConfiguration>();
         }
-    
+
         internal void Add(int k, YAMLDefs.Arena yamlConfig)
         {
             if (!configurations.ContainsKey(k))
@@ -174,21 +191,27 @@ namespace ArenasParameters
             }
         }
 
-        public void AddAdditionalArenas(YAMLDefs.ArenaConfig yamlArenaConfig){
-            foreach(YAMLDefs.Arena arena in yamlArenaConfig.arenas.Values){
+        public void AddAdditionalArenas(YAMLDefs.ArenaConfig yamlArenaConfig)
+        {
+            foreach (YAMLDefs.Arena arena in yamlArenaConfig.arenas.Values)
+            {
                 int i = configurations.Count;
                 Add(i, arena);
             }
         }
 
-        public void UpdateWithYAML(YAMLDefs.ArenaConfig yamlArenaConfig){
-            if (yamlArenaConfig.arenas.ContainsKey(-1)){
+        public void UpdateWithYAML(YAMLDefs.ArenaConfig yamlArenaConfig)
+        {
+            if (yamlArenaConfig.arenas.ContainsKey(-1))
+            {
                 Debug.Log("We only have one arena key");
                 Add(0, yamlArenaConfig.arenas[-1]);
             }
-            else{
+            else
+            {
                 Debug.Log("We have multiple arena keys");
-                foreach (KeyValuePair<int, YAMLDefs.Arena> arenaConfiguration in yamlArenaConfig.arenas){
+                foreach (KeyValuePair<int, YAMLDefs.Arena> arenaConfiguration in yamlArenaConfig.arenas)
+                {
                     Add(arenaConfiguration.Key, arenaConfiguration.Value);
                 }
             }
@@ -198,7 +221,7 @@ namespace ArenasParameters
         {
             byte[] arenas = arenasParametersEvent.arenas_yaml;
             var YAMLReader = new YAMLDefs.YAMLReader();
-            string utfString = Encoding.UTF8.GetString(arenas, 0, arenas.Length);   
+            string utfString = Encoding.UTF8.GetString(arenas, 0, arenas.Length);
             var parsed = YAMLReader.deserializer.Deserialize<YAMLDefs.ArenaConfig>(utfString);
             UpdateWithYAML(parsed);
         }

@@ -7,54 +7,15 @@ arenas:
     - !Item
       name: Agent
       positions:
-      - !Vector3 {x: 10, y: 0, z: 20}
+      - !Vector3 {x: 20, y: 0, z: 20}
       rotations: [90]
     - !Item
-      name: SpawnerTree
+      name: Pillar-Button
       positions:
       - !Vector3 {x: 25, y: 0, z: 30}
-      - !Vector3 {x: 30, y: 0, z: 25}
-      - !Vector3 {x: 35, y: 0, z: 35}
-      ripenTimes: [4, 10]
-      timesBetweenSpawns: [0.5, 5]
-      spawnCounts: [7, 3]
-      finalValues: [0.7, 2]
-      spawnColors:
-      - !RGB {r: 200, g: 200, b: 10}
-      - !RGB {r: 10, g: 50, b: 150}
-      colors:
-      - !RGB {r: 80, g: 0, b: 60}
-      - !RGB {r: 60, g: 0, b: 50}
-    - !Item
-      name: SpawnerDispenser
-      positions:
-      - !Vector3 {x: 35, y: 0, z: 10}
-      - !Vector3 {x: 30, y: 0, z: 5}
-      - !Vector3 {x: 25, y: 0, z: 15}
-      spawnCounts: [-1, 5]
-      timesBetweenDoorOpens: [-1, 6]
-      colors:
-      - !RGB {r: 180, g: 180, b: 60}
-      - !RGB {r: 100, g: 0, b: 100}
-      spawnColors:
-      - !RGB {r: 100, g: 0, b: 125}
-      - !RGB {r: 250, g: 75, b: 10}
-      finalValues: [0.7, 2]
-    - !Item
-      name: SpawnerContainer
-      positions:
-      - !Vector3 {x: 35, y: 0, z: 20}
-      - !Vector3 {x: 30, y: 0, z: 15}
-      - !Vector3 {x: 25, y: 0, z: 25}
-      initialValues: [0.7, 2]
-      colors:
-      - !RGB {r: 80, g: 0, b: 60}
-      - !RGB {r: 60, g: 200, b: 50}
-      spawnCounts: [1, 3]
-      doorDelays: [20, 0]
-      timesBetweenDoorOpens: [4, 20]
-      spawnColors:
-      - !RGB {r: -1, g: -1, b: -1}
-      - !RGB {r: 0, g: 50, b: 50}
-      - !RGB {r: 250, g: 75, b: 10}
-      
+      moveDurations: [0.1]
+      resetDurations: [1.0]
+      rewardNames: ["GoodGoal", "BadGoal", "GoodGoalMulti"]
+      rewardWeights: [0, 0, 80]
+      spawnProbability: 1.0
+      rewardSpawnPos: !Vector3 {x: 25, y: 0, z: 15}
