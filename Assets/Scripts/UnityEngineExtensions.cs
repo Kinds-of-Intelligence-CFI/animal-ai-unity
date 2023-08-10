@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace UnityEngineExtensions
 {
-
     public static class TransformExtensions
     {
         public static List<GameObject> FindChildrenWithTag(this Transform parent, string tag)
@@ -30,7 +29,6 @@ namespace UnityEngineExtensions
             }
             return new GameObject();
         }
-
     }
 
     public static class GameObjectExtensions
@@ -66,7 +64,8 @@ namespace UnityEngineExtensions
                     }
                     else
                     {
-                        bound = child.gameObject.GetBoundsWithChildren(); ;
+                        bound = child.gameObject.GetBoundsWithChildren();
+                        ;
                         boundFound = true;
                     }
                 }

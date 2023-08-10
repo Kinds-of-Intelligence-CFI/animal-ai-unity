@@ -14,14 +14,20 @@ public class TrainingArena : MonoBehaviour
     public int maxSpawnAttemptsForAgent = 100;
     public int maxSpawnAttemptsForPrefabs = 20;
     public ListOfBlackScreens blackScreens = new ListOfBlackScreens();
+
     [HideInInspector]
     public int arenaID = -1;
+
     [HideInInspector]
     public int maxarenaID = -1;
+
     [HideInInspector]
     public TrainingAgent _agent;
     private ArenaBuilder _builder;
-    public ArenaBuilder Builder { get { return _builder; } }
+    public ArenaBuilder Builder
+    {
+        get { return _builder; }
+    }
     private ArenaConfiguration _arenaConfiguration = new ArenaConfiguration();
     private AAI3EnvironmentManager _environmentManager;
     private List<Fade> _fades = new List<Fade>();
@@ -34,10 +40,12 @@ public class TrainingArena : MonoBehaviour
 
     internal void Awake()
     {
-        _builder = new ArenaBuilder(gameObject,
-                                    spawnedObjectsHolder,
-                                    maxSpawnAttemptsForPrefabs,
-                                    maxSpawnAttemptsForAgent);
+        _builder = new ArenaBuilder(
+            gameObject,
+            spawnedObjectsHolder,
+            maxSpawnAttemptsForPrefabs,
+            maxSpawnAttemptsForAgent
+        );
         _environmentManager = GameObject.FindObjectOfType<AAI3EnvironmentManager>();
         _agent = FindObjectsOfType<TrainingAgent>(true)[0];
         _agentDecisionInterval = _agent.GetComponentInChildren<DecisionRequester>().DecisionPeriod;
@@ -58,7 +66,7 @@ public class TrainingArena : MonoBehaviour
         spawnedRewards.Add(reward);
     }
 
-    public void ResetArena() // @TODO: add functionality so that for the interactive button, the triggered (spawned) reward is destroyed when the player/agent resets the arena.
+    public void ResetArena()
     {
         Debug.Log("Resetting Arena");
         foreach (GameObject holder in transform.FindChildrenWithTag("spawnedObjects"))
@@ -67,8 +75,8 @@ public class TrainingArena : MonoBehaviour
             Destroy(holder);
         }
 
-        //Each time reset is called we cycle through the defined arenaIDs
-        maxarenaID = _environmentManager.getMaxArenaID();// Should perform this check once (after environmentManager is initialized).
+        // Each time reset is called we cycle through the defined arenaIDs
+        maxarenaID = _environmentManager.getMaxArenaID(); // Should perform this check once (after environmentManager is initialized).
         if (maxarenaID > 0 && !_firstReset)
         {
             arenaID = (arenaID + 1) % maxarenaID;
@@ -91,7 +99,9 @@ public class TrainingArena : MonoBehaviour
 
         foreach (var spawnable in _builder.Spawnables)
         {
-            Debug.Log($"In ResetArena, moveDurations for {spawnable.name}: {string.Join(", ", spawnable.moveDurations)}");
+            Debug.Log(
+                $"In ResetArena, moveDurations for {spawnable.name}: {string.Join(", ", spawnable.moveDurations)}"
+            );
         }
 
         _builder.Build();
@@ -107,13 +117,16 @@ public class TrainingArena : MonoBehaviour
         {
             Destroy(reward);
         }
-        spawnedRewards.Clear(); // Clear the list
+        spawnedRewards.Clear();
     }
 
     public void UpdateLigthStatus()
     {
         int stepCount = _agent.StepCount;
-        bool newLight = _arenaConfiguration.lightsSwitch.LightStatus(stepCount, _agentDecisionInterval);
+        bool newLight = _arenaConfiguration.lightsSwitch.LightStatus(
+            stepCount,
+            _agentDecisionInterval
+        );
         if (newLight != _lightStatus)
         {
             _lightStatus = newLight;

@@ -11,7 +11,7 @@ public class ScreenshotCamera : MonoBehaviour
     public string FilePath = "ScreenshotTest"; // of the form "/folder1/folder2/.../folderN/"
     public string FileName = "capture"; // of the form "name" (NO EXTENSION)
     private Camera ScreenshotCam;
-    public bool TEST = false; // temporary for override of the enable/disable stuff
+    public bool TEST = false;
 
     private void Awake()
     {
@@ -20,20 +20,28 @@ public class ScreenshotCamera : MonoBehaviour
 
         if (!TEST)
         {
-            ScreenshotCam.targetTexture = new RenderTexture(RT.width, RT.height, RT.depth, RT.format, RenderTextureReadWrite.sRGB);
+            ScreenshotCam.targetTexture = new RenderTexture(
+                RT.width,
+                RT.height,
+                RT.depth,
+                RT.format,
+                RenderTextureReadWrite.sRGB
+            );
             Debug.Log(ScreenshotCam.targetTexture);
             Debug.Log(ScreenshotCam.targetTexture.width);
             Debug.Log(ScreenshotCam.targetTexture.height);
         }
 
-        if (!TEST) { Activate(false); }
+        if (!TEST)
+        {
+            Activate(false);
+        }
     }
 
     // called by self or other object to activate (or deactivate!) screenshot camera
     // which will cause it to capture a single screenshot (see LateUpdate())
     public void Activate(bool toggle = true)
     {
-        // enable camera ready to be picked up by LateUpdate() call
         ScreenshotCam.enabled = toggle;
     }
 
@@ -53,34 +61,45 @@ public class ScreenshotCamera : MonoBehaviour
     // LateUpdate is generally best for camera updates bc it's post-movement-computation
     private void LateUpdate()
     {
-        // if we have activated to capture a frame, then capture it
         if (ScreenshotCam.enabled && !TEST)
         {
             CameraCapture();
             Debug.Log("capturing from ScreenshotCamera . . .");
-            // deactivate camera now we have captured
             Activate(false);
         }
     }
 
     void CameraCapture()
     {
-
-        // actually need to tell it to render because it won't have done up to this point
+        // Actually need to tell it to render because it won't have done up to this point
         ScreenshotCam.Render();
         RenderTexture.active = ScreenshotCam.targetTexture;
-        Debug.Log(RenderTexture.active + (RenderTexture.active != null ? " SUCCESS !" : " FAILURE"));
+        Debug.Log(
+            RenderTexture.active + (RenderTexture.active != null ? " SUCCESS !" : " FAILURE")
+        );
 
-        Texture2D image = new Texture2D(ScreenshotCam.targetTexture.width, ScreenshotCam.targetTexture.height, TextureFormat.RGB24, true);
-        image.ReadPixels(new Rect(0, 0, ScreenshotCam.targetTexture.width, ScreenshotCam.targetTexture.height), 0, 0);
-        //image.Apply();
+        Texture2D image = new Texture2D(
+            ScreenshotCam.targetTexture.width,
+            ScreenshotCam.targetTexture.height,
+            TextureFormat.RGB24,
+            true
+        );
+        image.ReadPixels(
+            new Rect(0, 0, ScreenshotCam.targetTexture.width, ScreenshotCam.targetTexture.height),
+            0,
+            0
+        );
         byte[] bytes = image.EncodeToPNG();
         Destroy(image);
 
-        string path = string.Format("{0}/{1}/{2}{3}_{4}.png",
+        string path = string.Format(
+            "{0}/{1}/{2}{3}_{4}.png",
             Application.dataPath,
-            FilePath, FileName, FileCounter,
-            System.DateTime.Now.ToString("dd-MM_HH-mm-ss"));
+            FilePath,
+            FileName,
+            FileCounter,
+            System.DateTime.Now.ToString("dd-MM_HH-mm-ss")
+        );
         Debug.Log(path);
         File.WriteAllBytes(path, bytes);
         FileCounter++;

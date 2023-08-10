@@ -9,9 +9,7 @@ namespace Lights
         private int _initialValue = 0;
         private int _currentValue = 0;
 
-        public InfiniteEnumerator()
-        {
-        }
+        public InfiniteEnumerator() { }
 
         public InfiniteEnumerator(int initialValue)
         {
@@ -32,18 +30,12 @@ namespace Lights
 
         public int Current
         {
-            get
-            {
-                return _currentValue;
-            }
+            get { return _currentValue; }
         }
 
         object IEnumerator.Current
         {
-            get
-            {
-                return Current;
-            }
+            get { return Current; }
         }
 
         void IDisposable.Dispose() { }

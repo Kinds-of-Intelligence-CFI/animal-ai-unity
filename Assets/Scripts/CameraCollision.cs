@@ -17,12 +17,8 @@ public class CameraCollision : MonoBehaviour
         distance = transform.localPosition.magnitude;
     }
 
-    void Start()
-    {
-        
-    }
+    void Start() { }
 
-    // Update is called once per frame
     void Update()
     {
         Vector3 desiredCameraPos = transform.parent.TransformPoint(dollyDir * maxDistance);
@@ -37,6 +33,10 @@ public class CameraCollision : MonoBehaviour
             distance = maxDistance;
         }
 
-        transform.localPosition = Vector3.Lerp(transform.localPosition, dollyDir * distance, Time.deltaTime * smooth);
+        transform.localPosition = Vector3.Lerp(
+            transform.localPosition,
+            dollyDir * distance,
+            Time.deltaTime * smooth
+        );
     }
 }

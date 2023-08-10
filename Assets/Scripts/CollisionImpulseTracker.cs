@@ -1,11 +1,9 @@
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;    // Don't forget to add this if using a List.
+using System.Collections.Generic;
 
 public class CollisionImpulseTracker : MonoBehaviour
 {
-
-    // public current impulse parameter
     public float impulseMagnitude;
 
     private void FixedUpdate()

@@ -10,12 +10,12 @@ namespace YAMLDefs
         /// A deserialiser for reading YAML files in AmimalAI Format
         /// </summary>
         public YamlDotNet.Serialization.IDeserializer deserializer = new DeserializerBuilder()
-                            .WithTagMapping("!ArenaConfig", typeof(YAMLDefs.ArenaConfig))
-                            .WithTagMapping("!Arena", typeof(YAMLDefs.Arena))
-                            .WithTagMapping("!Item", typeof(YAMLDefs.Item))
-                            .WithTagMapping("!Vector3", typeof(Vector3))
-                            .WithTagMapping("!RGB", typeof(YAMLDefs.RGB))
-                            .Build();
+            .WithTagMapping("!ArenaConfig", typeof(YAMLDefs.ArenaConfig))
+            .WithTagMapping("!Arena", typeof(YAMLDefs.Arena))
+            .WithTagMapping("!Item", typeof(YAMLDefs.Item))
+            .WithTagMapping("!Vector3", typeof(Vector3))
+            .WithTagMapping("!RGB", typeof(YAMLDefs.RGB))
+            .Build();
     }
 
     public class ArenaConfig
@@ -61,8 +61,7 @@ namespace YAMLDefs
         public float spawnProbability { get; set; } = 1f; // InteractiveButton only
         public List<string> rewardNames { get; set; } = new List<string>(); // InteractiveButton only
         public List<float> rewardWeights { get; set; } = new List<float>(); // InteractiveButton only
-        public Vector3 rewardSpawnPos {get; set;} = new Vector3(0,0,0); // InteractiveButton only
-
+        public Vector3 rewardSpawnPos { get; set; } = new Vector3(0, 0, 0); // InteractiveButton only
     }
 
     public class RGB
@@ -71,5 +70,4 @@ namespace YAMLDefs
         public float g { get; set; } = 0;
         public float b { get; set; } = 0;
     }
-
 }

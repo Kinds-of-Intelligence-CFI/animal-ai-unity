@@ -20,9 +20,13 @@ namespace Holders
     public class ListOfBlackScreens
     {
         public List<GameObject> allBlackScreens;
+
         public List<Fade> GetFades()
         {
-            return (from blackScreen in allBlackScreens select blackScreen.GetComponentInChildren<Fade>()).ToList();
+            return (
+                from blackScreen in allBlackScreens
+                select blackScreen.GetComponentInChildren<Fade>()
+            ).ToList();
         }
     }
 }

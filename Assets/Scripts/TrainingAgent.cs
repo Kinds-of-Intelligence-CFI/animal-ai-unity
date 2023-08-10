@@ -15,6 +15,7 @@ public class TrainingAgent : Agent, IPrefab
     public float quickStopRatio = 0.9f;
     public float rotationSpeed = 100f;
     public float rotationAngle = 0.25f;
+
     [HideInInspector]
     public int numberOfGoalsCollected = 0;
     public ProgressBar progBar;
@@ -25,28 +26,40 @@ public class TrainingAgent : Agent, IPrefab
     private float _rewardPerStep;
     private float _previousScore = 0;
     private float _currentScore = 0;
+
     [HideInInspector]
     public float health = 100f;
     private float _maxHealth = 100f;
+
     [HideInInspector]
     public float timeLimit = 0f;
     private float _nextUpdateHealth = 0f;
     private bool _nextUpdateEpisodeEnd = false;
     private float _freezeDelay = 0f;
-    public float GetFreezeDelay() { return _freezeDelay; }
-    private bool _isCountdownActive = false; // add this flag
+
+    public float GetFreezeDelay()
+    {
+        return _freezeDelay;
+    }
+
+    private bool _isCountdownActive = false;
 
     public void SetFreezeDelay(float v)
     {
         _freezeDelay = Mathf.Clamp(v, 0f, v);
         if (v != 0f && !_isCountdownActive)
         {
-            // intended for single use per-episode (at beginning)
-            Debug.Log("starting coroutine unfreezeCountdown() with wait seconds == " + GetFreezeDelay());
+            Debug.Log(
+                "starting coroutine unfreezeCountdown() with wait seconds == " + GetFreezeDelay()
+            );
             StartCoroutine(unfreezeCountdown()); // start a new countdown if and only if the new delay is not zero.
         }
     }
-    public bool IsFrozen() { return (_freezeDelay > 0f); }
+
+    public bool IsFrozen()
+    {
+        return (_freezeDelay > 0f);
+    }
 
     public override void Initialize()
     {
@@ -71,13 +84,15 @@ public class TrainingAgent : Agent, IPrefab
 
     public override void OnActionReceived(ActionBuffers action)
     {
-        //Agent action
+        // Agent action
         int actionForward = Mathf.FloorToInt(action.DiscreteActions[0]);
         int actionRotate = Mathf.FloorToInt(action.DiscreteActions[1]);
-        if (!IsFrozen()) { MoveAgent(actionForward, actionRotate); }
-
-        //Agent health and reward update
-        UpdateHealth(_rewardPerStep);//Updates health and adds the reward in mlagents
+        if (!IsFrozen())
+        {
+            MoveAgent(actionForward, actionRotate);
+        }
+        // Agent health and reward update
+        UpdateHealth(_rewardPerStep); // Updates health and adds the reward in mlagents
     }
 
     public void UpdateHealthNextStep(float updateAmount, bool andEndEpisode = false)
@@ -87,7 +102,10 @@ public class TrainingAgent : Agent, IPrefab
         /// Therefore we queue any health updates to happen on the next action step.
         /// </summary>
         _nextUpdateHealth += updateAmount;
-        if (andEndEpisode) { _nextUpdateEpisodeEnd = true; }
+        if (andEndEpisode)
+        {
+            _nextUpdateEpisodeEnd = true;
+        }
     }
 
     public void UpdateHealth(float updateAmount, bool andEndEpisode = false)
@@ -98,7 +116,7 @@ public class TrainingAgent : Agent, IPrefab
         /// </summary>
         if (!IsFrozen())
         {
-            health += 100 * updateAmount; //health = 100*reward
+            health += 100 * updateAmount; // health = 100*reward
             health += 100 * _nextUpdateHealth;
             _nextUpdateHealth = 0;
             AddReward(updateAmount);
@@ -137,7 +155,7 @@ public class TrainingAgent : Agent, IPrefab
                 case 2:
                     directionToGo = transform.forward * -1f;
                     break;
-                case 0: //Slow down faster than drag with no input
+                case 0: // Slow down faster than drag with no input
                     _rigidBody.velocity = _rigidBody.velocity * quickStopRatio;
                     break;
             }
@@ -153,7 +171,10 @@ public class TrainingAgent : Agent, IPrefab
         }
 
         transform.Rotate(rotateDirection, Time.fixedDeltaTime * rotationSpeed);
-        _rigidBody.AddForce(directionToGo.normalized * speed * 100f * Time.fixedDeltaTime, ForceMode.Acceleration);
+        _rigidBody.AddForce(
+            directionToGo.normalized * speed * 100f * Time.fixedDeltaTime,
+            ForceMode.Acceleration
+        );
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
@@ -194,7 +215,6 @@ public class TrainingAgent : Agent, IPrefab
         SetFreezeDelay(GetFreezeDelay());
     }
 
-
     void OnCollisionEnter(Collision collision)
     {
         foreach (ContactPoint contact in collision.contacts)
@@ -226,6 +246,7 @@ public class TrainingAgent : Agent, IPrefab
             _isGrounded = false;
         }
     }
+
     public void AddExtraReward(float rewardFactor)
     {
         UpdateHealth(Math.Min(rewardFactor * _rewardPerStep, -0.001f));
@@ -240,23 +261,30 @@ public class TrainingAgent : Agent, IPrefab
     //PREFAB INTERFACE FOR THE AGENT
     //******************************
     public void SetColor(Vector3 color) { }
+
     public void SetSize(Vector3 scale) { }
 
     /// <summary>
     /// Returns a random position within the range for the object.
     /// </summary>
-    public virtual Vector3 GetPosition(Vector3 position,
-                                        Vector3 boundingBox,
-                                        float rangeX,
-                                        float rangeZ)
+    public virtual Vector3 GetPosition(
+        Vector3 position,
+        Vector3 boundingBox,
+        float rangeX,
+        float rangeZ
+    )
     {
         float xBound = boundingBox.x;
         float zBound = boundingBox.z;
-        float xOut = position.x < 0 ? Random.Range(xBound, rangeX - xBound)
-                                    : Math.Max(0, Math.Min(position.x, rangeX));
+        float xOut =
+            position.x < 0
+                ? Random.Range(xBound, rangeX - xBound)
+                : Math.Max(0, Math.Min(position.x, rangeX));
         float yOut = Math.Max(position.y, 0) + transform.localScale.y / 2 + 0.01f;
-        float zOut = position.z < 0 ? Random.Range(zBound, rangeZ - zBound)
-                                    : Math.Max(0, Math.Min(position.z, rangeZ));
+        float zOut =
+            position.z < 0
+                ? Random.Range(zBound, rangeZ - zBound)
+                : Math.Max(0, Math.Min(position.z, rangeZ));
 
         return new Vector3(xOut, yOut, zOut);
     }
@@ -266,19 +294,16 @@ public class TrainingAgent : Agent, IPrefab
     ///</summary>
     public virtual Vector3 GetRotation(float rotationY)
     {
-        return new Vector3(0,
-                        rotationY < 0 ? Random.Range(0f, 360f) : rotationY,
-                        0);
+        return new Vector3(0, rotationY < 0 ? Random.Range(0f, 360f) : rotationY, 0);
     }
-
 
     private IEnumerator unfreezeCountdown()
     {
-        _isCountdownActive = true; // countdown is active now
+        _isCountdownActive = true;
         yield return new WaitForSeconds(GetFreezeDelay());
 
         Debug.Log("unfreezing!");
         SetFreezeDelay(0f);
-        _isCountdownActive = false; // countdown is no longer active
+        _isCountdownActive = false;
     }
 }
