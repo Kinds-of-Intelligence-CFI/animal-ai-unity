@@ -29,6 +29,6 @@ public class ArenasParametersSideChannel : SideChannel
 		}
 	}
 
-	public EventHandler<ArenasParametersEventArgs> NewArenasParametersReceived;|
+	public EventHandler<ArenasParametersEventArgs> NewArenasParametersReceived;
 	
 }

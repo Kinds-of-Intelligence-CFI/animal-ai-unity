@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 public class PlayerControls : MonoBehaviour
 {
-
     private Camera _cameraAbove;
     private Camera _cameraAgent;
     private Camera _cameraFollow;
@@ -13,7 +12,10 @@ public class PlayerControls : MonoBehaviour
     private TrainingAgent _agent;
     public Text score; // This should be assigned to 'Score Text' in-editor
     private int _numActive = 0;
-    public int cameraID { get { return _numActive; } }
+    public int cameraID
+    {
+        get { return _numActive; }
+    }
     private Dictionary<int, Camera> _cameras;
     public float prevScore = 0;
     public Canvas effectCanvas;
@@ -22,7 +24,9 @@ public class PlayerControls : MonoBehaviour
     {
         _agent = GameObject.FindGameObjectWithTag("agent").GetComponent<TrainingAgent>();
         GameObject ssCamGO = GameObject.FindGameObjectWithTag("ScreenshotCam");
-        _screenshotCam = GameObject.FindGameObjectWithTag("ScreenshotCam").GetComponent<ScreenshotCamera>();
+        _screenshotCam = GameObject
+            .FindGameObjectWithTag("ScreenshotCam")
+            .GetComponent<ScreenshotCamera>();
 
         _cameraAbove = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
         _cameraAgent = _agent.transform.Find("AgentCamMid").GetComponent<Camera>();
@@ -62,8 +66,12 @@ public class PlayerControls : MonoBehaviour
             _screenshotCam.Activate();
         }
 
-        score.text = "Prev reward: " + _agent.GetPreviousScore().ToString("0.000") + "\n"
-                        + "Reward: " + _agent.GetCumulativeReward().ToString("0.000");
+        score.text =
+            "Prev reward: "
+            + _agent.GetPreviousScore().ToString("0.000")
+            + "\n"
+            + "Reward: "
+            + _agent.GetCumulativeReward().ToString("0.000");
     }
 
     public Camera getActiveCam()

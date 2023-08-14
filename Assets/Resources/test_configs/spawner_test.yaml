@@ -12,10 +12,10 @@ arenas:
     - !Item
       name: Pillar-Button
       positions:
-      - !Vector3 {x: 25, y: 0, z: 30}
+      - !Vector3 {x: 25, y: 0, z: 25}
       moveDurations: [0.1]
       resetDurations: [1.0]
       rewardNames: ["GoodGoal", "BadGoal", "GoodGoalMulti"]
-      rewardWeights: [0, 0, 80]
+      rewardWeights: [0, 0, 100]
       spawnProbability: 1.0
-      rewardSpawnPos: !Vector3 {x: 25, y: 0, z: 15}
+      rewardSpawnPos: !Vector3 {x: 25, y: 0, z: 23}

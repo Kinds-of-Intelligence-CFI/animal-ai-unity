@@ -7,6 +7,7 @@ using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using PrefabInterface;
 using Unity.MLAgents.Sensors;
+using YAMLDefs;
 
 /// Actions are currently discrete. 2 branches of 0,1,2, 0,1,2
 public class TrainingAgent : Agent, IPrefab
@@ -52,7 +53,7 @@ public class TrainingAgent : Agent, IPrefab
             Debug.Log(
                 "starting coroutine unfreezeCountdown() with wait seconds == " + GetFreezeDelay()
             );
-            StartCoroutine(unfreezeCountdown()); // start a new countdown if and only if the new delay is not zero.
+            StartCoroutine(unfreezeCountdown()); // Start a new countdown if and only if the new delay is not zero.
         }
     }
 
@@ -110,13 +111,18 @@ public class TrainingAgent : Agent, IPrefab
 
     public void UpdateHealth(float updateAmount, bool andEndEpisode = false)
     {
+        if (NotificationManager.Instance == null)
+        {
+            Debug.LogError("NotificationManager instance is not set.");
+            return;
+        }
         /// <summary>
         /// Update the health of the agent and reset any queued updates
         /// If health reaches 0 or the episode is queued to end then call EndEpisode().
         /// </summary>
         if (!IsFrozen())
         {
-            health += 100 * updateAmount; // health = 100*reward
+            health += 100 * updateAmount; // Health = 100*reward
             health += 100 * _nextUpdateHealth;
             _nextUpdateHealth = 0;
             AddReward(updateAmount);
@@ -129,14 +135,36 @@ public class TrainingAgent : Agent, IPrefab
         else if (health <= 0)
         {
             health = 0;
-            EndEpisode();
+            NotificationManager.Instance.ShowFailureNotification("Uh-oh! You FAILED! Try again!!!");
+            StartCoroutine(EndEpisodeAfterDelay());
+            //EndEpisode();
             return;
         }
+        Debug.Log("Current Pass Mark: " + Arena.CurrentPassMark);
         if (andEndEpisode || _nextUpdateEpisodeEnd)
         {
+            float cumulativeReward = this.GetCumulativeReward();
+
+            if (cumulativeReward >= Arena.CurrentPassMark)
+            {
+                NotificationManager.Instance.ShowSuccessNotification("Congrats! You PASSED!");
+            }
+            else
+            {
+                NotificationManager.Instance.ShowFailureNotification(
+                    "Uh-oh! You FAILED! Try again!"
+                );
+            }
             _nextUpdateEpisodeEnd = false;
-            EndEpisode();
+            StartCoroutine(EndEpisodeAfterDelay());
         }
+    }
+
+    IEnumerator EndEpisodeAfterDelay()
+    {
+        yield return new WaitForSeconds(2f);
+        NotificationManager.Instance.HideNotification();
+        EndEpisode();
     }
 
     private void MoveAgent(int actionForward, int actionRotate)

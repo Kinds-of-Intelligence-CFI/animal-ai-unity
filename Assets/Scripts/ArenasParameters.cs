@@ -191,6 +191,7 @@ namespace ArenasParameters
                     configurations[k] = new ArenaConfiguration(yamlConfig);
                 }
             }
+            yamlConfig.SetCurrentPassMark();
         }
 
         public void AddAdditionalArenas(YAMLDefs.ArenaConfig yamlArenaConfig)
@@ -199,6 +200,7 @@ namespace ArenasParameters
             {
                 int i = configurations.Count;
                 Add(i, arena);
+                arena.SetCurrentPassMark();
             }
         }
 

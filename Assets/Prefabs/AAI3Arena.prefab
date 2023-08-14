@@ -1657,6 +1657,10 @@ PrefabInstance:
       propertyPath: rotationSpeed
       value: 100
       objectReference: {fileID: 0}
+    - target: {fileID: 7020771223157296603, guid: 4cb5c9a0a96aaf148b897c3ef63654de, type: 3}
+      propertyPath: notificationManager
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 8679969811055685185, guid: 4cb5c9a0a96aaf148b897c3ef63654de, type: 3}
       propertyPath: m_DetectableTags.Array.size
       value: 6
