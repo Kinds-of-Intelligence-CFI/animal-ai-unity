@@ -1,7 +1,7 @@
 !ArenaConfig
 arenas:
   0: !Arena
-    pass_mark: 0
+    pass_mark: 50
     t: 250
     items:
     - !Item
@@ -10,12 +10,10 @@ arenas:
       - !Vector3 {x: 20, y: 0, z: 20}
       rotations: [90]
     - !Item
-      name: Pillar-Button
+      name: SpawnerTree
       positions:
-      - !Vector3 {x: 25, y: 0, z: 25}
-      moveDurations: [0.1]
-      resetDurations: [1.0]
-      rewardNames: ["GoodGoal", "BadGoal", "GoodGoalMulti"]
-      rewardWeights: [0, 0, 100]
-      spawnProbability: 1.0
-      rewardSpawnPos: !Vector3 {x: 25, y: 0, z: 23}
+      - !Vector3 {x: 30, y: 0, z: 30}
+      ripenTimes: [3]
+      timesBetweenSpawns: [0.5]
+      spawnCounts: [50]
+      finalValues: [1]

@@ -350,12 +350,24 @@ namespace ArenaBuilders
             Dictionary<string, object> optionals = null
         )
         {
+            Debug.Log("SpawnGameObject method started.");
             if (spawnLocRot != null)
             {
                 gameObjectInstance.transform.localPosition = spawnLocRot.Position;
                 gameObjectInstance.transform.Rotate(spawnLocRot.Rotation);
                 gameObjectInstance.SetLayer(0);
                 gameObjectInstance.GetComponent<IPrefab>().SetColor(color);
+
+                var prefabComponent = gameObjectInstance.GetComponent<IPrefab>();
+                if (prefabComponent != null)
+                {
+                    Debug.Log("Found IPrefab component.");
+                    prefabComponent.SetColor(color);
+                }
+                else
+                {
+                    Debug.LogError("IPrefab component is missing from the gameObjectInstance.");
+                }
 
                 if (
                     gameObjectInstance.CompareTag("goodGoalMulti")
@@ -364,19 +376,38 @@ namespace ArenaBuilders
                 {
                     _goodGoalsMultiSpawned.Add(gameObjectInstance.GetComponent<Goal>());
                 }
+
+                if (optionals == null)
+                {
+                    Debug.LogError("optionals dictionary is null.");
+                    return;
+                }
+                else
+                {
+                    Debug.Log("optionals dictionary is not null.");
+                }
                 // check for optional symbol name for SignPosterboards
                 if (optionals["symbolName"] != null)
                 {
                     AssignSymbolName(gameObjectInstance, (string)optionals["symbolName"], color);
                 }
 
-                // check for optionals for Spawner_InteractiveButton objects
+                List<string> spawnerInteractiveButtonKeys = new List<string>
+                {
+                    "moveDuration",
+                    "resetDuration",
+                    "spawnProbability",
+                    "rewardNames",
+                    "rewardWeights"
+                };
+
+                bool hasSpawnerInteractiveButtonProperties = spawnerInteractiveButtonKeys.Any(
+                    key => optionals.ContainsKey(key)
+                );
+
                 if (
-                    optionals.ContainsKey("moveDuration")
-                    || optionals.ContainsKey("resetDuration")
-                    || optionals.ContainsKey("spawnProbability")
-                    || optionals.ContainsKey("rewardNames")
-                    || optionals.ContainsKey("rewardWeights")
+                    gameObjectInstance.name == "Pillar-Button"
+                    && hasSpawnerInteractiveButtonProperties
                 )
                 {
                     var spawnerInteractiveButton =
@@ -406,7 +437,17 @@ namespace ArenaBuilders
                         spawnerInteractiveButton.RewardSpawnPos = (Vector3)
                             optionals["rewardSpawnPos"];
                     }
+                }
 
+                if (optionals.ContainsKey("moveDuration"))
+                {
+                    Debug.Log(
+                        "Trying to spawn an object with Spawner_InteractiveButton properties."
+                    );
+                }
+
+                // Check for optionals for Spawner_InteractiveButton objects
+                {
                     // check for optional spawnColor for Spawner objects
                     if (
                         optionals["spawnColor"] != null
@@ -494,6 +535,7 @@ namespace ArenaBuilders
                             }
                         }
                     }
+                    Debug.Log("SpawnGameObject method ended.");
                 }
                 else
                 {
