@@ -29,6 +29,7 @@ namespace YAMLDefs
 		public List<Item> items { get; set; } = new List<Item>();
 		public float pass_mark { get; set; } = 0;
 		public static float CurrentPassMark { get; private set; }
+		public bool showNotification { get; set; } = false; 
 		
 		public void SetCurrentPassMark()
 		{

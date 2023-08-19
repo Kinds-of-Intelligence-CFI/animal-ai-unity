@@ -100,6 +100,16 @@ namespace ArenaBuilders
 
 			InstantiateSpawnables(spawnedObjectsHolder);
 
+			TrainingAgent agentInstance = UnityEngine.Object.FindObjectOfType<TrainingAgent>();
+			if (agentInstance != null && _arena != null)
+			{
+				TrainingArena trainingArena = _arena.GetComponent<TrainingArena>();
+				if (trainingArena != null)
+				{
+					agentInstance.showNotification = trainingArena.ArenaConfig.showNotification;
+				}
+			}
+
 			updateGoodGoalsMulti();
 		}
 
@@ -149,10 +159,10 @@ namespace ArenaBuilders
 			List<float> rotations = spawnable.rotations;
 			List<Vector3> sizes = spawnable.sizes;
 			List<Vector3> colors = spawnable.colors;
-			
+
 			// ======== EXTRA/OPTIONAL PARAMETERS ========
 			// use for SignPosterboard symbols, Decay/SizeChange rates, Dispenser settings, etc.
-			
+
 			List<string> symbolNames = spawnable.symbolNames;
 			List<float> delays = spawnable.delays;
 			List<float> initialValues = spawnable.initialValues;
