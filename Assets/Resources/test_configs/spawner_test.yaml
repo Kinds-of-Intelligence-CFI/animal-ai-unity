@@ -19,3 +19,11 @@ arenas:
       rewardWeights: [0, 0, 100]
       spawnProbability: 1.0
       rewardSpawnPos: !Vector3 {x: 25, y: 0, z: 23}
+    - !Item
+      name: SpawnerTree
+      positions:
+      - !Vector3 {x: 30, y: 0, z: 30}
+      ripenTimes: [3]
+      timesBetweenSpawns: [0.5]
+      spawnCounts: [50]
+      finalValues: [1]
