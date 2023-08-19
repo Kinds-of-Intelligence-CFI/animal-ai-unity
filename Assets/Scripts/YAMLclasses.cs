@@ -50,7 +50,7 @@ namespace YAMLDefs
 		public List<RGB> colors { get; set; } = new List<RGB>();
 
 		// ======== EXTRA/OPTIONAL PARAMETERS ========
-		// use for SignPosterboard symbols, Decay/SizeChange rates, Dispenser settings, etc.
+		// Use for SignPosterboard symbols, Decay/SizeChange rates, Dispenser settings, etc.
 
 		public List<string> skins { get; set; } = new List<string>(); // Agent only
 		public List<string> symbolNames { get; set; } = new List<string>(); // SignPosterboard only
@@ -72,7 +72,6 @@ namespace YAMLDefs
 		public List<float> rewardWeights { get; set; } = new List<float>(); // InteractiveButton only
 		public Vector3 rewardSpawnPos { get; set; } = new Vector3(0, 0, 0); // InteractiveButton only
 	}
-
 	public class RGB
 	{
 		public float r { get; set; } = 0;

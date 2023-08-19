@@ -1,14 +1,21 @@
 !ArenaConfig
 arenas:
   0: !Arena
-    pass_mark: 0
+    pass_mark: 70
     t: 250
     items:
     - !Item
       name: Agent
       positions:
+      - !Vector3 {x: 20, y: 2, z: 20}
+      rotations: [0]s
+    - !Item
+      name: Wall
+      positions:
       - !Vector3 {x: 20, y: 0, z: 20}
-      rotations: [90]
+      sizes:
+      - !Vector3 {x: 2, y: 2, z: 40}
+      rotations: [0]
     - !Item
       name: Pillar-Button
       positions:
@@ -16,13 +23,13 @@ arenas:
       moveDurations: [0.1]
       resetDurations: [1.0]
       rewardNames: ["GoodGoal", "BadGoal", "GoodGoalMulti"]
-      rewardWeights: [0, 0, 100]
+      rewardWeights: [100, 0, 0]
       spawnProbability: 1.0
       rewardSpawnPos: !Vector3 {x: 25, y: 0, z: 23}
     - !Item
       name: SpawnerTree
       positions:
-      - !Vector3 {x: 30, y: 0, z: 30}
+      - !Vector3 {x: 31, y: 0, z: 20}
       ripenTimes: [3]
       timesBetweenSpawns: [0.5]
       spawnCounts: [50]

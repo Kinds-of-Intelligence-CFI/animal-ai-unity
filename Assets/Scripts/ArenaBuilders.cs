@@ -22,26 +22,26 @@ namespace ArenaBuilders
 	/// </summary>
 	public class ArenaBuilder
 	{
-		/// Range of values X and Y can take (basically the size of the arena)
+		// Range of values X and Y can take (basically the size of the arena)
 		private float _rangeX;
 		private float _rangeZ;
 
-		/// The arena we're in
+		// The arena we're in
 		private Transform _arena;
 
-		/// Empty gameobject that will hold all instantiated GameObjects
+		// Empty gameobject that will hold all instantiated GameObjects
 		private GameObject _spawnedObjectsHolder;
 
-		/// Maximum number of attempts to spawn the objects and the agent
+		// Maximum number of attempts to spawn the objects and the agent
 		private int _maxSpawnAttemptsForPrefabs;
 		private int _maxSpawnAttemptsForAgent;
 
-		/// Agent and its components
+		// Agent and its components
 		private GameObject _agent;
 		private Collider _agentCollider;
 		private Rigidbody _agentRigidbody;
 
-		/// List of good goals that have been instantiated, used to set numberOfGoals in these goals
+		// List of good goals that have been instantiated, used to set numberOfGoals in these goals
 		private List<Goal> _goodGoalsMultiSpawned;
 
 		public void AddToGoodGoalsMultiSpawned(Goal ggm)
@@ -56,10 +56,10 @@ namespace ArenaBuilders
 			updateGoodGoalsMulti();
 		}
 
-		/// Buffer to allow space around instantiated objects
+		// Buffer to allow space around instantiated objects
 		// public Vector3 safeSpawnBuffer = Vector3.zero;
 
-		/// The list of Spawnables the ArenaBuilder will attempt to spawn at each reset
+		// The list of Spawnables the ArenaBuilder will attempt to spawn at each reset
 		[HideInInspector]
 		public List<Spawnable> Spawnables { get; set; }
 
@@ -149,8 +149,10 @@ namespace ArenaBuilders
 			List<float> rotations = spawnable.rotations;
 			List<Vector3> sizes = spawnable.sizes;
 			List<Vector3> colors = spawnable.colors;
+			
 			// ======== EXTRA/OPTIONAL PARAMETERS ========
 			// use for SignPosterboard symbols, Decay/SizeChange rates, Dispenser settings, etc.
+			
 			List<string> symbolNames = spawnable.symbolNames;
 			List<float> delays = spawnable.delays;
 			List<float> initialValues = spawnable.initialValues;
@@ -219,8 +221,7 @@ namespace ArenaBuilders
 				Vector3 size = k < ns[2] ? sizes[k] : -Vector3.one;
 				Vector3 color = k < ns[3] ? colors[k] : -Vector3.one;
 
-				// For optional parameters, use default values
-
+				// For optional parameters, use default values if not provided.
 				string symbolName = k < ns[4] ? symbolNames[k] : null;
 				float delay = k < ns[5] ? delays[k] : 0;
 				bool tree = (spawnable.name.Contains("Tree"));
@@ -365,59 +366,50 @@ namespace ArenaBuilders
 				{
 					_goodGoalsMultiSpawned.Add(gameObjectInstance.GetComponent<Goal>());
 				}
-				// check for optional symbol name for SignPosterboards
-				if (optionals["symbolName"] != null)
+				if (optionals != null)
 				{
-					AssignSymbolName(gameObjectInstance, (string)optionals["symbolName"], color);
-				}
+					if (optionals.TryGetValue("symbolName", out var symbolNameValue) && symbolNameValue is string symbolName)
+					{
+						AssignSymbolName(gameObjectInstance, symbolName, color);
+					}
 
-				// check for optionals for Spawner_InteractiveButton objects
-				if (
-					optionals.ContainsKey("moveDuration")
-					|| optionals.ContainsKey("resetDuration")
-					|| optionals.ContainsKey("spawnProbability")
-					|| optionals.ContainsKey("rewardNames")
-					|| optionals.ContainsKey("rewardWeights")
-				)
-				{
-					var spawnerInteractiveButton =
-						gameObjectInstance.GetComponentInChildren<Spawner_InteractiveButton>();
+					var spawnerInteractiveButton = gameObjectInstance.GetComponentInChildren<Spawner_InteractiveButton>();
 					if (spawnerInteractiveButton != null)
 					{
-						spawnerInteractiveButton.MoveDuration = (float)optionals["moveDuration"];
-					}
-					if (optionals.ContainsKey("resetDuration"))
-					{
-						spawnerInteractiveButton.ResetDuration = (float)optionals["resetDuration"];
-					}
-					if (optionals.ContainsKey("spawnProbability"))
-					{
-						spawnerInteractiveButton.SpawnProbability = spawnable.SpawnProbability;
-					}
-					if (
-						optionals.ContainsKey("rewardNames")
-						&& optionals.ContainsKey("rewardWeights")
-						&& optionals.ContainsKey("rewardSpawnPos")
-					)
-					{
-						spawnerInteractiveButton.RewardNames =
-							(List<string>)optionals["rewardNames"];
-						spawnerInteractiveButton.RewardWeights =
-							(List<float>)optionals["rewardWeights"];
-						spawnerInteractiveButton.RewardSpawnPos = (Vector3)
-							optionals["rewardSpawnPos"];
+						if (optionals.TryGetValue("moveDuration", out var moveDurationValue) && moveDurationValue is float moveDuration)
+						{
+							spawnerInteractiveButton.MoveDuration = moveDuration;
+						}
+						if (optionals.TryGetValue("resetDuration", out var resetDurationValue) && resetDurationValue is float resetDuration)
+						{
+							spawnerInteractiveButton.ResetDuration = resetDuration;
+						}
+						if (optionals.TryGetValue("spawnProbability", out var spawnProbabilityValue) && spawnProbabilityValue is float spawnProbability)
+						{
+							spawnerInteractiveButton.SpawnProbability = spawnProbability;
+						}
+						if (optionals.TryGetValue("rewardNames", out var rewardNamesValue) && rewardNamesValue is List<string> rewardNames)
+						{
+							spawnerInteractiveButton.RewardNames = rewardNames;
+						}
+						if (optionals.TryGetValue("rewardWeights", out var rewardWeightsValue) && rewardWeightsValue is List<float> rewardWeights)
+						{
+							spawnerInteractiveButton.RewardWeights = rewardWeights;
+						}
+						if (optionals.TryGetValue("rewardSpawnPos", out var rewardSpawnPosValue) && rewardSpawnPosValue is Vector3 rewardSpawnPos)
+						{
+							spawnerInteractiveButton.RewardSpawnPos = rewardSpawnPos;
+						}
 					}
 
-					// check for optional spawnColor for Spawner objects
-					if (
-						optionals["spawnColor"] != null
-						&& gameObjectInstance.TryGetComponent(out GoalSpawner GS)
-					)
+					// Check for optional spawnColor for Spawner objects
+					if (optionals.TryGetValue("spawnColor", out var spawnColorValue) && spawnColorValue != null && gameObjectInstance.TryGetComponent(out GoalSpawner GS))
 					{
-						GS.SetSpawnColor((Vector3)optionals["spawnColor"]);
+						GS.SetSpawnColor((Vector3)spawnColorValue);
 					}
-					// now check all floats relating to timing of changes
-					// each float param has a list of "acceptable types" to which it applies
+
+					// Now check all floats relating to timing of changes
+					// Each float param has a list of "acceptable types" to which it applies
 					Dictionary<string, List<Type>> paramValidTypeLookup = new Dictionary<
 						string,
 						List<Type>
@@ -466,29 +458,26 @@ namespace ArenaBuilders
 							"ripenTime",
 							new List<Type> { typeof(GoalSpawner) }
 						}, // TreeSpawners only! Ignored o/wise
-                        {
+						{
 							"doorDelay",
 							new List<Type> { typeof(SpawnerStockpiler) }
 						}, // Dispensers/Containers only!
-                        {
+						{
 							"timeBetweenDoorOpens",
 							new List<Type> { typeof(SpawnerStockpiler) }
 						}, // Dispensers/Containers only!
-                    };
+					};
 					float v;
 					foreach (string paramKey in paramValidTypeLookup.Keys)
 					{
-						// try each valid type that we might be able to assign to
+						// Try each valid type that we might be able to assign to
 						if (optionals[paramKey] != null)
 						{
 							foreach (Type U in paramValidTypeLookup[paramKey])
 							{
-								Component component = new Component();
-								// see if gameObjectInstance has got the relevant component
-								if (gameObjectInstance.TryGetComponent(U, out component))
+								// Check if gameObjectInstance has got the relevant component
+								if (gameObjectInstance.TryGetComponent(U, out var component))
 								{
-									//Debug.Log(paramKey + ", " + optionals[paramKey] + ", " + component.ToString());
-									//Debug.Log(optionals[paramKey].GetType());
 									v = Convert.ToSingle(optionals[paramKey]);
 									AssignTimingNumber(paramKey, v, component);
 								}

@@ -1,13 +1,10 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
-
-
 [ExecuteInEditMode]
 
 public class ProgressBar : MonoBehaviour
 {
-
     [Header("Title Setting")]
     public string Title;
     public Color TitleColor;
@@ -20,9 +17,9 @@ public class ProgressBar : MonoBehaviour
     public Color BarEmptyColor;
     public Color BarBackGroundColor;
     public Sprite BarBackGroundSprite;
-    public int MaxHealth = 100; //Currently coupled with agent code - should remove to read frmo agent maxHealth
-    public int MinHealth = 0; //""
-    public int StartHealth = 0;//""
+    public int MaxHealth = 100; // Currently coupled with agent code - should remove to read frmo agent maxHealth
+    public int MinHealth = 0;
+    public int StartHealth = 0;
     public int PassMark = 0;
 
     private Image _bar, _barBackground;
@@ -40,13 +37,11 @@ public class ProgressBar : MonoBehaviour
     public float BarValue
     {
         get { return _barValue; }
-
         set
         {
             value = Mathf.Clamp(value, MinHealth, MaxHealth);
             _barValue = value;
             UpdateValue(_barValue);
-
         }
     }
 
@@ -72,7 +67,7 @@ public class ProgressBar : MonoBehaviour
 
         // ensures Start/Pass health values are within bounds
         StartHealth = Clamp(StartHealth); Debug.Log("StartHealth is " + StartHealth);
-        PassMark = Clamp(PassMark); Debug.Log("PassMark is " + PassMark);
+        PassMark = Clamp(PassMark); Debug.Log("From ProgressBar, PassMark is " + PassMark);
         _pass_mark_proportion = HealthProportion(PassMark); Debug.Log("Pass Proportion is " + _pass_mark_proportion);
         // color-pivots are precomputed for optimisation
         // they are used in color interpolation and never changed
@@ -94,7 +89,6 @@ public class ProgressBar : MonoBehaviour
     // works with negative values
     // e.g. on health bar ranging from [-100,100], HealthProportion(-50.0f) => (-50.0f+100)/200 = 0.25f
     private float HealthProportion(float x) { return ((x - MinHealth) / _barSize); }
-
     private int Clamp(int h) { return Mathf.Clamp(h, MinHealth, MaxHealth); }
     private float Clamp(float h) { return Mathf.Clamp(h, MinHealth, MaxHealth); }
 
@@ -103,7 +97,6 @@ public class ProgressBar : MonoBehaviour
         if (val != Mathf.Clamp(val, MinHealth, MaxHealth)) { Debug.Log("intended progress bar value out of bounds! Clamping . . ."); val = Mathf.Clamp(val, 0, MaxHealth); }
         float health_proportion = HealthProportion(val);
         _bar.fillAmount = health_proportion;
-        //_txtTitle.text = Title + " " + String.Format("{0:0}", health_proportion * 100 /*i.e. health percentage */) + "%";
         _txtTitle.text = Title + ": " + val.ToString("F1");
 
         UpdateColor(_bar.fillAmount);
@@ -131,8 +124,6 @@ public class ProgressBar : MonoBehaviour
 
     // assigns training agent to this progress bar once instantiated
     public void AssignAgent(TrainingAgent training_agent) { _agent = training_agent; }
-
-
     private void FixedUpdate()
     {
         if (!Application.isPlaying)
