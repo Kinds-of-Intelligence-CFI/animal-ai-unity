@@ -8,7 +8,7 @@ arenas:
       name: Agent
       positions:
       - !Vector3 {x: 20, y: 2, z: 20}
-      rotations: [0]s
+      rotations: [0]
     - !Item
       name: Wall
       positions:
