@@ -358,17 +358,6 @@ namespace ArenaBuilders
 				gameObjectInstance.SetLayer(0);
 				gameObjectInstance.GetComponent<IPrefab>().SetColor(color);
 
-				var prefabComponent = gameObjectInstance.GetComponent<IPrefab>();
-				if (prefabComponent != null)
-				{
-					Debug.Log("Found IPrefab component.");
-					prefabComponent.SetColor(color);
-				}
-				else
-				{
-					Debug.LogError("IPrefab component is missing from the gameObjectInstance.");
-				}
-
 				if (
 					gameObjectInstance.CompareTag("goodGoalMulti")
 					|| gameObjectInstance.CompareTag("goodGoal")
@@ -376,29 +365,19 @@ namespace ArenaBuilders
 				{
 					_goodGoalsMultiSpawned.Add(gameObjectInstance.GetComponent<Goal>());
 				}
-
-				// Check for optional symbol name for SignPosterboards
+				// check for optional symbol name for SignPosterboards
 				if (optionals["symbolName"] != null)
 				{
 					AssignSymbolName(gameObjectInstance, (string)optionals["symbolName"], color);
 				}
 
-				List<string> spawnerInteractiveButtonKeys = new List<string>
-				{
-					"moveDuration",
-					"resetDuration",
-					"spawnProbability",
-					"rewardNames",
-					"rewardWeights"
-				};
-
-				bool hasSpawnerInteractiveButtonProperties = spawnerInteractiveButtonKeys.Any(
-					key => optionals.ContainsKey(key)
-				);
-
+				// check for optionals for Spawner_InteractiveButton objects
 				if (
-					gameObjectInstance.name == "Pillar-Button"
-					&& hasSpawnerInteractiveButtonProperties
+					optionals.ContainsKey("moveDuration")
+					|| optionals.ContainsKey("resetDuration")
+					|| optionals.ContainsKey("spawnProbability")
+					|| optionals.ContainsKey("rewardNames")
+					|| optionals.ContainsKey("rewardWeights")
 				)
 				{
 					var spawnerInteractiveButton =
@@ -428,18 +407,8 @@ namespace ArenaBuilders
 						spawnerInteractiveButton.RewardSpawnPos = (Vector3)
 							optionals["rewardSpawnPos"];
 					}
-				}
 
-				// Check for optionals for Spawner_InteractiveButton game objects
-				if (
-					optionals.ContainsKey("moveDuration")
-					|| optionals.ContainsKey("resetDuration")
-					|| optionals.ContainsKey("spawnProbability")
-					|| optionals.ContainsKey("rewardNames")
-					|| optionals.ContainsKey("rewardWeights")
-				)
-				{
-					// Check for optional spawnColor for Spawner objects
+					// check for optional spawnColor for Spawner objects
 					if (
 						optionals["spawnColor"] != null
 						&& gameObjectInstance.TryGetComponent(out GoalSpawner GS)
@@ -447,9 +416,12 @@ namespace ArenaBuilders
 					{
 						GS.SetSpawnColor((Vector3)optionals["spawnColor"]);
 					}
-					// Now check all floats relating to timing of changes
-					// Each float param has a list of "acceptable types" to which it applies
-					Dictionary<string, List<Type>> paramValidTypeLookup = new Dictionary<string, List<Type>>
+					// now check all floats relating to timing of changes
+					// each float param has a list of "acceptable types" to which it applies
+					Dictionary<string, List<Type>> paramValidTypeLookup = new Dictionary<
+						string,
+						List<Type>
+					>
 					{
 						{
 							"delay",
@@ -494,27 +466,29 @@ namespace ArenaBuilders
 							"ripenTime",
 							new List<Type> { typeof(GoalSpawner) }
 						}, // TreeSpawners only! Ignored o/wise
-						{
+                        {
 							"doorDelay",
 							new List<Type> { typeof(SpawnerStockpiler) }
 						}, // Dispensers/Containers only!
-						{
+                        {
 							"timeBetweenDoorOpens",
 							new List<Type> { typeof(SpawnerStockpiler) }
 						}, // Dispensers/Containers only!
-					};
+                    };
 					float v;
 					foreach (string paramKey in paramValidTypeLookup.Keys)
 					{
-						// Try each valid type that we might be able to assign to
+						// try each valid type that we might be able to assign to
 						if (optionals[paramKey] != null)
 						{
 							foreach (Type U in paramValidTypeLookup[paramKey])
 							{
 								Component component = new Component();
-								// See if gameObjectInstance has got the relevant component
+								// see if gameObjectInstance has got the relevant component
 								if (gameObjectInstance.TryGetComponent(U, out component))
 								{
+									//Debug.Log(paramKey + ", " + optionals[paramKey] + ", " + component.ToString());
+									//Debug.Log(optionals[paramKey].GetType());
 									v = Convert.ToSingle(optionals[paramKey]);
 									AssignTimingNumber(paramKey, v, component);
 								}
