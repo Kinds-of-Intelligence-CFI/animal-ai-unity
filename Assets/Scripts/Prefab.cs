@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using Random = UnityEngine.Random;
-// using UnityEngineExtensions;
 using PrefabInterface;
 using System.Reflection;
 
@@ -19,10 +18,8 @@ public class Prefab : MonoBehaviour, IPrefab
     public bool canRandomizeColor = true;
     public Vector3 ratioSize;
     public float sizeAdjustement = 0.999f;
-
-    // To scale textures on dynamically-sized objects
+    // To scale textures on dynamically-sized objects:
     public bool textureUVOverride = false;
-
     public bool typicalOrigin = true;
     protected float _height;
 
@@ -108,7 +105,6 @@ public class Prefab : MonoBehaviour, IPrefab
 
     protected virtual void RescaleUVs(bool child = false, GameObject childOverride = null)
     {
-        //if (this.name.ToLower().Contains("ramp")) { Debug.Log(this.name + " CALLING RescaleUVs() " + child + ", " + childOverride); }
         Renderer R =
             (child) ? childOverride.GetComponent<Renderer>() : this.GetComponent<Renderer>();
         MeshFilter MF =

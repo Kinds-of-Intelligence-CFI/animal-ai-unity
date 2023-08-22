@@ -297,10 +297,7 @@ MonoBehaviour:
   moveOffset: {x: 0.09, y: 0, z: 0}
   rewardSpawnPoint: {fileID: 7321951510414112991}
   objectToControl: {fileID: 7150004164178407081, guid: b19f8e36bd5ca73489a251d8daa9acea, type: 3}
-  objectToControlSpawnPoint: {fileID: 1212440655105317655}
   showObject: 0
-  rewards: []
-  rewardWeights: []
 --- !u!1001 &2400991117071955604
 PrefabInstance:
   m_ObjectHideFlags: 0
