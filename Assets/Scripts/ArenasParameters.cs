@@ -55,7 +55,7 @@ namespace ArenasParameters
 		// InteractiveButton //
 		public List<float> moveDurations = null;
 		public List<float> resetDurations = null;
-		public float SpawnProbability { get; private set; } // TODO: make this a list LIKE BELOW OR KEEP 1F VALUE.
+		public float SpawnProbability { get; private set; }
 		public List<string> RewardNames { get; private set; }
 		public List<float> RewardWeights { get; private set; }
 		public Vector3 rewardSpawnPos { get; private set; }

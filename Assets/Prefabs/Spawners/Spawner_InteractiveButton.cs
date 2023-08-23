@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-public class Spawner_InteractiveButton : MonoBehaviour
-{
 	// TODO add function to randomize colour of the prefab.
 	// TODO add function to set (by default off) the number of balls spawnable by the button.
 	// TODO add function/logic to set rewardSpawnPosition of the rewards to be random in the arena.
+	// TODO add function/logic to have the colour random for the button prefab.
+
+public class Spawner_InteractiveButton : MonoBehaviour
+{
 	private bool IsMoving = false;
 	private float lastInteractionTime;
 	private float totalInteractionInterval = 0f;

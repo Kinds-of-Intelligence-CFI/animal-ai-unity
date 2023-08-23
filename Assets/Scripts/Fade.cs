@@ -50,7 +50,6 @@ public class Fade : MonoBehaviour
 
 	void Awake()
 	{
-		// TODO Please note that this function (FindObjectOfType) is very slow. It is not recommended to use this function every frame. In most cases you can use the singleton pattern instead.
 		_play = FindObjectOfType<AAI3EnvironmentManager>().playerMode;
 		_image = gameObject.GetComponentInChildren<Image>();
 		ResetFade();
