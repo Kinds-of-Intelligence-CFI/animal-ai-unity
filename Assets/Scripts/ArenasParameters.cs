@@ -34,10 +34,11 @@ namespace ArenasParameters
 		public List<float> rotations = null;
 		public List<Vector3> sizes = null;
 		public List<Vector3> colors = null;
-	
+
 		// ======== EXTRA/OPTIONAL PARAMETERS ========
 		// use for SignPosterboard symbols, Decay/SizeChange rates, Dispenser settings, etc.
 
+		// Spawners/Dispensers // 
 		public List<string> skins = null;
 		public List<string> symbolNames = null;
 		public List<float> delays = null;
@@ -51,11 +52,10 @@ namespace ArenasParameters
 		public List<float> doorDelays = null;
 		public List<float> timesBetweenDoorOpens = null;
 		public List<float> frozenAgentDelays = null;
-
 		// InteractiveButton //
 		public List<float> moveDurations = null;
 		public List<float> resetDurations = null;
-		public float SpawnProbability { get; private set; } = 1f; // TODO: make this a list LIKE BELOW OR KEEP 1F VALUE.
+		public float SpawnProbability { get; private set; } // TODO: make this a list LIKE BELOW OR KEEP 1F VALUE.
 		public List<string> RewardNames { get; private set; }
 		public List<float> RewardWeights { get; private set; }
 		public Vector3 rewardSpawnPos { get; private set; }
@@ -146,15 +146,16 @@ namespace ArenasParameters
 		{
 			T = yamlArena.t;
 			spawnables = new List<Spawnable>();
+
 			foreach (YAMLDefs.Item item in yamlArena.items)
 			{
 				spawnables.Add(new Spawnable(item));
 			}
+
 			List<int> blackouts = yamlArena.blackouts;
 			lightsSwitch = new LightsSwitch(T, blackouts);
 			toUpdate = true;
 			protoString = yamlArena.ToString();
-
 			randomSeed = yamlArena.random_seed;
 			this.showNotification = yamlArena.showNotification;
 		}

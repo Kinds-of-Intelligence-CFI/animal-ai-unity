@@ -10,13 +10,6 @@ arenas:
       - !Vector3 {x: 20, y: 2, z: 20}
       rotations: [0]
     - !Item
-      name: Wall
-      positions:
-      - !Vector3 {x: 20, y: 0, z: 20}
-      sizes:
-      - !Vector3 {x: 2, y: 2, z: 40}
-      rotations: [0]
-    - !Item
       name: Pillar-Button
       positions:
       - !Vector3 {x: 25, y: 0, z: 25}
@@ -26,11 +19,3 @@ arenas:
       rewardWeights: [100, 0, 0]
       spawnProbability: 1.0
       rewardSpawnPos: !Vector3 {x: 25, y: 0, z: 23}
-    - !Item
-      name: SpawnerTree
-      positions:
-      - !Vector3 {x: 31, y: 0, z: 20}
-      ripenTimes: [3]
-      timesBetweenSpawns: [0.5]
-      spawnCounts: [50]
-      finalValues: [1]
