@@ -59,6 +59,7 @@ namespace ArenasParameters
 		public List<string> RewardNames { get; private set; }
 		public List<float> RewardWeights { get; private set; }
 		public Vector3 rewardSpawnPos { get; private set; }
+		public List<int> maxRewardCounts { get; private set; }
 
 		public Spawnable(GameObject obj)
 		{
@@ -101,7 +102,7 @@ namespace ArenasParameters
 			RewardNames = yamlItem.rewardNames;
 			RewardWeights = yamlItem.rewardWeights;
 			rewardSpawnPos = yamlItem.rewardSpawnPos;
-
+			maxRewardCounts = yamlItem.maxRewardCounts;
 		}
 
 		internal List<Vector3> initVec3sFromRGBs(List<YAMLDefs.RGB> yamlList)

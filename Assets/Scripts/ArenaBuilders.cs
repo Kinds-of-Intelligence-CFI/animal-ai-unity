@@ -275,7 +275,8 @@ namespace ArenaBuilders
 					{ nameof(spawnProbability), spawnProbability },
 					{ "rewardNames", spawnable.RewardNames },
 					{ "rewardWeights", spawnable.RewardWeights },
-					{ "rewardSpawnPos", rewardSpawnPos }
+					{ "rewardSpawnPos", rewardSpawnPos },
+					{ "maxRewardCounts", spawnable.maxRewardCounts }
 				};
 
 				PositionRotation spawnPosRot = SamplePositionRotation(
@@ -409,6 +410,10 @@ namespace ArenaBuilders
 						if (optionals.TryGetValue("rewardSpawnPos", out var rewardSpawnPosValue) && rewardSpawnPosValue is Vector3 rewardSpawnPos)
 						{
 							spawnerInteractiveButton.RewardSpawnPos = rewardSpawnPos;
+						}
+						if (optionals.TryGetValue("maxRewardCounts", out var maxRewardCountsValue) && maxRewardCountsValue is List<int> maxRewardCounts)
+						{
+							spawnerInteractiveButton.MaxRewardCounts = maxRewardCounts;
 						}
 					}
 

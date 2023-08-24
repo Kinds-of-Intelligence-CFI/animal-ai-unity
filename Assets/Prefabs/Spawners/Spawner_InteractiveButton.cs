@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-	// TODO add function to randomize colour of the prefab.
-	// TODO add function to set (by default off) the number of balls spawnable by the button.
-	// TODO add function/logic to set rewardSpawnPosition of the rewards to be random in the arena.
-	// TODO add function/logic to have the colour random for the button prefab.
+// TODO add function to randomize colour of the prefab.
+// TODO add function to set (by default off) the number of balls spawnable by the button.
+// TODO add function/logic to set rewardSpawnPosition of the rewards to be random in the arena.
+// TODO add function/logic to have the colour random for the button prefab.
 
 public class Spawner_InteractiveButton : MonoBehaviour
 {
@@ -43,6 +43,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
 	public List<float> RewardWeights { get; set; }
 	public List<GameObject> Rewards { get; set; }
 	public Vector3 RewardSpawnPos { get; set; }
+	public List<int> MaxRewardCounts { get; set; }
 
 	void Start()
 	{
@@ -146,13 +147,44 @@ public class Spawner_InteractiveButton : MonoBehaviour
 		}
 
 		// If no reward is selected within the loop (which should not happen), return the last reward
-		Debug.LogError("Failed to choose a reward to spawn.");
+		Debug.LogError("Failed to choose a reward to spawn. ");
 		return Rewards[Rewards.Count - 1];
 	}
 
 	private void SpawnReward()
 	{
-		Debug.Log("Rewards count in SpawnReward(): " + (Rewards != null ? Rewards.Count.ToString() : "null"));
+		GameObject rewardToSpawn = ChooseReward();
+
+		if (rewardToSpawn == null)
+		{
+			Debug.LogError("Failed to choose a reward to spawn.");
+			return;
+		}
+
+		int rewardIndex = Rewards.IndexOf(rewardToSpawn);
+		if (rewardIndex == -1)
+		{
+			Debug.LogError("Chosen reward is not in the Rewards list.");
+			return;
+		}
+
+		if (rewardIndex < MaxRewardCounts.Count)
+		{
+			Debug.Log("Max allowed spawns for " + rewardToSpawn.name + ": " + MaxRewardCounts[rewardIndex]);
+		}
+		else
+		{
+			Debug.Log("No max spawn count set for " + rewardToSpawn.name);
+		}
+
+		if (MaxRewardCounts != null && rewardIndex < MaxRewardCounts.Count && MaxRewardCounts[rewardIndex] != -1)
+		{
+			if (RewardSpawnCounts.TryGetValue(rewardToSpawn, out var count) && count >= MaxRewardCounts[rewardIndex])
+			{
+				Debug.Log("Max reward count reached for reward: " + rewardToSpawn.name);
+				return;
+			}
+		}
 
 		if (Rewards == null || Rewards.Count == 0)
 		{
@@ -162,14 +194,6 @@ public class Spawner_InteractiveButton : MonoBehaviour
 
 		if (Random.value <= SpawnProbability)
 		{
-			GameObject rewardToSpawn = ChooseReward();
-
-			if (rewardToSpawn == null)
-			{
-				Debug.LogError("Failed to choose a reward to spawn.");
-				return;
-			}
-
 			Vector3 spawnPosition = rewardSpawnPoint.position; // Use the default spawn position
 
 			if (RewardSpawnPos != Vector3.zero) // If a specific spawn position is set, use it instead
