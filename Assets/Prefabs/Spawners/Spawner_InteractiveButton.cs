@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-// TODO add function to randomize colour of the prefab.
-// TODO add function to set (by default off) the number of balls spawnable by the button.
 // TODO add function/logic to set rewardSpawnPosition of the rewards to be random in the arena.
-// TODO add function/logic to have the colour random for the button prefab.
 
 public class Spawner_InteractiveButton : MonoBehaviour
 {
@@ -20,8 +17,9 @@ public class Spawner_InteractiveButton : MonoBehaviour
 	[SerializeField] private Vector3 moveOffset;
 	[SerializeField] private Transform rewardSpawnPoint;
 	[SerializeField] private GameObject objectToControl;
-	private Transform objectToControlSpawnPoint;
+	[SerializeField] private bool randomizeColor = false;
 	[SerializeField] private bool showObject;
+	private Transform objectToControlSpawnPoint;
 	private List<GameObject> rewards;
 	private List<float> rewardWeights;
 	public delegate void OnRewardSpawned(GameObject reward);
@@ -64,6 +62,11 @@ public class Spawner_InteractiveButton : MonoBehaviour
 		}
 
 		rewardWeights = RewardWeights;
+
+		if (randomizeColor)
+		{
+			RandomizeColor();
+		}
 	}
 
 	private void OnTriggerEnter(Collider other)
@@ -148,7 +151,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
 
 		// If no reward is selected within the loop (which should not happen), return the last reward
 		Debug.LogError("Failed to choose a reward to spawn. ");
-		
+
 		return Rewards[Rewards.Count - 1];
 	}
 
@@ -233,5 +236,24 @@ public class Spawner_InteractiveButton : MonoBehaviour
 
 		return totalInteractionInterval / ButtonPressCount;
 	}
+
+	private void RandomizeColor()
+	{
+		Debug.Log("Attempting to randomize color...");
+
+		Color randomColor = new Color(Random.value, Random.value, Random.value, 1.0f);
+		Renderer rend = this.gameObject.GetComponent<Renderer>();
+
+		if (rend != null)
+		{
+			rend.material.color = randomColor;
+			Debug.Log($"Color set to: {randomColor}");
+		}
+		else
+		{
+			Debug.LogWarning("No Renderer found on the Pillar-Button to set the color.");
+		}
+	}
+
 
 }
