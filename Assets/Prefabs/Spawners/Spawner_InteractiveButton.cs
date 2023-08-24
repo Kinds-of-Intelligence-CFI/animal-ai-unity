@@ -148,6 +148,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
 
 		// If no reward is selected within the loop (which should not happen), return the last reward
 		Debug.LogError("Failed to choose a reward to spawn. ");
+		
 		return Rewards[Rewards.Count - 1];
 	}
 
