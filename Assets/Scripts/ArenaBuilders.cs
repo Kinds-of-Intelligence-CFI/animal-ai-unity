@@ -25,6 +25,15 @@ namespace ArenaBuilders
 		// Range of values X and Y can take (basically the size of the arena)
 		private float _rangeX;
 		private float _rangeZ;
+		
+		public float GetArenaWidth()
+		{
+			return _rangeX;
+		}
+		public float GetArenaDepth()
+		{
+			return _rangeZ;
+		}
 
 		// The arena we're in
 		private Transform _arena;

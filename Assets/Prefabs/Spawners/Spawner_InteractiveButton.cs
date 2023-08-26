@@ -2,8 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-
-// TODO add function/logic to set rewardSpawnPosition of the rewards to be random in the arena.
+using ArenaBuilders;
 
 public class Spawner_InteractiveButton : MonoBehaviour
 {
@@ -19,6 +18,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
 	[SerializeField] private GameObject objectToControl;
 	[SerializeField] private bool randomizeColor = false;
 	[SerializeField] private bool showObject;
+	[SerializeField] private ArenaBuilder arenaBuilder;
 	private Transform objectToControlSpawnPoint;
 	private List<GameObject> rewards;
 	private List<float> rewardWeights;
@@ -198,11 +198,24 @@ public class Spawner_InteractiveButton : MonoBehaviour
 
 		if (Random.value <= SpawnProbability)
 		{
-			Vector3 spawnPosition = rewardSpawnPoint.position; // Use the default spawn position
+			Vector3 spawnPosition = rewardSpawnPoint.position;
 
-			if (RewardSpawnPos != Vector3.zero) // If a specific spawn position is set, use it instead
+			if (RewardSpawnPos != Vector3.zero)
 			{
 				spawnPosition = RewardSpawnPos;
+			}
+			// Otherwise, random spawning.
+			else
+			{
+				float arenaWidth = arenaBuilder.GetArenaWidth();
+				float arenaDepth = arenaBuilder.GetArenaDepth();
+
+				// Randomly generate a spawn position within the bounds of the arena, as defined by Arenabuilders.cs.
+				spawnPosition = new Vector3(
+					Random.Range(0, arenaWidth),
+					0,  // Assuming spawning on the ground.
+					Random.Range(0, arenaDepth)
+				);
 			}
 
 			LastSpawnedReward = Instantiate(rewardToSpawn, spawnPosition, Quaternion.identity);
