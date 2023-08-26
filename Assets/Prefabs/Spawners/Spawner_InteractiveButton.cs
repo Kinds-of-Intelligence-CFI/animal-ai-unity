@@ -126,10 +126,6 @@ public class Spawner_InteractiveButton : MonoBehaviour
 
 	private GameObject ChooseReward()
 	{
-		Debug.Log("ChooseReward() method called.");
-		Debug.Log("Rewards: " + (Rewards == null ? "null" : Rewards.Count.ToString()));
-		Debug.Log("rewardWeights: " + (rewardWeights == null ? "null" : rewardWeights.Count.ToString()));
-
 		if (Rewards == null || rewardWeights == null || Rewards.Count != rewardWeights.Count)
 		{
 			Debug.LogError("Invalid rewards or reward weights setup.");
@@ -150,8 +146,6 @@ public class Spawner_InteractiveButton : MonoBehaviour
 		}
 
 		// If no reward is selected within the loop (which should not happen), return the last reward
-		Debug.LogError("Failed to choose a reward to spawn. ");
-
 		return Rewards[Rewards.Count - 1];
 	}
 
@@ -252,21 +246,17 @@ public class Spawner_InteractiveButton : MonoBehaviour
 
 	private void RandomizeColor()
 	{
-		Debug.Log("Attempting to randomize color...");
-
 		Color randomColor = new Color(Random.value, Random.value, Random.value, 1.0f);
 		Renderer rend = this.gameObject.GetComponent<Renderer>();
 
 		if (rend != null)
 		{
 			rend.material.color = randomColor;
-			Debug.Log($"Color set to: {randomColor}");
 		}
 		else
 		{
-			Debug.LogWarning("No Renderer found on the Pillar-Button to set the color.");
+			Debug.LogWarning("No Renderer found on the Pillar-Button to set the color. Please add a Renderer to the Pillar-Button prefab.");
 		}
 	}
-
 
 }

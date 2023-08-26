@@ -33,9 +33,7 @@ public class TrainingArena : MonoBehaviour
 	private List<Fade> _fades = new List<Fade>();
 	private bool _lightStatus = true;
 	private int _agentDecisionInterval; // How many frames between decisions, reads from agent's decision requester
-
 	private bool _firstReset = true;
-
 	private List<GameObject> spawnedRewards = new List<GameObject>();
 	public bool showNotification { get; set; }
 

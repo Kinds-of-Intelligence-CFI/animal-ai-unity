@@ -130,6 +130,9 @@ namespace ArenasParameters
 		public string protoString = "";
 		public int randomSeed = 0;
 		public bool showNotification { get; set; } = false;
+		public bool canResetEpisode { get; set; } = true;
+		public bool canChangePerspective { get; set; } = true;
+		public int defaultPerspective { get; set; } = 0;
 
 		public ArenaConfiguration() { }
 
@@ -159,6 +162,9 @@ namespace ArenasParameters
 			protoString = yamlArena.ToString();
 			randomSeed = yamlArena.random_seed;
 			this.showNotification = yamlArena.showNotification;
+			this.canResetEpisode = yamlArena.canResetEpisode;
+			this.canChangePerspective = yamlArena.canChangePerspective;
+			this.defaultPerspective = yamlArena.defaultPerspective;
 		}
 
 		public void SetGameObject(List<GameObject> listObj)
@@ -177,10 +183,39 @@ namespace ArenasParameters
 	{
 		public Dictionary<int, ArenaConfiguration> configurations;
 		public int seed;
+		public static ArenasConfigurations Instance { get; private set; }
 
 		public ArenasConfigurations()
 		{
+			if (Instance != null)
+			{
+				throw new Exception("Multiple instances of ArenasConfigurations!");
+			}
+			Instance = this;
+
 			configurations = new Dictionary<int, ArenaConfiguration>();
+		}
+		public ArenaConfiguration CurrentArenaConfiguration
+		{
+			get
+			{
+				if (configurations.ContainsKey(0))  // Assuming '0' is the default key for current configuration
+				{
+					return configurations[0];
+				}
+				return null;  // Return null if there's no current configuration. Handle this case in consuming code.
+			}
+		}
+		public void SetCurrentArenaConfiguration(ArenaConfiguration config)
+		{
+			if (configurations.ContainsKey(0))
+			{
+				configurations[0] = config;
+			}
+			else
+			{
+				configurations.Add(0, config);
+			}
 		}
 
 		internal void Add(int k, YAMLDefs.Arena yamlConfig)
@@ -196,8 +231,10 @@ namespace ArenasParameters
 					configurations[k] = new ArenaConfiguration(yamlConfig);
 				}
 			}
+			SetCurrentArenaConfiguration(configurations[k]);
 			yamlConfig.SetCurrentPassMark();
 		}
+
 
 		public void AddAdditionalArenas(YAMLDefs.ArenaConfig yamlArenaConfig)
 		{

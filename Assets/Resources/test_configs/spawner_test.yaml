@@ -3,6 +3,8 @@ arenas:
   0: !Arena
     pass_mark: 70
     t: 250
+    canResetEpisode: true
+    canChangePerspective: false
     items:
     - !Item
       name: Agent

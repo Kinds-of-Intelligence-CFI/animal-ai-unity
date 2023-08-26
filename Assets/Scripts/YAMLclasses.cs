@@ -29,8 +29,11 @@ namespace YAMLDefs
 		public List<Item> items { get; set; } = new List<Item>();
 		public float pass_mark { get; set; } = 0;
 		public static float CurrentPassMark { get; private set; }
-		public bool showNotification { get; set; } = false; 
-		
+		public bool showNotification { get; set; } = false;
+		public bool canResetEpisode { get; set; } = true;
+		public bool canChangePerspective { get; set; } = true;
+		public int defaultPerspective { get; set; } = 1;
+
 		public void SetCurrentPassMark()
 		{
 			CurrentPassMark = pass_mark;

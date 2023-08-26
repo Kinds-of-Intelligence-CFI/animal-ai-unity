@@ -304,7 +304,6 @@ public class TrainingAgent : Agent, IPrefab
 	//PREFAB INTERFACE FOR THE AGENT
 	//******************************
 	public void SetColor(Vector3 color) { }
-
 	public void SetSize(Vector3 scale) { }
 
 	/// <summary>

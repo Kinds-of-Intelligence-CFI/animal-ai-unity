@@ -2,6 +2,7 @@ using Unity.MLAgents;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using ArenasParameters;
 
 public class PlayerControls : MonoBehaviour
 {
@@ -19,6 +20,10 @@ public class PlayerControls : MonoBehaviour
 	{
 		get { return _numActive; }
 	}
+	private bool _canResetEpisode = true;
+	private bool _canChangePerspective = true;
+	private int _defaultPerspective = 0;
+	private ArenasConfigurations arenasConfigurations;
 
 	void Start()
 	{
@@ -44,16 +49,46 @@ public class PlayerControls : MonoBehaviour
 		effectCanvas.renderMode = RenderMode.ScreenSpaceCamera;
 		effectCanvas.worldCamera = getActiveCam();
 		effectCanvas.planeDistance = choosePlaneDistance(); // Has to be within clip volume of all cameras (3rd person one is set to 0.3)
+
+		arenasConfigurations = ArenasConfigurations.Instance;
+
+		if (arenasConfigurations == null)
+		{
+			arenasConfigurations = new ArenasConfigurations();
+		}
+
+		ArenaConfiguration currentConfig = arenasConfigurations.CurrentArenaConfiguration;
+
+		if (currentConfig == null)
+		{
+			Debug.LogError("Current Arena Configuration is null.");
+			return;
+		}
+		_canResetEpisode = currentConfig.canResetEpisode;
+		_canChangePerspective = currentConfig.canChangePerspective;
+		_defaultPerspective = currentConfig.defaultPerspective;
+		Debug.Log("Active Camera: " + _numActive);
+
+		if (!_canChangePerspective)
+		{
+			_cameraAbove.enabled = true;
+			_cameraAgent.enabled = true;
+			_cameraFollow.enabled = true;
+			_numActive = 1;  // Corresponds to _cameraAgent
+			effectCanvas.worldCamera = getActiveCam();
+			effectCanvas.planeDistance = choosePlaneDistance();
+			UpdateCam();
+			Debug.Log("Active Camera after toggle off: " + _numActive);
+		}
 	}
 
 	void Update()
 	{
-		bool cDown = Input.GetKeyDown(KeyCode.C);
-		if (cDown)
+		if (_canChangePerspective && Input.GetKeyDown(KeyCode.C))
 		{
 			UpdateCam();
 		}
-		if (Input.GetKeyDown(KeyCode.R))
+		if (_canResetEpisode && Input.GetKeyDown(KeyCode.R))
 		{
 			_agent.EndEpisode();
 		}
