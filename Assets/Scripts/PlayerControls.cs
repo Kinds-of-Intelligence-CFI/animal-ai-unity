@@ -9,32 +9,41 @@ public class PlayerControls : MonoBehaviour
 	private Camera _cameraAbove;
 	private Camera _cameraAgent;
 	private Camera _cameraFollow;
-	private ScreenshotCamera _screenshotCam; // Don't include in _cameras
+	private ScreenshotCamera _screenshotCam;
 	private TrainingAgent _agent;
-	public Text score; // Assigned to 'Score Text' in editor inspector.
+	public Text score;
 	private int _numActive = 0;
 	private Dictionary<int, Camera> _cameras;
 	public float prevScore = 0;
 	public Canvas effectCanvas;
+
 	public int cameraID
 	{
 		get { return _numActive; }
 	}
+
 	private bool _canResetEpisode = true;
 	private bool _canChangePerspective = true;
-	private int _defaultPerspective = 0;
 	private ArenasConfigurations arenasConfigurations;
 
 	void Start()
 	{
 		_agent = GameObject.FindGameObjectWithTag("agent").GetComponent<TrainingAgent>();
-		GameObject ssCamGO = GameObject.FindGameObjectWithTag("ScreenshotCam");
-		_screenshotCam = GameObject
-			.FindGameObjectWithTag("ScreenshotCam")
-			.GetComponent<ScreenshotCamera>();
+		_screenshotCam = GameObject.FindGameObjectWithTag("ScreenshotCam").GetComponent<ScreenshotCamera>();
 
 		_cameraAbove = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
 		_cameraAgent = _agent.transform.Find("AgentCamMid").GetComponent<Camera>();
+
+		if (_cameraAgent != null)
+		{
+			Debug.Log("Camera Agent fetched successfully.");
+		}
+		else
+		{
+			Debug.Log("Failed to fetch Camera Agent.");
+			return;
+		}
+
 		_cameraFollow = GameObject.FindGameObjectWithTag("camBase").GetComponent<Camera>();
 
 		_cameraAbove.enabled = true;
@@ -45,40 +54,32 @@ public class PlayerControls : MonoBehaviour
 		_cameras.Add(0, _cameraAbove);
 		_cameras.Add(1, _cameraAgent);
 		_cameras.Add(2, _cameraFollow);
-		_numActive = 0;
+
 		effectCanvas.renderMode = RenderMode.ScreenSpaceCamera;
 		effectCanvas.worldCamera = getActiveCam();
-		effectCanvas.planeDistance = choosePlaneDistance(); // Has to be within clip volume of all cameras (3rd person one is set to 0.3)
+		effectCanvas.planeDistance = choosePlaneDistance();
 
 		arenasConfigurations = ArenasConfigurations.Instance;
 
-		if (arenasConfigurations == null)
-		{
-			arenasConfigurations = new ArenasConfigurations();
-		}
-
 		ArenaConfiguration currentConfig = arenasConfigurations.CurrentArenaConfiguration;
-
 		if (currentConfig == null)
 		{
 			Debug.LogError("Current Arena Configuration is null.");
 			return;
 		}
+
 		_canResetEpisode = currentConfig.canResetEpisode;
 		_canChangePerspective = currentConfig.canChangePerspective;
-		_defaultPerspective = currentConfig.defaultPerspective;
-		Debug.Log("Active Camera: " + _numActive);
 
 		if (!_canChangePerspective)
 		{
-			_cameraAbove.enabled = true;
+			_cameraAbove.enabled = false;
 			_cameraAgent.enabled = true;
-			_cameraFollow.enabled = true;
-			_numActive = 1;  // Corresponds to _cameraAgent
+			_cameraFollow.enabled = false;
+			_numActive = 1;
+
 			effectCanvas.worldCamera = getActiveCam();
 			effectCanvas.planeDistance = choosePlaneDistance();
-			UpdateCam();
-			Debug.Log("Active Camera after toggle off: " + _numActive);
 		}
 	}
 
@@ -101,12 +102,8 @@ public class PlayerControls : MonoBehaviour
 			_screenshotCam.Activate();
 		}
 
-		score.text =
-			"Prev reward: "
-			+ _agent.GetPreviousScore().ToString("0.000")
-			+ "\n"
-			+ "Reward: "
-			+ _agent.GetCumulativeReward().ToString("0.000");
+		score.text = "Prev reward: " + _agent.GetPreviousScore().ToString("0.000")
+					 + "\n" + "Reward: " + _agent.GetCumulativeReward().ToString("0.000");
 	}
 
 	public Camera getActiveCam()
@@ -128,5 +125,4 @@ public class PlayerControls : MonoBehaviour
 		effectCanvas.worldCamera = getActiveCam();
 		effectCanvas.planeDistance = choosePlaneDistance();
 	}
-
 }
