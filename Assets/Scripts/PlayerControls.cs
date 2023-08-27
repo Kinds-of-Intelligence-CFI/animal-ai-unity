@@ -30,7 +30,7 @@ public class PlayerControls : MonoBehaviour
 	{
 		_agent = GameObject.FindGameObjectWithTag("agent").GetComponent<TrainingAgent>();
 		_screenshotCam = GameObject.FindGameObjectWithTag("ScreenshotCam").GetComponent<ScreenshotCamera>();
-
+		_cameraFollow = GameObject.FindGameObjectWithTag("camBase").GetComponent<Camera>();
 		_cameraAbove = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
 		_cameraAgent = _agent.transform.Find("AgentCamMid").GetComponent<Camera>();
 
@@ -43,8 +43,6 @@ public class PlayerControls : MonoBehaviour
 			Debug.Log("Failed to fetch Camera Agent.");
 			return;
 		}
-
-		_cameraFollow = GameObject.FindGameObjectWithTag("camBase").GetComponent<Camera>();
 
 		_cameraAbove.enabled = true;
 		_cameraAgent.enabled = false;
@@ -73,10 +71,10 @@ public class PlayerControls : MonoBehaviour
 
 		if (!_canChangePerspective)
 		{
-			_cameraAbove.enabled = false;
+			_cameraAbove.enabled = true;
 			_cameraAgent.enabled = true;
-			_cameraFollow.enabled = false;
-			_numActive = 1;
+			_cameraFollow.enabled = true;
+			_numActive = 2;
 
 			effectCanvas.worldCamera = getActiveCam();
 			effectCanvas.planeDistance = choosePlaneDistance();
