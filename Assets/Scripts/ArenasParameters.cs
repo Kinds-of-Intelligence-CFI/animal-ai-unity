@@ -203,7 +203,7 @@ namespace ArenasParameters
 				{
 					return configurations[0];
 				}
-				return null;  // Return null if there's no current configuration. Handle this case in consuming code.
+				return null;
 			}
 		}
 		public void SetCurrentArenaConfiguration(ArenaConfiguration config)
