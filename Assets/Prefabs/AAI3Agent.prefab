@@ -376,6 +376,7 @@ MonoBehaviour:
   - DeathZone
   - HotZone
   - Ramp
+  - Pillar-Button
   m_RaysPerDirection: 3
   m_MaxRayDegrees: 70
   m_SphereCastRadius: 0.5

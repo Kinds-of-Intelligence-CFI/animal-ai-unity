@@ -46,7 +46,7 @@ GameObject:
   - component: {fileID: -8960863943252276745}
   m_Layer: 0
   m_Name: Pillar-Button
-  m_TagString: spawnedObjects
+  m_TagString: GoalSpawner
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
