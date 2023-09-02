@@ -217,6 +217,17 @@ public class Spawner_InteractiveButton : MonoBehaviour
 				spawnPosition.x = Random.Range(0, arenaBuilder.GetArenaWidth());
 			}
 
+			if (RewardSpawnPos.y == -1)
+			{
+				spawnPosition.y = Random.Range(0, 100);
+				Debug.Log("Randomized y: " + spawnPosition.y);  // Random value between 0 and 100 for the y-axis to make sure no object is too high.
+			}
+			else
+			{
+				spawnPosition.y = RewardSpawnPos.y;
+				Debug.Log("Set y to: " + spawnPosition.y);
+			}
+
 			if (RewardSpawnPos.z == -1)
 			{
 				spawnPosition.z = Random.Range(0, arenaBuilder.GetArenaDepth());
