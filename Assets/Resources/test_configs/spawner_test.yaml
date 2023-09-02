@@ -4,7 +4,7 @@ arenas:
     pass_mark: 70
     t: 250
     canResetEpisode: true
-    canChangePerspective: false
+    canChangePerspective: true
     items:
     - !Item
       name: Agent
@@ -14,7 +14,7 @@ arenas:
     - !Item
       name: Pillar-Button
       positions:
-      - !Vector3 {x: 25, y: 0, z: 25}
+      - !Vector3 {x: 10, y: -1, z: 10}
       moveDurations: [0.1]
       resetDurations: [1.0]
       rewardNames: ["GoodGoal", "BadGoal", "GoodGoalMulti"]

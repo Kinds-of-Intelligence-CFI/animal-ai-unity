@@ -211,6 +211,16 @@ public class Spawner_InteractiveButton : MonoBehaviour
 					Random.Range(0, arenaDepth)
 				);
 			}
+			// Check for randomization flags for x and z axes
+			if (RewardSpawnPos.x == -1)
+			{
+				spawnPosition.x = Random.Range(0, arenaBuilder.GetArenaWidth());
+			}
+
+			if (RewardSpawnPos.z == -1)
+			{
+				spawnPosition.z = Random.Range(0, arenaBuilder.GetArenaDepth());
+			}
 
 			LastSpawnedReward = Instantiate(rewardToSpawn, spawnPosition, Quaternion.identity);
 
