@@ -6,17 +6,15 @@ using ArenaBuilders;
 
 public class GoalSpawner : Prefab
 {
-	[Header("Spawning Params")]
+	[Header("Spawning Parameters")]
 	public BallGoal[] spawnObjects;
 	public float initialSpawnSize;
-
 	public override void SetInitialValue(float v)
 	{
 		initialSpawnSize = Mathf.Clamp(v, 0.2f, 3f);
 	}
 
 	public float ripenedSpawnSize;
-
 	public override void SetFinalValue(float v)
 	{
 		ripenedSpawnSize = Mathf.Clamp(v, 0.2f, 3f);
@@ -34,21 +32,18 @@ public class GoalSpawner : Prefab
 	}
 
 	public float timeBetweenSpawns; // Seconds
-
 	public override void SetTimeBetweenSpawns(float v)
 	{
 		timeBetweenSpawns = v;
 	}
 
 	public float delaySeconds;
-
 	public override void SetDelay(float v)
 	{
 		delaySeconds = (int)v;
 	}
 
 	public int spawnCount; // -1 = infinite spawning
-
 	public override void SetSpawnCount(float v)
 	{
 		spawnCount = (int)v;
@@ -56,7 +51,6 @@ public class GoalSpawner : Prefab
 
 	[ColorUsage(true, true)]
 	private Color colourOverride;
-
 	public override void SetSpawnColor(Vector3 v)
 	{
 		// Overwrite only if not (-1, -1, -1); this is a substitute for 'null' in the YAML configs
@@ -65,14 +59,13 @@ public class GoalSpawner : Prefab
 			colourOverride.r = v.x / 255f;
 			colourOverride.g = v.y / 255f;
 			colourOverride.b = v.z / 255f;
-		} // HDR intensity constrained automatically at 0 from initial/default colourOverride value
+		}
 	}
 
 	private bool willSpawnInfinite()
 	{
 		return spawnCount == -1;
 	}
-
 	private bool canStillSpawn()
 	{
 		return spawnCount != 0;
