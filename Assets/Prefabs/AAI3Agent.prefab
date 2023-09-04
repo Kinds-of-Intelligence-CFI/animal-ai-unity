@@ -371,12 +371,10 @@ MonoBehaviour:
   - goodGoalMulti
   - badGoal
   - GoalSpawner
-  - InnerWall
-  - OuterWall
   - DeathZone
   - HotZone
   - Ramp
-  - Pillar-Button
+  - PillarButton
   m_RaysPerDirection: 3
   m_MaxRayDegrees: 70
   m_SphereCastRadius: 0.5

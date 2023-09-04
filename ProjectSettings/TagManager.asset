@@ -26,6 +26,7 @@ TagManager:
   - EffectCanvas
   - PlayerControls
   - GoalSpawner
+  - PIllarButton
   layers:
   - Default
   - TransparentFX
