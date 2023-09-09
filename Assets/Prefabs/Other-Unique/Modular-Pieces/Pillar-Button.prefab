@@ -47,7 +47,7 @@ GameObject:
   - component: {fileID: 2607137493736694331}
   m_Layer: 0
   m_Name: Pillar-Button
-  m_TagString: PIllarButton
+  m_TagString: PillarButton
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

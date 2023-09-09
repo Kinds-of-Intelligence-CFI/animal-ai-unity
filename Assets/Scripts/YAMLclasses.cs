@@ -32,7 +32,7 @@ namespace YAMLDefs
 		public bool showNotification { get; set; } = false;
 		public bool canResetEpisode { get; set; } = true;
 		public bool canChangePerspective { get; set; } = true;
-		public int defaultPerspective { get; set; } = 1;
+		public int defaultPerspective { get; set; } = 1; // TODO: REMOVE THIS PARAMETER WHERE IMPLEMENTED --> NO LONGER USED.
 
 		public void SetCurrentPassMark()
 		{
