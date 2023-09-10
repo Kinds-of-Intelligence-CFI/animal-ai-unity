@@ -141,7 +141,7 @@ public class TrainingAgent : Agent, IPrefab
             if (showNotification)
             {
                 NotificationManager.Instance.ShowFailureNotification(
-                    "Uh-oh! You FAILED! Try again!"
+                    "Uh-oh! You FAILED!"
                 );
                 NotificationManager.Instance.PlayFailureGif();
             }
@@ -166,7 +166,7 @@ public class TrainingAgent : Agent, IPrefab
                 if (showNotification)
                 {
                     NotificationManager.Instance.ShowFailureNotification(
-                        "Uh-oh! You FAILED! Try again!"
+                        "Uh-oh! You FAILED!"
                     );
                     NotificationManager.Instance.PlayFailureGif();
                 }
