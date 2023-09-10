@@ -70,19 +70,12 @@ public class NotificationManager : MonoBehaviour
 
     private void ShowNotification(string message, Color color)
     {
-        Debug.Log("Notification Panel: " + notificationPanel);
-        Debug.Log("Notification Text: " + notificationText);
-        Debug.Log("Message: " + message);
-        Debug.Log("Color: " + color);
-
-        Debug.Log("Is notificationText null? " + (notificationText == null));
         if (notificationText != null)
         {
             Debug.Log(
                 "Is the Text component missing? " + (notificationText.GetComponent<Text>() == null)
             );
         }
-        Debug.Log("Trying to show notification with message: " + message);
         notificationText.text = message;
         notificationPanel.GetComponent<Image>().color = color;
         notificationText.color = color;
@@ -116,13 +109,13 @@ public class NotificationManager : MonoBehaviour
 
     public void PlaySuccessGif()
     {
-        StopAllCoroutines(); // Ensure no other animations are running
-        StartCoroutine(AnimateSprite(successFrames)); // Start the success sprite animation
+        StopAllCoroutines();
+        StartCoroutine(AnimateSprite(successFrames));
     }
 
     public void PlayFailureGif()
     {
-        StopAllCoroutines(); // Ensure no other animations are running
-        StartCoroutine(AnimateSprite(failureFrames)); // Start the failure sprite animation
+        StopAllCoroutines();
+        StartCoroutine(AnimateSprite(failureFrames));
     }
 }
