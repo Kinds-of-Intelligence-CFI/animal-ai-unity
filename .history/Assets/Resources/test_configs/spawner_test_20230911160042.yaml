@@ -10,16 +10,16 @@ arenas:
     - !Item
       name: Agent
       positions:
-      - !Vector3 {x: 20, y: 0, z: 20}
+      - !Vector3 {x: 20, y: 0, z: 20}s
       rotations: [0]
     - !Item
       name: Pillar-Button
       positions:
       - !Vector3 {x: 20, y: 0, z: 25}
-      moveDurations: [0.1]
-      resetDurations: [1.0]
-      rewardNames: ["GoodGoal", "BadGoal", "GoodGoalMulti"]
+      moveDurations: [0.1] 
+      resetDurations: [1.0] 
+      rewardNames: ["GoodGoal", "BadGoal", "GoodGoalMulti"] 
       rewardWeights: [100, 0, 0]
-      spawnProbability: 1.0
-      maxRewardCounts: [-1, -1, -1]
-      rewardSpawnPos: !Vector3 {x: 25, y: 0, z: 23}
+      spawnProbability: 1.0 
+      maxRewardCounts: [-1, -1, -1] 
+      rewardSpawnPos: !Vector3 {x: 25, y: 0, z: 23} 
