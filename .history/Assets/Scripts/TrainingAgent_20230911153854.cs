@@ -39,7 +39,6 @@ public class TrainingAgent : Agent, IPrefab
     private float _freezeDelay = 0f;
 
     public bool showNotification = false;
-    private bool _hasShownFailureNotification = false;
 
     public float GetFreezeDelay()
     {
@@ -114,12 +113,16 @@ public class TrainingAgent : Agent, IPrefab
 
     public void UpdateHealth(float updateAmount, bool andEndEpisode = false)
     {
+        Debug.Log($"Value of showNotification: {showNotification}");
         if (NotificationManager.Instance == null && showNotification == true)
         {
             Debug.LogError("NotificationManager instance is not set.");
             return;
         }
-
+        /// <summary>
+        /// Update the health of the agent and reset any queued updates
+        /// If health reaches 0 or the episode is queued to end then call EndEpisode().
+        /// </summary>
         if (!IsFrozen())
         {
             health += 100 * updateAmount; // Health = 100*reward
@@ -132,14 +135,15 @@ public class TrainingAgent : Agent, IPrefab
         {
             health = _maxHealth;
         }
-        else if (health <= 0 && !_hasShownFailureNotification) // Check the flag here
+        else if (health <= 0)
         {
             health = 0;
             if (showNotification)
             {
-                NotificationManager.Instance.ShowFailureNotification("Uh-oh! You FAILED!");
+                NotificationManager.Instance.ShowFailureNotification(
+                    "Uh-oh! You FAILED!"
+                );
                 NotificationManager.Instance.PlayFailureGif();
-                _hasShownFailureNotification = true; // Set the flag to true
             }
             StartCoroutine(EndEpisodeAfterDelay());
             return;
@@ -161,7 +165,9 @@ public class TrainingAgent : Agent, IPrefab
             {
                 if (showNotification)
                 {
-                    NotificationManager.Instance.ShowFailureNotification("Uh-oh! You FAILED!");
+                    NotificationManager.Instance.ShowFailureNotification(
+                        "Uh-oh! You FAILED!"
+                    );
                     NotificationManager.Instance.PlayFailureGif();
                 }
             }
@@ -247,7 +253,7 @@ public class TrainingAgent : Agent, IPrefab
     public override void OnEpisodeBegin()
     {
         Debug.Log("Episode Begin");
-        StopCoroutine("unfreezeCountdown");
+        StopCoroutine("unfreezeCountdown"); // When a new episode starts, any existing unfreeze countdown is cancelled.
         _previousScore = _currentScore;
         numberOfGoalsCollected = 0;
         _arena.ResetArena();
@@ -255,6 +261,7 @@ public class TrainingAgent : Agent, IPrefab
         _isGrounded = false;
         health = _maxHealth;
 
+        // Initiate the freeze for the agent. Fix for erratic behaviour.
         SetFreezeDelay(GetFreezeDelay());
     }
 
