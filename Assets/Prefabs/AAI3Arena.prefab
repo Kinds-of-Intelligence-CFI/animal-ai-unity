@@ -1662,7 +1662,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8679969811055685185, guid: 4cb5c9a0a96aaf148b897c3ef63654de, type: 3}
       propertyPath: m_DetectableTags.Array.size
-      value: 11
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 8679969811055685185, guid: 4cb5c9a0a96aaf148b897c3ef63654de, type: 3}
       propertyPath: m_DetectableTags.Array.data[4]
@@ -1691,6 +1691,10 @@ PrefabInstance:
     - target: {fileID: 8679969811055685185, guid: 4cb5c9a0a96aaf148b897c3ef63654de, type: 3}
       propertyPath: m_DetectableTags.Array.data[10]
       value: PillarButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 8679969811055685185, guid: 4cb5c9a0a96aaf148b897c3ef63654de, type: 3}
+      propertyPath: m_DetectableTags.Array.data[11]
+      value: SignPoster
       objectReference: {fileID: 0}
     - target: {fileID: 9181951476684829857, guid: 4cb5c9a0a96aaf148b897c3ef63654de, type: 3}
       propertyPath: m_BrainParameters.VectorObservationSize
