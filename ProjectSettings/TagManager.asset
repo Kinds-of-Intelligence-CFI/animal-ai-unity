@@ -27,6 +27,7 @@ TagManager:
   - PlayerControls
   - GoalSpawner
   - PillarButton
+  - SignPoster
   layers:
   - Default
   - TransparentFX
