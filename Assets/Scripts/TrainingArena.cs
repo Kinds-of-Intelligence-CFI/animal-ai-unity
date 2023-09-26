@@ -74,15 +74,22 @@ public class TrainingArena : MonoBehaviour
 			Destroy(holder);
 		}
 
+		int totalArenas = _environmentManager.getMaxArenaID();
+
 		if (_firstReset)
 		{
-			arenaID = 0; // On the first reset, set the arenaID to 0.
+			if (_environmentManager.GetRandomizeArenasStatus())
+			{
+				arenaID = Random.Range(0, totalArenas + 1);
+			}
+			else
+			{
+				arenaID = 0; // On the first reset, set the arenaID to 0 if not randomizing.
+			}
 			_firstReset = false;
 		}
 		else
 		{
-			int totalArenas = _environmentManager.getMaxArenaID();
-
 			if (_environmentManager.GetRandomizeArenasStatus())
 			{
 				List<int> validArenaIDs = new List<int>();
@@ -150,6 +157,7 @@ public class TrainingArena : MonoBehaviour
 		}
 		spawnedRewards.Clear();
 	}
+
 
 
 	public void UpdateLigthStatus()
