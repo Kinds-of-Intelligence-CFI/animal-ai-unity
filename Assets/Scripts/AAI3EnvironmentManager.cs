@@ -112,7 +112,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
 
 		resolution = Math.Max(minimumResolution, Math.Min(maximumResolution, resolution));
 
-		TrainingArena arena = FindObjectOfType<TrainingArena>(); // TODO: Find a way to instantiate this without creating a new TrainingArena object as this will cause Unity-native errors.
+		TrainingArena arena = FindObjectOfType<TrainingArena>();
 		InstantiateArenas(); // Instantiate every new arena with agent and objects. Agents are currently deactivated until we set the sensors.
 
 		//Add playerControls if in play mode
