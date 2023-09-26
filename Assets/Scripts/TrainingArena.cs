@@ -74,22 +74,28 @@ public class TrainingArena : MonoBehaviour
             Destroy(holder);
         }
 
-        // Each time reset is called we cycle through the defined arenaIDs
-        maxarenaID = _environmentManager.getMaxArenaID(); // Should perform this check once (after environmentManager is initialized).
-        if (maxarenaID >= 0 && !_firstReset)
+        maxarenaID = _environmentManager.getMaxArenaID();
+
+        if (maxarenaID > 1)
         {
-            arenaID = (arenaID + 1) % (maxarenaID + 1);
+            // If more than one arena is defined, cycle through them
+            if (!_firstReset)
+            {
+                arenaID = (arenaID + 1) % maxarenaID;
+            }
+            else
+            {
+                arenaID = 0;
+                _firstReset = false;
+            }
         }
-        else if (_firstReset)
-        {
-            arenaID = 0;
-        }
+        // If only one arena is defined (or none), the arenaID will remain at its default value (0 or -1)
 
         ArenaConfiguration newConfiguration;
         if (!_environmentManager.GetConfiguration(arenaID, out newConfiguration))
         {
-            newConfiguration = new ArenaConfiguration(prefabs);
-            _environmentManager.AddConfiguration(arenaID, newConfiguration);
+            Debug.LogWarning($"Failed to retrieve configuration for arenaID: {arenaID}");
+            return;
         }
         _arenaConfiguration = newConfiguration;
 
@@ -104,7 +110,6 @@ public class TrainingArena : MonoBehaviour
         _agent.timeLimit = _arenaConfiguration.T * _agentDecisionInterval;
         _builder.Build();
         _arenaConfiguration.lightsSwitch.Reset();
-        _firstReset = false;
 
         if (_arenaConfiguration.randomSeed != 0)
         {
