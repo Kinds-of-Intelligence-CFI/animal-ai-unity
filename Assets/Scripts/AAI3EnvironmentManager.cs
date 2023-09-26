@@ -187,7 +187,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
 
     public int getMaxArenaID()
     {
-        return _arenasConfigurations.configurations.Count;
+        return _arenasConfigurations.configurations.Count - 1;
     }
 
     private void ChangeRayCasts(
