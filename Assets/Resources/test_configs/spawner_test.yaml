@@ -22,4 +22,6 @@ arenas:
       rewardWeights: [100, 0, 0] # the list of rewards that can be spawned
       spawnProbability: 1.0 # the probability of spawning the reward 
       maxRewardCounts: [-1, -1, -1] # the maximum number of times each reward can be spawned. -1 means no limit. Currently, the y value is fixed at 0.
-      rewardSpawnPos: !Vector3 {x: 25, y: 0, z: 23} # the position where the reward will be spawned. If no position is given or -1 is given, the reward will be spawned randomly
+      rewardSpawnPos: !Vector3 {x: 25, y: 0, z: 23} # the position where the reward will be spawned. 
+                                                        # ...If no position is given or -1 is given, the reward will be spawned randomly
+  
