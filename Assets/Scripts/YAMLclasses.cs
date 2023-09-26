@@ -21,6 +21,7 @@ namespace YAMLDefs
 	public class ArenaConfig
 	{
 		public IDictionary<int, Arena> arenas { get; set; }
+		public bool randomizeArenas = false;
 	}
 
 	public class Arena

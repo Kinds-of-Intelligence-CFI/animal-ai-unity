@@ -190,6 +190,11 @@ public class AAI3EnvironmentManager : MonoBehaviour
         return _arenasConfigurations.configurations.Count - 1;
     }
 
+    public bool GetRandomizeArenasStatus()
+    {
+        return _arenasConfigurations.randomizeArenas;
+    }
+
     private void ChangeRayCasts(
         RayPerceptionSensorComponent3D raySensor,
         int no_raycasts,
