@@ -1,0 +1,48 @@
+!ArenaConfig
+randomizeArenas: false # by default it is set to false, so arenas are NOT randomized. True will randomize arenas where arenas > 0.
+arenas:
+  0: !Arena
+    pass_mark: 1
+    t: 500
+    items:
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 20, y: 0, z: 20}
+      rotations: [0]
+    - !Item
+      name: GoodGoal
+      positions:
+      - !Vector3 {x: 20, y: 0, z: 24}
+      sizes:
+      - !Vector3 { x: 2, y: 2, z: 2 }
+  1: !Arena
+    pass_mark: 1
+    t: 500
+    items:
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 20, y: 0, z: 20}
+      rotations: [0]
+    - !Item
+      name: GoodGoalMulti
+      positions:
+      - !Vector3 {x: 20, y: 0, z: 24}
+      sizes:
+      - !Vector3 { x: 2, y: 2, z: 2 }
+  2: !Arena
+    pass_mark: 1
+    t: 500
+    items:
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 20, y: 0, z: 20}
+      rotations: [0]
+    - !Item
+      name: BadGoal
+      positions:
+      - !Vector3 {x: 20, y: 0, z: 24}
+      sizes:
+      - !Vector3 { x: 2, y: 2, z: 2 }
