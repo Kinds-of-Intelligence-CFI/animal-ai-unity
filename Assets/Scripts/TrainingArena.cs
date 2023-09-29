@@ -158,8 +158,6 @@ public class TrainingArena : MonoBehaviour
 		spawnedRewards.Clear();
 	}
 
-
-
 	public void UpdateLigthStatus()
 	{
 		int stepCount = _agent.StepCount;
