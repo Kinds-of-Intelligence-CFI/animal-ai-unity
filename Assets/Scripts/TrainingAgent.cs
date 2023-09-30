@@ -7,6 +7,7 @@ using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using PrefabInterface;
 using Unity.MLAgents.Sensors;
+using YAMLDefs;
 
 /// Actions are currently discrete. 2 branches of 0,1,2, 0,1,2
 public class TrainingAgent : Agent, IPrefab
@@ -37,6 +38,9 @@ public class TrainingAgent : Agent, IPrefab
     private bool _nextUpdateEpisodeEnd = false;
     private float _freezeDelay = 0f;
 
+    public bool showNotification = false;
+    private bool _hasShownFailureNotification = false;
+
     public float GetFreezeDelay()
     {
         return _freezeDelay;
@@ -52,7 +56,7 @@ public class TrainingAgent : Agent, IPrefab
             Debug.Log(
                 "starting coroutine unfreezeCountdown() with wait seconds == " + GetFreezeDelay()
             );
-            StartCoroutine(unfreezeCountdown()); // start a new countdown if and only if the new delay is not zero.
+            StartCoroutine(unfreezeCountdown()); // Start a new countdown if and only if the new delay is not zero.
         }
     }
 
@@ -110,13 +114,15 @@ public class TrainingAgent : Agent, IPrefab
 
     public void UpdateHealth(float updateAmount, bool andEndEpisode = false)
     {
-        /// <summary>
-        /// Update the health of the agent and reset any queued updates
-        /// If health reaches 0 or the episode is queued to end then call EndEpisode().
-        /// </summary>
+        if (NotificationManager.Instance == null && showNotification == true)
+        {
+            Debug.LogError("NotificationManager instance is not set.");
+            return;
+        }
+
         if (!IsFrozen())
         {
-            health += 100 * updateAmount; // health = 100*reward
+            health += 100 * updateAmount; // Health = 100*reward
             health += 100 * _nextUpdateHealth;
             _nextUpdateHealth = 0;
             AddReward(updateAmount);
@@ -126,17 +132,55 @@ public class TrainingAgent : Agent, IPrefab
         {
             health = _maxHealth;
         }
-        else if (health <= 0)
+        else if (health <= 0 && !_hasShownFailureNotification)
         {
             health = 0;
-            EndEpisode();
+            if (showNotification)
+            {
+                NotificationManager.Instance.ShowFailureNotification("Uh-oh! You FAILED!");
+                NotificationManager.Instance.PlayFailureGif();
+                _hasShownFailureNotification = true;
+            }
+            StartCoroutine(EndEpisodeAfterDelay());
             return;
         }
+        Debug.Log("Current Pass Mark: " + Arena.CurrentPassMark);
         if (andEndEpisode || _nextUpdateEpisodeEnd)
         {
+            float cumulativeReward = this.GetCumulativeReward();
+
+            if (cumulativeReward >= Arena.CurrentPassMark)
+            {
+                if (showNotification)
+                {
+                    NotificationManager.Instance.ShowSuccessNotification("Congrats! You PASSED!");
+                    NotificationManager.Instance.PlaySuccessGif();
+                }
+            }
+            else
+            {
+                if (showNotification)
+                {
+                    NotificationManager.Instance.ShowFailureNotification("Uh-oh! You FAILED!");
+                    NotificationManager.Instance.PlayFailureGif();
+                }
+            }
             _nextUpdateEpisodeEnd = false;
-            EndEpisode();
+            StartCoroutine(EndEpisodeAfterDelay());
         }
+    }
+
+    IEnumerator EndEpisodeAfterDelay()
+    {
+        if (!showNotification)
+        {
+            EndEpisode();
+            yield break;
+        }
+
+        yield return new WaitForSeconds(2.5f);
+        NotificationManager.Instance.HideNotification();
+        EndEpisode();
     }
 
     private void MoveAgent(int actionForward, int actionRotate)
@@ -203,7 +247,7 @@ public class TrainingAgent : Agent, IPrefab
     public override void OnEpisodeBegin()
     {
         Debug.Log("Episode Begin");
-        StopCoroutine("unfreezeCountdown"); // When a new episode starts, any existing unfreeze countdown is cancelled.
+        StopCoroutine("unfreezeCountdown");
         _previousScore = _currentScore;
         numberOfGoalsCollected = 0;
         _arena.ResetArena();
@@ -211,7 +255,6 @@ public class TrainingAgent : Agent, IPrefab
         _isGrounded = false;
         health = _maxHealth;
 
-        // Initiate the freeze for the agent. Fix for erratic behaviour.
         SetFreezeDelay(GetFreezeDelay());
     }
 

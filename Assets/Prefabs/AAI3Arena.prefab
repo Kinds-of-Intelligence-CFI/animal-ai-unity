@@ -855,7 +855,6 @@ MonoBehaviour:
     - {fileID: 6131923203371649459, guid: 2647b94027143164f8f1f4851d148d1f, type: 3}
     - {fileID: 6131923203371649459, guid: ce5a25432c06c184e848968dfac329dc, type: 3}
     - {fileID: 7150004164178407081, guid: b19f8e36bd5ca73489a251d8daa9acea, type: 3}
-    - {fileID: 6131923203371649459, guid: 6208774e34f79fe4892906d7e4acf164, type: 3}
     - {fileID: 6751702490339512953, guid: 1988d679a56b6834b8cb15b18aaa6c5c, type: 3}
   spawnedObjectsHolder: {fileID: 6276814220842007455, guid: ff9a0b038a04e8747a9f95217df0b26f, type: 3}
   maxSpawnAttemptsForAgent: 100
@@ -1657,9 +1656,13 @@ PrefabInstance:
       propertyPath: rotationSpeed
       value: 100
       objectReference: {fileID: 0}
+    - target: {fileID: 7020771223157296603, guid: 4cb5c9a0a96aaf148b897c3ef63654de, type: 3}
+      propertyPath: notificationManager
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 8679969811055685185, guid: 4cb5c9a0a96aaf148b897c3ef63654de, type: 3}
       propertyPath: m_DetectableTags.Array.size
-      value: 6
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 8679969811055685185, guid: 4cb5c9a0a96aaf148b897c3ef63654de, type: 3}
       propertyPath: m_DetectableTags.Array.data[4]
@@ -1671,11 +1674,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8679969811055685185, guid: 4cb5c9a0a96aaf148b897c3ef63654de, type: 3}
       propertyPath: m_DetectableTags.Array.data[6]
-      value: 
+      value: GoalSpawner
       objectReference: {fileID: 0}
     - target: {fileID: 8679969811055685185, guid: 4cb5c9a0a96aaf148b897c3ef63654de, type: 3}
       propertyPath: m_DetectableTags.Array.data[7]
-      value: HotZone
+      value: DeathZone
       objectReference: {fileID: 0}
     - target: {fileID: 8679969811055685185, guid: 4cb5c9a0a96aaf148b897c3ef63654de, type: 3}
       propertyPath: m_DetectableTags.Array.data[8]
@@ -1683,7 +1686,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8679969811055685185, guid: 4cb5c9a0a96aaf148b897c3ef63654de, type: 3}
       propertyPath: m_DetectableTags.Array.data[9]
-      value: HotZone
+      value: Ramp
+      objectReference: {fileID: 0}
+    - target: {fileID: 8679969811055685185, guid: 4cb5c9a0a96aaf148b897c3ef63654de, type: 3}
+      propertyPath: m_DetectableTags.Array.data[10]
+      value: PillarButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 8679969811055685185, guid: 4cb5c9a0a96aaf148b897c3ef63654de, type: 3}
+      propertyPath: m_DetectableTags.Array.data[11]
+      value: SignPoster
       objectReference: {fileID: 0}
     - target: {fileID: 9181951476684829857, guid: 4cb5c9a0a96aaf148b897c3ef63654de, type: 3}
       propertyPath: m_BrainParameters.VectorObservationSize

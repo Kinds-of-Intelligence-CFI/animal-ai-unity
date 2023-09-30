@@ -47,6 +47,7 @@ ExportedObj/
 *.mdb
 *.opendb
 *.VC.db
+*.history
 
 # Unity3D generated meta files
 *.pidb.meta
@@ -77,3 +78,29 @@ Packages/packages-lock.json
 .vsconfig
 
 Assets/ML-Agents/Timers/*
+.history/Assets/Resources/test_configs/spawner_test_20230906223546.yaml
+.history/Assets/Resources/test_configs/spawner_test_20230909141527.yaml
+.history/Assets/Resources/test_configs/spawner_test_20230909141538.yaml
+.history/Assets/Resources/test_configs/spawner_test_20230909142059.yaml
+.history/Assets/Resources/test_configs/spawner_test_20230909142151.yaml
+.history/Assets/Scripts/NotificationManager_20230909135707.cs
+.history/Assets/Scripts/NotificationManager_20230910213100.cs
+.history/Assets/Scripts/NotificationManager_20230910213119.cs
+.history/Assets/Scripts/NotificationManager_20230910213517.cs
+.history/Assets/Scripts/NotificationManager_20230910213530.cs
+.history/Assets/Resources/test_configs/spawner_test_20230910214203.yaml
+.history/Assets/Resources/test_configs/spawner_test_20230910231945.yaml
+.history/Assets/Resources/test_configs/spawner_test_20230910232301.yaml
+.history/Assets/Resources/test_configs/spawner_test_20230910232607.yaml
+.history/Assets/Resources/test_configs/spawner_test_20230910235022.yaml
+.history/Assets/Resources/test_configs/spawner_test_20230910235102.yaml
+.history/Assets/Scripts/NotificationManager_20230910233604.cs
+.history/Assets/Scripts/NotificationManager_20230910233613.cs
+.history/Assets/Scripts/NotificationManager_20230910233625.cs
+.history/Assets/Scripts/NotificationManager_20230910233633.cs
+.history/Assets/Scripts/NotificationManager_20230910233641.cs
+.history/Assets/Scripts/NotificationManager_20230910234510.cs
+.history/Assets/Scripts/TrainingAgent_20230909135753.cs
+.history/Assets/Scripts/TrainingAgent_20230910232425.cs
+.history/Assets/Scripts/TrainingAgent_20230910232455.cs
+.history/Assets/Scripts/TrainingAgent_20230910232506.cs
