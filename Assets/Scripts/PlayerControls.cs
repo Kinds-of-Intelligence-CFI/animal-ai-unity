@@ -45,6 +45,20 @@ public class PlayerControls : MonoBehaviour
 
 		_canResetEpisode = currentConfig.canResetEpisode;
 		_canChangePerspective = currentConfig.canChangePerspective;
+
+		// Camera Component Checks. Important check in general.
+		if (_screenshotCam == null)
+		{
+			Debug.LogError("Screenshot camera not found!");
+		}
+		if (_cameraFollow == null)
+		{
+			Debug.LogError("Camera with 'camBase' tag not found!");
+		}
+		if (_cameraAbove == null)
+		{
+			Debug.LogError("Main camera not found!");
+		}
 	}
 
 	void Update()
@@ -53,37 +67,51 @@ public class PlayerControls : MonoBehaviour
 		{
 			_agent = GameObject.FindGameObjectWithTag("agent").GetComponent<TrainingAgent>();
 
-			if (_agent != null)
+			// Agent Component Check. Also important.
+			if (_agent == null)
 			{
-				_cameraAgent = _agent.transform.Find("AgentCamMid").GetComponent<Camera>();
+				Debug.LogError("Agent with 'agent' tag not found!");
+				return;
+			}
 
-				if (_cameraAgent != null)
-				{
-					camerasFetched = true;
+			_cameraAgent = _agent.transform.Find("AgentCamMid").GetComponent<Camera>();
 
-					_cameraAbove.enabled = true;
-					_cameraAgent.enabled = false;
-					_cameraFollow.enabled = false;
+			// Camera Agent Check
+			if (_cameraAgent == null)
+			{
+				Debug.LogError("Camera 'AgentCamMid' not found in agent!");
+				return;
+			}
 
-					_cameras = new Dictionary<int, Camera>();
-					_cameras.Add(0, _cameraAbove);
-					_cameras.Add(1, _cameraAgent);
-					_cameras.Add(2, _cameraFollow);
+			camerasFetched = true;
 
-					effectCanvas.worldCamera = getActiveCam();
-					effectCanvas.planeDistance = choosePlaneDistance();
+			_cameraAbove.enabled = true;
+			_cameraAgent.enabled = false;
+			_cameraFollow.enabled = false;
 
-					if (!_canChangePerspective)
-					{
-						_cameraAbove.enabled = false;
-						_cameraAgent.enabled = true;
-						_cameraFollow.enabled = false;
-						_numActive = 1;
+			_cameras = new Dictionary<int, Camera>();
+			_cameras.Add(0, _cameraAbove);
+			_cameras.Add(1, _cameraAgent);
+			_cameras.Add(2, _cameraFollow);
 
-						effectCanvas.worldCamera = getActiveCam();
-						effectCanvas.planeDistance = choosePlaneDistance();
-					}
-				}
+			effectCanvas.worldCamera = getActiveCam();
+			effectCanvas.planeDistance = choosePlaneDistance();
+
+			if (!_canChangePerspective)
+			{
+				_cameraAbove.enabled = false;
+				_cameraAgent.enabled = true;
+				_cameraFollow.enabled = false;
+				_numActive = 1;
+
+				effectCanvas.worldCamera = getActiveCam();
+				effectCanvas.planeDistance = choosePlaneDistance();
+			}
+
+			if (_cameras == null || _cameras.Count != 3)
+			{
+				Debug.LogError("Cameras dictionary not initialized properly!");
+				return;
 			}
 		}
 
@@ -102,10 +130,6 @@ public class PlayerControls : MonoBehaviour
 		if (Input.GetKeyDown(KeyCode.F9))
 		{
 			_screenshotCam.Activate();
-		}
-		if (Input.GetKeyDown(KeyCode.F10))
-		{
-			Application.Quit(); // Only works on game build, not on editor.
 		}
 
 		score.text = "Prev reward: " + _agent.GetPreviousScore().ToString("0.000")
