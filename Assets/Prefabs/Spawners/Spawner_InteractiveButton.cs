@@ -120,7 +120,8 @@ public class Spawner_InteractiveButton : MonoBehaviour
         IsMoving = true;
 
         Vector3 originalPosition = childObjectToMove.transform.position;
-        Vector3 targetPosition = originalPosition + moveOffset;
+        Vector3 movementDirection = -transform.forward * moveOffset.x; // Use parent's negative local Z axis
+        Vector3 targetPosition = originalPosition + movementDirection;
         float startTime = Time.time;
 
         while (MoveToTarget(originalPosition, targetPosition, startTime, MoveDuration))
@@ -140,6 +141,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
 
         IsMoving = false;
     }
+
 
     private GameObject ChooseReward()
     {

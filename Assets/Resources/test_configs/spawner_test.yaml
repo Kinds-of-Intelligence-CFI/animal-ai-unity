@@ -16,6 +16,7 @@ arenas:
       name: Pillar-Button
       positions:
       - !Vector3 {x: 20, y: 0, z: 25}
+      rotations: [0]
       moveDurations: [0.1]
       resetDurations: [1.0]
       rewardNames: ["GoodGoal", "BadGoal", "GoodGoalMulti"] # the list of rewards that can be spawned
