@@ -95,7 +95,7 @@ MeshCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 4
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -4171273114132182892, guid: 34e11e8319937914fb76dabde1473f6c, type: 3}
 --- !u!1 &1028025888232295838
@@ -312,7 +312,7 @@ MeshCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 4
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -817681737498102685, guid: 34e11e8319937914fb76dabde1473f6c, type: 3}
 --- !u!1 &3541086752434072365
@@ -388,9 +388,9 @@ GameObject:
   - component: {fileID: 5827418943653793803}
   - component: {fileID: 7453735775492038574}
   - component: {fileID: 4653355841896983396}
-  - component: {fileID: 8746382641134514803}
   - component: {fileID: 447105005112466788}
   - component: {fileID: 6721031035980741608}
+  - component: {fileID: 5602724600326259656}
   m_Layer: 0
   m_Name: Pillar-Button
   m_TagString: PillarButton
@@ -465,20 +465,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &8746382641134514803
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6599169884992408241}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -3264360637987800443, guid: 34e11e8319937914fb76dabde1473f6c, type: 3}
 --- !u!54 &447105005112466788
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -490,8 +476,8 @@ Rigidbody:
   m_Mass: 100000
   m_Drag: 0
   m_AngularDrag: 0.05
-  m_UseGravity: 0
-  m_IsKinematic: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -515,3 +501,17 @@ MonoBehaviour:
   sizeAdjustement: 0.999
   textureUVOverride: 0
   typicalOrigin: 0
+--- !u!64 &5602724600326259656
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6599169884992408241}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -3264360637987800443, guid: 34e11e8319937914fb76dabde1473f6c, type: 3}
