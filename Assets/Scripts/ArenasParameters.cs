@@ -252,49 +252,44 @@ namespace ArenasParameters
         public void UpdateWithYAML(YAMLDefs.ArenaConfig yamlArenaConfig)
         {
             List<int> existingIds = new List<int>();
-            foreach (var key in yamlArenaConfig.arenas.Keys)
+            int nextAvailableId = 0; // Start from 0 for the first available ID
+
+            // First, add arenas with non-negative IDs from the YAML
+            foreach (KeyValuePair<int, YAMLDefs.Arena> arenaConfiguration in yamlArenaConfig.arenas)
             {
-                if (key >= 0)
+                if (arenaConfiguration.Key >= 0)
                 {
-                    existingIds.Add(key);
+                    Add(arenaConfiguration.Key, arenaConfiguration.Value);
+                    existingIds.Add(arenaConfiguration.Key);
                 }
             }
-			// Sanity check to make sure arenas are cycled properly even if negative numbers are assigned for arena ID's.
-            int nextAvailableId = 0; // Initialize with 0, assuming 0 might be the first available ID.
-            while (existingIds.Contains(nextAvailableId))
-            {
-                nextAvailableId++; // If ID is already taken, increment to find the next available one.
-            }
 
+            // Now, assign new IDs for arenas with negative or skipped IDs
             foreach (KeyValuePair<int, YAMLDefs.Arena> arenaConfiguration in yamlArenaConfig.arenas)
             {
                 if (arenaConfiguration.Key < 0)
                 {
+                    // Find the next available ID that's not already used
+                    while (existingIds.Contains(nextAvailableId))
+                    {
+                        nextAvailableId++;
+                    }
+
                     // Warn the user about the ID change. Does not crash the game.
                     Debug.LogWarning(
                         $"Arena with ID {arenaConfiguration.Key} has been changed to {nextAvailableId}."
                     );
 
-                    // Add the arena with the new ID.
+                    // Add the arena with the new ID
                     Add(nextAvailableId, arenaConfiguration.Value);
                     existingIds.Add(nextAvailableId);
-
-                    // Update next available ID for potential future conflicts.
                     nextAvailableId++;
-                    while (existingIds.Contains(nextAvailableId))
-                    {
-                        nextAvailableId++;
-                    }
-                }
-                else
-                {
-                    // If the ID is not negative, simply add the arena.
-                    Add(arenaConfiguration.Key, arenaConfiguration.Value);
                 }
             }
 
             randomizeArenas = yamlArenaConfig.randomizeArenas;
         }
+
 
         public void UpdateWithConfigurationsReceived(
             object sender,

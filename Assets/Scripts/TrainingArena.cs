@@ -121,17 +121,23 @@ public class TrainingArena : MonoBehaviour
 			}
 		}
 
+		// Attempt to retrieve a valid configuration for the next arenaID
 		ArenaConfiguration newConfiguration;
-		if (!_environmentManager.GetConfiguration(arenaID, out newConfiguration))
+		int attempts = 0; // Avoid infinite loops
+
+		while (!_environmentManager.GetConfiguration(arenaID, out newConfiguration) && attempts < totalArenas)
 		{
-			Debug.LogWarning($"Failed to retrieve configuration for arenaID: {arenaID}. Looping back to the first arena.");
-			arenaID = 0;
-			if (!_environmentManager.GetConfiguration(arenaID, out newConfiguration))
-			{
-				Debug.LogError($"Critical error: Failed to retrieve configuration for default arenaID: {arenaID}");
-				return;
-			}
+			Debug.LogWarning($"Failed to retrieve configuration for arenaID: {arenaID}. Trying next arena.");
+			arenaID = (arenaID + 1) % (totalArenas + 1); // Loop to the next arena ID
+			attempts++;
 		}
+
+		if (attempts == totalArenas)
+		{
+			Debug.LogError($"Critical error: Failed to retrieve configuration for any arena.");
+			return;
+		}
+
 		_arenaConfiguration = newConfiguration;
 
 		// Pass the showNotification attribute to the agent
@@ -157,6 +163,7 @@ public class TrainingArena : MonoBehaviour
 		}
 		spawnedRewards.Clear();
 	}
+
 
 	public void UpdateLigthStatus()
 	{
