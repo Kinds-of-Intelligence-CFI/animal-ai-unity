@@ -37,6 +37,8 @@ public class AAI3EnvironmentManager : MonoBehaviour
 	private ArenasConfigurations _arenasConfigurations;
 	private TrainingArena _instantiatedArena;
 	private ArenasParametersSideChannel _arenasParametersSideChannel;
+	public List<int> arenaOrder = new List<int>();
+
 
 	public void Awake()
 	{
