@@ -144,7 +144,7 @@ public class TrainingAgent : Agent, IPrefab
             StartCoroutine(EndEpisodeAfterDelay());
             return;
         }
-        Debug.Log("Current Pass Mark: " + Arena.CurrentPassMark);
+
         if (andEndEpisode || _nextUpdateEpisodeEnd)
         {
             float cumulativeReward = this.GetCumulativeReward();
