@@ -6,6 +6,8 @@ using UnityEngineExtensions;
 using ArenasParameters;
 using Holders;
 using Random = UnityEngine.Random;
+using System.Linq;
+
 
 public class TrainingArena : MonoBehaviour
 {
@@ -36,6 +38,7 @@ public class TrainingArena : MonoBehaviour
 	private bool _firstReset = true;
 	private List<GameObject> spawnedRewards = new List<GameObject>();
 	public bool showNotification { get; set; }
+	
 
 	internal void Awake()
 	{
@@ -68,6 +71,7 @@ public class TrainingArena : MonoBehaviour
 	public void ResetArena()
 	{
 		Debug.Log("Resetting Arena");
+
 		foreach (GameObject holder in transform.FindChildrenWithTag("spawnedObjects"))
 		{
 			holder.SetActive(false);
@@ -80,11 +84,11 @@ public class TrainingArena : MonoBehaviour
 		{
 			if (_environmentManager.GetRandomizeArenasStatus())
 			{
-				arenaID = Random.Range(0, totalArenas + 1);
+				arenaID = Random.Range(0, totalArenas + 1); // Randomly select an arena
 			}
 			else
 			{
-				arenaID = 0; // On the first reset, set the arenaID to 0 if not randomizing.
+				arenaID = 0; // Start with the first arena with arena ID = 0
 			}
 			_firstReset = false;
 		}
@@ -92,47 +96,30 @@ public class TrainingArena : MonoBehaviour
 		{
 			if (_environmentManager.GetRandomizeArenasStatus())
 			{
-				List<int> validArenaIDs = new List<int>();
-				for (int i = 0; i <= totalArenas; i++)
+				int newArenaID;
+				do
 				{
-					if (i != arenaID && _environmentManager.GetConfiguration(i, out _))
-					{
-						validArenaIDs.Add(i);
-					}
-				}
+					newArenaID = Random.Range(0, totalArenas + 1);
+				} while (newArenaID == arenaID); // Ensure we get a different arena than the current one upon reset
 
-				if (validArenaIDs.Count > 0)
-				{
-					arenaID = validArenaIDs[Random.Range(0, validArenaIDs.Count)];
-				}
-				else
-				{
-					Debug.LogWarning("No valid arena configurations found other than current. Keeping the same arena.");
-				}
+				arenaID = newArenaID;
 			}
 			else
 			{
-				// Sequentially select the next arena
-				do
-				{
-					arenaID = (arenaID + 1) % (totalArenas + 1);
-				}
-				while (!_environmentManager.GetConfiguration(arenaID, out _));
+				arenaID = (arenaID + 1) % (totalArenas + 1); // Sequentially move to the next arena
 			}
 		}
 
-		// Attempt to retrieve a valid configuration for the next arenaID
 		ArenaConfiguration newConfiguration;
-		int attempts = 0; // Avoid infinite loops
-
-		while (!_environmentManager.GetConfiguration(arenaID, out newConfiguration) && attempts < totalArenas)
+		int attempts = 0;
+		while (!_environmentManager.GetConfiguration(arenaID, out newConfiguration) && attempts <= totalArenas)
 		{
 			Debug.LogWarning($"Failed to retrieve configuration for arenaID: {arenaID}. Trying next arena.");
-			arenaID = (arenaID + 1) % (totalArenas + 1); // Loop to the next arena ID
+			arenaID = (arenaID + 1) % (totalArenas + 1);
 			attempts++;
 		}
 
-		if (attempts == totalArenas)
+		if (attempts > totalArenas)
 		{
 			Debug.LogError($"Critical error: Failed to retrieve configuration for any arena.");
 			return;
@@ -140,14 +127,13 @@ public class TrainingArena : MonoBehaviour
 
 		_arenaConfiguration = newConfiguration;
 
-		// Pass the showNotification attribute to the agent
 		_agent.showNotification = _arenaConfiguration.showNotification;
 
 		Debug.Log("Updating");
 		_arenaConfiguration.SetGameObject(prefabs.GetList());
 		_builder.Spawnables = _arenaConfiguration.spawnables;
 		_arenaConfiguration.toUpdate = false;
-		_agent.MaxStep = 0; // We never time the environment out unless agent health goes to 0
+		_agent.MaxStep = 0;
 		_agent.timeLimit = _arenaConfiguration.T * _agentDecisionInterval;
 		_builder.Build();
 		_arenaConfiguration.lightsSwitch.Reset();
