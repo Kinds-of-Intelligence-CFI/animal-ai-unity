@@ -114,7 +114,7 @@ public class TrainingArena : MonoBehaviour
 		int attempts = 0;
 		while (!_environmentManager.GetConfiguration(arenaID, out newConfiguration) && attempts <= totalArenas)
 		{
-			Debug.LogWarning($"Failed to retrieve configuration for arenaID: {arenaID}. Trying next arena.");
+			Debug.LogWarning($"Failed to retrieve configuration for arenaID: {arenaID}. Trying next arena or recycling arenas.");
 			arenaID = (arenaID + 1) % (totalArenas + 1);
 			attempts++;
 		}
