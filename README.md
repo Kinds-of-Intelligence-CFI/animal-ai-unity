@@ -1,5 +1,5 @@
 # AnimalAI
-
+![steampunkFOURcrop](https://github.com/Kinds-of-Intelligence-CFI/animal-ai/assets/65875290/df798f4a-cb2c-416f-a150-093b9382a621)
 AnimalAI3 Unity Project
 
 This repo is for the Unity project for AnimalAI in case you would like to make improvements to the environment. The main AnimalAI repo is at [https://github.com/Kinds-of-Intelligence-CFI/animal-ai](https://github.com/Kinds-of-Intelligence-CFI/animal-ai).
