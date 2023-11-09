@@ -2,7 +2,7 @@
 randomizeArenas: true # whether to randomize arenas from the beginning. Default is false.
 arenas:
   0: !Arena
-    pass_mark: 99
+    pass_mark: 0
     t: 250
     canResetEpisode: true # allow the user to change the perspective. Default is true.
     canChangePerspective: true # allow the user to change the perspective. Default is true.
