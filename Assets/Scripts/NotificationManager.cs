@@ -5,117 +5,122 @@ using TMPro;
 
 public class NotificationManager : MonoBehaviour
 {
-    public GameObject notificationPanel; // Reference to the panel created
-    public TMP_Text notificationText; // Reference to the text element inside the panel
-    public Image notificationBackgroundImage; // Reference to the image element inside the panel
+	public GameObject notificationPanel; // Reference to the panel
+	public Image notificationBackgroundImage; // Reference to the image for gradient background
 
-    public Color successColor = Color.green;
-    public Color failureColor = Color.red;
+	private AudioSource audioSource; // Reference to the AudioSource component
+	public AudioClip successSound; // Sound to play on success
+	public AudioClip failureSound; // Sound to play on failure
 
-    public Sprite[] successFrames; // Frames of success GIF
-    public Sprite[] failureFrames; // Frames of failure GIF
+	public Sprite[] successFrames;
+	public Sprite[] failureFrames;
 
-    public float frameRate = 0.1f; // Seconds per frame for animation
-    private int currentFrame = 0;
+	public static NotificationManager Instance; // Singleton instance
 
-    public AudioClip successSound;
-    public AudioClip failureSound;
-    private AudioSource audioSource;
+	void Start()
+	{
+		successFrames = Resources.LoadAll<Sprite>("happyGIF");
+		failureFrames = Resources.LoadAll<Sprite>("sadGIF");
+	}
 
-    public static NotificationManager Instance;
+	private void Awake()
+	{
+		// Singleton pattern to ensure only one instance exists
+		if (Instance == null)
+		{
+			Instance = this;
+			DontDestroyOnLoad(gameObject);
+		}
+		else
+		{
+			Destroy(gameObject);
+		}
 
-    void Start()
-    {
-        audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
-        {
-            // If there's no AudioSource attached to the GameObject, add one
-            audioSource = gameObject.AddComponent<AudioSource>();
-        }
-        HideNotification();
-    }
+		audioSource = GetComponent<AudioSource>();
+		// Ensure there is an AudioSource component
+		if (audioSource == null)
+		{
+			audioSource = gameObject.AddComponent<AudioSource>();
+		}
 
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject); // This ensures the manager persists between scenes
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
+		// Initially hide the notification
+		notificationPanel.SetActive(false);
+	}
 
-    public void ShowSuccessNotification(string message)
-    {
-        ShowNotification(message, successColor);
-        StartCoroutine(AnimateSprite(successFrames));
-        if (successSound != null)
-        {
-            audioSource.PlayOneShot(successSound);
-        }
-    }
+	public void ShowSuccessNotification()
+	{
+		ShowNotification(successSound, successFrames);
+	}
 
-    public void ShowFailureNotification(string message)
-    {
-        ShowNotification(message, failureColor);
-        StartCoroutine(AnimateSprite(failureFrames));
-        if (failureSound != null)
-        {
-            audioSource.PlayOneShot(failureSound);
-        }
-    }
+	public void ShowFailureNotification()
+	{
+		ShowNotification(failureSound, failureFrames);
+	}
 
-    private void ShowNotification(string message, Color color)
-    {
-        if (notificationText != null)
-        {
-            Debug.Log(
-                "Is the Text component missing? " + (notificationText.GetComponent<Text>() == null)
-            );
-        }
-        notificationText.text = message;
-        notificationPanel.GetComponent<Image>().color = color;
-        notificationText.color = color;
-        notificationBackgroundImage.color = color;
-        notificationPanel.SetActive(true);
-    }
+	private void ShowNotification(AudioClip sound, Sprite[] frames)
+	{
+		notificationPanel.SetActive(true);
+		StartCoroutine(AnimateGIF(frames, 0.025f));
+		if (sound != null)
+		{
+			audioSource.PlayOneShot(sound);
+		}
+	}
 
-    public void HideNotification()
-    {
-        if (notificationPanel == null)
-        {
-            Debug.Log("Notification panel is null.");
-        }
-        else
-        {
-            Debug.Log("Hiding notification panel.");
-            notificationPanel.SetActive(false);
-            StopAllCoroutines();
-        }
-    }
 
-    IEnumerator AnimateSprite(Sprite[] animationFrames)
-    {
-        while (true)
-        {
-            notificationBackgroundImage.sprite = animationFrames[currentFrame];
-            currentFrame = (currentFrame + 1) % animationFrames.Length;
-            yield return new WaitForSeconds(frameRate);
-        }
-    }
+	public void HideNotification()
+	{
+		StartCoroutine(FadeOutBackground(1f));
+	}
 
-    public void PlaySuccessGif()
-    {
-        StopAllCoroutines();
-        StartCoroutine(AnimateSprite(successFrames));
-    }
+	IEnumerator FadeInBackground(Color color, float duration)
+	{
+		float currentTime = 0f;
+		while (currentTime < duration)
+		{
+			float alpha = Mathf.Lerp(0f, 1f, currentTime / duration);
+			notificationBackgroundImage.color = new Color(color.r, color.g, color.b, alpha);
+			currentTime += Time.deltaTime;
+			yield return null;
+		}
+		notificationBackgroundImage.color = new Color(color.r, color.g, color.b, 1f);
+	}
 
-    public void PlayFailureGif()
-    {
-        StopAllCoroutines();
-        StartCoroutine(AnimateSprite(failureFrames));
-    }
+	IEnumerator FadeOutBackground(float duration)
+	{
+		float startAlpha = notificationBackgroundImage.color.a;
+		float currentTime = 0f;
+		while (currentTime < duration)
+		{
+			float alpha = Mathf.Lerp(startAlpha, 0f, currentTime / duration);
+			notificationBackgroundImage.color = new Color(
+				notificationBackgroundImage.color.r,
+				notificationBackgroundImage.color.g,
+				notificationBackgroundImage.color.b,
+				alpha
+			);
+			currentTime += Time.deltaTime;
+			yield return null;
+		}
+		notificationBackgroundImage.color = new Color(
+			notificationBackgroundImage.color.r,
+			notificationBackgroundImage.color.g,
+			notificationBackgroundImage.color.b,
+			0f
+		);
+		notificationPanel.SetActive(false);
+	}
+
+	IEnumerator AnimateGIF(Sprite[] frames, float frameRate)
+	{
+		int currentFrame = 0;
+		while (true)
+		{
+			notificationBackgroundImage.sprite = frames[currentFrame];
+			currentFrame = (currentFrame + 1) % frames.Length;
+			yield return new WaitForSeconds(frameRate);
+		}
+	}
+
+
 }
