@@ -140,9 +140,7 @@ public class TrainingAgent : Agent, IPrefab
 			health = 0;
 			if (showNotification)
 			{
-				NotificationManager.Instance.ShowFailureNotification(
-					"Uh-oh! You FAILED! Try again!"
-				);
+				NotificationManager.Instance.ShowFailureNotification();
 				NotificationManager.Instance.PlayFailureGif();
 			}
 			StartCoroutine(EndEpisodeAfterDelay());
@@ -157,7 +155,7 @@ public class TrainingAgent : Agent, IPrefab
 			{
 				if (showNotification)
 				{
-					NotificationManager.Instance.ShowSuccessNotification("Congrats! You PASSED!");
+					NotificationManager.Instance.ShowSuccessNotification();
 					NotificationManager.Instance.PlaySuccessGif();
 				}
 			}
@@ -165,9 +163,7 @@ public class TrainingAgent : Agent, IPrefab
 			{
 				if (showNotification)
 				{
-					NotificationManager.Instance.ShowFailureNotification(
-						"Uh-oh! You FAILED! Try again!"
-					);
+					NotificationManager.Instance.ShowFailureNotification();
 					NotificationManager.Instance.PlayFailureGif();
 				}
 			}

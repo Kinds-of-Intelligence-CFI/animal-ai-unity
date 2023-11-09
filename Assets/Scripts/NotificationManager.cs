@@ -5,7 +5,6 @@ using System.Collections;
 public class NotificationManager : MonoBehaviour
 {
 	public GameObject notificationPanel; // Reference to the panel created
-	public Text notificationText; // Reference to the text element inside the panel
 	public Image notificationBackgroundImage; // Reference to the image element inside the panel
 
 	public Color successColor = Color.green;
@@ -39,39 +38,25 @@ public class NotificationManager : MonoBehaviour
 		}
 	}
 
-	public void ShowSuccessNotification(string message)
+	public void ShowSuccessNotification()
 	{
-		ShowNotification(message, successColor);
+		ShowNotification(successColor);
 		StartCoroutine(AnimateSprite(successFrames));
 	}
 
-	public void ShowFailureNotification(string message)
+	public void ShowFailureNotification()
 	{
-		ShowNotification(message, failureColor);
+		ShowNotification(failureColor);
 		StartCoroutine(AnimateSprite(failureFrames));
 	}
 
-	private void ShowNotification(string message, Color color)
+	private void ShowNotification(Color color)
 	{
-		Debug.Log("Notification Panel: " + notificationPanel);
-		Debug.Log("Notification Text: " + notificationText);
-		Debug.Log("Message: " + message);
-		Debug.Log("Color: " + color);
-
-		Debug.Log("Is notificationText null? " + (notificationText == null));
-		if (notificationText != null)
-		{
-			Debug.Log(
-				"Is the Text component missing? " + (notificationText.GetComponent<Text>() == null)
-			);
-		}
-		Debug.Log("Trying to show notification with message: " + message);
-		notificationText.text = message;
 		notificationPanel.GetComponent<Image>().color = color;
-		notificationText.color = color;
 		notificationBackgroundImage.color = color;
 		notificationPanel.SetActive(true);
 	}
+
 
 	public void HideNotification()
 	{
