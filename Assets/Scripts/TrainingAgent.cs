@@ -180,7 +180,7 @@ public class TrainingAgent : Agent, IPrefab
 			yield break;
 		}
 
-		yield return new WaitForSeconds(5f);
+		yield return new WaitForSeconds(2.5f);
 		NotificationManager.Instance.HideNotification();
 		EndEpisode();
 	}
