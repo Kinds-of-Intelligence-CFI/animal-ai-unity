@@ -38,7 +38,7 @@ public class TrainingArena : MonoBehaviour
 	private bool _firstReset = true;
 	private List<GameObject> spawnedRewards = new List<GameObject>();
 	public bool showNotification { get; set; }
-	
+
 
 	internal void Awake()
 	{
@@ -149,7 +149,6 @@ public class TrainingArena : MonoBehaviour
 		}
 		spawnedRewards.Clear();
 	}
-
 
 	public void UpdateLigthStatus()
 	{

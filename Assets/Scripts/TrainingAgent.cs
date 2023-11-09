@@ -39,7 +39,6 @@ public class TrainingAgent : Agent, IPrefab
 	private float _freezeDelay = 0f;
 
 	public bool showNotification = false;
-	private bool _hasShownFailureNotification = false;
 
 	public float GetFreezeDelay()
 	{
@@ -114,12 +113,16 @@ public class TrainingAgent : Agent, IPrefab
 
 	public void UpdateHealth(float updateAmount, bool andEndEpisode = false)
 	{
+		Debug.Log($"Value of showNotification: {showNotification}");
 		if (NotificationManager.Instance == null && showNotification == true)
 		{
 			Debug.LogError("NotificationManager instance is not set.");
 			return;
 		}
-
+		/// <summary>
+		/// Update the health of the agent and reset any queued updates
+		/// If health reaches 0 or the episode is queued to end then call EndEpisode().
+		/// </summary>
 		if (!IsFrozen())
 		{
 			health += 100 * updateAmount; // Health = 100*reward
@@ -132,18 +135,20 @@ public class TrainingAgent : Agent, IPrefab
 		{
 			health = _maxHealth;
 		}
-		else if (health <= 0 && !_hasShownFailureNotification)
+		else if (health <= 0)
 		{
 			health = 0;
 			if (showNotification)
 			{
-				NotificationManager.Instance.ShowFailureNotification();
-				_hasShownFailureNotification = true;
+				NotificationManager.Instance.ShowFailureNotification(
+					"Uh-oh! You FAILED! Try again!"
+				);
+				NotificationManager.Instance.PlayFailureGif();
 			}
 			StartCoroutine(EndEpisodeAfterDelay());
 			return;
 		}
-
+		Debug.Log("Current Pass Mark: " + Arena.CurrentPassMark);
 		if (andEndEpisode || _nextUpdateEpisodeEnd)
 		{
 			float cumulativeReward = this.GetCumulativeReward();
@@ -152,14 +157,18 @@ public class TrainingAgent : Agent, IPrefab
 			{
 				if (showNotification)
 				{
-					NotificationManager.Instance.ShowSuccessNotification();
+					NotificationManager.Instance.ShowSuccessNotification("Congrats! You PASSED!");
+					NotificationManager.Instance.PlaySuccessGif();
 				}
 			}
 			else
 			{
 				if (showNotification)
 				{
-					NotificationManager.Instance.ShowFailureNotification();
+					NotificationManager.Instance.ShowFailureNotification(
+						"Uh-oh! You FAILED! Try again!"
+					);
+					NotificationManager.Instance.PlayFailureGif();
 				}
 			}
 			_nextUpdateEpisodeEnd = false;
@@ -167,56 +176,56 @@ public class TrainingAgent : Agent, IPrefab
 		}
 	}
 
-		IEnumerator EndEpisodeAfterDelay()
+	IEnumerator EndEpisodeAfterDelay()
+	{
+		if (!showNotification)
 		{
-			if (!showNotification)
-			{
-				EndEpisode();
-				yield break;
-			}
-
-			yield return new WaitForSeconds(2.5f);
-			NotificationManager.Instance.HideNotification();
 			EndEpisode();
+			yield break;
 		}
 
-		private void MoveAgent(int actionForward, int actionRotate)
-		{
-			Vector3 directionToGo = Vector3.zero;
-			Vector3 rotateDirection = Vector3.zero;
-			Vector3 quickStop = Vector3.zero;
+		yield return new WaitForSeconds(5f);
+		NotificationManager.Instance.HideNotification();
+		EndEpisode();
+	}
 
-			if (_isGrounded)
-			{
-				switch (actionForward)
-				{
-					case 1:
-						directionToGo = transform.forward * 1f;
-						break;
-					case 2:
-						directionToGo = transform.forward * -1f;
-						break;
-					case 0: // Slow down faster than drag with no input
-						_rigidBody.velocity = _rigidBody.velocity * quickStopRatio;
-						break;
-				}
-			}
-			switch (actionRotate)
+	private void MoveAgent(int actionForward, int actionRotate)
+	{
+		Vector3 directionToGo = Vector3.zero;
+		Vector3 rotateDirection = Vector3.zero;
+		Vector3 quickStop = Vector3.zero;
+
+		if (_isGrounded)
+		{
+			switch (actionForward)
 			{
 				case 1:
-					rotateDirection = transform.up * 1f;
+					directionToGo = transform.forward * 1f;
 					break;
 				case 2:
-					rotateDirection = transform.up * -1f;
+					directionToGo = transform.forward * -1f;
+					break;
+				case 0: // Slow down faster than drag with no input
+					_rigidBody.velocity = _rigidBody.velocity * quickStopRatio;
 					break;
 			}
-
-			transform.Rotate(rotateDirection, Time.fixedDeltaTime * rotationSpeed);
-			_rigidBody.AddForce(
-				directionToGo.normalized * speed * 100f * Time.fixedDeltaTime,
-				ForceMode.Acceleration
-			);
 		}
+		switch (actionRotate)
+		{
+			case 1:
+				rotateDirection = transform.up * 1f;
+				break;
+			case 2:
+				rotateDirection = transform.up * -1f;
+				break;
+		}
+
+		transform.Rotate(rotateDirection, Time.fixedDeltaTime * rotationSpeed);
+		_rigidBody.AddForce(
+			directionToGo.normalized * speed * 100f * Time.fixedDeltaTime,
+			ForceMode.Acceleration
+		);
+	}
 
 	public override void Heuristic(in ActionBuffers actionsOut)
 	{
@@ -244,7 +253,7 @@ public class TrainingAgent : Agent, IPrefab
 	public override void OnEpisodeBegin()
 	{
 		Debug.Log("Episode Begin");
-		StopCoroutine("unfreezeCountdown");
+		StopCoroutine("unfreezeCountdown"); // When a new episode starts, any existing unfreeze countdown is cancelled.
 		_previousScore = _currentScore;
 		numberOfGoalsCollected = 0;
 		_arena.ResetArena();
@@ -252,6 +261,7 @@ public class TrainingAgent : Agent, IPrefab
 		_isGrounded = false;
 		health = _maxHealth;
 
+		// Initiate the freeze for the agent. Fix for erratic behaviour.
 		SetFreezeDelay(GetFreezeDelay());
 	}
 
