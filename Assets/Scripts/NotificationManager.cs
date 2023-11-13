@@ -18,6 +18,10 @@ public class NotificationManager : MonoBehaviour
 
 	public static NotificationManager Instance;
 
+	public Image gradientOverlay;
+	public Color successGradientColor = Color.green;
+	public Color failureGradientColor = Color.red;
+
 	void Start()
 	{
 		successFrames = Resources.LoadAll<Sprite>("happyGIF");
