@@ -4,23 +4,21 @@ using System.Collections;
 
 public class NotificationManager : MonoBehaviour
 {
-	public GameObject notificationPanel; // Reference to the panel created
+	public GameObject notificationPanel; // Reference to the panel
 	public Image notificationBackgroundImage; // Reference to the image element inside the panel
+	public Image gradientOverlay; // Reference to the gradient overlay image
 
-	public Color successColor = Color.green;
-	public Color failureColor = Color.red;
+	public Sprite[] successFrames; // Frames for success animation
+	public Sprite[] failureFrames; // Frames for failure animation
+	public float frameRate = 0.1f; // Frame rate for the animation
 
-	public Sprite[] successFrames;
-	public Sprite[] failureFrames;
-
-	public float frameRate = 0.1f; // seconds per frame for animation
-	private int currentFrame = 0;
-
-	public static NotificationManager Instance;
-
-	public Image gradientOverlay;
 	public Color successGradientColor = Color.green;
 	public Color failureGradientColor = Color.red;
+
+	private int currentFrame = 0; // Current frame index for the animation
+	private Coroutine gifCoroutine; // Coroutine for handling the GIF animation
+
+	public static NotificationManager Instance;
 
 	void Start()
 	{
@@ -34,67 +32,66 @@ public class NotificationManager : MonoBehaviour
 		if (Instance == null)
 		{
 			Instance = this;
-			DontDestroyOnLoad(gameObject); // This ensures the manager persists between scenes
+			DontDestroyOnLoad(gameObject); // Ensure this object persists between scene loads
 		}
 		else
 		{
-			Destroy(gameObject);
+			Destroy(gameObject); // Destroy any duplicates
 		}
 	}
 
 	public void ShowSuccessNotification()
 	{
-		ShowNotification(successColor);
-		StartCoroutine(AnimateSprite(successFrames));
+		ShowNotification(true);
 	}
 
 	public void ShowFailureNotification()
 	{
-		ShowNotification(failureColor);
-		StartCoroutine(AnimateSprite(failureFrames));
+		ShowNotification(false);
 	}
 
-	private void ShowNotification(Color color)
+	private void ShowNotification(bool isSuccess)
 	{
-		notificationPanel.GetComponent<Image>().color = color;
-		notificationBackgroundImage.color = color;
-		notificationPanel.SetActive(true);
-	}
+		Sprite[] framesToShow = isSuccess ? successFrames : failureFrames;
+		Color gradientColor = isSuccess ? successGradientColor : failureGradientColor;
 
+		gradientOverlay.color = gradientColor;
+
+		notificationPanel.SetActive(true);
+		gradientOverlay.gameObject.SetActive(true);
+
+		// If there is an existing GIF animation coroutine, stop it
+		if (gifCoroutine != null)
+		{
+			StopCoroutine(gifCoroutine);
+		}
+		// Start a new coroutine to animate the appropriate set of frames
+		gifCoroutine = StartCoroutine(AnimateSprite(framesToShow));
+	}
 
 	public void HideNotification()
 	{
-		if (notificationPanel == null)
+		notificationPanel.SetActive(false);
+		gradientOverlay.gameObject.SetActive(false);
+
+		if (gifCoroutine != null)
 		{
-			Debug.Log("Notification panel is null.");
+			StopCoroutine(gifCoroutine);
+			gifCoroutine = null;
 		}
-		else
-		{
-			Debug.Log("Hiding notification panel.");
-			notificationPanel.SetActive(false);
-			StopAllCoroutines();
-		}
+		currentFrame = 0;
 	}
 
 	IEnumerator AnimateSprite(Sprite[] animationFrames)
 	{
 		while (true)
 		{
+			// Set the current sprite frame
 			notificationBackgroundImage.sprite = animationFrames[currentFrame];
+			// Increment the frame index, wrapping back to 0 if it exceeds the length of the array
 			currentFrame = (currentFrame + 1) % animationFrames.Length;
+			// Wait for the frame rate duration before the next frame
 			yield return new WaitForSeconds(frameRate);
 		}
-	}
-
-	public void PlaySuccessGif()
-	{
-		StopAllCoroutines();
-		StartCoroutine(AnimateSprite(successFrames));
-	}
-
-	public void PlayFailureGif()
-	{
-		StopAllCoroutines();
-		StartCoroutine(AnimateSprite(failureFrames));
 	}
 }

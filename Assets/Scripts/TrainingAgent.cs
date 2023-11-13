@@ -141,7 +141,6 @@ public class TrainingAgent : Agent, IPrefab
 			if (showNotification)
 			{
 				NotificationManager.Instance.ShowFailureNotification();
-				NotificationManager.Instance.PlayFailureGif();
 			}
 			StartCoroutine(EndEpisodeAfterDelay());
 			return;
@@ -156,7 +155,6 @@ public class TrainingAgent : Agent, IPrefab
 				if (showNotification)
 				{
 					NotificationManager.Instance.ShowSuccessNotification();
-					NotificationManager.Instance.PlaySuccessGif();
 				}
 			}
 			else
@@ -164,7 +162,6 @@ public class TrainingAgent : Agent, IPrefab
 				if (showNotification)
 				{
 					NotificationManager.Instance.ShowFailureNotification();
-					NotificationManager.Instance.PlayFailureGif();
 				}
 			}
 			_nextUpdateEpisodeEnd = false;
