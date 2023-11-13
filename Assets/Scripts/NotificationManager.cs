@@ -4,9 +4,10 @@ using System.Collections;
 
 public class NotificationManager : MonoBehaviour
 {
+	public static NotificationManager Instance;
+
 	public GameObject notificationPanel; // Reference to the panel
 	public Image notificationBackgroundImage; // Reference to the image element inside the panel
-	public Image gradientOverlay; // Reference to the gradient overlay image
 
 	public Sprite[] successFrames; // Frames for success animation
 	public Sprite[] failureFrames; // Frames for failure animation
@@ -15,10 +16,9 @@ public class NotificationManager : MonoBehaviour
 	private int currentFrame = 0; // Current frame index for the animation
 	private Coroutine gifCoroutine; // Coroutine for handling the GIF animation
 
-	public static NotificationManager Instance;
+	public Image successGradientBorderImage;
+	public Image failureGradientBorderImage;
 
-	public Image successGradientBorder;
-	public Image failureGradientBorder;
 
 	void Start()
 	{
@@ -53,23 +53,25 @@ public class NotificationManager : MonoBehaviour
 	private void ShowNotification(bool isSuccess)
 	{
 		Sprite[] framesToShow = isSuccess ? successFrames : failureFrames;
+		Image gradientBorderToShow = isSuccess ? successGradientBorderImage : failureGradientBorderImage;
 
 		notificationPanel.SetActive(true);
-		gradientOverlay.gameObject.SetActive(true);
+		successGradientBorderImage.gameObject.SetActive(isSuccess);
+		failureGradientBorderImage.gameObject.SetActive(!isSuccess);
 
-		// If there is an existing GIF animation coroutine, stop it
 		if (gifCoroutine != null)
 		{
 			StopCoroutine(gifCoroutine);
 		}
-		// Start a new coroutine to animate the appropriate set of frames
 		gifCoroutine = StartCoroutine(AnimateSprite(framesToShow));
 	}
+
 
 	public void HideNotification()
 	{
 		notificationPanel.SetActive(false);
-		gradientOverlay.gameObject.SetActive(false);
+		successGradientBorderImage.gameObject.SetActive(false);
+		failureGradientBorderImage.gameObject.SetActive(false);
 
 		if (gifCoroutine != null)
 		{
@@ -78,6 +80,7 @@ public class NotificationManager : MonoBehaviour
 		}
 		currentFrame = 0;
 	}
+
 
 	IEnumerator AnimateSprite(Sprite[] animationFrames)
 	{
