@@ -406,6 +406,7 @@ GameObject:
   - component: {fileID: 283262112}
   - component: {fileID: 283262113}
   - component: {fileID: 283262114}
+  - component: {fileID: 283262115}
   m_Layer: 5
   m_Name: NotificationGradientSuccess
   m_TagString: Untagged
@@ -471,6 +472,20 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &283262115
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 283262111}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80fe2f92bad056a449c606b1ab53208d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  imageToFlash: {fileID: 283262114}
+  flashSpeed: 10
 --- !u!1 &335556351
 GameObject:
   m_ObjectHideFlags: 0
@@ -482,6 +497,7 @@ GameObject:
   - component: {fileID: 335556354}
   - component: {fileID: 335556353}
   - component: {fileID: 335556352}
+  - component: {fileID: 335556355}
   m_Layer: 5
   m_Name: NotificationGradientFailure
   m_TagString: Untagged
@@ -547,6 +563,20 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0.00035095215}
   m_SizeDelta: {x: -872, y: -378}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &335556355
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 335556351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80fe2f92bad056a449c606b1ab53208d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  imageToFlash: {fileID: 335556352}
+  flashSpeed: 10
 --- !u!1 &411491232
 GameObject:
   m_ObjectHideFlags: 0
