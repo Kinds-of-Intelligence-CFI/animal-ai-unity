@@ -12,13 +12,13 @@ public class NotificationManager : MonoBehaviour
 	public Sprite[] failureFrames; // Frames for failure animation
 	public float frameRate = 0.1f; // Frame rate for the animation
 
-	public Color successGradientColor = Color.green;
-	public Color failureGradientColor = Color.red;
-
 	private int currentFrame = 0; // Current frame index for the animation
 	private Coroutine gifCoroutine; // Coroutine for handling the GIF animation
 
 	public static NotificationManager Instance;
+
+	public Image successGradientBorder;
+	public Image failureGradientBorder;
 
 	void Start()
 	{
@@ -53,9 +53,6 @@ public class NotificationManager : MonoBehaviour
 	private void ShowNotification(bool isSuccess)
 	{
 		Sprite[] framesToShow = isSuccess ? successFrames : failureFrames;
-		Color gradientColor = isSuccess ? successGradientColor : failureGradientColor;
-
-		gradientOverlay.color = gradientColor;
 
 		notificationPanel.SetActive(true);
 		gradientOverlay.gameObject.SetActive(true);
