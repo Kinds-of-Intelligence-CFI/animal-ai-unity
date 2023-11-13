@@ -18,6 +18,8 @@ public class NotificationManager : MonoBehaviour
 
 	public Image successGradientBorderImage;
 	public Image failureGradientBorderImage;
+	
+	public TrainingAgent trainingAgent;
 
 
 	void Start()

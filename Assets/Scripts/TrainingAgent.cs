@@ -182,6 +182,8 @@ public class TrainingAgent : Agent, IPrefab
 		EndEpisode();
 	}
 
+	
+
 	private void MoveAgent(int actionForward, int actionRotate)
 	{
 		Vector3 directionToGo = Vector3.zero;
