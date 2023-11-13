@@ -53,7 +53,7 @@ public class TrainingAgent : Agent, IPrefab
 		if (v != 0f && !_isCountdownActive)
 		{
 			Debug.Log(
-				"starting coroutine unfreezeCountdown() with wait seconds == " + GetFreezeDelay()
+				"Starting coroutine unfreezeCountdown() with wait seconds == " + GetFreezeDelay()
 			);
 			StartCoroutine(unfreezeCountdown()); // Start a new countdown if and only if the new delay is not zero.
 		}
@@ -300,6 +300,16 @@ public class TrainingAgent : Agent, IPrefab
 		return _previousScore;
 	}
 
+	private IEnumerator unfreezeCountdown()
+	{
+		_isCountdownActive = true;
+		yield return new WaitForSeconds(GetFreezeDelay());
+
+		Debug.Log("unfreezing!");
+		SetFreezeDelay(0f);
+		_isCountdownActive = false;
+	}
+
 	//******************************
 	//PREFAB INTERFACE FOR THE AGENT
 	//******************************
@@ -340,13 +350,4 @@ public class TrainingAgent : Agent, IPrefab
 		return new Vector3(0, rotationY < 0 ? Random.Range(0f, 360f) : rotationY, 0);
 	}
 
-	private IEnumerator unfreezeCountdown()
-	{
-		_isCountdownActive = true;
-		yield return new WaitForSeconds(GetFreezeDelay());
-
-		Debug.Log("unfreezing!");
-		SetFreezeDelay(0f);
-		_isCountdownActive = false;
-	}
 }
