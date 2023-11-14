@@ -37,15 +37,15 @@ public class TrainingAgent : Agent, IPrefab
 	private float _nextUpdateHealth = 0f;
 	private bool _nextUpdateEpisodeEnd = false;
 	private float _freezeDelay = 0f;
+	private bool _isFrozen = false;
 
 	public bool showNotification = false;
+	private bool _isCountdownActive = false;
 
 	public float GetFreezeDelay()
 	{
 		return _freezeDelay;
 	}
-
-	private bool _isCountdownActive = false;
 
 	public void SetFreezeDelay(float v)
 	{
@@ -61,7 +61,17 @@ public class TrainingAgent : Agent, IPrefab
 
 	public bool IsFrozen()
 	{
-		return (_freezeDelay > 0f);
+		return _freezeDelay > 0f || _isFrozen;
+	}
+
+	public void FreezeAgent(bool freeze)
+	{
+		_isFrozen = freeze;
+		if (_isFrozen)
+		{
+			_rigidBody.velocity = Vector3.zero;
+			_rigidBody.angularVelocity = Vector3.zero;
+		}
 	}
 
 	public override void Initialize()
@@ -184,6 +194,16 @@ public class TrainingAgent : Agent, IPrefab
 
 	private void MoveAgent(int actionForward, int actionRotate)
 	{
+		// Check if the agent should be frozen during notification
+		if (IsFrozen())
+		{
+			// If the agent is frozen, stop all movement and rotation
+			_rigidBody.velocity = Vector3.zero;
+			_rigidBody.angularVelocity = Vector3.zero;
+			return; // No further movement logic should be executed
+		}
+
+		// Existing movement logic
 		Vector3 directionToGo = Vector3.zero;
 		Vector3 rotateDirection = Vector3.zero;
 		Vector3 quickStop = Vector3.zero;
@@ -199,10 +219,12 @@ public class TrainingAgent : Agent, IPrefab
 					directionToGo = transform.forward * -1f;
 					break;
 				case 0: // Slow down faster than drag with no input
-					_rigidBody.velocity = _rigidBody.velocity * quickStopRatio;
+					quickStop = _rigidBody.velocity * quickStopRatio;
+					_rigidBody.velocity = quickStop;
 					break;
 			}
 		}
+
 		switch (actionRotate)
 		{
 			case 1:
@@ -213,12 +235,12 @@ public class TrainingAgent : Agent, IPrefab
 				break;
 		}
 
+		// Apply the rotation
 		transform.Rotate(rotateDirection, Time.fixedDeltaTime * rotationSpeed);
-		_rigidBody.AddForce(
-			directionToGo.normalized * speed * 100f * Time.fixedDeltaTime,
-			ForceMode.Acceleration
-		);
+		// Apply the force for movement
+		_rigidBody.AddForce(directionToGo.normalized * speed * 100f * Time.fixedDeltaTime, ForceMode.Acceleration);
 	}
+
 
 	public override void Heuristic(in ActionBuffers actionsOut)
 	{

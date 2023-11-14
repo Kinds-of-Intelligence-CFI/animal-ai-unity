@@ -5,6 +5,7 @@ using System.Collections;
 public class NotificationManager : MonoBehaviour
 {
 	public static NotificationManager Instance;
+	public TrainingAgent trainingAgent;
 
 	public GameObject notificationPanel; // Reference to the panel
 	public Image notificationBackgroundImage; // Reference to the image element inside the panel
@@ -23,6 +24,7 @@ public class NotificationManager : MonoBehaviour
 	{
 		successFrames = Resources.LoadAll<Sprite>("happyGIF");
 		failureFrames = Resources.LoadAll<Sprite>("sadGIF");
+		trainingAgent = GameObject.FindObjectOfType<TrainingAgent>();
 		HideNotification();
 	}
 
@@ -42,11 +44,13 @@ public class NotificationManager : MonoBehaviour
 	public void ShowSuccessNotification()
 	{
 		ShowNotification(true);
+		trainingAgent.FreezeAgent(true);
 	}
 
 	public void ShowFailureNotification()
 	{
 		ShowNotification(false);
+		trainingAgent.FreezeAgent(true);
 	}
 
 	private void ShowNotification(bool isSuccess)
@@ -78,6 +82,8 @@ public class NotificationManager : MonoBehaviour
 			gifCoroutine = null;
 		}
 		currentFrame = 0;
+		
+		trainingAgent.FreezeAgent(false);
 	}
 
 
