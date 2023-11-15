@@ -22,6 +22,9 @@ namespace YAMLDefs
 	{
 		public IDictionary<int, Arena> arenas { get; set; }
 		public bool randomizeArenas = false;
+		public bool showNotification { get; set; } = false;
+		public bool canResetEpisode { get; set; } = true;
+		public bool canChangePerspective { get; set; } = true;
 	}
 
 	public class Arena
@@ -30,10 +33,6 @@ namespace YAMLDefs
 		public List<Item> items { get; set; } = new List<Item>();
 		public float pass_mark { get; set; } = 0;
 		public static float CurrentPassMark { get; private set; }
-		public bool showNotification { get; set; } = false;
-		public bool canResetEpisode { get; set; } = true;
-		public bool canChangePerspective { get; set; } = true;
-		public int defaultPerspective { get; set; } = 1; // TODO: REMOVE THIS PARAMETER WHERE IMPLEMENTED --> NO LONGER USED.
 
 		public void SetCurrentPassMark()
 		{

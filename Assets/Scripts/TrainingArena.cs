@@ -127,7 +127,7 @@ public class TrainingArena : MonoBehaviour
 
 		_arenaConfiguration = newConfiguration;
 
-		_agent.showNotification = _arenaConfiguration.showNotification;
+		_agent.showNotification = ArenasConfigurations.Instance.showNotification;
 
 		Debug.Log("Updating");
 		_arenaConfiguration.SetGameObject(prefabs.GetList());

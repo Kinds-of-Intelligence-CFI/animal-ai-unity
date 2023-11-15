@@ -43,8 +43,9 @@ public class PlayerControls : MonoBehaviour
 			return;
 		}
 
-		_canResetEpisode = currentConfig.canResetEpisode;
-		_canChangePerspective = currentConfig.canChangePerspective;
+		_canResetEpisode = arenasConfigurations.canResetEpisode;
+		_canChangePerspective = arenasConfigurations.canChangePerspective;
+
 
 		// Camera Component Checks. Important check in general.
 		if (_screenshotCam == null)

@@ -134,10 +134,6 @@ namespace ArenasParameters
 		public bool toUpdate = false;
 		public string protoString = "";
 		public int randomSeed = 0;
-		public bool showNotification { get; set; } = false;
-		public bool canResetEpisode { get; set; } = true;
-		public bool canChangePerspective { get; set; } = true;
-		public int defaultPerspective { get; set; } = 0;
 
 		public ArenaConfiguration() { }
 
@@ -166,10 +162,7 @@ namespace ArenasParameters
 			toUpdate = true;
 			protoString = yamlArena.ToString();
 			randomSeed = yamlArena.random_seed;
-			this.showNotification = yamlArena.showNotification;
-			this.canResetEpisode = yamlArena.canResetEpisode;
-			this.canChangePerspective = yamlArena.canChangePerspective;
-			this.defaultPerspective = yamlArena.defaultPerspective;
+
 		}
 
 		public void SetGameObject(List<GameObject> listObj)
@@ -190,6 +183,9 @@ namespace ArenasParameters
 		public int seed;
 		public static ArenasConfigurations Instance { get; private set; }
 		public bool randomizeArenas = false;
+		public bool showNotification { get; set; } = false;
+		public bool canResetEpisode { get; set; } = true;
+		public bool canChangePerspective { get; set; } = true;
 
 		public ArenasConfigurations()
 		{
@@ -283,6 +279,10 @@ namespace ArenasParameters
 			}
 
 			randomizeArenas = yamlArenaConfig.randomizeArenas;
+			showNotification = yamlArenaConfig.showNotification;
+			canResetEpisode = yamlArenaConfig.canResetEpisode;
+			canChangePerspective = yamlArenaConfig.canChangePerspective;
+			
 		}
 
 

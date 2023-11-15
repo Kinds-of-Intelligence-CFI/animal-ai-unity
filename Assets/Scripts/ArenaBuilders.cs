@@ -116,7 +116,7 @@ namespace ArenaBuilders
                 TrainingArena trainingArena = _arena.GetComponent<TrainingArena>();
                 if (trainingArena != null)
                 {
-                    agentInstance.showNotification = trainingArena.ArenaConfig.showNotification;
+                    agentInstance.showNotification = ArenasConfigurations.Instance.showNotification;
                 }
             }
 
