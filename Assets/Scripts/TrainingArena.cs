@@ -85,14 +85,22 @@ public class TrainingArena : MonoBehaviour
 		if (_firstReset)
 		{
 			_firstReset = false;
-			if (_environmentManager.GetRandomizeArenasStatus())
+
+			// Check if the application is in training mode
+			if (Academy.Instance.IsCommunicatorOn)
 			{
-				// Randomly select any arena, including the first one
+				// If in training mode, always start with the first arena
+				arenaID = 0;
+			}
+			else if (_environmentManager.GetRandomizeArenasStatus())
+			{
+				// If randomizeArenas is true, randomly select an arena
 				arenaID = Random.Range(0, totalArenas + 1);
 			}
 			else
 			{
-				arenaID = 0; // Start with the first arena
+				// If not in training mode and randomizeArenas is false, start with the first arena
+				arenaID = 0;
 			}
 		}
 		else
@@ -154,6 +162,7 @@ public class TrainingArena : MonoBehaviour
 		}
 		spawnedRewards.Clear();
 	}
+
 
 
 	public void UpdateLigthStatus()
