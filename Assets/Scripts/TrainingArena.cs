@@ -72,25 +72,28 @@ public class TrainingArena : MonoBehaviour
 	{
 		Debug.Log("Resetting Arena");
 
+		// Destroy existing objects in the arena
 		foreach (GameObject holder in transform.FindChildrenWithTag("spawnedObjects"))
 		{
 			holder.SetActive(false);
 			Destroy(holder);
 		}
 
+		// Calculate the total number of arenas
 		int totalArenas = _environmentManager.getMaxArenaID();
 
 		if (_firstReset)
 		{
+			_firstReset = false;
 			if (_environmentManager.GetRandomizeArenasStatus())
 			{
-				arenaID = Random.Range(0, totalArenas + 1); // Randomly select an arena
+				// Randomly select any arena, including the first one
+				arenaID = Random.Range(0, totalArenas + 1);
 			}
 			else
 			{
-				arenaID = 0; // Start with the first arena with arena ID = 0
+				arenaID = 0; // Start with the first arena
 			}
-			_firstReset = false;
 		}
 		else
 		{
@@ -100,7 +103,7 @@ public class TrainingArena : MonoBehaviour
 				do
 				{
 					newArenaID = Random.Range(0, totalArenas + 1);
-				} while (newArenaID == arenaID); // Ensure we get a different arena than the current one upon reset
+				} while (newArenaID == arenaID); // Ensure a different arena than the current one
 
 				arenaID = newArenaID;
 			}
@@ -127,9 +130,10 @@ public class TrainingArena : MonoBehaviour
 
 		_arenaConfiguration = newConfiguration;
 
+		// Updating showNotification from the global configuration
 		_agent.showNotification = ArenasConfigurations.Instance.showNotification;
 
-		Debug.Log("Updating");
+		Debug.Log("Updating Arena Configuration");
 		_arenaConfiguration.SetGameObject(prefabs.GetList());
 		_builder.Spawnables = _arenaConfiguration.spawnables;
 		_arenaConfiguration.toUpdate = false;
@@ -143,12 +147,14 @@ public class TrainingArena : MonoBehaviour
 			Random.InitState(_arenaConfiguration.randomSeed);
 		}
 
+		// Clear any spawned rewards
 		foreach (var reward in spawnedRewards)
 		{
 			Destroy(reward);
 		}
 		spawnedRewards.Clear();
 	}
+
 
 	public void UpdateLigthStatus()
 	{
