@@ -164,7 +164,6 @@ public class TrainingArena : MonoBehaviour
 	}
 
 
-
 	public void UpdateLigthStatus()
 	{
 		int stepCount = _agent.StepCount;
