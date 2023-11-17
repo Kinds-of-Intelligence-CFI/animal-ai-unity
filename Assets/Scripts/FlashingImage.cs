@@ -4,7 +4,7 @@ using UnityEngine.UI;
 public class FlashingImage : MonoBehaviour
 {
     public Image imageToFlash;
-    public float flashSpeed = 5.0f;
+    public float flashSpeed = 1.0f;
     private float flashTimer = 0.0f;
     private bool isFlashing = true;
 
