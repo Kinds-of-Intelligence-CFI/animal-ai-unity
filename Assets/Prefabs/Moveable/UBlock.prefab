@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 5386178230800116260}
   - component: {fileID: 7389748377450827967}
   m_Layer: 0
-  m_Name: UObject
+  m_Name: UBlock
   m_TagString: Movable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

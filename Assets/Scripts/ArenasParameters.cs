@@ -4,6 +4,7 @@ using UnityEngine;
 using Lights;
 using System.Text;
 using System.Linq;
+using YAMLDefs;
 
 
 namespace ArenasParameters
@@ -83,6 +84,7 @@ namespace ArenasParameters
 			rotations = yamlItem.rotations;
 			sizes = yamlItem.sizes;
 			colors = initVec3sFromRGBs(yamlItem.colors);
+			name = AliasMapper.ResolveAlias(yamlItem.name);
 
 			// ======== EXTRA/OPTIONAL PARAMETERS ========
 			// use for SignPosterboard symbols, Decay/SizeChange rates, Dispenser settings, etc.
@@ -282,7 +284,7 @@ namespace ArenasParameters
 			showNotification = yamlArenaConfig.showNotification;
 			canResetEpisode = yamlArenaConfig.canResetEpisode;
 			canChangePerspective = yamlArenaConfig.canChangePerspective;
-			
+
 		}
 
 

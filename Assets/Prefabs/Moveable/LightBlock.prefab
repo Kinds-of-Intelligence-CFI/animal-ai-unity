@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 896760693658122941}
   - component: {fileID: 1275144277993231339}
   m_Layer: 0
-  m_Name: Cardbox1
+  m_Name: LightBlock
   m_TagString: Movable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

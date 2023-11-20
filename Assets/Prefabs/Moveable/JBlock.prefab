@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 2929563314707697068}
   - component: {fileID: 5270042298484302448}
   m_Layer: 0
-  m_Name: LObject2
+  m_Name: JBlock
   m_TagString: Movable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -83,4 +83,34 @@ namespace YAMLDefs
 		public float g { get; set; } = 0;
 		public float b { get; set; } = 0;
 	}
+
+	public static class AliasMapper
+	{
+		private static readonly HashSet<string> ObjectsToCheck = new HashSet<string>
+	{
+		"Cardbox1",
+		"Cardbox2",
+		"LObject",
+		"LObject2",
+		"UObject",
+    };
+		private static readonly Dictionary<string, string> AliasMap = new Dictionary<string, string>
+		{
+			{ "Cardbox1", "LightBlock" },
+			{ "Cardbox2", "HeavyBlock" },
+			{ "LObject", "LBlock" },
+			{ "LObject2", "JBlock" },
+			{ "UObject", "UBlock" },
+		};
+
+		public static string ResolveAlias(string name)
+		{
+			if (ObjectsToCheck.Contains(name) && AliasMap.TryGetValue(name, out string newName))
+			{
+				Debug.Log($"Alias found: '{name}' is mapped to '{newName}'");
+				return newName;
+			}
+			return name; // Return the original name if no alias exists
+		}
+	}
 }

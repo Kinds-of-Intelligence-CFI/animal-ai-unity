@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 54194842026184948}
   - component: {fileID: 5840798843576773320}
   m_Layer: 0
-  m_Name: Cardbox2
+  m_Name: HeavyBlock
   m_TagString: Movable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
