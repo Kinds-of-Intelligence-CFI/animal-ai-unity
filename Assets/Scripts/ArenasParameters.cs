@@ -204,7 +204,7 @@ namespace ArenasParameters
 		{
 			get
 			{
-				if (configurations.ContainsKey(-1)) // Use '-1' as the default configuration key
+				if (configurations.ContainsKey(-1))
 				{
 					return configurations[-1];
 				}
@@ -257,7 +257,7 @@ namespace ArenasParameters
 			List<int> existingIds = new List<int>();
 			int nextAvailableId = 0;
 
-			// Iterating over arenas in the order they appear in the YAML, top to bottom
+			// Iterating over arenas in the order they appear in the YAML, top to bottom.
 			foreach (KeyValuePair<int, YAMLDefs.Arena> arenaConfiguration in yamlArenaConfig.arenas)
 			{
 				int currentID = arenaConfiguration.Key;
@@ -266,7 +266,7 @@ namespace ArenasParameters
 				{
 					Debug.LogWarning($"Issue with arenaID: {currentID}. Assigning a new unique ID: {nextAvailableId}.");
 
-					// Assign a new unique ID
+					// Assign a new unique ID if required.
 					Add(nextAvailableId, arenaConfiguration.Value);
 					existingIds.Add(nextAvailableId);
 				}
