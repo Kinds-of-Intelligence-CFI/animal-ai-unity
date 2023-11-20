@@ -6,7 +6,6 @@ using System.Text;
 using System.Linq;
 using YAMLDefs;
 
-
 namespace ArenasParameters
 {
 	/// <summary>
@@ -65,7 +64,6 @@ namespace ArenasParameters
 		public Vector3 rewardSpawnPos { get; private set; }
 		public List<int> maxRewardCounts { get; private set; }
 		public Dictionary<int, int> originalToNewIDMapping = new Dictionary<int, int>();
-
 
 		public Spawnable(GameObject obj)
 		{
@@ -286,7 +284,6 @@ namespace ArenasParameters
 			canChangePerspective = yamlArenaConfig.canChangePerspective;
 
 		}
-
 
 		public void UpdateWithConfigurationsReceived(
 			object sender,

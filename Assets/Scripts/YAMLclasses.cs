@@ -77,6 +77,7 @@ namespace YAMLDefs
 		public Vector3 rewardSpawnPos { get; set; } = new Vector3(0, 0, 0); // InteractiveButton only
 		public List<int> maxRewardCounts { get; set; } = new List<int>(); // InteractiveButton only
 	}
+
 	public class RGB
 	{
 		public float r { get; set; } = 0;
@@ -93,7 +94,7 @@ namespace YAMLDefs
 		"LObject",
 		"LObject2",
 		"UObject",
-    };
+	};
 		private static readonly Dictionary<string, string> AliasMap = new Dictionary<string, string>
 		{
 			{ "Cardbox1", "LightBlock" },
