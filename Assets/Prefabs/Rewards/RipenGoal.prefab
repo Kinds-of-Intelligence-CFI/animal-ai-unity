@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 54054735976619294}
   - component: {fileID: 4211236304195966414}
   m_Layer: 0
-  m_Name: AntiDecayGoal
+  m_Name: RipenGoal
   m_TagString: goodGoal
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -88,12 +88,18 @@ namespace YAMLDefs
 	public static class AliasMapper
 	{
 		private static readonly HashSet<string> ObjectsToCheck = new HashSet<string>
-	{
+	{ 
+		// As of 11/20/2023, the below objects have been assigned new names and are now assigned aliases.
 		"Cardbox1",
 		"Cardbox2",
 		"LObject",
 		"LObject2",
 		"UObject",
+		"AntiDecayGoal",
+		"SpawnerDispenser",
+		"SpawnerContainer",
+		"SignPosterboard",
+		"Pillar-Button"
 	};
 		private static readonly Dictionary<string, string> AliasMap = new Dictionary<string, string>
 		{
@@ -102,6 +108,11 @@ namespace YAMLDefs
 			{ "LObject", "LBlock" },
 			{ "LObject2", "JBlock" },
 			{ "UObject", "UBlock" },
+			{ "AntiDecayGoal", "RipenGoal" },
+			{ "SpawnerDispenser", "SpawnerDispenserTall" },
+			{ "SpawnerContainer", "SpawnerContainerShort" },
+			{ "SignPosterboard", "SignBoard" },
+			{ "Pillar-Button", "SpawnerButton" },
 		};
 
 		public static string ResolveAlias(string name)
