@@ -35,7 +35,7 @@ public class TrainingArena : MonoBehaviour
 	private List<Fade> _fades = new List<Fade>();
 	private bool _lightStatus = true;
 	private int _agentDecisionInterval; // How many frames between decisions, reads from agent's decision requester
-	private bool _isFirstReset = true;
+	private bool _firstReset = true;
 	private List<GameObject> spawnedRewards = new List<GameObject>();
 	public bool showNotification { get; set; }
 
@@ -55,8 +55,6 @@ public class TrainingArena : MonoBehaviour
 
 		// Subscribe to the reward spawn event from spawner_InteractiveButton.cs
 		Spawner_InteractiveButton.RewardSpawned += OnRewardSpawned;
-		arenaID = 0;
-		_isFirstReset = true;
 	}
 
 	private void OnDestroy()
@@ -72,75 +70,78 @@ public class TrainingArena : MonoBehaviour
 
 	public void ResetArena()
 	{
-		Debug.Log($"Resetting Arena - Current Arena ID: {arenaID}");
+		Debug.Log("Resetting Arena");
 
 		// Destroy existing objects in the arena
-		ClearArena();
-
-		// Handle arena cycling
-		HandleArenaCycling();
-
-		// Apply the configuration for the current arena
-		ApplyCurrentArenaConfiguration();
-	}
-
-	private void ClearArena()
-	{
 		foreach (GameObject holder in transform.FindChildrenWithTag("spawnedObjects"))
 		{
 			holder.SetActive(false);
 			Destroy(holder);
 		}
-		// Clear any other states or objects as needed
-	}
 
-	private void HandleArenaCycling()
-{
-    // Get total number of arenas (assuming index starts at 0)
-    int totalArenas = _environmentManager.getMaxArenaID() + 1;
+		// Calculate the total number of arenas
+		int totalArenas = _environmentManager.getMaxArenaID();
 
-    // If it's not the first reset, update arenaID
-    if (!_isFirstReset)
-    {
-        // Sequentially move to the next arena for both training and manual play
-        arenaID = (arenaID + 1) % totalArenas;
-    }
-    else
-    {
-        // For the first reset, keep the first arena (index 0) if in training mode
-        if (Academy.Instance.IsCommunicatorOn)
-        {
-            arenaID = 0;
-        }
-        else if (_environmentManager.GetRandomizeArenasStatus())
-        {
-            // In manual play with randomization
-            arenaID = Random.Range(0, totalArenas);
-        }
-
-        _isFirstReset = false; // Mark the first reset as completed
-    }
-
-    Debug.Log($"Next Arena ID: {arenaID}");
-}
-
-	
-
-	private void ApplyCurrentArenaConfiguration()
-	{
-		if (_environmentManager.GetConfiguration(arenaID, out ArenaConfiguration newConfiguration))
+		if (_firstReset)
 		{
-			_arenaConfiguration = newConfiguration;
-			UpdateArenaConfiguration();
+			_firstReset = false;
+
+			// Check if the application is in training mode
+			if (Academy.Instance.IsCommunicatorOn)
+			{
+				// If in training mode, always start with the first arena
+				arenaID = 0;
+			}
+			else if (_environmentManager.GetRandomizeArenasStatus())
+			{
+				// If randomizeArenas is true, randomly select an arena
+				arenaID = Random.Range(0, totalArenas + 1);
+			}
+			else
+			{
+				// If not in training mode and randomizeArenas is false, start with the first arena
+				arenaID = 0;
+			}
 		}
 		else
 		{
-			Debug.LogError($"Error: Failed to retrieve configuration for arenaID: {arenaID}.");
-		}
-	}
+			if (_environmentManager.GetRandomizeArenasStatus())
+			{
+				int newArenaID;
+				do
+				{
+					newArenaID = Random.Range(0, totalArenas + 1);
+				} while (newArenaID == arenaID); // Ensure a different arena than the current one
 
-	private void UpdateArenaConfiguration()
-	{
+				arenaID = newArenaID;
+			}
+			else
+			{
+				arenaID = (arenaID + 1) % (totalArenas + 1); // Sequentially move to the next arena
+			}
+		}
+
+		ArenaConfiguration newConfiguration;
+		int attempts = 0;
+		while (!_environmentManager.GetConfiguration(arenaID, out newConfiguration) && attempts <= totalArenas)
+		{
+			Debug.LogWarning($"Failed to retrieve configuration for arenaID: {arenaID}. Trying next arena or recycling arenas.");
+			arenaID = (arenaID + 1) % (totalArenas + 1);
+			attempts++;
+		}
+
+		if (attempts > totalArenas)
+		{
+			Debug.LogError($"Critical error: Failed to retrieve configuration for any arena.");
+			return;
+		}
+
+		_arenaConfiguration = newConfiguration;
+
+		// Updating showNotification from the global configuration
+		_agent.showNotification = ArenasConfigurations.Instance.showNotification;
+
+		Debug.Log("Updating Arena Configuration");
 		_arenaConfiguration.SetGameObject(prefabs.GetList());
 		_builder.Spawnables = _arenaConfiguration.spawnables;
 		_arenaConfiguration.toUpdate = false;
