@@ -82,51 +82,58 @@ public class TrainingArena : MonoBehaviour
 		// Calculate the total number of arenas
 		int totalArenas = _environmentManager.getMaxArenaID();
 
+		// Determine if the environment is in training mode
+		bool isTrainingMode = Academy.Instance.IsCommunicatorOn;
+		Debug.Log($"Value of isTrainingMode: {isTrainingMode}");
+
 		if (_firstReset)
 		{
 			_firstReset = false;
-
-			// Check if the application is in training mode
-			if (Academy.Instance.IsCommunicatorOn)
+			// If in training mode, always start with the first arena
+			if (isTrainingMode)
 			{
-				// If in training mode, always start with the first arena
+				Debug.Log($"Value of isTrainingMode: {isTrainingMode}");
 				arenaID = 0;
-			}
-			else if (_environmentManager.GetRandomizeArenasStatus())
-			{
-				// If randomizeArenas is true, randomly select an arena
-				arenaID = Random.Range(0, totalArenas + 1);
 			}
 			else
 			{
-				// If not in training mode and randomizeArenas is false, start with the first arena
-				arenaID = 0;
+				// If in manual play and randomizeArenas is true, randomly select an arena
+				arenaID = _environmentManager.GetRandomizeArenasStatus() ? Random.Range(0, totalArenas) : 0;
 			}
 		}
 		else
 		{
-			if (_environmentManager.GetRandomizeArenasStatus())
+			// For subsequent resets
+			if (isTrainingMode)
 			{
+				// In training mode, sequentially move to the next arena
+				arenaID = (arenaID + 1) % totalArenas;
+			}
+			else if (_environmentManager.GetRandomizeArenasStatus())
+			{
+				// In manual play with randomization, select a random arena different from the current one
 				int newArenaID;
 				do
 				{
-					newArenaID = Random.Range(0, totalArenas + 1);
-				} while (newArenaID == arenaID); // Ensure a different arena than the current one
-
+					newArenaID = Random.Range(0, totalArenas);
+				} while (newArenaID == arenaID);
 				arenaID = newArenaID;
 			}
 			else
 			{
-				arenaID = (arenaID + 1) % (totalArenas + 1); // Sequentially move to the next arena
+				// In manual play without randomization, sequentially move to the next arena
+				arenaID = (arenaID + 1) % totalArenas;
 			}
 		}
 
 		ArenaConfiguration newConfiguration;
 		if (!_environmentManager.GetConfiguration(arenaID, out newConfiguration))
 		{
+			Debug.LogWarning("No predefined arena configuration found. Creating a random configuration.");
 			newConfiguration = new ArenaConfiguration(prefabs);
 			_environmentManager.AddConfiguration(arenaID, newConfiguration);
 		}
+
 		_arenaConfiguration = newConfiguration;
 
 		// Updating showNotification from the global configuration
@@ -153,6 +160,7 @@ public class TrainingArena : MonoBehaviour
 		}
 		spawnedRewards.Clear();
 	}
+
 
 
 	public void UpdateLigthStatus()
