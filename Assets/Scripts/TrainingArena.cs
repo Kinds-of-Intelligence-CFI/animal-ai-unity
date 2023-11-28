@@ -122,20 +122,11 @@ public class TrainingArena : MonoBehaviour
 		}
 
 		ArenaConfiguration newConfiguration;
-		int attempts = 0;
-		while (!_environmentManager.GetConfiguration(arenaID, out newConfiguration) && attempts <= totalArenas)
+		if (!_environmentManager.GetConfiguration(arenaID, out newConfiguration))
 		{
-			Debug.LogWarning($"Failed to retrieve configuration for arenaID: {arenaID}. Trying next arena or recycling arenas.");
-			arenaID = (arenaID + 1) % (totalArenas + 1);
-			attempts++;
+			newConfiguration = new ArenaConfiguration(prefabs);
+			_environmentManager.AddConfiguration(arenaID, newConfiguration);
 		}
-
-		if (attempts > totalArenas)
-		{
-			Debug.LogError($"Critical error: Failed to retrieve configuration for any arena.");
-			return;
-		}
-
 		_arenaConfiguration = newConfiguration;
 
 		// Updating showNotification from the global configuration
