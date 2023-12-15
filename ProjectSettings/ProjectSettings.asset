@@ -737,12 +737,12 @@ PlayerSettings:
     m_VersionName: 
   apiCompatibilityLevel: 6
   activeInputHandler: 0
-  cloudProjectId: f2356bde-a5eb-46eb-b607-04ffc560906f
+  cloudProjectId: 
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: animal-ai-unity-project
-  organizationId: vanguardean
+  projectName: 
+  organizationId: 
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   virtualTexturingSupportEnabled: 0
-  genesisOrgId: '5773242291833'
+  genesisOrgId: 
