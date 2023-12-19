@@ -84,6 +84,7 @@ public class TrainingAgent : Agent, IPrefab
         sensor.AddObservation(localVel);
         Vector3 localPos = transform.position;
         sensor.AddObservation(localPos);
+        Debug.Log("Health:" + health + "\nVelocity: " + localVel + "\nPosition:" + localPos);
     }
 
     public override void OnActionReceived(ActionBuffers action)
@@ -128,6 +129,7 @@ public class TrainingAgent : Agent, IPrefab
             AddReward(updateAmount);
         }
         _currentScore = GetCumulativeReward();
+        Debug.Log("Current score is: " + _currentScore);
         if (health > _maxHealth)
         {
             health = _maxHealth;
