@@ -14,7 +14,7 @@ arenas:
       - !Vector3 {x: 20, y: 0, z: 20}
       rotations: [0]
     - !Item
-      name: Pillar-Button
+      name: SpawnerButton
       positions:
       - !Vector3 {x: 20, y: 0, z: 25}
       rotations: [0]
