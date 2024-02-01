@@ -91,14 +91,15 @@ public class TrainingArena : MonoBehaviour
 		{
 			if (randomizeArenas)
 			{
-				// Add the current arenaID to the played list and clear if all have been played
+				// Add the current arenaID to the played list
 				playedArenas.Add(arenaID);
 				if (playedArenas.Count >= totalArenas)
 				{
-					playedArenas.Clear();
+					// Reset the played arenas list but keep the current arena in it to avoid immediate repetition
+					playedArenas = new List<int> { arenaID };
 				}
 
-				// Choose a random arena that hasn't been played yet
+				// Choose a random arena that hasn't been played yet and is not the current one
 				List<int> availableArenas = Enumerable.Range(0, totalArenas).Except(playedArenas).ToList();
 				arenaID = availableArenas[Random.Range(0, availableArenas.Count)];
 			}
@@ -142,6 +143,7 @@ public class TrainingArena : MonoBehaviour
 		}
 		spawnedRewards.Clear();
 	}
+
 
 
 
