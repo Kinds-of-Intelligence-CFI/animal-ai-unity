@@ -189,7 +189,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
 
 	public int getMaxArenaID()
 	{
-		return _arenasConfigurations.configurations.Count + 1;
+		return _arenasConfigurations.configurations.Count;
 	}
 
 	public bool GetRandomizeArenasStatus()
