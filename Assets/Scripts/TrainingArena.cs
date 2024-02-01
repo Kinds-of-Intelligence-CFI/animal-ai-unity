@@ -72,6 +72,7 @@ public class TrainingArena : MonoBehaviour
 	{
 		Debug.Log("Resetting Arena");
 
+		// Destroy existing objects in the arena
 		foreach (GameObject holder in transform.FindChildrenWithTag("spawnedObjects"))
 		{
 			holder.SetActive(false);
@@ -79,34 +80,36 @@ public class TrainingArena : MonoBehaviour
 		}
 
 		int totalArenas = _environmentManager.getMaxArenaID();
+		bool randomizeArenas = _environmentManager.GetRandomizeArenasStatus();
 
 		if (_firstReset)
 		{
 			_firstReset = false;
-			arenaID = 0;
+			arenaID = randomizeArenas ? Random.Range(0, totalArenas) : 0;
 		}
 		else
 		{
-			bool randomizeArenas = _environmentManager.GetRandomizeArenasStatus();
-
 			if (randomizeArenas)
 			{
+				// Add the current arenaID to the played list and clear if all have been played
 				playedArenas.Add(arenaID);
 				if (playedArenas.Count >= totalArenas)
 				{
 					playedArenas.Clear();
 				}
 
+				// Choose a random arena that hasn't been played yet
 				List<int> availableArenas = Enumerable.Range(0, totalArenas).Except(playedArenas).ToList();
 				arenaID = availableArenas[Random.Range(0, availableArenas.Count)];
 			}
 			else
 			{
+				// Sequential mode: proceed to the next arena, loop back if at the end
 				arenaID = (arenaID + 1) % totalArenas;
 			}
 		}
 
-		Debug.Log($"Attempting to load configuration for Arena ID: {arenaID}");
+		// Attempt to load the configuration for the chosen arenaID
 		if (!_environmentManager.GetConfiguration(arenaID, out ArenaConfiguration newConfiguration))
 		{
 			Debug.LogError($"Failed to load predefined arena configuration for Arena ID: {arenaID}. Total arenas: {totalArenas}");
@@ -115,6 +118,7 @@ public class TrainingArena : MonoBehaviour
 
 		_arenaConfiguration = newConfiguration;
 
+		// Updating showNotification from the global configuration
 		_agent.showNotification = ArenasConfigurations.Instance.showNotification;
 
 		Debug.Log("Updating Arena Configuration");
@@ -131,12 +135,14 @@ public class TrainingArena : MonoBehaviour
 			Random.InitState(_arenaConfiguration.randomSeed);
 		}
 
+		// Clear any spawned rewards
 		foreach (var reward in spawnedRewards)
 		{
 			Destroy(reward);
 		}
 		spawnedRewards.Clear();
 	}
+
 
 
 	public void UpdateLigthStatus()
