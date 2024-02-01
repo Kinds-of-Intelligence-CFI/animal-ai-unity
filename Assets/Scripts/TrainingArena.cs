@@ -38,7 +38,7 @@ public class TrainingArena : MonoBehaviour
 	private bool _firstReset = true;
 	private List<GameObject> spawnedRewards = new List<GameObject>();
 	public bool showNotification { get; set; }
-
+	private List<int> playedArenas = new List<int>(); // List to keep track of played arenas
 
 	internal void Awake()
 	{
@@ -72,71 +72,49 @@ public class TrainingArena : MonoBehaviour
 	{
 		Debug.Log("Resetting Arena");
 
-		// Destroy existing objects in the arena
 		foreach (GameObject holder in transform.FindChildrenWithTag("spawnedObjects"))
 		{
 			holder.SetActive(false);
 			Destroy(holder);
 		}
 
-		// Calculate the total number of arenas
 		int totalArenas = _environmentManager.getMaxArenaID();
-
-		// Determine if the environment is in training mode
-		bool isTrainingMode = Academy.Instance.IsCommunicatorOn;
-		Debug.Log($"Value of isTrainingMode: {isTrainingMode}");
 
 		if (_firstReset)
 		{
 			_firstReset = false;
-			// If in training mode, always start with the first arena
-			if (isTrainingMode)
-			{
-				Debug.Log($"Value of isTrainingMode: {isTrainingMode}");
-				arenaID = 0;
-			}
-			else
-			{
-				// If in manual play and randomizeArenas is true, randomly select an arena
-				arenaID = _environmentManager.GetRandomizeArenasStatus() ? Random.Range(0, totalArenas) : 0;
-			}
+			arenaID = 0;
 		}
 		else
 		{
-			// For subsequent resets
-			if (isTrainingMode)
+			bool randomizeArenas = _environmentManager.GetRandomizeArenasStatus();
+
+			if (randomizeArenas)
 			{
-				// In training mode, sequentially move to the next arena
-				arenaID = (arenaID + 1) % totalArenas;
-			}
-			else if (_environmentManager.GetRandomizeArenasStatus())
-			{
-				// In manual play with randomization, select a random arena different from the current one
-				int newArenaID;
-				do
+				playedArenas.Add(arenaID);
+				if (playedArenas.Count >= totalArenas)
 				{
-					newArenaID = Random.Range(0, totalArenas);
-				} while (newArenaID == arenaID);
-				arenaID = newArenaID;
+					playedArenas.Clear();
+				}
+
+				List<int> availableArenas = Enumerable.Range(0, totalArenas).Except(playedArenas).ToList();
+				arenaID = availableArenas[Random.Range(0, availableArenas.Count)];
 			}
 			else
 			{
-				// In manual play without randomization, sequentially move to the next arena
 				arenaID = (arenaID + 1) % totalArenas;
 			}
 		}
 
-		ArenaConfiguration newConfiguration;
-		if (!_environmentManager.GetConfiguration(arenaID, out newConfiguration))
+		Debug.Log($"Attempting to load configuration for Arena ID: {arenaID}");
+		if (!_environmentManager.GetConfiguration(arenaID, out ArenaConfiguration newConfiguration))
 		{
-			Debug.LogWarning("No predefined arena configuration found. Creating a random configuration.");
-			newConfiguration = new ArenaConfiguration(prefabs);
-			_environmentManager.AddConfiguration(arenaID, newConfiguration);
+			Debug.LogError($"Failed to load predefined arena configuration for Arena ID: {arenaID}. Total arenas: {totalArenas}");
+			return;
 		}
 
 		_arenaConfiguration = newConfiguration;
 
-		// Updating showNotification from the global configuration
 		_agent.showNotification = ArenasConfigurations.Instance.showNotification;
 
 		Debug.Log("Updating Arena Configuration");
@@ -153,14 +131,12 @@ public class TrainingArena : MonoBehaviour
 			Random.InitState(_arenaConfiguration.randomSeed);
 		}
 
-		// Clear any spawned rewards
 		foreach (var reward in spawnedRewards)
 		{
 			Destroy(reward);
 		}
 		spawnedRewards.Clear();
 	}
-
 
 
 	public void UpdateLigthStatus()
