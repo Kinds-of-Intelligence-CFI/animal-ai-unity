@@ -145,5 +145,5 @@ MonoBehaviour:
   initialColour: {r: 0.39157256, g: 0.39157256, b: 0.39157256, a: 1}
   finalColour: {r: 0.913099, g: 0.72305536, b: 0.13843165, a: 1}
   decayRate: -0.005
-  flipDecayDirection: 1
+  flipDecayDirection: 0
   fixedFrameDelay: 150
