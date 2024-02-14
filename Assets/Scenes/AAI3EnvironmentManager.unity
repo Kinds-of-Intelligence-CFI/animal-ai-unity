@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.21499568, g: 0.27351773, b: 0.35116208, a: 1}
+  m_IndirectSpecularColor: {r: 0.21499613, g: 0.2735186, b: 0.35116386, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -738,7 +738,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   arena: {fileID: 1540725604319108, guid: cb05c844a0de0cd4880c39b9a1aedeef, type: 3}
   uiCanvas: {fileID: 1822920678}
-  configFile: test_configs/spawner_button_test
+  configFile: test_configs/decoy-file-test
   maximumResolution: 512
   minimumResolution: 4
   defaultResolution: 84
@@ -747,7 +747,6 @@ MonoBehaviour:
   defaultDecisionPeriod: 3
   playerControls: {fileID: 1065671190}
   playerMode: 0
-  arenaOrder: 
 --- !u!1 &660795385
 GameObject:
   m_ObjectHideFlags: 0
