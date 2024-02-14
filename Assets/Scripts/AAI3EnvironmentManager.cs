@@ -20,7 +20,7 @@ using YamlDotNet.Serialization;
 ///
 public class AAI3EnvironmentManager : MonoBehaviour
 {
-	public GameObject arena; // A prefab for the training arena setup
+	public GameObject arena;
 	public GameObject uiCanvas;
 	public string configFile = "";
 	public int maximumResolution = 512;
@@ -29,7 +29,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
 	public int defaultRaysPerSide = 2;
 	public int defaultRayMaxDegrees = 60;
 	public int defaultDecisionPeriod = 3;
-	public GameObject playerControls; //Just for camera and reset controls.
+	public GameObject playerControls;
 
 	[HideInInspector]
 	public bool playerMode = true;
@@ -37,7 +37,6 @@ public class AAI3EnvironmentManager : MonoBehaviour
 	private ArenasConfigurations _arenasConfigurations;
 	private TrainingArena _instantiatedArena;
 	private ArenasParametersSideChannel _arenasParametersSideChannel;
-	public List<int> arenaOrder = new List<int>();
 
 
 	public void Awake()
