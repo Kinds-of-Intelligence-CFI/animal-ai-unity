@@ -1,4 +1,5 @@
 !ArenaConfig
+# Testing the freeze delay countdown feature in multiple arenas.
 arenas:
   0: !Arena
     pass_mark: 0
@@ -16,4 +17,13 @@ arenas:
       initialValues: [0.7, 2]
       colors:
       - !RGB {r: 80, g: 0, b: 60}
-
+  1: !Arena
+    pass_mark: 0
+    t: 1000
+    items:
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 20, y: 0, z: 1}
+      rotations: [0]
+      frozenAgentDelays: [10]
