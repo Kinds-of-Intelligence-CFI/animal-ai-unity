@@ -1,18 +1,12 @@
 using NUnit.Framework;
 using UnityEngine;
-using Unity.MLAgents.Sensors;
 using System.Collections.Generic;
-using System;
 using System;
 using System.IO;
-using System.Collections.Generic;
-using UnityEngine;
 using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using Unity.MLAgents.SideChannels;
 using Unity.MLAgents.Policies;
-
-
 
 namespace Tests
 {
