@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System;
 using MLAgents;
 
-// Other necessary using directives
-
 namespace Tests
 {
     public class AAI3EnvironmentManagerTests
