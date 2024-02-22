@@ -1,9 +1,12 @@
 {
     "name": "Tests",
-    "rootNamespace": "",
     "references": [
         "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "UnityEditor.TestRunner",
+        "Unity.MLAgents",
+        "Unity.MLAgents.Sensors",
+        "Unity.MLAgents.SideChannels",
+        "Unity.MLAgents.Policies"
     ],
     "includePlatforms": [],
     "excludePlatforms": [
