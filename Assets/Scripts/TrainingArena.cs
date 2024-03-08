@@ -173,4 +173,11 @@ public class TrainingArena : MonoBehaviour
 	{
 		get { return _arenaConfiguration; }
 	}
+
+	public int GetTotalSpawnedObjects()
+	{
+		Debug.Log("Total spawned objects: " + spawnedObjectsHolder.transform.childCount);
+		return spawnedObjectsHolder.transform.childCount;
+	}
+
 }
