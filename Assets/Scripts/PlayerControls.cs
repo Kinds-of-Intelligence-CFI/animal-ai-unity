@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using ArenasParameters;
+using TMPro;
+
 
 public class PlayerControls : MonoBehaviour
 {
@@ -11,7 +13,7 @@ public class PlayerControls : MonoBehaviour
 	private Camera _cameraFollow;
 	private ScreenshotCamera _screenshotCam;
 	private TrainingAgent _agent;
-	public Text score;
+	public TMP_Text score;
 	private int _numActive = 0;
 	private Dictionary<int, Camera> _cameras;
 	public float prevScore = 0;
