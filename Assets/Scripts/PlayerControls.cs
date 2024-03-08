@@ -137,10 +137,10 @@ public class PlayerControls : MonoBehaviour
         }
 
         score.text =
-            "Prev. Reward: "
+            "Previous Reward: "
             + _agent.GetPreviousScore().ToString("0.000")
             + "\n"
-            + "Reward: "
+            + "Current Reward: "
             + _agent.GetCumulativeReward().ToString("0.000");
     }
 
