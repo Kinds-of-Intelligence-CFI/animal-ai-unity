@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 using TMPro;
 using System.IO;
@@ -8,29 +8,51 @@ public class UIManager : MonoBehaviour
 	public TMP_Dropdown arenaDropdown;
 	public TextMeshProUGUI fileNameText;
 	public AAI3EnvironmentManager environmentManager;
+	private bool isDropdownVisible = false;
 
-	void Start()
+
+	void Awake()
 	{
-		PopulateArenaDropdown();
+		AAI3EnvironmentManager.OnArenaChanged += UpdateArenaUI;
 	}
 
-	void PopulateArenaDropdown()
+	void OnDestroy()
 	{
-		List<TMP_Dropdown.OptionData> dropdownOptions = new List<TMP_Dropdown.OptionData>();
+		AAI3EnvironmentManager.OnArenaChanged -= UpdateArenaUI;
+		arenaDropdown.gameObject.SetActive(false);
+	}
 
-		int totalArenas = environmentManager.GetTotalArenas();
+	private void Start()
+	{
+		UpdateArenaUI(environmentManager.GetCurrentArenaIndex(), environmentManager.GetTotalArenas());
+	}
+
+	private void UpdateArenaUI(int currentArenaIndex, int totalArenas)
+	{
+		arenaDropdown.ClearOptions();
 		for (int i = 0; i < totalArenas; i++)
 		{
-			dropdownOptions.Add(new TMP_Dropdown.OptionData($"Arena {i + 1} of {totalArenas}")); // Format as "Arena X of Y"
+			arenaDropdown.options.Add(new TMP_Dropdown.OptionData($"Arena {i + 1} of {totalArenas}"));
 		}
-
-		arenaDropdown.ClearOptions();
-		arenaDropdown.AddOptions(dropdownOptions);
-
-		int currentArenaIndex = environmentManager.GetCurrentArenaIndex();
 		arenaDropdown.value = currentArenaIndex;
+		arenaDropdown.RefreshShownValue();
 
 		fileNameText.text = $"File: {Path.GetFileName(environmentManager.configFile)}";
 	}
+
+	public void ToggleDropdown()
+	{
+		if (arenaDropdown != null)
+		{
+			arenaDropdown.Show();
+		}
+	}
+
+	public void ToggleDropdownVisibility()
+	{
+		isDropdownVisible = !isDropdownVisible;
+		arenaDropdown.gameObject.SetActive(isDropdownVisible);
+	}
+
 
 }

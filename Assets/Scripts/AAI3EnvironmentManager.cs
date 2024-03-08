@@ -38,6 +38,8 @@ public class AAI3EnvironmentManager : MonoBehaviour
 	private TrainingArena _instantiatedArena;
 	private ArenasParametersSideChannel _arenasParametersSideChannel;
 
+	public static event Action<int, int> OnArenaChanged;
+
 
 	public void Awake()
 	{
@@ -185,6 +187,12 @@ public class AAI3EnvironmentManager : MonoBehaviour
 				+ rayMaxDegrees
 		);
 	}
+
+	public void TriggerArenaChangeEvent(int currentArenaIndex, int totalArenas)
+	{
+		OnArenaChanged?.Invoke(currentArenaIndex, totalArenas);
+	}
+
 
 	public int getMaxArenaID()
 	{

@@ -26,6 +26,8 @@ public class PlayerControls : MonoBehaviour
 	private bool _canResetEpisode = true;
 	private bool _canChangePerspective = true;
 	private ArenasConfigurations arenasConfigurations;
+	public UIManager uiManager;
+
 
 	void Start()
 	{
@@ -131,6 +133,13 @@ public class PlayerControls : MonoBehaviour
 		if (Input.GetKeyDown(KeyCode.F9))
 		{
 			_screenshotCam.Activate();
+		}
+		if (Input.GetKeyDown(KeyCode.B))
+		{
+			if (uiManager != null)
+			{
+				uiManager.ToggleDropdown();
+			}
 		}
 
 		score.text = "Prev reward: " + _agent.GetPreviousScore().ToString("0.000")

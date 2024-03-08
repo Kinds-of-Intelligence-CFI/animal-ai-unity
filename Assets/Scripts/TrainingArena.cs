@@ -142,10 +142,10 @@ public class TrainingArena : MonoBehaviour
 			Destroy(reward);
 		}
 		spawnedRewards.Clear();
+
+		_environmentManager.TriggerArenaChangeEvent(arenaID, _environmentManager.GetTotalArenas());
+
 	}
-
-
-
 
 	public void UpdateLigthStatus()
 	{
