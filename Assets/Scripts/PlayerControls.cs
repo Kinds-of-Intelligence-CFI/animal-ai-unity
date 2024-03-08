@@ -135,13 +135,6 @@ public class PlayerControls : MonoBehaviour
         {
             _screenshotCam.Activate();
         }
-        if (Input.GetKeyDown(KeyCode.B))
-        {
-            if (uiManager != null)
-            {
-                uiManager.ToggleDropdown();
-            }
-        }
 
         score.text =
             "Prev. Reward: "

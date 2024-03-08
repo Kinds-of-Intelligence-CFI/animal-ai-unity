@@ -5,54 +5,36 @@ using System.IO;
 
 public class UIManager : MonoBehaviour
 {
-	public TMP_Dropdown arenaDropdown;
-	public TextMeshProUGUI fileNameText;
-	public AAI3EnvironmentManager environmentManager;
-	private bool isDropdownVisible = false;
+    public TMP_Text arenaText; // Reference for displaying the current arena
+    public TMP_Text configFileNameText; // Reference for displaying the YAML file name
+    public AAI3EnvironmentManager environmentManager; // Reference to your environment manager component
 
+    void Awake()
+    {
+        // Subscribe to the event that notifies when the current arena changes
+        AAI3EnvironmentManager.OnArenaChanged += UpdateArenaUI;
+    }
 
-	void Awake()
-	{
-		AAI3EnvironmentManager.OnArenaChanged += UpdateArenaUI;
-	}
+    void OnDestroy()
+    {
+        // Unsubscribe from the event to clean up
+        AAI3EnvironmentManager.OnArenaChanged -= UpdateArenaUI;
+    }
 
-	void OnDestroy()
-	{
-		AAI3EnvironmentManager.OnArenaChanged -= UpdateArenaUI;
-		arenaDropdown.gameObject.SetActive(false);
-	}
+    private void Start()
+    {
+        // Initial UI update to display current arena and YAML file name
+        UpdateArenaUI(
+            environmentManager.GetCurrentArenaIndex(),
+            environmentManager.GetTotalArenas()
+        );
+    }
 
-	private void Start()
-	{
-		UpdateArenaUI(environmentManager.GetCurrentArenaIndex(), environmentManager.GetTotalArenas());
-	}
-
-	private void UpdateArenaUI(int currentArenaIndex, int totalArenas)
-	{
-		arenaDropdown.ClearOptions();
-		for (int i = 0; i < totalArenas; i++)
-		{
-			arenaDropdown.options.Add(new TMP_Dropdown.OptionData($"Arena {i + 1} of {totalArenas}"));
-		}
-		arenaDropdown.value = currentArenaIndex;
-		arenaDropdown.RefreshShownValue();
-
-		fileNameText.text = $"File: {Path.GetFileName(environmentManager.configFile)}";
-	}
-
-	public void ToggleDropdown()
-	{
-		if (arenaDropdown != null)
-		{
-			arenaDropdown.Show();
-		}
-	}
-
-	public void ToggleDropdownVisibility()
-	{
-		isDropdownVisible = !isDropdownVisible;
-		arenaDropdown.gameObject.SetActive(isDropdownVisible);
-	}
-
-
+    private void UpdateArenaUI(int currentArenaIndex, int totalArenas)
+    {
+        // Set the text to display "Arena X of Y"
+        arenaText.text = $"Arena {currentArenaIndex + 1} of {totalArenas}";
+        // Display the name of the current YAML configuration file
+        configFileNameText.text = $"Config File: {Path.GetFileName(environmentManager.configFile)}";
+    }
 }

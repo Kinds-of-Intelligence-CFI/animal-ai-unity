@@ -108,3 +108,5 @@ Assets/ML-Agents/Timers/*
 .plastic/fs_beacon
 Assets/Prefabs/Other-Unique/SignPosterboard.prefab
 Assets/Prefabs/Other-Unique/SignPosterboard.prefab
+.plastic/plastic.changes
+.plastic/plastic.wktree
