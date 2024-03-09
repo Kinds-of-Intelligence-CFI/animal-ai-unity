@@ -84,16 +84,17 @@ public class TrainingAgent : Agent, IPrefab
 		health = _maxHealth;
 	}
 
-	// Agent additionally receives local observations of length 7
-	// [health, velocity x, velocity y, velocity z, position x, position y, position z]
-	public override void CollectObservations(VectorSensor sensor)
-	{
-		sensor.AddObservation(health);
-		Vector3 localVel = transform.InverseTransformDirection(_rigidBody.velocity);
-		sensor.AddObservation(localVel);
-		Vector3 localPos = transform.position;
-		sensor.AddObservation(localPos);
-	}
+    // Agent additionally receives local observations of length 7
+    // [health, velocity x, velocity y, velocity z, position x, position y, position z]
+    public override void CollectObservations(VectorSensor sensor)
+    {
+        sensor.AddObservation(health);
+        Vector3 localVel = transform.InverseTransformDirection(_rigidBody.velocity);
+        sensor.AddObservation(localVel);
+        Vector3 localPos = transform.position;
+        sensor.AddObservation(localPos);
+        Debug.Log("Health:" + health + "\nVelocity: " + localVel + "\nPosition:" + localPos);
+    }
 
 	public override void OnActionReceived(ActionBuffers action)
 	{
