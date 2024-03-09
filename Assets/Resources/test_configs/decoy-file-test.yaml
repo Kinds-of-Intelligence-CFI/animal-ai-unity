@@ -1,0 +1,33 @@
+!ArenaConfig
+# Testing file for ongoing development. Will be removed once the feature is complete.
+arenas:
+  0: !Arena
+    pass_mark: 0
+    t: 250
+    items:
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 10, y: 0, z: 20}
+      rotations: [90]
+    - !Item
+      name: DecayGoal
+      positions:
+      - !Vector3 {x: 25, y: 0, z: 25}
+      sizes:
+      - !Vector3 {x: 5, y: 5, z: 5}
+  1: !Arena
+    pass_mark: 0
+    t: 250
+    items:
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 10, y: 0, z: 20}
+      rotations: [90]
+    - !Item
+      name: DecayGoal
+      positions:
+      - !Vector3 {x: 25, y: 0, z: 25}
+      sizes:
+      - !Vector3 {x: 5, y: 5, z: 5}

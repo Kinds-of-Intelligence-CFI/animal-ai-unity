@@ -47,6 +47,7 @@ ExportedObj/
 *.mdb
 *.opendb
 *.VC.db
+*.history/
 *.history
 
 # Unity3D generated meta files
@@ -104,3 +105,8 @@ Assets/ML-Agents/Timers/*
 .history/Assets/Scripts/TrainingAgent_20230910232425.cs
 .history/Assets/Scripts/TrainingAgent_20230910232455.cs
 .history/Assets/Scripts/TrainingAgent_20230910232506.cs
+.plastic/fs_beacon
+Assets/Prefabs/Other-Unique/SignPosterboard.prefab
+Assets/Prefabs/Other-Unique/SignPosterboard.prefab
+.plastic/plastic.changes
+.plastic/plastic.wktree

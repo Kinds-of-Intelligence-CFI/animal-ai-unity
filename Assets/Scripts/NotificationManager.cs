@@ -1,121 +1,102 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
-using TMPro;
 
 public class NotificationManager : MonoBehaviour
 {
-    public GameObject notificationPanel; // Reference to the panel created
-    public TMP_Text notificationText; // Reference to the text element inside the panel
-    public Image notificationBackgroundImage; // Reference to the image element inside the panel
+	public static NotificationManager Instance;
+	public TrainingAgent trainingAgent;
 
-    public Color successColor = Color.green;
-    public Color failureColor = Color.red;
+	public GameObject notificationPanel; // Reference to the panel
+	public Image notificationBackgroundImage; // Reference to the image element inside the panel
 
-    public Sprite[] successFrames; // Frames of success GIF
-    public Sprite[] failureFrames; // Frames of failure GIF
+	public Sprite[] successFrames; // Frames for success animation
+	public Sprite[] failureFrames; // Frames for failure animation
+	public float frameRate = 0.1f; // Frame rate for the animation
 
-    public float frameRate = 0.1f; // Seconds per frame for animation
-    private int currentFrame = 0;
+	private int currentFrame = 0; // Current frame index for the animation
+	private Coroutine gifCoroutine; // Coroutine for handling the GIF animation
 
-    public AudioClip successSound;
-    public AudioClip failureSound;
-    private AudioSource audioSource;
+	public Image successGradientBorderImage;
+	public Image failureGradientBorderImage;
 
-    public static NotificationManager Instance;
+	void Start()
+	{
+		successFrames = Resources.LoadAll<Sprite>("happyGIF");
+		failureFrames = Resources.LoadAll<Sprite>("sadGIF");
+		trainingAgent = GameObject.FindObjectOfType<TrainingAgent>();
+		HideNotification();
+	}
 
-    void Start()
-    {
-        audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
-        {
-            // If there's no AudioSource attached to the GameObject, add one
-            audioSource = gameObject.AddComponent<AudioSource>();
-        }
-        HideNotification();
-    }
+	private void Awake()
+	{
+		if (Instance == null)
+		{
+			Instance = this;
+			DontDestroyOnLoad(gameObject); // Ensure this object persists between scene loads
+		}
+		else
+		{
+			Destroy(gameObject); // Destroy any duplicates
+		}
+	}
 
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject); // This ensures the manager persists between scenes
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
+	public void ShowSuccessNotification()
+	{
+		ShowNotification(true);
+		trainingAgent.FreezeAgent(true);
+	}
 
-    public void ShowSuccessNotification(string message)
-    {
-        ShowNotification(message, successColor);
-        StartCoroutine(AnimateSprite(successFrames));
-        if (successSound != null)
-        {
-            audioSource.PlayOneShot(successSound);
-        }
-    }
+	public void ShowFailureNotification()
+	{
+		ShowNotification(false);
+		trainingAgent.FreezeAgent(true);
+	}
 
-    public void ShowFailureNotification(string message)
-    {
-        ShowNotification(message, failureColor);
-        StartCoroutine(AnimateSprite(failureFrames));
-        if (failureSound != null)
-        {
-            audioSource.PlayOneShot(failureSound);
-        }
-    }
+	private void ShowNotification(bool isSuccess)
+	{
+		Sprite[] framesToShow = isSuccess ? successFrames : failureFrames;
+		Image gradientBorderToShow = isSuccess ? successGradientBorderImage : failureGradientBorderImage;
 
-    private void ShowNotification(string message, Color color)
-    {
-        if (notificationText != null)
-        {
-            Debug.Log(
-                "Is the Text component missing? " + (notificationText.GetComponent<Text>() == null)
-            );
-        }
-        notificationText.text = message;
-        notificationPanel.GetComponent<Image>().color = color;
-        notificationText.color = color;
-        notificationBackgroundImage.color = color;
-        notificationPanel.SetActive(true);
-    }
+		notificationPanel.SetActive(true);
+		successGradientBorderImage.gameObject.SetActive(isSuccess);
+		failureGradientBorderImage.gameObject.SetActive(!isSuccess);
 
-    public void HideNotification()
-    {
-        if (notificationPanel == null)
-        {
-            Debug.Log("Notification panel is null.");
-        }
-        else
-        {
-            Debug.Log("Hiding notification panel.");
-            notificationPanel.SetActive(false);
-            StopAllCoroutines();
-        }
-    }
+		if (gifCoroutine != null)
+		{
+			StopCoroutine(gifCoroutine);
+		}
+		gifCoroutine = StartCoroutine(AnimateSprite(framesToShow));
+	}
 
-    IEnumerator AnimateSprite(Sprite[] animationFrames)
-    {
-        while (true)
-        {
-            notificationBackgroundImage.sprite = animationFrames[currentFrame];
-            currentFrame = (currentFrame + 1) % animationFrames.Length;
-            yield return new WaitForSeconds(frameRate);
-        }
-    }
 
-    public void PlaySuccessGif()
-    {
-        StopAllCoroutines();
-        StartCoroutine(AnimateSprite(successFrames));
-    }
+	public void HideNotification()
+	{
+		notificationPanel.SetActive(false);
+		successGradientBorderImage.gameObject.SetActive(false);
+		failureGradientBorderImage.gameObject.SetActive(false);
 
-    public void PlayFailureGif()
-    {
-        StopAllCoroutines();
-        StartCoroutine(AnimateSprite(failureFrames));
-    }
+		if (gifCoroutine != null)
+		{
+			StopCoroutine(gifCoroutine);
+			gifCoroutine = null;
+		}
+		currentFrame = 0;
+		
+		trainingAgent.FreezeAgent(false);
+	}
+
+
+	IEnumerator AnimateSprite(Sprite[] animationFrames)
+	{
+		while (true)
+		{
+			// Set the current sprite frame
+			notificationBackgroundImage.sprite = animationFrames[currentFrame];
+			// Increment the frame index, wrapping back to 0 if it exceeds the length of the array
+			currentFrame = (currentFrame + 1) % animationFrames.Length;
+			// Wait for the frame rate duration before the next frame
+			yield return new WaitForSeconds(frameRate);
+		}
+	}
 }

@@ -22,6 +22,9 @@ namespace YAMLDefs
 	{
 		public IDictionary<int, Arena> arenas { get; set; }
 		public bool randomizeArenas = false;
+		public bool showNotification { get; set; } = false;
+		public bool canResetEpisode { get; set; } = true;
+		public bool canChangePerspective { get; set; } = true;
 	}
 
 	public class Arena
@@ -30,10 +33,6 @@ namespace YAMLDefs
 		public List<Item> items { get; set; } = new List<Item>();
 		public float pass_mark { get; set; } = 0;
 		public static float CurrentPassMark { get; private set; }
-		public bool showNotification { get; set; } = false;
-		public bool canResetEpisode { get; set; } = true;
-		public bool canChangePerspective { get; set; } = true;
-		public int defaultPerspective { get; set; } = 1; // TODO: REMOVE THIS PARAMETER WHERE IMPLEMENTED --> NO LONGER USED.
 
 		public void SetCurrentPassMark()
 		{
@@ -78,10 +77,52 @@ namespace YAMLDefs
 		public Vector3 rewardSpawnPos { get; set; } = new Vector3(0, 0, 0); // InteractiveButton only
 		public List<int> maxRewardCounts { get; set; } = new List<int>(); // InteractiveButton only
 	}
+
 	public class RGB
 	{
 		public float r { get; set; } = 0;
 		public float g { get; set; } = 0;
 		public float b { get; set; } = 0;
+	}
+
+	public static class AliasMapper
+	{
+		private static readonly HashSet<string> ObjectsToCheck = new HashSet<string>
+	{ 
+		// As of 11/20/2023, the below objects have been assigned new names and are now assigned aliases.
+		"Cardbox1",
+		"Cardbox2",
+		"LObject",
+		"LObject2",
+		"UObject",
+		"AntiDecayGoal",
+		"SpawnerDispenser",
+		"SpawnerContainer",
+		"SignPosterboard",
+		"Pillar-Button"
+	};
+		private static readonly Dictionary<string, string> AliasMap = new Dictionary<string, string>
+		{
+			{ "Cardbox1", "LightBlock" },
+			{ "Cardbox2", "HeavyBlock" },
+			{ "LObject", "LBlock" },
+			{ "LObject2", "JBlock" },
+			{ "UObject", "UBlock" },
+			{ "AntiDecayGoal", "RipenGoal" },
+			{ "SpawnerDispenser", "SpawnerDispenserTall" },
+			{ "SpawnerContainer", "SpawnerContainerShort" },
+			{ "SignPosterboard", "SignBoard" },
+			{ "Pillar-Button", "SpawnerButton" },
+		};
+
+		public static string ResolveAlias(string name)
+		{
+			if (ObjectsToCheck.Contains(name) && AliasMap.TryGetValue(name, out string newName))
+			{
+				Debug.Log($"Alias found: '{name}' is mapped to '{newName}'");
+				return newName;
+			}
+			return name; // Return the original name if no alias exists
+		}
 	}
 }

@@ -3,6 +3,8 @@ using System;
 using UnityEngine;
 using Lights;
 using System.Text;
+using System.Linq;
+using YAMLDefs;
 
 namespace ArenasParameters
 {
@@ -61,6 +63,7 @@ namespace ArenasParameters
         public List<float> RewardWeights { get; private set; }
         public Vector3 rewardSpawnPos { get; private set; }
         public List<int> maxRewardCounts { get; private set; }
+        public Dictionary<int, int> originalToNewIDMapping = new Dictionary<int, int>();
 
         public Spawnable(GameObject obj)
         {
@@ -79,6 +82,7 @@ namespace ArenasParameters
             rotations = yamlItem.rotations;
             sizes = yamlItem.sizes;
             colors = initVec3sFromRGBs(yamlItem.colors);
+            name = AliasMapper.ResolveAlias(yamlItem.name);
 
             // ======== EXTRA/OPTIONAL PARAMETERS ========
             // use for SignPosterboard symbols, Decay/SizeChange rates, Dispenser settings, etc.
@@ -130,10 +134,6 @@ namespace ArenasParameters
         public bool toUpdate = false;
         public string protoString = "";
         public int randomSeed = 0;
-        public bool showNotification { get; set; } = false;
-        public bool canResetEpisode { get; set; } = true;
-        public bool canChangePerspective { get; set; } = true;
-        public int defaultPerspective { get; set; } = 0;
 
         public ArenaConfiguration() { }
 
@@ -162,10 +162,6 @@ namespace ArenasParameters
             toUpdate = true;
             protoString = yamlArena.ToString();
             randomSeed = yamlArena.random_seed;
-            this.showNotification = yamlArena.showNotification;
-            this.canResetEpisode = yamlArena.canResetEpisode;
-            this.canChangePerspective = yamlArena.canChangePerspective;
-            this.defaultPerspective = yamlArena.defaultPerspective;
         }
 
         public void SetGameObject(List<GameObject> listObj)
@@ -186,6 +182,10 @@ namespace ArenasParameters
         public int seed;
         public static ArenasConfigurations Instance { get; private set; }
         public bool randomizeArenas = false;
+        public bool showNotification { get; set; } = false;
+        public bool canResetEpisode { get; set; } = true;
+        public bool canChangePerspective { get; set; } = true;
+        public int CurrentArenaID { get; set; } = 0;
 
         public ArenasConfigurations()
         {
@@ -202,23 +202,9 @@ namespace ArenasParameters
         {
             get
             {
-                if (configurations.ContainsKey(-1)) // Use '-1' as the default configuration key
-                {
-                    return configurations[-1];
-                }
-                return null;
-            }
-        }
-
-        public void SetCurrentArenaConfiguration(ArenaConfiguration config)
-        {
-            if (configurations.ContainsKey(-1))
-            {
-                configurations[-1] = config;
-            }
-            else
-            {
-                configurations.Add(-1, config);
+                return configurations.ContainsKey(CurrentArenaID)
+                    ? configurations[CurrentArenaID]
+                    : null;
             }
         }
 
@@ -235,7 +221,7 @@ namespace ArenasParameters
                     configurations[k] = new ArenaConfiguration(yamlConfig);
                 }
             }
-            SetCurrentArenaConfiguration(configurations[k]);
+            CurrentArenaID = k;
             yamlConfig.SetCurrentPassMark();
         }
 
@@ -251,49 +237,39 @@ namespace ArenasParameters
 
         public void UpdateWithYAML(YAMLDefs.ArenaConfig yamlArenaConfig)
         {
+            configurations.Clear();
             List<int> existingIds = new List<int>();
-            foreach (var key in yamlArenaConfig.arenas.Keys)
-            {
-                if (key >= 0)
-                {
-                    existingIds.Add(key);
-                }
-            }
-			// Sanity check to make sure arenas are cycled properly even if negative numbers are assigned for arena ID's.
-            int nextAvailableId = 0; // Initialize with 0, assuming 0 might be the first available ID.
-            while (existingIds.Contains(nextAvailableId))
-            {
-                nextAvailableId++; // If ID is already taken, increment to find the next available one.
-            }
+            int nextAvailableId = 0;
 
+            // Iterating over arenas in the order they appear in the YAML, top to bottom.
             foreach (KeyValuePair<int, YAMLDefs.Arena> arenaConfiguration in yamlArenaConfig.arenas)
             {
-                if (arenaConfiguration.Key < 0)
+                int currentID = arenaConfiguration.Key;
+
+                if (existingIds.Contains(currentID) || currentID < 0)
                 {
-                    // Warn the user about the ID change. Does not crash the game.
                     Debug.LogWarning(
-                        $"Arena with ID {arenaConfiguration.Key} has been changed to {nextAvailableId}."
+                        $"Issue with arenaID: {currentID}. Assigning a new unique ID: {nextAvailableId}."
                     );
 
-                    // Add the arena with the new ID.
+                    // Assign a new unique ID if required.
                     Add(nextAvailableId, arenaConfiguration.Value);
                     existingIds.Add(nextAvailableId);
-
-                    // Update next available ID for potential future conflicts.
-                    nextAvailableId++;
-                    while (existingIds.Contains(nextAvailableId))
-                    {
-                        nextAvailableId++;
-                    }
                 }
                 else
                 {
-                    // If the ID is not negative, simply add the arena.
-                    Add(arenaConfiguration.Key, arenaConfiguration.Value);
+                    Add(currentID, arenaConfiguration.Value);
+                    existingIds.Add(currentID);
                 }
+
+                // Adjust the nextAvailableId for future entries.
+                nextAvailableId = existingIds.Max() + 1;
             }
 
             randomizeArenas = yamlArenaConfig.randomizeArenas;
+            showNotification = yamlArenaConfig.showNotification;
+            canResetEpisode = yamlArenaConfig.canResetEpisode;
+            canChangePerspective = yamlArenaConfig.canChangePerspective;
         }
 
         public void UpdateWithConfigurationsReceived(
