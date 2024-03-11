@@ -15,8 +15,8 @@ GameObject:
   - component: {fileID: 8014198640529402448}
   - component: {fileID: 3115477092056669210}
   m_Layer: 0
-  m_Name: DecayGoalBounce
-  m_TagString: badGoal
+  m_Name: DecoyGoalBounce
+  m_TagString: DecoyGoalBounce
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

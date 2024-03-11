@@ -376,6 +376,8 @@ MonoBehaviour:
   - Ramp
   - PillarButton
   - SignPoster
+  - DecoyGoal
+  - DecoyGoalBounce
   m_RaysPerDirection: 3
   m_MaxRayDegrees: 70
   m_SphereCastRadius: 0.5

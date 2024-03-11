@@ -28,6 +28,8 @@ TagManager:
   - GoalSpawner
   - PillarButton
   - SignPoster
+  - DecoyGoal
+  - DecoyGoalBounce
   layers:
   - Default
   - TransparentFX
