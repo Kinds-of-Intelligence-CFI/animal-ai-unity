@@ -47,6 +47,7 @@ namespace YAMLDefs
 
 	public class Item
 	{
+		// ======== MANDATORY PARAMETERS (ALL OBJECTS) ========
 		public string name { get; set; } = "";
 		public List<Vector3> positions { get; set; } = new List<Vector3>();
 		public List<float> rotations { get; set; } = new List<float>();
@@ -54,21 +55,24 @@ namespace YAMLDefs
 		public List<RGB> colors { get; set; } = new List<RGB>();
 
 		// ======== EXTRA/OPTIONAL PARAMETERS ========
-		// Use for SignPosterboard symbols, Decay/SizeChange rates, Dispenser settings, etc.
-
-		public List<string> skins { get; set; } = new List<string>(); // Agent only
-		public List<string> symbolNames { get; set; } = new List<string>(); // SignPosterboard only
-		public List<float> delays { get; set; } = new List<float>(); // all uniques except Posterboard
-		public List<float> initialValues { get; set; } = new List<float>(); // all w/value change
-		public List<float> finalValues { get; set; } = new List<float>(); // " "
-		public List<float> changeRates { get; set; } = new List<float>(); // Decay/SizeChange
-		public List<int> spawnCounts { get; set; } = new List<int>(); // Spawners only
-		public List<RGB> spawnColors { get; set; } = new List<RGB>(); // Spawners only
-		public List<float> timesBetweenSpawns { get; set; } = new List<float>(); // Spawners only
-		public List<float> ripenTimes { get; set; } = new List<float>(); // SpawnerTree only
-		public List<float> doorDelays { get; set; } = new List<float>(); // SpawnerDispenser/Container only
-		public List<float> timesBetweenDoorOpens { get; set; } = new List<float>(); // " "
+		public List<string> skins { get; set; } = new List<string>(); // Agent only (this is optional as the default is randomized skin selection)
 		public List<float> frozenAgentDelays { get; set; } = new List<float>(); // Agent only
+
+		public List<string> symbolNames { get; set; } = new List<string>(); // SignBoard only
+
+		public List<float> delays { get; set; } = new List<float>(); // SpawnerDispenser/Container only
+		public List<float> initialValues { get; set; } = new List<float>(); // SpawnerDispenser/Container only
+		public List<float> finalValues { get; set; } = new List<float>(); // SpawnerDispenser/Container only
+		public List<int> spawnCounts { get; set; } = new List<int>(); // SpawnerDispenser/Container only
+		public List<RGB> spawnColors { get; set; } = new List<RGB>(); // SpawnerDispenser/Container only
+		public List<float> timesBetweenSpawns { get; set; } = new List<float>(); // SpawnerDispenser/Container only
+		public List<float> doorDelays { get; set; } = new List<float>(); // SpawnerDispenser/Container only
+		public List<float> timesBetweenDoorOpens { get; set; } = new List<float>(); // SpawnerDispenser/Container only
+		
+		public List<float> changeRates { get; set; } = new List<float>(); // Decay/SizeChange only (RIPEN/DECAY GOALS only)
+		
+		public List<float> ripenTimes { get; set; } = new List<float>(); // SpawnerTree only
+		
 		public List<float> moveDurations { get; set; } = new List<float>(); // InteractiveButton only
 		public List<float> resetDurations { get; set; } = new List<float>(); // InteractiveButton only
 		public float spawnProbability { get; set; } = 1f; // InteractiveButton only
@@ -122,7 +126,7 @@ namespace YAMLDefs
 				Debug.Log($"Alias found: '{name}' is mapped to '{newName}'");
 				return newName;
 			}
-			return name; // Return the original name if no alias exists
+			return name;
 		}
 	}
 }
