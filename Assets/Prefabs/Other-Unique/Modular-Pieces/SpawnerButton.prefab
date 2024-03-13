@@ -386,11 +386,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5827418943653793803}
+  - component: {fileID: 5602724600326259656}
   - component: {fileID: 7453735775492038574}
   - component: {fileID: 4653355841896983396}
   - component: {fileID: 447105005112466788}
   - component: {fileID: 6721031035980741608}
-  - component: {fileID: 5602724600326259656}
   m_Layer: 0
   m_Name: SpawnerButton
   m_TagString: PillarButton
@@ -415,6 +415,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!64 &5602724600326259656
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6599169884992408241}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -3264360637987800443, guid: 34e11e8319937914fb76dabde1473f6c, type: 3}
 --- !u!33 &7453735775492038574
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -501,17 +515,3 @@ MonoBehaviour:
   sizeAdjustement: 0.999
   textureUVOverride: 0
   typicalOrigin: 0
---- !u!64 &5602724600326259656
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6599169884992408241}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -3264360637987800443, guid: 34e11e8319937914fb76dabde1473f6c, type: 3}
