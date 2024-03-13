@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 7526142022006780947}
   - component: {fileID: 6907925748948253622}
   - component: {fileID: 8662980198616354684}
-  - component: {fileID: -6601130326534759375}
   - component: {fileID: -1495984043384320533}
+  - component: {fileID: -6601130326534759375}
   m_Layer: 0
   m_Name: SignBoard
   m_TagString: SignPoster
@@ -87,6 +87,19 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &-1495984043384320533
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7150004164178407081}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.100000024, y: 2, z: 3}
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!114 &-6601130326534759375
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -158,16 +171,3 @@ MonoBehaviour:
   - {r: 0.9339623, g: 0.08282302, b: 0.08282302, a: 1}
   useDefaultColourArray: 0
   assignedColourOverride: {r: 0.239153, g: 0, b: 0.8396226, a: 1}
---- !u!65 &-1495984043384320533
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7150004164178407081}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.100000024, y: 2, z: 3}
-  m_Center: {x: 0, y: 1, z: 0}
