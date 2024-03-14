@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 6131923203372012947}
   - component: {fileID: 6131923203368588723}
   - component: {fileID: 6131923203369719667}
-  - component: {fileID: 2714515721024027578}
   - component: {fileID: -2901181462991391087}
+  - component: {fileID: 2714515721024027578}
   m_Layer: 0
   m_Name: SpawnerTree
   m_TagString: GoalSpawner
@@ -30,6 +30,7 @@ Transform:
   m_LocalRotation: {x: 0.000000057601156, y: 0.7071067, z: -0.000000057601145, w: 0.7071068}
   m_LocalPosition: {x: -0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -53,6 +54,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -84,6 +86,20 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &-2901181462991391087
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6131923203371649459}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -7100219141164419968, guid: 5d014f7bb02269145ab66199dfe8240a, type: 3}
 --- !u!114 &2714515721024027578
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -102,6 +118,7 @@ MonoBehaviour:
   canRandomizeColor: 0
   ratioSize: {x: 1, y: 1, z: 1}
   sizeAdjustement: 0.999
+  textureUVOverride: 0
   typicalOrigin: 0
   spawnObjects:
   - {fileID: 703623700356385717, guid: efdf89976edbdaa42aee9b9c7013c916, type: 3}
@@ -115,20 +132,5 @@ MonoBehaviour:
   timeBetweenSpawns: 1.5
   delaySeconds: 2
   spawnCount: 10
-  colourOverride: {r: 1, g: 0, b: 0.44876766, a: 1}
   objSpawnSeed: 0
   spawnSizeSeed: 1
---- !u!64 &-2901181462991391087
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6131923203371649459}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -7100219141164419968, guid: 5d014f7bb02269145ab66199dfe8240a, type: 3}
