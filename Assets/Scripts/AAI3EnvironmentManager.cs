@@ -2,38 +2,29 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
+using ArenasParameters;
 using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using Unity.MLAgents.SideChannels;
 using Unity.MLAgents.Policies;
-using ArenasParameters;
-using UnityEngineExtensions;
-using YamlDotNet.Serialization;
 
-/// Training scene must start automatically on launch by training process
-/// Academy must reset the scene to a valid starting point for each episode
-/// Training episode must have a definite end (MaxSteps or Agent.EndEpisode)
-///
-/// Scene requires:
-///     GameObject with tag "agent" and component CameraSensorComponent
-///     GameObject with tag MainCamera which views the full scene in Unity
-///
+/// <summary>
+/// Manages the environment settings and configurations for the AAI project. 
+/// </summary>
 public class AAI3EnvironmentManager : MonoBehaviour
 {
-	public GameObject arena;
-	public GameObject uiCanvas;
-	public string configFile = "";
-	public int maximumResolution = 512;
-	public int minimumResolution = 4;
-	public int defaultResolution = 84;
-	public int defaultRaysPerSide = 2;
-	public int defaultRayMaxDegrees = 60;
-	public int defaultDecisionPeriod = 3;
-	public GameObject playerControls;
-
-	[HideInInspector]
-	public bool playerMode = true;
-
+	[SerializeField] private GameObject arena;
+	[SerializeField] private GameObject uiCanvas;
+	[SerializeField] private string configFile = "";
+	[HideInInspector] [SerializeField] private const int maximumResolution = 512;
+	[HideInInspector] [SerializeField] private const int minimumResolution = 4;
+	[HideInInspector] [SerializeField] private const int defaultResolution = 84;
+	[HideInInspector] [SerializeField] private const int defaultRaysPerSide = 2;
+	[HideInInspector] [SerializeField] private const int defaultRayMaxDegrees = 60;
+	[HideInInspector]  [SerializeField] private const int defaultDecisionPeriod = 3;
+	[SerializeField] private GameObject playerControls;
+	
+	[HideInInspector] public bool PlayerMode { get; private set; } = true;
 	private ArenasConfigurations _arenasConfigurations;
 	private TrainingArena _instantiatedArena;
 	private ArenasParametersSideChannel _arenasParametersSideChannel;
@@ -46,7 +37,6 @@ public class AAI3EnvironmentManager : MonoBehaviour
 		// This is used to initialise the ArenaParametersSideChannel wich is a subclass of MLAgents SideChannel
 		_arenasParametersSideChannel = new ArenasParametersSideChannel();
 		_arenasConfigurations = new ArenasConfigurations();
-
 		_arenasParametersSideChannel.NewArenasParametersReceived +=
 			_arenasConfigurations.UpdateWithConfigurationsReceived;
 
@@ -86,12 +76,13 @@ public class AAI3EnvironmentManager : MonoBehaviour
 			grayscale = false;
 			useRayCasts = true;
 			raysPerSide = 2;
-			// If in editor mode load whichever config is specified in configFile field in editor
+
+			// If in editor mode, load the configuration file specified in the inspector
 			if (configFile != "")
 			{
 				var configYAML = Resources.Load<TextAsset>(configFile);
 				if (configYAML != null)
-				{ // If config file
+				{
 					var YAMLReader = new YAMLDefs.YAMLReader();
 					var parsed = YAMLReader.deserializer.Deserialize<YAMLDefs.ArenaConfig>(
 						configYAML.ToString()
@@ -99,7 +90,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
 					_arenasConfigurations.UpdateWithYAML(parsed);
 				}
 				else
-				{ // If directory, then load all config files in the directory.
+				{
 					var configYAMLS = Resources.LoadAll<TextAsset>(configFile);
 					var YAMLReader = new YAMLDefs.YAMLReader();
 					foreach (TextAsset config in configYAMLS)
@@ -114,20 +105,13 @@ public class AAI3EnvironmentManager : MonoBehaviour
 		}
 
 		resolution = Math.Max(minimumResolution, Math.Min(maximumResolution, resolution));
-
 		TrainingArena arena = FindObjectOfType<TrainingArena>();
-		InstantiateArenas(); // Instantiate every new arena with agent and objects. Agents are currently deactivated until we set the sensors.
 
-		//Add playerControls if in play mode
+		InstantiateArenas();
+
 		playerControls.SetActive(playerMode);
 		uiCanvas.GetComponent<Canvas>().enabled = playerMode;
 
-		// Destroy the sensors that aren't being used and update the values of those that are
-		// mlagents automatically registers cameras when the agent script is initialised so have to:
-		//  1) use FindObjectsOfType as this returns deactivated objects
-		//  2) start with agent deactivated and then set active after editing sensors
-		//  3) use DestroyImmediate so that it is destroyed before agent is initialised
-		// also sets agent decision period and the correct behaviour type for play mode
 		foreach (Agent a in FindObjectsOfType<Agent>(true))
 		{
 			a.GetComponentInChildren<DecisionRequester>().DecisionPeriod = decisionPeriod;
@@ -166,7 +150,6 @@ public class AAI3EnvironmentManager : MonoBehaviour
 			}
 		}
 
-		// Enable the agent now that their sensors have been set.
 		_instantiatedArena._agent.gameObject.SetActive(true);
 
 		Debug.Log(
@@ -192,7 +175,6 @@ public class AAI3EnvironmentManager : MonoBehaviour
 	{
 		OnArenaChanged?.Invoke(currentArenaIndex, totalArenas);
 	}
-
 
 	public int getMaxArenaID()
 	{
@@ -236,10 +218,6 @@ public class AAI3EnvironmentManager : MonoBehaviour
 		cameraSensor.Grayscale = grayscale;
 	}
 
-	///<summary>
-	/// We organize the arenas in a grid and position the main camera at the center, high enough
-	/// to see all arenas at once.
-	///</summary>
 	private void InstantiateArenas()
 	{
 		GameObject arenaInst = Instantiate(arena, new Vector3(0f, 0f, 0f), Quaternion.identity);
@@ -247,28 +225,12 @@ public class AAI3EnvironmentManager : MonoBehaviour
 		_instantiatedArena.arenaID = 0;
 	}
 
-	///<summary>
-	/// Parses command line arguments for:
-	///--playerMode: if true then can change camera angles and have control of agent
-	///--receiveConfiguration - adds the configuration file to load
-	///--numberOfArenas - the number of Arenas to spawn (always set to 1 in playerMode)
-	///--useCamera - if true adds camera obseravations
-	///--resolution - the resolution for camera observations (default 84, min4, max 512)
-	///--grayscale
-	///--useRayCasts - if true adds raycast observations
-	///--raysPerSide - sets the number of rays per side (total = 2n+1)
-	///--rayAngle - sets the maximum angle of the rays (defaults to 60)
-	///--decisionPeriod - The frequency with which the agent requests a decision.
-	///     A DecisionPeriod of 5 means that the Agent will request a decision every 5 Academy steps.
-	///     Range: (1, 20)
-	///     Default: 3
-	/// ///</summary>
 	private Dictionary<string, int> RetrieveEnvironmentParameters()
 	{
 		Dictionary<string, int> environmentParameters = new Dictionary<string, int>();
-
 		string[] args = System.Environment.GetCommandLineArgs();
 		Debug.Log("Command Line Args: " + String.Join(" ", args));
+
 		for (int i = 0; i < args.Length; i++)
 		{
 			switch (args[i])
