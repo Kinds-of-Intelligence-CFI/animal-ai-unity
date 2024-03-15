@@ -21,7 +21,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
 	[HideInInspector] [SerializeField] private const int defaultResolution = 84;
 	[HideInInspector] [SerializeField] private const int defaultRaysPerSide = 2;
 	[HideInInspector] [SerializeField] private const int defaultRayMaxDegrees = 60;
-	[HideInInspector]  [SerializeField] private const int defaultDecisionPeriod = 3;
+	[HideInInspector] [SerializeField] private const int defaultDecisionPeriod = 3;
 	[SerializeField] private GameObject playerControls;
 	
 	[HideInInspector] public bool PlayerMode { get; private set; } = true;
