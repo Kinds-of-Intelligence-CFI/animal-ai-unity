@@ -12,35 +12,39 @@ using Unity.MLAgents.Policies;
 /// Manages the environment settings and configurations for the AAI project. 
 /// </summary>
 public class AAI3EnvironmentManager : MonoBehaviour
-{
+{   
+	[Header("Arena Settings")]
 	[SerializeField] private GameObject arena;
 	[SerializeField] private GameObject uiCanvas;
+	[SerializeField] private GameObject playerControls;
+	
+	[Header("Configuration File")]
 	[SerializeField] private string configFile = "";
+
 	[HideInInspector] [SerializeField] private const int maximumResolution = 512;
 	[HideInInspector] [SerializeField] private const int minimumResolution = 4;
 	[HideInInspector] [SerializeField] private const int defaultResolution = 84;
 	[HideInInspector] [SerializeField] private const int defaultRaysPerSide = 2;
 	[HideInInspector] [SerializeField] private const int defaultRayMaxDegrees = 60;
 	[HideInInspector] [SerializeField] private const int defaultDecisionPeriod = 3;
-	[SerializeField] private GameObject playerControls;
-	
 	[HideInInspector] public bool PlayerMode { get; private set; } = true;
+	
 	private ArenasConfigurations _arenasConfigurations;
 	private TrainingArena _instantiatedArena;
 	private ArenasParametersSideChannel _arenasParametersSideChannel;
-
 	public static event Action<int, int> OnArenaChanged;
-
+	
+	private void InitialiseSideChannel()
+	{
+		_arenasConfigurations = new ArenasConfigurations();
+		_arenasParametersSideChannel = new ArenasParametersSideChannel();
+		_arenasParametersSideChannel.NewArenasParametersReceived += _arenasConfigurations.UpdateWithConfigurationsReceived;
+		SideChannelManager.RegisterSideChannel(_arenasParametersSideChannel);
+	}
 
 	public void Awake()
 	{
-		// This is used to initialise the ArenaParametersSideChannel wich is a subclass of MLAgents SideChannel
-		_arenasParametersSideChannel = new ArenasParametersSideChannel();
-		_arenasConfigurations = new ArenasConfigurations();
-		_arenasParametersSideChannel.NewArenasParametersReceived +=
-			_arenasConfigurations.UpdateWithConfigurationsReceived;
-
-		SideChannelManager.RegisterSideChannel(_arenasParametersSideChannel);
+		InitialiseSideChannel();
 
 		// Get all commandline arguments and update starting parameters
 		Dictionary<string, int> environmentParameters = RetrieveEnvironmentParameters();
