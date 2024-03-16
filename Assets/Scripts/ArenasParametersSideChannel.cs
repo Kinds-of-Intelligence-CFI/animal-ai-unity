@@ -2,6 +2,9 @@ using Unity.MLAgents.SideChannels;
 using System;
 using ArenasParameters;
 
+/// <summary>
+/// This class is used to communicate the environment configurations to the Unity.
+/// </summary>
 public class ArenasParametersSideChannel : SideChannel
 {
 	public ArenasParametersSideChannel()
@@ -11,8 +14,6 @@ public class ArenasParametersSideChannel : SideChannel
 
 	protected override void OnMessageReceived(IncomingMessage msg)
 	{
-		// When a new message is received we trigger an event to signal the environment
-		// configurations to check if they need to update
 		ArenasParametersEventArgs args = new ArenasParametersEventArgs();
 		args.arenas_yaml = msg.GetRawBytes();
 		OnArenasParametersReceived(args);
@@ -30,5 +31,5 @@ public class ArenasParametersSideChannel : SideChannel
 	}
 
 	public EventHandler<ArenasParametersEventArgs> NewArenasParametersReceived;
-	
+
 }
