@@ -12,28 +12,28 @@ using Unity.MLAgents.Policies;
 /// Manages the environment settings and configurations for the AAI project. 
 /// </summary>
 public class AAI3EnvironmentManager : MonoBehaviour
-{   
+{
 	[Header("Arena Settings")]
 	[SerializeField] private GameObject arena;
 	[SerializeField] private GameObject uiCanvas;
 	[SerializeField] private GameObject playerControls;
-	
+
 	[Header("Configuration File")]
 	[SerializeField] private string configFile = "";
 
-	[HideInInspector] [SerializeField] private const int maximumResolution = 512;
-	[HideInInspector] [SerializeField] private const int minimumResolution = 4;
-	[HideInInspector] [SerializeField] private const int defaultResolution = 84;
-	[HideInInspector] [SerializeField] private const int defaultRaysPerSide = 2;
-	[HideInInspector] [SerializeField] private const int defaultRayMaxDegrees = 60;
-	[HideInInspector] [SerializeField] private const int defaultDecisionPeriod = 3;
+	[HideInInspector][SerializeField] private const int maximumResolution = 512;
+	[HideInInspector][SerializeField] private const int minimumResolution = 4;
+	[HideInInspector][SerializeField] private const int defaultResolution = 84;
+	[HideInInspector][SerializeField] private const int defaultRaysPerSide = 2;
+	[HideInInspector][SerializeField] private const int defaultRayMaxDegrees = 60;
+	[HideInInspector][SerializeField] private const int defaultDecisionPeriod = 3;
 	[HideInInspector] public bool PlayerMode { get; private set; } = true;
-	
+
 	private ArenasConfigurations _arenasConfigurations;
 	private TrainingArena _instantiatedArena;
 	private ArenasParametersSideChannel _arenasParametersSideChannel;
 	public static event Action<int, int> OnArenaChanged;
-	
+
 	private void InitialiseSideChannel()
 	{
 		_arenasConfigurations = new ArenasConfigurations();
@@ -301,16 +301,8 @@ public class AAI3EnvironmentManager : MonoBehaviour
 
 	public static byte[] ReadFully(Stream stream)
 	{
-		byte[] buffer = new byte[32768];
-		using (MemoryStream ms = new MemoryStream())
-		{
-			while (true)
-			{
-				int read = stream.Read(buffer, 0, buffer.Length);
-				if (read <= 0)
-					return ms.ToArray();
-				ms.Write(buffer, 0, read);
-			}
-		}
+		using var ms = new MemoryStream();
+		stream.CopyTo(ms);
+		return ms.ToArray();
 	}
 }
