@@ -1,229 +1,162 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 using Random = UnityEngine.Random;
 using PrefabInterface;
-using System.Reflection;
 
 /// <summary>
-/// A Prefab represents a GameObject that cna be spawned in an arena, it also contains the range of
-/// values that the user can pass as parameters
+/// Handles the method of modifying and spawning game objects in the environment.
 /// </summary>
 public class Prefab : MonoBehaviour, IPrefab
 {
-    public Vector2 rotationRange;
-    public Vector3 sizeMin;
-    public Vector3 sizeMax;
-    public bool canRandomizeColor = true;
-    public Vector3 ratioSize;
-    public float sizeAdjustement = 0.999f;
-    // To scale textures on dynamically-sized objects:
-    public bool textureUVOverride = false;
-    public bool typicalOrigin = true;
-    protected float _height;
+	[Header("Prefab Configuration")]
+	public Vector2 rotationRange;
+	public Vector3 sizeMin, sizeMax, ratioSize;
+	public bool canRandomizeColor = true, textureUVOverride = false, typicalOrigin = true;
+	public float sizeAdjustment = 0.999f;
 
-    public virtual void SetColor(Vector3 color)
-    {
-        if (canRandomizeColor)
-        {
-            Color newColor = new Color();
-            newColor.a = 1f;
-            newColor.r = color.x >= 0 ? color.x / 255f : Random.Range(0f, 1f);
-            newColor.g = color.y >= 0 ? color.y / 255f : Random.Range(0f, 1f);
-            newColor.b = color.z >= 0 ? color.z / 255f : Random.Range(0f, 1f);
+	protected Renderer[] _renderers;
+	protected float _height;
 
-            if (GetComponent<Renderer>() != null)
-            {
-                GetComponent<Renderer>().material.color = newColor;
-            }
-            foreach (Renderer r in GetComponentsInChildren<Renderer>())
-            {
-                if (
-                    r.material.GetFloat("_Surface") != 1 /*=Transparent*/
-                )
-                    r.material.color = newColor;
-            }
-        }
-    }
+	private void Awake()
+	{
+		_renderers = GetComponentsInChildren<Renderer>();
+	}
 
-    public virtual void SetSize(Vector3 size)
-    {
-        Vector3 clippedSize = Vector3.Max(sizeMin, Vector3.Min(sizeMax, size)) * sizeAdjustement;
-        float sizeX = size.x < 0 ? Random.Range(sizeMin[0], sizeMax[0]) : clippedSize.x;
-        float sizeY = size.y < 0 ? Random.Range(sizeMin[1], sizeMax[1]) : clippedSize.y;
-        float sizeZ = size.z < 0 ? Random.Range(sizeMin[2], sizeMax[2]) : clippedSize.z;
+	public virtual void SetColor(Vector3 color)
+	{
+		if (!canRandomizeColor) return;
 
-        _height = sizeY;
-        transform.localScale = new Vector3(
-            sizeX * ratioSize.x,
-            sizeY * ratioSize.y,
-            sizeZ * ratioSize.z
-        );
+		Color newColor = new Color(
+			color.x >= 0 ? color.x / 255f : Random.Range(0f, 1f),
+			color.y >= 0 ? color.y / 255f : Random.Range(0f, 1f),
+			color.z >= 0 ? color.z / 255f : Random.Range(0f, 1f),
+			1f
+		);
 
-        if (textureUVOverride)
-        {
-            RescaleUVs();
-        }
-    }
+		foreach (var renderer in _renderers)
+		{
+			if (renderer.material.GetFloat("_Surface") != 1) // Not Transparent
+			{
+				renderer.material.color = newColor;
+			}
+		}
+	}
 
-    public virtual Vector3 GetRotation(float rotationY)
-    {
-        return new Vector3(
-            0,
-            rotationY < 0 ? Random.Range(rotationRange.x, rotationRange.y) : rotationY,
-            0
-        );
-    }
+	public virtual void SetSize(Vector3 size)
+	{
+		Vector3 clippedSize = Vector3.Max(sizeMin, Vector3.Min(sizeMax, size)) * sizeAdjustment;
+		Vector3 newSize = new Vector3(
+			size.x < 0 ? Random.Range(sizeMin.x, sizeMax.x) : clippedSize.x,
+			size.y < 0 ? Random.Range(sizeMin.y, sizeMax.y) : clippedSize.y,
+			size.z < 0 ? Random.Range(sizeMin.z, sizeMax.z) : clippedSize.z
+		);
 
-    public virtual Vector3 GetPosition(
-        Vector3 position,
-        Vector3 boundingBox,
-        float rangeX,
-        float rangeZ
-    )
-    {
-        float xBound = boundingBox.x;
-        float zBound = boundingBox.z;
-        float xOut =
-            position.x < 0
-                ? Random.Range(xBound, rangeX - xBound)
-                : Math.Max(0, Math.Min(position.x, rangeX));
-        float yOut = Math.Max(position.y, 0);
-        float zOut =
-            position.z < 0
-                ? Random.Range(zBound, rangeZ - zBound)
-                : Math.Max(0, Math.Min(position.z, rangeZ));
+		// Apply ratioSize correctly as a multiplication to each dimension.
+		newSize.x *= ratioSize.x;
+		newSize.y *= ratioSize.y;
+		newSize.z *= ratioSize.z;
 
-        return new Vector3(xOut, AdjustY(yOut), zOut);
-    }
+		_height = newSize.y;
+		transform.localScale = newSize;
 
-    protected virtual float AdjustY(float yIn)
-    {
-        return yIn + (typicalOrigin ? (_height / 2) : 0) + 0.01f;
-    }
+		if (textureUVOverride) RescaleUVs();
+	}
 
-    protected virtual void RescaleUVs(bool child = false, GameObject childOverride = null)
-    {
-        Renderer R =
-            (child) ? childOverride.GetComponent<Renderer>() : this.GetComponent<Renderer>();
-        MeshFilter MF =
-            (child) ? childOverride.GetComponent<MeshFilter>() : this.GetComponent<MeshFilter>();
-        if (R != null && R.material.GetTexture("_BaseMap") != null)
-        {
-            MF.sharedMesh = Instantiate<Mesh>(MF.mesh);
-            Mesh MESH = MF.sharedMesh;
+	public virtual Vector3 GetRotation(float rotationY)
+	{
+		return new Vector3(
+			0,
+			rotationY < 0 ? Random.Range(rotationRange.x, rotationRange.y) : rotationY,
+			0
+		);
+	}
 
-            Transform T = /*(child) ? transform.parent :*/
-            transform;
+	public virtual Vector3 GetPosition(Vector3 position, Vector3 boundingBox, float rangeX, float rangeZ)
+	{
+		float xOut = position.x < 0 ? Random.Range(boundingBox.x, rangeX - boundingBox.x) : Mathf.Max(0, Mathf.Min(position.x, rangeX));
+		float yOut = Mathf.Max(position.y, 0);
+		float zOut = position.z < 0 ? Random.Range(boundingBox.z, rangeZ - boundingBox.z) : Mathf.Max(0, Mathf.Min(position.z, rangeZ));
 
-            Vector2[] uvs = new Vector2[MESH.uv.Length];
-            Dictionary<Vector3, Vector2Int> uvStretchLookup = new Dictionary<Vector3, Vector2Int>
-            {
-                { new Vector3(0f, 0f, 1f), new Vector2Int(0, 1) },
-                { new Vector3(0f, 1f, 0f), new Vector2Int(0, 2) },
-                { new Vector3(0f, 0f, -1f), new Vector2Int(0, 1) },
-                { new Vector3(0f, -1f, 0f), new Vector2Int(0, 2) },
-                { new Vector3(-1f, 0f, 0f), new Vector2Int(2, 1) },
-                { new Vector3(1f, 0f, 0f), new Vector2Int(2, 1) }
-            };
-            Vector2Int n;
-            bool b;
-            Vector2Int d = new Vector2Int(0, 1);
-            for (int i = 0; i < uvs.Length; ++i)
-            {
-                b = uvStretchLookup.TryGetValue(MESH.normals[i], out n);
-                if (b)
-                {
-                    uvs[i].x = (MESH.uv[i].x > 0) ? T.localScale[n.x] : 0;
-                    uvs[i].y = (MESH.uv[i].y > 0) ? T.localScale[n.y] : 0;
-                }
-                else
-                {
-                    uvs[i].x = (MESH.uv[i].x > 0) ? T.localScale[0] : 0;
-                    uvs[i].y =
-                        (MESH.uv[i].y > 0)
-                            ? Mathf.Sqrt(
-                                Mathf.Pow(T.localScale[1], 2) + Mathf.Pow(T.localScale[2], 2)
-                            )
-                            : 0;
-                }
-            }
-            MESH.uv = uvs;
-        }
-        else if (!child)
-        {
-            for (int i = 0; i < transform.childCount; ++i)
-            {
-                RescaleUVs(true, (transform.GetChild(i).gameObject));
-            }
-        }
-    }
+		return new Vector3(xOut, AdjustY(yOut), zOut);
+	}
 
-    private void SetOptAbstract<Type>(Type v, MethodBase method)
-    {
-        Debug.Log(method.ToString() + " activated in Prefab with value " + v.ToString());
-    }
+	protected virtual float AdjustY(float yIn)
+	{
+		return yIn + (typicalOrigin ? (_height / 2) : 0) + 0.01f;
+	}
 
-    private MethodBase m;
+	protected virtual void RescaleUVs(bool child = false, GameObject childOverride = null)
+	{
+		Renderer R =
+			(child) ? childOverride.GetComponent<Renderer>() : this.GetComponent<Renderer>();
+		MeshFilter MF =
+			(child) ? childOverride.GetComponent<MeshFilter>() : this.GetComponent<MeshFilter>();
+		if (R != null && R.material.GetTexture("_BaseMap") != null)
+		{
+			MF.sharedMesh = Instantiate<Mesh>(MF.mesh);
+			Mesh MESH = MF.sharedMesh;
 
-    public virtual void SetDelay(float v)
-    {
-        m = MethodBase.GetCurrentMethod();
-        SetOptAbstract(v, m);
-    }
+			Transform T = /*(child) ? transform.parent :*/
+			transform;
 
-    public virtual void SetInitialValue(float v)
-    {
-        m = MethodBase.GetCurrentMethod();
-        SetOptAbstract(v, m);
-    }
+			Vector2[] uvs = new Vector2[MESH.uv.Length];
+			Dictionary<Vector3, Vector2Int> uvStretchLookup = new Dictionary<Vector3, Vector2Int>
+			{
+				{ new Vector3(0f, 0f, 1f), new Vector2Int(0, 1) },
+				{ new Vector3(0f, 1f, 0f), new Vector2Int(0, 2) },
+				{ new Vector3(0f, 0f, -1f), new Vector2Int(0, 1) },
+				{ new Vector3(0f, -1f, 0f), new Vector2Int(0, 2) },
+				{ new Vector3(-1f, 0f, 0f), new Vector2Int(2, 1) },
+				{ new Vector3(1f, 0f, 0f), new Vector2Int(2, 1) }
+			};
+			Vector2Int n;
+			bool b;
+			Vector2Int d = new Vector2Int(0, 1);
+			for (int i = 0; i < uvs.Length; ++i)
+			{
+				b = uvStretchLookup.TryGetValue(MESH.normals[i], out n);
+				if (b)
+				{
+					uvs[i].x = (MESH.uv[i].x > 0) ? T.localScale[n.x] : 0;
+					uvs[i].y = (MESH.uv[i].y > 0) ? T.localScale[n.y] : 0;
+				}
+				else
+				{
+					uvs[i].x = (MESH.uv[i].x > 0) ? T.localScale[0] : 0;
+					uvs[i].y =
+						(MESH.uv[i].y > 0)
+							? Mathf.Sqrt(
+								Mathf.Pow(T.localScale[1], 2) + Mathf.Pow(T.localScale[2], 2)
+							)
+							: 0;
+				}
+			}
+			MESH.uv = uvs;
+		}
+		else if (!child)
+		{
+			for (int i = 0; i < transform.childCount; ++i)
+			{
+				RescaleUVs(true, (transform.GetChild(i).gameObject));
+			}
+		}
+	}
 
-    public virtual void SetFinalValue(float v)
-    {
-        m = MethodBase.GetCurrentMethod();
-        SetOptAbstract(v, m);
-    }
+	protected void SetOption<T>(T value, string optionName)
+	{
+		Debug.Log($"{optionName} set to {value} in Prefab.");
+	}
 
-    public virtual void SetChangeRate(float v)
-    {
-        m = MethodBase.GetCurrentMethod();
-        SetOptAbstract(v, m);
-    }
+	// Unused methods
+	public virtual void SetDelay(float v) => SetOption(v, nameof(SetDelay));
+	public virtual void SetInitialValue(float v) => SetOption(v, nameof(SetInitialValue));
+	public virtual void SetFinalValue(float v) => SetOption(v, nameof(SetFinalValue));
+	public virtual void SetChangeRate(float v) => SetOption(v, nameof(SetChangeRate));
+	public virtual void SetSpawnCount(float v) => SetOption(v, nameof(SetSpawnCount));
+	public virtual void SetTimeBetweenSpawns(float v) => SetOption(v, nameof(SetTimeBetweenSpawns));
+	public virtual void SetRipenTime(float v) => SetOption(v, nameof(SetRipenTime));
+	public virtual void SetDoorDelay(float v) => SetOption(v, nameof(SetDoorDelay));
+	public virtual void SetTimeBetweenDoorOpens(float v) => SetOption(v, nameof(SetTimeBetweenDoorOpens));
+	public virtual void SetSpawnColor(Vector3 v) => SetOption(v, nameof(SetSpawnColor));
 
-    public virtual void SetSpawnCount(float v)
-    {
-        m = MethodBase.GetCurrentMethod();
-        SetOptAbstract(v, m);
-    }
-
-    public virtual void SetTimeBetweenSpawns(float v)
-    {
-        m = MethodBase.GetCurrentMethod();
-        SetOptAbstract(v, m);
-    }
-
-    public virtual void SetRipenTime(float v)
-    {
-        m = MethodBase.GetCurrentMethod();
-        SetOptAbstract(v, m);
-    }
-
-    public virtual void SetDoorDelay(float v)
-    {
-        m = MethodBase.GetCurrentMethod();
-        SetOptAbstract(v, m);
-    }
-
-    public virtual void SetTimeBetweenDoorOpens(float v)
-    {
-        m = MethodBase.GetCurrentMethod();
-        SetOptAbstract(v, m);
-    }
-
-    public virtual void SetSpawnColor(Vector3 v)
-    {
-        m = MethodBase.GetCurrentMethod();
-        SetOptAbstract(v, m);
-    }
 }
