@@ -2,42 +2,56 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
+/// <summary>
+/// Manages the notifications for the agent.
+/// </summary>
 public class NotificationManager : MonoBehaviour
 {
-	public static NotificationManager Instance;
-	public TrainingAgent trainingAgent;
-
-	public GameObject notificationPanel; // Reference to the panel
-	public Image notificationBackgroundImage; // Reference to the image element inside the panel
-
-	public Sprite[] successFrames; // Frames for success animation
-	public Sprite[] failureFrames; // Frames for failure animation
-	public float frameRate = 0.1f; // Frame rate for the animation
-
-	private int currentFrame = 0; // Current frame index for the animation
-	private Coroutine gifCoroutine; // Coroutine for handling the GIF animation
-
+	[Header("Notification Settings")]
+	public Image notificationBackgroundImage;
 	public Image successGradientBorderImage;
 	public Image failureGradientBorderImage;
 
+	[Header("GIF Settings")]
+	public Sprite[] successFrames;
+	public Sprite[] failureFrames;
+	public float frameRate = 0.1f;
+	private int currentFrame = 0;
+
+	private Coroutine gifCoroutine;
+
+	public TrainingAgent trainingAgent;
+	public GameObject notificationPanel;
+	public static NotificationManager Instance;
+
 	void Start()
+	{
+		LoadFrames();
+		trainingAgent = FindObjectOfType<TrainingAgent>();
+		HideNotification();
+	}
+
+	void LoadFrames()
 	{
 		successFrames = Resources.LoadAll<Sprite>("happyGIF");
 		failureFrames = Resources.LoadAll<Sprite>("sadGIF");
-		trainingAgent = GameObject.FindObjectOfType<TrainingAgent>();
-		HideNotification();
 	}
 
 	private void Awake()
 	{
+		SingletonCheck();
+	}
+
+	void SingletonCheck()
+	{
 		if (Instance == null)
 		{
 			Instance = this;
-			DontDestroyOnLoad(gameObject); // Ensure this object persists between scene loads
+			DontDestroyOnLoad(gameObject);
 		}
 		else
 		{
-			Destroy(gameObject); // Destroy any duplicates
+			Destroy(gameObject);
 		}
 	}
 
@@ -62,13 +76,18 @@ public class NotificationManager : MonoBehaviour
 		successGradientBorderImage.gameObject.SetActive(isSuccess);
 		failureGradientBorderImage.gameObject.SetActive(!isSuccess);
 
+		StopPreviousAnimation();
+
+		gifCoroutine = StartCoroutine(AnimateSprite(framesToShow));
+	}
+
+	void StopPreviousAnimation()
+	{
 		if (gifCoroutine != null)
 		{
 			StopCoroutine(gifCoroutine);
 		}
-		gifCoroutine = StartCoroutine(AnimateSprite(framesToShow));
 	}
-
 
 	public void HideNotification()
 	{
@@ -76,26 +95,18 @@ public class NotificationManager : MonoBehaviour
 		successGradientBorderImage.gameObject.SetActive(false);
 		failureGradientBorderImage.gameObject.SetActive(false);
 
-		if (gifCoroutine != null)
-		{
-			StopCoroutine(gifCoroutine);
-			gifCoroutine = null;
-		}
+		StopPreviousAnimation();
+
 		currentFrame = 0;
-		
 		trainingAgent.FreezeAgent(false);
 	}
-
 
 	IEnumerator AnimateSprite(Sprite[] animationFrames)
 	{
 		while (true)
 		{
-			// Set the current sprite frame
 			notificationBackgroundImage.sprite = animationFrames[currentFrame];
-			// Increment the frame index, wrapping back to 0 if it exceeds the length of the array
 			currentFrame = (currentFrame + 1) % animationFrames.Length;
-			// Wait for the frame rate duration before the next frame
 			yield return new WaitForSeconds(frameRate);
 		}
 	}
