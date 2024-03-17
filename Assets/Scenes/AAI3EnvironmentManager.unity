@@ -973,15 +973,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   arena: {fileID: 1540725604319108, guid: cb05c844a0de0cd4880c39b9a1aedeef, type: 3}
   uiCanvas: {fileID: 1822920678}
-  configFile: test_configs/decoy-file-test
-  maximumResolution: 512
-  minimumResolution: 4
-  defaultResolution: 84
-  defaultRaysPerSide: 2
-  defaultRayMaxDegrees: 60
-  defaultDecisionPeriod: 3
   playerControls: {fileID: 1065671190}
-  playerMode: 0
+  configFile: test_configs/decoy-file-test
 --- !u!1 &544926169
 GameObject:
   m_ObjectHideFlags: 0
@@ -1775,11 +1768,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74d21046d95ee1e49a7ec92a3f6165f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  FileCounter: 0
-  RT: {fileID: 8400000, guid: 828dad2906405da4aa4792c126792419, type: 2}
-  FilePath: ScreenshotTest
-  FileName: capture
-  TEST: 0
+  fileCounter: 0
+  renderTexture: {fileID: 8400000, guid: 828dad2906405da4aa4792c126792419, type: 2}
+  filePath: Screenshots
+  fileName: capture
+  testMode: 0
 --- !u!1 &1065671190
 GameObject:
   m_ObjectHideFlags: 0
@@ -1796,7 +1789,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1065671191
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1809,10 +1802,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26a675a361a32d14db6ae3adba6dffe7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  score: {fileID: 1901104414}
-  prevScore: 0
+  scoreText: {fileID: 1901104414}
   effectCanvas: {fileID: 59569253}
-  uiManager: {fileID: 0}
+  uiManager: {fileID: 938435691}
+  prevScore: 0
 --- !u!4 &1065671192
 Transform:
   m_ObjectHideFlags: 0
@@ -2103,14 +2096,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a15f9cd4cb542ed4e843c0669790f058, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  trainingAgent: {fileID: 0}
-  notificationPanel: {fileID: 831170195}
   notificationBackgroundImage: {fileID: 1564859305}
+  successGradientBorderImage: {fileID: 283262114}
+  failureGradientBorderImage: {fileID: 335556352}
   successFrames: []
   failureFrames: []
   frameRate: 0.035
-  successGradientBorderImage: {fileID: 283262114}
-  failureGradientBorderImage: {fileID: 335556352}
+  trainingAgent: {fileID: 0}
+  notificationPanel: {fileID: 831170195}
 --- !u!222 &1714193172
 CanvasRenderer:
   m_ObjectHideFlags: 0
