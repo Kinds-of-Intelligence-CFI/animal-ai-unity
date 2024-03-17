@@ -30,7 +30,6 @@ public class PlayerControls : MonoBehaviour
 	private ArenasConfigurations arenasConfigurations;
 	public UIManager uiManager;
 
-	[Header("Previous Score")]
 	public float prevScore = 0;
 
 	public Camera getActiveCam()
