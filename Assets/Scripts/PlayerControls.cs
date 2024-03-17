@@ -107,7 +107,7 @@ public class PlayerControls : MonoBehaviour
 		{
 			Application.Quit();
 		}
-		if (Input.GetKeyDown(KeyCode.F9))
+		if (Input.GetKeyDown(KeyCode.P))
 		{
 			screenshotCam.Activate();
 		}
