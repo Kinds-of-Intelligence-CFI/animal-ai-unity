@@ -1,6 +1,9 @@
 using System.IO;
 using UnityEngine;
 
+/// <summary>
+/// Captures screenshots from a camera and saves them to the device's storage.
+/// </summary>
 [RequireComponent(typeof(Camera))]
 public class ScreenshotCamera : MonoBehaviour
 {
