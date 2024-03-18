@@ -21,13 +21,15 @@ public class AAI3EnvironmentManager : MonoBehaviour
 	[Header("Configuration File")]
 	[SerializeField] private string configFile = "";
 
-	[HideInInspector][SerializeField] private const int maximumResolution = 512;
-	[HideInInspector][SerializeField] private const int minimumResolution = 4;
-	[HideInInspector][SerializeField] private const int defaultResolution = 84;
-	[HideInInspector][SerializeField] private const int defaultRaysPerSide = 2;
-	[HideInInspector][SerializeField] private const int defaultRayMaxDegrees = 60;
-	[HideInInspector][SerializeField] private const int defaultDecisionPeriod = 3;
-	[HideInInspector] public bool PlayerMode { get; private set; } = true;
+	[Header("Resolution Settings")]
+	[SerializeField] private const int maximumResolution = 512;
+	[SerializeField] private const int minimumResolution = 4;
+	[SerializeField] private const int defaultResolution = 84;
+	[SerializeField] private const int defaultRaysPerSide = 2;
+	[SerializeField] private const int defaultRayMaxDegrees = 60;
+	[SerializeField] private const int defaultDecisionPeriod = 3;
+
+	public bool PlayerMode { get; private set; } = true;
 
 	private ArenasConfigurations _arenasConfigurations;
 	private TrainingArena _instantiatedArena;
