@@ -7,6 +7,7 @@ using UnityEngine.UI;
 /// </summary>
 public class Fade : MonoBehaviour
 {
+	[Header("Fade Settings")]
 	public float fadeSpeed = 0.25f;
 	private int _fadeDirection = -1;
 	private Image _image;
