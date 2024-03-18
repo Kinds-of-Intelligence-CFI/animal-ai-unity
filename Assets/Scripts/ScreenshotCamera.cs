@@ -7,6 +7,7 @@ using UnityEngine;
 [RequireComponent(typeof(Camera))]
 public class ScreenshotCamera : MonoBehaviour
 {
+	[Header("Screenshot Settings")]
 	public int fileCounter = 0;
 	public RenderTexture renderTexture;
 	public string filePath = "Screenshots";
