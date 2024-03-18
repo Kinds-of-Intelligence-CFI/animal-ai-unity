@@ -9,7 +9,11 @@ using PrefabInterface;
 using Unity.MLAgents.Sensors;
 using YAMLDefs;
 
-/// Actions are currently discrete. 2 branches of 0,1,2, 0,1,2
+/// <summary>
+/// The TrainingAgent class is a subclass of the Agent class in the ML-Agents library.
+/// It is used to define the behaviour of the agent in the training environment.
+/// Actions are currently discrete. 2 branches of 0,1,2, 0,1,2 for forward and rotate respectively.
+/// </summary>
 public class TrainingAgent : Agent, IPrefab
 {
 	public float speed = 25f;
