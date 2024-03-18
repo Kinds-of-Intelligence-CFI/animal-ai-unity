@@ -145,7 +145,7 @@ public class TrainingAgent : Agent, IPrefab
         /// </summary>
         if (!IsFrozen())
         {
-            health += 100 * updateAmount; // Health = 100*reward
+            health += 100 * updateAmount;
             health += 100 * _nextUpdateHealth;
             _nextUpdateHealth = 0;
             AddReward(updateAmount);
@@ -204,16 +204,14 @@ public class TrainingAgent : Agent, IPrefab
 
     private void MoveAgent(int actionForward, int actionRotate)
     {
-        // Check if the agent should be frozen during notification
         if (IsFrozen())
         {
             // If the agent is frozen, stop all movement and rotation
             _rigidBody.velocity = Vector3.zero;
             _rigidBody.angularVelocity = Vector3.zero;
-            return; // No further movement logic should be executed
+            return;
         }
 
-        // Existing movement logic
         Vector3 directionToGo = Vector3.zero;
         Vector3 rotateDirection = Vector3.zero;
         Vector3 quickStop = Vector3.zero;
@@ -245,9 +243,7 @@ public class TrainingAgent : Agent, IPrefab
                 break;
         }
 
-        // Apply the rotation
         transform.Rotate(rotateDirection, Time.fixedDeltaTime * rotationSpeed);
-        // Apply the force for movement
         _rigidBody.AddForce(
             directionToGo.normalized * speed * 100f * Time.fixedDeltaTime,
             ForceMode.Acceleration
@@ -280,15 +276,14 @@ public class TrainingAgent : Agent, IPrefab
     public override void OnEpisodeBegin()
     {
         Debug.Log("Episode Begin");
-        StopCoroutine("unfreezeCountdown"); // When a new episode starts, any existing unfreeze countdown is cancelled.
+        StopCoroutine("unfreezeCountdown");
         _previousScore = _currentScore;
         numberOfGoalsCollected = 0;
         _arena.ResetArena();
-        _rewardPerStep = timeLimit > 0 ? -1f / timeLimit : 0; // No step reward for infinite episode by default
+        _rewardPerStep = timeLimit > 0 ? -1f / timeLimit : 0;
         _isGrounded = false;
         health = _maxHealth;
 
-        // Initiate the freeze for the agent. Fix for erratic behaviour.
         SetFreezeDelay(GetFreezeDelay());
     }
 
