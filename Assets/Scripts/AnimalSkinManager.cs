@@ -1,9 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.Generic;
 
 /// <summary>
-/// This class is used to manage the animal skins.
+/// A class that manages the animal skins.
 /// </summary>
 [System.Serializable]
 public class MultiDimArray<T>
@@ -21,17 +20,20 @@ public class AnimalSkinManager : MonoBehaviour
     public Mesh[] AnimalMeshes = new Mesh[AnimalCount];
     public MultiDimArray<Material>[] AnimalMaterials = new MultiDimArray<Material>[AnimalCount];
 
-    private Dictionary<string, KeyValuePair<Mesh, Material[]>> animalDict =
-        new Dictionary<string, KeyValuePair<Mesh, Material[]>>();
+    private Dictionary<string, (Mesh mesh, Material[] materials)> animalDict =
+        new Dictionary<string, (Mesh mesh, Material[] materials)>();
+
+    private MeshRenderer meshRenderer;
+    private MeshFilter meshFilter;
 
     void Awake()
     {
-        for (int i = 0; i < AnimalCount; ++i)
+        meshRenderer = GetComponent<MeshRenderer>();
+        meshFilter = GetComponent<MeshFilter>();
+
+        for (int i = 0; i < AnimalCount; i++)
         {
-            animalDict[AnimalNames[i]] = new KeyValuePair<Mesh, Material[]>(
-                AnimalMeshes[i],
-                AnimalMaterials[i].array
-            );
+            animalDict[AnimalNames[i]] = (AnimalMeshes[i], AnimalMaterials[i].array);
         }
 
         RefreshSkin();
@@ -39,24 +41,32 @@ public class AnimalSkinManager : MonoBehaviour
 
     void RefreshSkin()
     {
-        this.GetComponent<MeshFilter>().mesh = animalDict[AnimalNames[AnimalSkinID]].Key;
-        this.GetComponent<MeshRenderer>().materials = animalDict[AnimalNames[AnimalSkinID]].Value;
+        if (animalDict.TryGetValue(AnimalNames[AnimalSkinID], out var animalData))
+        {
+            meshFilter.mesh = animalData.mesh;
+            meshRenderer.materials = animalData.materials;
+        }
     }
 
-    public void SetAnimalSkin(string skin)
+    public void SetAnimalSkin(string skinName)
     {
-        int id = -1;
-        for (int x = 0; x < AnimalCount; ++x)
+        if (animalDict.ContainsKey(skinName))
         {
-            id = (skin == AnimalNames[x]) ? x : id;
+            AnimalSkinID = System.Array.IndexOf(AnimalNames, skinName);
+            RefreshSkin();
         }
-        SetAnimalSkin((id == -1) ? Random.Range(0, AnimalCount) : id);
+        else
+        {
+            SetAnimalSkin(Random.Range(0, AnimalCount));
+        }
     }
 
     void SetAnimalSkin(int skinID)
     {
         if (skinID >= 0 && skinID < AnimalCount)
+        {
             AnimalSkinID = skinID;
-        RefreshSkin();
+            RefreshSkin();
+        }
     }
 }
