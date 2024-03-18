@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Extends Unity GameObjects and Transforms with useful functionalities.
+/// </summary>
 namespace UnityEngineExtensions
 {
     public static class TransformExtensions

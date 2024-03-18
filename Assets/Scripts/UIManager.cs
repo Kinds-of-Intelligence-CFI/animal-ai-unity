@@ -3,6 +3,9 @@ using UnityEngine;
 using TMPro;
 using System.IO;
 
+/// <summary>
+/// Manages the UI elements in the scene, particularly the arena and total objects text.
+/// </summary>
 public class UIManager : MonoBehaviour
 {
     [Header("UI References")]
