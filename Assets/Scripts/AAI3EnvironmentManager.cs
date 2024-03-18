@@ -8,6 +8,8 @@ using Unity.MLAgents.Sensors;
 using Unity.MLAgents.SideChannels;
 using Unity.MLAgents.Policies;
 
+// TODO: optimize this code
+
 /// <summary>
 /// Manages the environment settings and configurations for the AAI project. 
 /// </summary>

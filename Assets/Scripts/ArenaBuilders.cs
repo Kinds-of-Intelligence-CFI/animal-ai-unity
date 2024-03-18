@@ -8,6 +8,8 @@ using Holders;
 using PrefabInterface;
 using ArenasParameters;
 
+// TODO: optimize this code
+
 namespace ArenaBuilders
 {
 	/// <summary>

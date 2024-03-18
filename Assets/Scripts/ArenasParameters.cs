@@ -6,6 +6,9 @@ using System.Text;
 using System.Linq;
 using YAMLDefs;
 
+
+// TODO: optimize this code
+
 namespace ArenasParameters
 {
     /// <summary>
