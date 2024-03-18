@@ -5,6 +5,7 @@
 /// </summary>
 public class CameraFollow : MonoBehaviour
 {
+	[Header("Followed Object")]
 	public GameObject followObj;
 
 	void Start()
