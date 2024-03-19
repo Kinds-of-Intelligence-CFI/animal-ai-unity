@@ -1,10 +1,10 @@
-// using System.Collections;
-// using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// A BallGoal that bounces the ball depending on the forceToApply and maximumVelocity parameters.
 public class BallGoalBounce : BallGoal
 {
-
+    [Header("Bounce Settings")]
     public float maximumVelocity = 20;
     public float forceToApply = 5;
 
@@ -14,17 +14,9 @@ public class BallGoalBounce : BallGoal
     {
         rBody = GetComponent<Rigidbody>();
 
-        rBody.AddForce(forceToApply * transform.forward * Time.fixedDeltaTime,
-                            ForceMode.VelocityChange);
+        rBody.AddForce(
+            forceToApply * transform.forward * Time.fixedDeltaTime,
+            ForceMode.VelocityChange
+        );
     }
-
-    // void FixedUpdate()
-    // {
-        // Vector3 velocity = rBody.velocity;
-        // Vector3 direction = velocity.normalized;
-        // Vector3 forceVector = (maximumVelocity - velocity.magnitude) * forceToApply * direction;
-        // forceVector.y = 0;
-
-        // rBody.AddForce(forceVector * Time.fixedDeltaTime, ForceMode.VelocityChange);
-    // }
 }
