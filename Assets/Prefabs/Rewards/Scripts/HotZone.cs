@@ -1,36 +1,51 @@
-// using System.Collections;
-// using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// HotZone class is a subclass of Goal that represents a hot zone in the environment.
+/// </summary>
 public class HotZone : Goal
 {
+    [Header("Hot Zone Settings")]
     private GameObject hotZoneFogOverlayObject;
     private Image hotZoneFog;
-    public PlayerControls playerControls;
+    private PlayerControls playerControls;
     private bool insideHotZone;
 
     private void Awake()
     {
-        hotZoneFogOverlayObject = GameObject.FindGameObjectWithTag("EffectCanvas").transform.Find("HotZoneFog").gameObject;
-        hotZoneFog = hotZoneFogOverlayObject.GetComponent<Image>();
-        hotZoneFog.enabled = false;
-        playerControls = GameObject.FindGameObjectWithTag("PlayerControls").GetComponent<PlayerControls>();
+        InitializeReferences();
     }
 
-    public override void SetSize(Vector3 size)//This switches back to grandparent method @TODO change prefab.cs to allow direct access and have other children of Prefab.cs override separate method.
+    private void InitializeReferences()
     {
-        Vector3 clippedSize = Vector3.Max(sizeMin, Vector3.Min(sizeMax, size)) * sizeAdjustment;
-        float sizeX = size.x < 0 ? Random.Range(sizeMin[0], sizeMax[0]) : clippedSize.x;
-        float sizeY = size.y < 0 ? Random.Range(sizeMin[1], sizeMax[1]) : clippedSize.y;
-        float sizeZ = size.z < 0 ? Random.Range(sizeMin[2], sizeMax[2]) : clippedSize.z;
+        hotZoneFogOverlayObject = GameObject
+            .FindGameObjectWithTag("EffectCanvas")
+            .transform.Find("HotZoneFog")
+            .gameObject;
+        hotZoneFog = hotZoneFogOverlayObject.GetComponent<Image>();
+        hotZoneFog.enabled = false;
+        playerControls = GameObject
+            .FindGameObjectWithTag("PlayerControls")
+            .GetComponent<PlayerControls>();
+    }
 
-        _height = sizeY;
-        transform.localScale = new Vector3(sizeX * ratioSize.x,
-                                            sizeY * ratioSize.y,
-                                            sizeZ * ratioSize.z);
+    public override void SetSize(Vector3 size)
+    {
+        base.SetSize(size);
+        AdjustHeight();
+        AdjustMaterialScale();
+    }
 
-        GetComponent<Renderer>().material.SetVector("_ObjScale", new Vector3(sizeX, sizeY, sizeZ));
+    private void AdjustHeight()
+    {
+        _height = Mathf.Max(sizeMin.y, Mathf.Min(sizeMax.y, transform.localScale.y));
+    }
+
+    private void AdjustMaterialScale()
+    {
+        Vector3 scale = transform.localScale;
+        GetComponent<Renderer>().material.SetVector("_ObjScale", scale);
     }
 
     protected override float AdjustY(float yIn)
@@ -38,37 +53,39 @@ public class HotZone : Goal
         return -0.15f;
     }
 
-    public override void OnTriggerEnter(Collider collision)
+    public override void OnTriggerEnter(Collider other)
     {
-        if (collision.gameObject.CompareTag("agent"))
+        if (other.CompareTag("agent"))
         {
-            collision.GetComponent<TrainingAgent>().AddExtraReward(reward);
+            other.GetComponent<TrainingAgent>().AddExtraReward(reward);
         }
     }
 
-    public void OnTriggerStay(Collider collision)
+    public void OnTriggerStay(Collider other)
     {
-        if (collision.gameObject.CompareTag("agent"))
-        {
-            collision.GetComponent<TrainingAgent>().AddExtraReward(reward);
-        }
+        OnTriggerEnter(other);
     }
 
-    public void OnTriggerExit(Collider collision)
+    public void FixedUpdate()
     {
-        // Used to contain hotZone fog stuff, but replaced with better alternative actually relevant to the active camera
-        // Leaving void here because could be useful in future: if (collision.gameObject.GetComponentInChildren<Camera>() == playerControls.getActiveCam())
+        UpdateHotZoneVisibility();
+        UpdateRendererCulling();
     }
 
-    private void FixedUpdate()
+    private void UpdateHotZoneVisibility()
     {
-        Vector3 p = playerControls.getActiveCam().gameObject.transform.position;
-        Vector3 offset = this.GetComponent<BoxCollider>().bounds.center - p;
-        Ray inputRay = new Ray(p, offset.normalized);
-        RaycastHit rHit;
+        Vector3 playerPosition = playerControls.getActiveCam().gameObject.transform.position;
+        Vector3 offset = GetComponent<BoxCollider>().bounds.center - playerPosition;
+        Ray inputRay = new Ray(playerPosition, offset.normalized);
 
-        insideHotZone = !this.GetComponent<BoxCollider>().Raycast(inputRay, out rHit, offset.magnitude * 1.1f);
+        insideHotZone = !GetComponent<BoxCollider>()
+            .Raycast(inputRay, out _, offset.magnitude * 1.1f);
         hotZoneFog.enabled = insideHotZone;
-        this.GetComponent<Renderer>().material.SetFloat("_Cull", playerControls.cameraID==0 ? 2f : 0f);
+    }
+
+    private void UpdateRendererCulling()
+    {
+        float cullValue = playerControls.cameraID == 0 ? 2f : 0f;
+        GetComponent<Renderer>().material.SetFloat("_Cull", cullValue);
     }
 }
