@@ -1,308 +1,166 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using ArenaBuilders;
 
+/// <summary>
+/// Spawns goals in the training arena. The base class for all goal spawners/dispensers.
+/// </summary>
 public class GoalSpawner : Prefab
 {
-    [Header("Spawning Parameters")]
-    public BallGoal[] spawnObjects;
-    public float initialSpawnSize;
+	[Header("Spawning Parameters")]
+	public BallGoal[] spawnObjects;
+	public float initialSpawnSize;
+	public float ripenedSpawnSize;
+	public bool variableSize;
+	public bool variableSpawnPosition;
+	public float sphericalSpawnRadius;
+	public Vector3 defaultSpawnPosition;
+	public float timeToRipen; // Seconds
+	public float timeBetweenSpawns; // Seconds
+	public float delaySeconds; // Seconds
+	public int spawnCount; // '-1' = infinite spawning
 
-    public override void SetInitialValue(float v)
-    {
-        initialSpawnSize = Mathf.Clamp(v, 0.2f, 3f);
-    }
+	[ColorUsage(true, true)]
+	private Color colourOverride;
 
-    public float ripenedSpawnSize;
+	// Random Seeds
+	public int objSpawnSeed = 0;
+	public int spawnSizeSeed = 0;
 
-    public override void SetFinalValue(float v)
-    {
-        ripenedSpawnSize = Mathf.Clamp(v, 0.2f, 3f);
-    }
+	// RNGs
+	private System.Random[] RNGs = new System.Random[4];
+	private enum E { OBJECT = 0, SIZE = 1, ANGLE = 2 }
 
-    public bool variableSize;
-    public bool variableSpawnPosition;
-    public float sphericalSpawnRadius;
-    public Vector3 defaultSpawnPosition;
-    public float timeToRipen; // Seconds
+	private float height;
+	private ArenaBuilder AB;
+	private bool spawnsRandomObjects;
 
-    public override void SetRipenTime(float v)
-    {
-        timeToRipen = v;
-    }
+	public virtual void Awake()
+	{
+		InitializeParameters();
+		StartCoroutine(StartSpawning());
+	}
 
-    public float timeBetweenSpawns; // Seconds
+	// Initialize spawning parameters and RNGs
+	private void InitializeParameters()
+	{
+		typicalOrigin = false;
+		sizeMin = sizeMax = Vector3Int.one;
+		canRandomizeColor = false;
+		ratioSize = Vector3Int.one;
 
-    public override void SetTimeBetweenSpawns(float v)
-    {
-        timeBetweenSpawns = v;
-    }
+		height = GetComponent<Renderer>().bounds.size.y;
+		AB = transform.parent.parent.GetComponent<TrainingArena>().Builder;
 
-    public float delaySeconds;
+		spawnsRandomObjects = (spawnObjects.Length > 1);
 
-    public override void SetDelay(float v)
-    {
-        delaySeconds = (int)v;
-    }
+		if (spawnsRandomObjects)
+			RNGs[(int)E.OBJECT] = new System.Random(objSpawnSeed);
 
-    public int spawnCount; // -1 = infinite spawning
+		if (variableSize)
+			RNGs[(int)E.SIZE] = new System.Random(spawnSizeSeed);
 
-    public override void SetSpawnCount(float v)
-    {
-        spawnCount = (int)v;
-    }
+		if (variableSpawnPosition)
+			RNGs[(int)E.ANGLE] = new System.Random(1);
 
-    [ColorUsage(true, true)]
-    private Color colourOverride;
+		if (timeToRipen <= 0)
+			initialSpawnSize = ripenedSpawnSize;
+	}
 
-    public override void SetSpawnColor(Vector3 v)
-    {
-        // Overwrite only if not (-1, -1, -1); this is a substitute for 'null' in the YAML configs
-        if (v != -Vector3.one)
-        {
-            colourOverride.r = v.x / 255f;
-            colourOverride.g = v.y / 255f;
-            colourOverride.b = v.z / 255f;
-        }
-    }
+	private IEnumerator StartSpawning()
+	{
+		yield return new WaitForSeconds(delaySeconds);
 
-    private bool willSpawnInfinite()
-    {
-        return spawnCount == -1;
-    }
+		while (CanStillSpawn())
+		{
+			BallGoal newGoal = SpawnNewGoal(0);
+			StartCoroutine(ManageSingleSpawnLifeCycle(newGoal, variableSize ? (newGoal.reward - initialSpawnSize) : 0));
 
-    private bool canStillSpawn()
-    {
-        return spawnCount != 0;
-    }
+			if (!WillSpawnInfinite())
+				spawnCount--;
 
-    private float height;
-    private ArenaBuilder AB;
-    private bool spawnsRandomObjects;
-    public int objSpawnSeed = 0;
-    public int spawnSizeSeed = 0;
+			yield return new WaitForSeconds(timeBetweenSpawns);
+		}
+	}
 
-    /* IMPORTANT use ''System''.Random so can be locally instanced;
-     * ..this allows us to fix a sequence via a particular seed.
-     * Four RNGs depending on which random variations are toggled:
-     * (1) OBJECT: for spawn-object selection
-     * (2) SIZE: for eventual size of spawned object when released
-     * (3) H_ANGLE: proportion around the tree where spawning occurs
-     * (4) V_ANGLE: extent up the tree where spawning occurs */
-    private System.Random[] RNGs = new System.Random[4];
+	private bool CanStillSpawn()
+	{
+		return spawnCount != 0;
+	}
 
-    private enum E
-    {
-        OBJECT = 0,
-        SIZE = 1,
-        ANGLE = 2
-    };
+	private bool WillSpawnInfinite()
+	{
+		return spawnCount == -1;
+	}
 
-    public virtual void Awake()
-    {
-        // Overwrite 'typicalOrigin' because origin of geometry is at base
-        typicalOrigin = false;
-        // Combats random size setting from ArenaBuilder
-        sizeMin = sizeMax = Vector3Int.one;
-        canRandomizeColor = false;
-        ratioSize = Vector3Int.one;
+	public virtual BallGoal SpawnNewGoal(int listID)
+	{
+		Vector3 spawnPos = variableSpawnPosition ? CalculateSpawnPosition() : defaultSpawnPosition;
 
-        height = GetComponent<Renderer>().bounds.size.y;
-        AB = this.transform.parent.parent.GetComponent<TrainingArena>().Builder;
+		BallGoal newGoal = (BallGoal)Instantiate(spawnObjects[listID], transform.position + spawnPos, Quaternion.identity);
+		AB.AddToGoodGoalsMultiSpawned(newGoal);
+		newGoal.transform.parent = transform;
 
-        // Sets to random if more than one spawn object to choose from
-        // ...else just spawns the same object repeatedly
-        // ...assumes uniform random sampling (for now?)
-        spawnsRandomObjects = (spawnObjects.Length > 1);
-        if (spawnsRandomObjects)
-        {
-            RNGs[(int)E.OBJECT] = new System.Random(objSpawnSeed);
-        }
-        if (variableSize)
-        {
-            RNGs[(int)E.SIZE] = new System.Random(spawnSizeSeed);
-        }
-        if (variableSpawnPosition)
-        {
-            RNGs[(int)E.ANGLE] = new System.Random(1);
-        }
-        if (timeToRipen <= 0)
-        {
-            initialSpawnSize = ripenedSpawnSize;
-        }
+		if (variableSize)
+			SetVariableSize(newGoal);
 
-        StartCoroutine(startSpawning());
-    }
+		return newGoal;
+	}
 
-    public override void SetSize(Vector3 size)
-    {
-        // Bypasses random size assignment (used e.g. by ArenaBuilder) from parent Prefab class,
-        // ...fixing to desired size otherwise just changes size as usual
-        sizeMin = sizeMax = Vector3Int.one;
-        base.SetSize(Vector3Int.one);
-        _height = height;
-    }
+	// Calculate spawn position
+	private Vector3 CalculateSpawnPosition()
+	{
+		float phi = (float)(RNGs[(int)E.ANGLE].NextDouble() * 2 * Math.PI);
+		float theta = (float)((RNGs[(int)E.ANGLE].NextDouble() * 0.6f + 0.2f) * Math.PI);
+		return defaultSpawnPosition + SphericalToCartesian(sphericalSpawnRadius, theta, phi);
+	}
 
-    protected override float AdjustY(float yIn)
-    {
-        return yIn;
-    }
+	// Set variable size for a goal
+	private void SetVariableSize(BallGoal goal)
+	{
+		float sizeNoise = (float)(RNGs[(int)E.SIZE].NextDouble() - 0.5f) * 0.5f;
+		goal.sizeMax = Vector3.one * (ripenedSpawnSize + 0.25f);
+		goal.sizeMin = Vector3.one * (initialSpawnSize - 0.25f);
+		goal.gameObject.GetComponent<Rigidbody>().useGravity = false;
+		goal.gameObject.GetComponent<Rigidbody>().isKinematic = true;
+		goal.enabled = true;
+	}
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawWireSphere(transform.position + defaultSpawnPosition, sphericalSpawnRadius);
-        var bs = transform.GetComponent<Renderer>().bounds.size;
-        Gizmos.DrawWireCube(transform.position + new Vector3(0, bs.y / 2, 0), bs);
-        Gizmos.DrawSphere(transform.position + defaultSpawnPosition, 0.5f);
-    }
+	// Convert spherical coordinates to cartesian
+	private Vector3 SphericalToCartesian(float r, float theta, float phi)
+	{
+		float sin_theta = Mathf.Sin(theta);
+		return new Vector3(r * Mathf.Cos(phi) * sin_theta, r * Mathf.Cos(theta), r * Mathf.Sin(phi) * sin_theta);
+	}
 
-    private IEnumerator startSpawning()
-    {
-        yield return new WaitForSeconds(delaySeconds);
+	// Manage the entire life cycle of a spawned object
+	private IEnumerator ManageSingleSpawnLifeCycle(BallGoal newGoal, float sizeNoise = 0)
+	{
+		float dt = 0f;
+		float newSize;
 
-        while (canStillSpawn())
-        {
-            BallGoal newGoal = spawnNewGoal(0);
-            if (variableSize)
-            {
-                var sizeNoise = newGoal.reward - initialSpawnSize;
-                StartCoroutine(ManageSingleSpawnLifeCycle(newGoal, sizeNoise));
-            }
-            else
-            {
-                StartCoroutine(ManageSingleSpawnLifeCycle(newGoal));
-            }
+		while (dt < timeToRipen && newGoal != null)
+		{
+			newSize = Mathf.Clamp(interpolate(0, timeToRipen, dt, initialSpawnSize + sizeNoise, ripenedSpawnSize + sizeNoise), initialSpawnSize, ripenedSpawnSize);
+			newGoal.SetSize(Vector3.one * newSize);
+			dt += Time.deltaTime;
+			yield return null;
+		}
 
-            if (!willSpawnInfinite())
-            {
-                spawnCount--;
-            }
+		if (newGoal != null)
+		{
+			newGoal.SetSize(Vector3.one * ripenedSpawnSize);
+			newGoal.gameObject.GetComponent<Rigidbody>().useGravity = true;
+			newGoal.gameObject.GetComponent<Rigidbody>().isKinematic = false;
+		}
+	}
 
-            yield return new WaitForSeconds(timeBetweenSpawns);
-        }
-    }
-
-    public virtual BallGoal spawnNewGoal(int listID)
-    {
-        // Calculate spawning location if necessary
-        Vector3 spawnPos;
-        if (variableSpawnPosition)
-        {
-            float phi /*azimuthal angle*/
-            = (float)(RNGs[(int)E.ANGLE].NextDouble() * 2 * Math.PI);
-            float theta /*polar/inclination angle*/
-            = (float)((RNGs[(int)E.ANGLE].NextDouble() * 0.6f + 0.2f) * Math.PI);
-            spawnPos =
-                defaultSpawnPosition + sphericalToCartesian(sphericalSpawnRadius, theta, phi);
-        }
-        else
-        {
-            spawnPos = defaultSpawnPosition;
-        }
-
-        BallGoal newGoal = (BallGoal)Instantiate(
-            spawnObjects[listID],
-            transform.position + spawnPos,
-            Quaternion.identity
-        );
-        AB.AddToGoodGoalsMultiSpawned(newGoal);
-        newGoal.transform.parent = this.transform;
-        float sizeNoise = variableSize
-            ? ((float)(RNGs[(int)E.SIZE].NextDouble() - 0.5f) * 0.5f)
-            : 0;
-        newGoal.sizeMax = Vector3.one * (ripenedSpawnSize + (variableSize ? 0.25f : 0f));
-        newGoal.sizeMin = Vector3.one * (initialSpawnSize - (variableSize ? 0.25f : 0f));
-        newGoal.gameObject.GetComponent<Rigidbody>().useGravity = false;
-        newGoal.gameObject.GetComponent<Rigidbody>().isKinematic = true;
-        newGoal.enabled = true;
-
-        return newGoal;
-    }
-
-    private IEnumerator waitForRipening(BallGoal newGoal, float sizeNoise = 0)
-    {
-        yield return new WaitForSeconds(timeToRipen);
-
-        if (newGoal != null)
-        {
-            // Ensure growth is complete at exactly ripenedSpawnSize
-            newGoal.SetSize(
-                new Func<float, Vector3>(x => new Vector3(x, x, x))(ripenedSpawnSize + sizeNoise)
-            );
-            newGoal.gameObject.GetComponent<Rigidbody>().useGravity = true;
-            newGoal.gameObject.GetComponent<Rigidbody>().isKinematic = false;
-        }
-    }
-
-    private IEnumerator manageRipeningGrowth(BallGoal newGoal, float sizeNoise = 0)
-    {
-        float dt = 0f;
-        float newSize;
-        while (dt < timeToRipen && newGoal != null)
-        {
-            newSize = interpolate(
-                0,
-                timeToRipen,
-                dt,
-                initialSpawnSize + sizeNoise,
-                ripenedSpawnSize + sizeNoise
-            );
-            newGoal.SetSize(new Func<float, Vector3>(x => new Vector3(x, x, x))(newSize));
-            dt += Time.fixedDeltaTime;
-            yield return new WaitForSeconds(Time.fixedDeltaTime);
-        }
-
-        yield return null;
-    }
-
-    // New Coroutine that handles the entire life cycle of a spawned object
-    private IEnumerator ManageSingleSpawnLifeCycle(BallGoal newGoal, float sizeNoise = 0)
-    {
-        // Initial growth phase
-        float dt = 0f;
-        float newSize;
-        while (dt < timeToRipen)
-        {
-            newSize = interpolate(
-                0,
-                timeToRipen,
-                dt,
-                initialSpawnSize + sizeNoise,
-                ripenedSpawnSize + sizeNoise
-            );
-            newGoal.SetSize(new Vector3(newSize, newSize, newSize));
-            dt += Time.deltaTime;
-            yield return null;
-        }
-
-        // Ripening phase
-        newGoal.SetSize(
-            new Vector3(
-                ripenedSpawnSize + sizeNoise,
-                ripenedSpawnSize + sizeNoise,
-                ripenedSpawnSize + sizeNoise
-            )
-        );
-        newGoal.gameObject.GetComponent<Rigidbody>().useGravity = true;
-        newGoal.gameObject.GetComponent<Rigidbody>().isKinematic = false;
-    }
-
-    Vector3 sphericalToCartesian(float r, float theta, float phi)
-    {
-        float sin_theta = Mathf.Sin(theta);
-        return new Vector3(
-            r * Mathf.Cos(phi) * sin_theta,
-            r * Mathf.Cos(theta),
-            r * Mathf.Sin(phi) * sin_theta
-        );
-    }
-
-    public float interpolate(float tLo, float tHi, float t, float sLo, float sHi)
-    {
-        t = Mathf.Clamp(t, tLo, tHi); // Ensure "t" is actually clamped within [tLo, tHi]
-        float p = (t - tLo) / (tHi - tLo); // Get proportion to interpolate with
-        return sHi * p + sLo * (1 - p);
-    }
+	// Interpolate between two values
+	public float interpolate(float tLo, float tHi, float t, float sLo, float sHi)
+	{
+		t = Mathf.Clamp(t, tLo, tHi);
+		float p = (t - tLo) / (tHi - tLo);
+		return sHi * p + sLo * (1 - p);
+	}
 }
