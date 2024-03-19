@@ -1,11 +1,12 @@
-// using System.Collections;
-// using System.Collections.Generic;
 using UnityEngine;
+// TODO: see if the trigger and collision methods can be moved or changed for efficiency.
 
-
+/// <summary>
+/// Goal class is a base class for all the goals in the environment.
+/// </summary>
 public class Goal : Prefab
 {
-
+    [Header("Goal Settings")]
     public int numberOfGoals = 1;
     public float reward = 1;
     public bool isMulti = false;
@@ -28,7 +29,6 @@ public class Goal : Prefab
         if (collision.gameObject.CompareTag("agent"))
         {
             TrainingAgent agentScript = collision.gameObject.GetComponent<TrainingAgent>();
-            // Debug.Break();
             if (!isMulti)
             {
                 agentScript.UpdateHealth(reward, true);
@@ -49,5 +49,4 @@ public class Goal : Prefab
             }
         }
     }
-
 }
