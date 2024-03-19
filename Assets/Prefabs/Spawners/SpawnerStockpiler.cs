@@ -113,9 +113,9 @@ public class SpawnerStockpiler : GoalSpawner
         }
     }
 
-    public override BallGoal spawnNewGoal(int listID)
+    public override BallGoal SpawnNewGoal(int listID)
     {
-        BallGoal newGoal = base.spawnNewGoal(listID);
+        BallGoal newGoal = base.SpawnNewGoal(listID);
         newGoal.name += spawnCount + 1;
 
         if (!freeToMaterialise(ripenedSpawnSize, newGoal))
