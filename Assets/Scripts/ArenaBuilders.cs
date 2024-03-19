@@ -566,7 +566,7 @@ namespace ArenaBuilders
 		// Calls SetSymbol on SignPosterboard if such a component can be found - overrides colour setting also
 		private void AssignSymbolName(GameObject gameObjectInstance, string sName, Vector3 color)
 		{
-			SignPosterboard SP = gameObjectInstance.GetComponent<SignPosterboard>();
+			SignBoard SP = gameObjectInstance.GetComponent<SignBoard>();
 			if (SP != null)
 			{
 				if (color != new Vector3(-1, -1, -1))
