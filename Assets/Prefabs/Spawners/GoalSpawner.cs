@@ -142,7 +142,7 @@ public class GoalSpawner : Prefab
 
 		while (dt < timeToRipen && newGoal != null)
 		{
-			newSize = Mathf.Clamp(interpolate(0, timeToRipen, dt, initialSpawnSize + sizeNoise, ripenedSpawnSize + sizeNoise), initialSpawnSize, ripenedSpawnSize);
+			newSize = Mathf.Clamp(Interpolate(0, timeToRipen, dt, initialSpawnSize + sizeNoise, ripenedSpawnSize + sizeNoise), initialSpawnSize, ripenedSpawnSize);
 			newGoal.SetSize(Vector3.one * newSize);
 			dt += Time.deltaTime;
 			yield return null;
@@ -157,7 +157,7 @@ public class GoalSpawner : Prefab
 	}
 
 	// Interpolate between two values
-	public float interpolate(float tLo, float tHi, float t, float sLo, float sHi)
+	public float Interpolate(float tLo, float tHi, float t, float sLo, float sHi)
 	{
 		t = Mathf.Clamp(t, tLo, tHi);
 		float p = (t - tLo) / (tHi - tLo);
