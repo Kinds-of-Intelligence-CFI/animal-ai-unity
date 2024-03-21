@@ -1,4 +1,0 @@
-repository "animal-ai-unity-project@Vanguardean@cloud"
-  path "/"
-    br "/main"
-    co "/main"
