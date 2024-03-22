@@ -47,7 +47,7 @@ public class TrainingAgent : Agent, IPrefab
     private float _freezeDelay = 0f;
     private bool _isFrozen = false;
 
-    private bool _nextUpdateEpisodeEnd = false;
+    private bool _nextUpdateCompleteArena = false;
 
     [Header("Agent Notification")]
     public bool showNotification = false;
@@ -214,20 +214,20 @@ public class TrainingAgent : Agent, IPrefab
 
     #region Agent Health Methods
 
-    public void UpdateHealthNextStep(float updateAmount, bool andEndEpisode = false)
+    public void UpdateHealthNextStep(float updateAmount, bool andCompleteArena = false)
     {
         /// <summary>
         /// ML-Agents doesn't guarantee behaviour if an episode ends outside of OnActionReceived
         /// Therefore we queue any health updates to happen on the next action step.
         /// </summary>
         _nextUpdateHealth += updateAmount;
-        if (andEndEpisode)
+        if (andCompleteArena)
         {
-            _nextUpdateEpisodeEnd = true;
+            _nextUpdateCompleteArena = true;
         }
     }
 
-    public void UpdateHealth(float updateAmount, bool andEndEpisode = false)
+    public void UpdateHealth(float updateAmount, bool andCompleteArena = false)
     {
         if (NotificationManager.Instance == null && showNotification == true)
         {
@@ -260,12 +260,19 @@ public class TrainingAgent : Agent, IPrefab
             StartCoroutine(EndEpisodeAfterDelay());
             return;
         }
-        if (andEndEpisode || _nextUpdateEpisodeEnd)
+        if (andCompleteArena || _nextUpdateCompleteArena)
         {
+            _nextUpdateCompleteArena = false;
             float cumulativeReward = this.GetCumulativeReward();
 
             if (cumulativeReward >= Arena.CurrentPassMark)
             {
+                // If passed and the next arena is merged load that without ending the episode
+                if (_arena.mergeNextArena)
+                {
+                    _arena.LoadNextArena();
+                    return;
+                }
                 if (showNotification)
                 {
                     NotificationManager.Instance.ShowSuccessNotification();
@@ -278,7 +285,6 @@ public class TrainingAgent : Agent, IPrefab
                     NotificationManager.Instance.ShowFailureNotification();
                 }
             }
-            _nextUpdateEpisodeEnd = false;
             StartCoroutine(EndEpisodeAfterDelay());
         }
     }

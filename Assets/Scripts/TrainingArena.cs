@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.MLAgents;
@@ -40,8 +41,15 @@ public class TrainingArena : MonoBehaviour
 	private bool isFirstArenaReset = true;
 	private List<GameObject> spawnedRewards = new List<GameObject>();
 	private List<int> playedArenas = new List<int>();
+	private List<int> _mergedArenas = null;
 
 	public bool showNotification { get; set; }
+	public bool mergeNextArena
+	{
+		get {
+			return _arenaConfiguration.mergeNextArena;
+		}
+	}
 
 	public ArenaBuilder Builder
 	{
@@ -87,6 +95,32 @@ public class TrainingArena : MonoBehaviour
 		Spawner_InteractiveButton.RewardSpawned += OnRewardSpawned;
 	}
 
+	/// <summary>
+	/// Provides a list of the arenas in the current config file that are preceeded by an arena with
+	/// the mergeNextArena property, so that we can avoid loading them when arenas are randomised.
+	/// </summary>
+	private List<int> GetMergedArenas()
+	{
+		List<int> mergedArenas = new List<int>();
+		int totalArenas = _environmentManager.getArenaCount();
+		ArenaConfiguration currentArena;
+		if (!_environmentManager.GetConfiguration(0, out currentArena))
+		{
+			Debug.LogError("Critical error: Failed to load arena configuration for arena 0");
+		}
+		bool currentlyMerged = currentArena.mergeNextArena;
+		for (int i = 1; i < totalArenas; i++)
+		{
+			if (currentlyMerged) { mergedArenas.Add(i); }
+			if (!_environmentManager.GetConfiguration(i, out currentArena))
+			{
+				Debug.LogError($"Critical error: Failed to load arena configuration for arena {i}");
+			}
+			currentlyMerged = currentArena.mergeNextArena;
+		}
+		return mergedArenas;
+	}
+
 	#region Arena Handling Methods
 
 	/// <summary>
@@ -99,20 +133,31 @@ public class TrainingArena : MonoBehaviour
 
 		CleanUpSpawnedObjects();
 
-		DetermineNextArenaID();
+		SetNextArenaID();
 
-		if (!TryLoadArenaConfiguration(out ArenaConfiguration newConfiguration))
+		UpdateActiveArenaToCurrentArenaID();
+	}
+
+	public void LoadNextArena()
+	{
+		// TrainingArena must have reset() called at first to initialise arenaID
+		if (isFirstArenaReset)
 		{
-			Debug.LogError("Failed to load arena configuration");
-			return;
+			throw new InvalidOperationException("LoadNextArena called before first reset");
 		}
 
-		ApplyNewArenaConfiguration(newConfiguration);
+		Debug.Log($"Loading next arena. Previous: {arenaID}, next: {arenaID + 1}");
+		CleanUpSpawnedObjects();
 
-		CleanupRewards();
+		arenaID += 1;
+		// We need an arena to sequentially follow the current one to LoadNextArena
+		if (!_environmentManager.GetConfiguration(arenaID, out _))
+		{
+			// TODO: This is the error hit if mergeNextArena is put in the final arena. Add some validation to move this from a runtime error
+			throw new InvalidOperationException($"Tried to LoadNextArena but arena {arenaID} did not exist");
+		}
 
-		NotifyArenaChange();
-
+		UpdateActiveArenaToCurrentArenaID();
 	}
 
 	private void CleanUpSpawnedObjects()
@@ -124,45 +169,69 @@ public class TrainingArena : MonoBehaviour
 		}
 	}
 
-	private void DetermineNextArenaID()
+	private void SetNextArenaID()
 	{
-		int totalArenas = _environmentManager.getMaxArenaID();
+		int totalArenas = _environmentManager.getArenaCount();
 		bool randomizeArenas = _environmentManager.GetRandomizeArenasStatus();
 
 		if (isFirstArenaReset)
 		{
 			isFirstArenaReset = false;
-			arenaID = randomizeArenas ? Random.Range(0, totalArenas) : 0;
+			arenaID = randomizeArenas ? ChooseRandomArenaID(totalArenas) : 0;
 		}
 		else
 		{
-			arenaID = randomizeArenas ? ChooseRandomArenaID(totalArenas) : (arenaID + 1) % totalArenas;
+			if (randomizeArenas)
+			{
+				arenaID = ChooseRandomArenaID(totalArenas);
+			}
+			else
+			{
+				// If the next arena is merged, sequentially search for the next unmerged one
+				ArenaConfiguration preceedingArena = _arenaConfiguration;
+				arenaID = (arenaID + 1) % totalArenas;
+				while (preceedingArena.mergeNextArena)
+				{
+					if (!_environmentManager.GetConfiguration(arenaID, out preceedingArena))
+					{
+						Debug.LogError($"Critical error: Failed to load arena configuration for arena {arenaID}");
+						return;
+					}
+					arenaID = (arenaID + 1) % totalArenas;
+				}
+			}
 		}
 	}
 
 	private int ChooseRandomArenaID(int totalArenas)
 	{
+		// Populate the list of merged arenas if needed
+		if (_mergedArenas == null){ _mergedArenas = GetMergedArenas(); }
+
 		playedArenas.Add(arenaID);
 		if (playedArenas.Count >= totalArenas)
 		{
 			playedArenas = new List<int> { arenaID };
 		}
 
-		var availableArenas = Enumerable.Range(0, totalArenas).Except(playedArenas).ToList();
+		var availableArenas = Enumerable.Range(0, totalArenas).Except(playedArenas).Except(_mergedArenas).ToList();
 		return availableArenas[Random.Range(0, availableArenas.Count)];
+
 	}
 
-	private bool TryLoadArenaConfiguration(out ArenaConfiguration newConfiguration)
-	{
-		return _environmentManager.GetConfiguration(arenaID, out newConfiguration);
-	}
+	private void UpdateActiveArenaToCurrentArenaID() {
+		// Try to load the new configuration, throwing if it fails
+		ArenaConfiguration newConfiguration;
+		if (!_environmentManager.GetConfiguration(arenaID, out newConfiguration))
+		{
+			Debug.LogError($"Critical error: Failed to load arena configuration for arena {arenaID}");
+			return;
+		}
 
-	private void ApplyNewArenaConfiguration(ArenaConfiguration newConfiguration)
-	{
+		// Apply the new arena configuration
+		Debug.Log("Updating Arena Configuration");
 		_arenaConfiguration = newConfiguration;
 		_agent.showNotification = ArenasConfigurations.Instance.showNotification;
-		Debug.Log("Updating Arena Configuration");
-
 		_arenaConfiguration.SetGameObject(prefabs.GetList());
 		_builder.Spawnables = _arenaConfiguration.spawnables;
 		_arenaConfiguration.toUpdate = false;
@@ -175,30 +244,22 @@ public class TrainingArena : MonoBehaviour
 		{
 			Random.InitState(_arenaConfiguration.randomSeed);
 		}
-
 		Debug.Log($"TimeLimit set to: {_arenaConfiguration.TimeLimit}");
-	}
 
-	private void NotifyArenaChange()
-	{
+		// Destroy all spawned rewards in the arena.
+		foreach (var reward in spawnedRewards)
+		{
+			Destroy(reward);
+		}
+		spawnedRewards.Clear();
+
+		// Notify Arena Change
 		_environmentManager.TriggerArenaChangeEvent(arenaID, _environmentManager.GetTotalArenas());
 	}
 	
 	#endregion
 
 	#region Other Methods
-
-	/// <summary>
-	/// Destroys all spawned rewards in the arena.
-	/// </summary>
-	private void CleanupRewards()
-	{
-		foreach (var reward in spawnedRewards)
-		{
-			Destroy(reward);
-		}
-		spawnedRewards.Clear();
-	}
 
 	/// <summary>
 	/// Updates the light status in the arena based on the current step count.

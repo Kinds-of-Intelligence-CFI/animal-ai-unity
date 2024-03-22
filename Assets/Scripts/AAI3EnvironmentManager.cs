@@ -214,7 +214,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
 		OnArenaChanged?.Invoke(currentArenaIndex, totalArenas);
 	}
 
-	public int getMaxArenaID()
+	public int getArenaCount()
 	{
 		return _arenasConfigurations.configurations.Count;
 	}

@@ -141,6 +141,7 @@ namespace ArenasParameters
 		public bool toUpdate = false;
 		public string protoString = "";
 		public int randomSeed = 0;
+		public bool mergeNextArena = false;
 
 		public ArenaConfiguration() { }
 
@@ -175,6 +176,7 @@ namespace ArenasParameters
 			toUpdate = true;
 			protoString = yamlArena.ToString();
 			randomSeed = yamlArena.randomSeed;
+			this.mergeNextArena = yamlArena.mergeNextArena;
 		}
 
 		/// <summary>
