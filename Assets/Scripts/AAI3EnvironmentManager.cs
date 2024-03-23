@@ -55,26 +55,6 @@ public class AAI3EnvironmentManager : MonoBehaviour
     private ArenasParametersSideChannel _arenasParametersSideChannel;
     public static event Action<int, int> OnArenaChanged;
 
-	// TODO: remove these variables and use the ones in the inspector
-	[Header("PlayMode Environment Settings")]
-	public bool playerMode = true;
-	public bool useCamera = true;
-	public int resolution = 84;
-	public bool grayscale = false;
-	public bool useRayCasts = true;
-	public int raysPerSide = 2;
-	public int rayMaxDegrees = 60;
-	public int decisionPeriod = 3;
-
-    private void InitialiseSideChannel()
-    {
-        _arenasConfigurations = new ArenasConfigurations();
-        _arenasParametersSideChannel = new ArenasParametersSideChannel();
-        _arenasParametersSideChannel.NewArenasParametersReceived +=
-            _arenasConfigurations.UpdateWithConfigurationsReceived;
-        SideChannelManager.RegisterSideChannel(_arenasParametersSideChannel);
-    }
-
     public void Awake()
     {
         InitialiseSideChannel();
@@ -104,9 +84,9 @@ public class AAI3EnvironmentManager : MonoBehaviour
             : defaultDecisionPeriod;
         Debug.Log("Set playermode to " + playerMode);
 
-        if (Application.isEditor) // Default settings for tests in Editor
+        if (Application.isEditor) // Default settings
         {
-            Debug.Log("Using UnityEditor default configuration");
+            Debug.Log("Using Unity Editor Default Configuration");
             playerMode = true;
             useCamera = true;
             resolution = 84;
@@ -114,7 +94,6 @@ public class AAI3EnvironmentManager : MonoBehaviour
             useRayCasts = true;
             raysPerSide = 2;
 
-            // If in editor mode, load the configuration file specified in the inspector
             if (configFile != "")
             {
                 var configYAML = Resources.Load<TextAsset>(configFile);
@@ -149,7 +128,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
         playerControls.SetActive(playerMode);
         uiCanvas.GetComponent<Canvas>().enabled = playerMode;
 
-		// if removed, division by zero error occurs:
+        // if removed, division by zero error occurs:
         foreach (Agent a in FindObjectsOfType<Agent>(true))
         {
             a.GetComponentInChildren<DecisionRequester>().DecisionPeriod = decisionPeriod;
@@ -180,18 +159,40 @@ public class AAI3EnvironmentManager : MonoBehaviour
             }
             if (playerMode)
             {
-                // The following does nothing under normal execution - but when loading the built version
-                // with the play script it sets the BehaviorType back to Heursitic
-                // from default as loading this autotamically attaches Academy for training (since mlagents 0.16.0)
                 a.GetComponentInChildren<BehaviorParameters>().BehaviorType =
                     BehaviorType.HeuristicOnly;
             }
         }
-        PrintDebugInfo();
+        PrintDebugInfo(
+            playerMode,
+            useCamera,
+            resolution,
+            grayscale,
+            useRayCasts,
+            raysPerSide,
+            rayMaxDegrees
+        );
         _instantiatedArena._agent.gameObject.SetActive(true);
     }
 
-    private void PrintDebugInfo()
+    private void InitialiseSideChannel()
+    {
+        _arenasConfigurations = new ArenasConfigurations();
+        _arenasParametersSideChannel = new ArenasParametersSideChannel();
+        _arenasParametersSideChannel.NewArenasParametersReceived +=
+            _arenasConfigurations.UpdateWithConfigurationsReceived;
+        SideChannelManager.RegisterSideChannel(_arenasParametersSideChannel);
+    }
+
+    private void PrintDebugInfo(
+        bool playerMode,
+        bool useCamera,
+        int resolution,
+        bool grayscale,
+        bool useRayCasts,
+        int raysPerSide,
+        int rayMaxDegrees
+    )
     {
         Debug.Log(
             "Environment loaded with options:"
