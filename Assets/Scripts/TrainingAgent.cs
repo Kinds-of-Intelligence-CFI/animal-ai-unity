@@ -133,7 +133,6 @@ public class TrainingAgent : Agent, IPrefab
 
     public void UpdateHealth(float updateAmount, bool andEndEpisode = false)
     {
-        Debug.Log($"Value of showNotification: {showNotification}");
         if (NotificationManager.Instance == null && showNotification == true)
         {
             Debug.LogError("NotificationManager instance is not set.");
@@ -165,7 +164,6 @@ public class TrainingAgent : Agent, IPrefab
             StartCoroutine(EndEpisodeAfterDelay());
             return;
         }
-        Debug.Log("Current Pass Mark: " + Arena.CurrentPassMark);
         if (andEndEpisode || _nextUpdateEpisodeEnd)
         {
             float cumulativeReward = this.GetCumulativeReward();
@@ -275,8 +273,10 @@ public class TrainingAgent : Agent, IPrefab
 
     public override void OnEpisodeBegin()
     {
+        Debug.Log($"Value of showNotification: {showNotification}");
         Debug.Log("Episode Begin");
         StopCoroutine("unfreezeCountdown");
+        Debug.Log("Current Pass Mark: " + Arena.CurrentPassMark);
         _previousScore = _currentScore;
         numberOfGoalsCollected = 0;
         _arena.ResetArena();
