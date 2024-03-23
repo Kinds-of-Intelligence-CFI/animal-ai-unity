@@ -8,8 +8,6 @@ using Unity.MLAgents.Sensors;
 using Unity.MLAgents.SideChannels;
 using Unity.MLAgents.Policies;
 
-// TODO: optimize this code
-
 /// <summary>
 /// Manages the environment settings and configurations for the AAI project.
 /// </summary>
@@ -53,13 +51,13 @@ public class AAI3EnvironmentManager : MonoBehaviour
     private ArenasConfigurations _arenasConfigurations;
     private TrainingArena _instantiatedArena;
     private ArenasParametersSideChannel _arenasParametersSideChannel;
+
     public static event Action<int, int> OnArenaChanged;
 
     public void Awake()
     {
         InitialiseSideChannel();
 
-        // Get all commandline arguments and update starting parameters
         Dictionary<string, int> environmentParameters = RetrieveEnvironmentParameters();
         int paramValue;
         bool playerMode =
@@ -84,7 +82,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
             : defaultDecisionPeriod;
         Debug.Log("Set playermode to " + playerMode);
 
-        if (Application.isEditor) // Default settings
+        if (Application.isEditor)
         {
             Debug.Log("Using Unity Editor Default Configuration");
             playerMode = true;
@@ -94,30 +92,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
             useRayCasts = true;
             raysPerSide = 2;
 
-            if (configFile != "")
-            {
-                var configYAML = Resources.Load<TextAsset>(configFile);
-                if (configYAML != null)
-                {
-                    var YAMLReader = new YAMLDefs.YAMLReader();
-                    var parsed = YAMLReader.deserializer.Deserialize<YAMLDefs.ArenaConfig>(
-                        configYAML.ToString()
-                    );
-                    _arenasConfigurations.UpdateWithYAML(parsed);
-                }
-                else
-                {
-                    var configYAMLS = Resources.LoadAll<TextAsset>(configFile);
-                    var YAMLReader = new YAMLDefs.YAMLReader();
-                    foreach (TextAsset config in configYAMLS)
-                    {
-                        var parsed = YAMLReader.deserializer.Deserialize<YAMLDefs.ArenaConfig>(
-                            config.ToString()
-                        );
-                        _arenasConfigurations.AddAdditionalArenas(parsed);
-                    }
-                }
-            }
+            LoadYAMLFileInEditor();
         }
 
         resolution = Math.Max(minimumResolution, Math.Min(maximumResolution, resolution));
@@ -173,6 +148,45 @@ public class AAI3EnvironmentManager : MonoBehaviour
             rayMaxDegrees
         );
         _instantiatedArena._agent.gameObject.SetActive(true);
+    }
+
+    private void LoadYAMLFileInEditor()
+    {
+        if (string.IsNullOrWhiteSpace(configFile))
+        {
+            Debug.LogWarning("Config file path is null or empty.");
+            return;
+        }
+
+        try
+        {
+            var configYAML = Resources.Load<TextAsset>(configFile);
+            if (configYAML != null)
+            {
+                var YAMLReader = new YAMLDefs.YAMLReader();
+                var parsed = YAMLReader.deserializer.Deserialize<YAMLDefs.ArenaConfig>(
+                    configYAML.text
+                );
+                if (parsed != null)
+                {
+                    _arenasConfigurations.UpdateWithYAML(parsed);
+                }
+                else
+                {
+                    Debug.LogWarning("Deserialized YAML content is null.");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"YAML file '{configFile}' could not be found or loaded.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(
+                $"An error occurred while loading or processing the YAML file: {ex.Message}"
+            );
+        }
     }
 
     private void InitialiseSideChannel()
