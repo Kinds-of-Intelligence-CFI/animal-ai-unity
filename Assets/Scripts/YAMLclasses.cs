@@ -38,7 +38,6 @@ namespace YAMLDefs
         public void SetCurrentPassMark()
         {
             CurrentPassMark = pass_mark;
-            Debug.Log($"Current Pass Mark: {CurrentPassMark}");
         }
 
         public List<int> blackouts { get; set; } = new List<int>();
