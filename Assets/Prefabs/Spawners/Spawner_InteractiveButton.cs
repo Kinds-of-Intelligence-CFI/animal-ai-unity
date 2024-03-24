@@ -224,8 +224,8 @@ public class Spawner_InteractiveButton : MonoBehaviour
             // Otherwise, random spawning.
             else
             {
-                float arenaWidth = arenaBuilder.GetArenaWidth();
-                float arenaDepth = arenaBuilder.GetArenaDepth();
+                float arenaWidth = arenaBuilder.ArenaWidth;
+                float arenaDepth = arenaBuilder.ArenaDepth;
 
                 // Randomly generate a spawn position within the bounds of the arena, as defined by Arenabuilders.cs.
                 spawnPosition = new Vector3(
@@ -237,7 +237,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
             // Check for randomization flags for x and z axes
             if (RewardSpawnPos.x == -1)
             {
-                spawnPosition.x = Random.Range(0, arenaBuilder.GetArenaWidth());
+                spawnPosition.x = Random.Range(0, arenaBuilder.ArenaWidth);
             }
 
             if (RewardSpawnPos.y == -1)
@@ -253,7 +253,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
 
             if (RewardSpawnPos.z == -1)
             {
-                spawnPosition.z = Random.Range(0, arenaBuilder.GetArenaDepth());
+                spawnPosition.z = Random.Range(0, arenaBuilder.ArenaDepth);
             }
 
             LastSpawnedReward = Instantiate(rewardToSpawn, spawnPosition, Quaternion.identity);

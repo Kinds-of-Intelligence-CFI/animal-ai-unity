@@ -28,15 +28,9 @@ namespace ArenaBuilders
 		private float _rangeX;
 		private float _rangeZ;
 
-		public float GetArenaWidth()
-		{
-			return _rangeX;
-		}
+		public float ArenaWidth => _rangeX;
+		public float ArenaDepth => _rangeZ;
 
-		public float GetArenaDepth()
-		{
-			return _rangeZ;
-		}
 
 		// The arena we're in
 		private Transform _arena;
