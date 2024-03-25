@@ -103,7 +103,6 @@ public class AAI3EnvironmentManager : MonoBehaviour
         playerControls.SetActive(playerMode);
         uiCanvas.GetComponent<Canvas>().enabled = playerMode;
 
-        // if removed, division by zero error occurs:
         foreach (Agent a in FindObjectsOfType<Agent>(true))
         {
             a.GetComponentInChildren<DecisionRequester>().DecisionPeriod = decisionPeriod;
