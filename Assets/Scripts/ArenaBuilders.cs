@@ -25,7 +25,7 @@ namespace ArenaBuilders
         private float _rangeX;
         private float _rangeZ;
 
-        // Getters for the arena size (used for spawning objects within the arena bounds)
+        // Getters for the arena size (used for spawning objects within the arena bounds in other scripts)
         public float ArenaWidth => _rangeX;
         public float ArenaDepth => _rangeZ;
 
