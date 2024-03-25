@@ -8,7 +8,7 @@ using Holders;
 using Random = UnityEngine.Random;
 using System.Linq;
 
-
+// TODO: REFACTOR THIS SCRIPT!
 public class TrainingArena : MonoBehaviour
 {
 	public ListOfPrefabs prefabs = new ListOfPrefabs();
@@ -127,10 +127,10 @@ public class TrainingArena : MonoBehaviour
 		_builder.Spawnables = _arenaConfiguration.spawnables;
 		_arenaConfiguration.toUpdate = false;
 		_agent.MaxStep = 0;
-		_agent.timeLimit = _arenaConfiguration.T * _agentDecisionInterval;
+		_agent.timeLimit = _arenaConfiguration.TimeLimit * _agentDecisionInterval;
 		_builder.Build();
 		_arenaConfiguration.lightsSwitch.Reset();
-
+		Debug.Log("TimeLimit set to: " + _arenaConfiguration.TimeLimit);
 		if (_arenaConfiguration.randomSeed != 0)
 		{
 			Random.InitState(_arenaConfiguration.randomSeed);
