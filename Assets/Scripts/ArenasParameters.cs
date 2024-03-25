@@ -135,7 +135,7 @@ namespace ArenasParameters
 	/// </summary>
 	public class ArenaConfiguration
 	{
-		public int T = 1000;
+		public int TimeLimit = 0;
 		public List<Spawnable> spawnables = new List<Spawnable>();
 		public LightsSwitch lightsSwitch = new LightsSwitch();
 		public bool toUpdate = false;
@@ -153,7 +153,7 @@ namespace ArenasParameters
 			{
 				spawnables.Add(new Spawnable(prefab));
 			}
-			T = 0;
+			TimeLimit = 0;
 			toUpdate = true;
 		}
 
@@ -162,7 +162,7 @@ namespace ArenasParameters
 		/// </summary>
 		internal ArenaConfiguration(YAMLDefs.Arena yamlArena)
 		{
-			T = yamlArena.t;
+			TimeLimit = yamlArena.timeLimit;
 			spawnables = new List<Spawnable>();
 
 			foreach (YAMLDefs.Item item in yamlArena.items)
@@ -171,7 +171,7 @@ namespace ArenasParameters
 			}
 
 			List<int> blackouts = yamlArena.blackouts;
-			lightsSwitch = new LightsSwitch(T, blackouts);
+			lightsSwitch = new LightsSwitch(TimeLimit, blackouts);
 			toUpdate = true;
 			protoString = yamlArena.ToString();
 			randomSeed = yamlArena.random_seed;

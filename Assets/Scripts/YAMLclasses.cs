@@ -30,7 +30,7 @@ namespace YAMLDefs
 
 	public class Arena
 	{
-		public int t { get; set; } = 0;
+		public int timeLimit { get; set; } = 0;
 		public List<Item> items { get; set; } = new List<Item>();
 		public float pass_mark { get; set; } = 0;
 		public static float CurrentPassMark { get; private set; }
