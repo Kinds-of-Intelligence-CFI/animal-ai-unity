@@ -60,6 +60,7 @@ namespace ArenaBuilders
 
         /// <summary>
         /// Constructor for the ArenaBuilder class.
+        /// It initializes the arena, the spawned objects holder, and the maximum spawn attempts for prefabs and the agent.
         /// </summary>
         public ArenaBuilder(
             GameObject arenaGameObject,
@@ -680,18 +681,18 @@ namespace ArenaBuilders
             }
         }
 
-		/// <summary>
-		/// Adds a goal to the goodGoalsMultiSpawned list.
-		/// </summary>
+        /// <summary>
+        /// Adds a goal to the goodGoalsMultiSpawned list.
+        /// </summary>
         public void AddToGoodGoalsMultiSpawned(Goal ggm)
         {
             _goodGoalsMultiSpawned.Add(ggm);
             updateGoodGoalsMulti();
         }
 
-		/// <summary>
-		/// Adds a goal to the goodGoalsMultiSpawned list as a GameObject.
-		/// </summary>
+        /// <summary>
+        /// Adds a goal to the goodGoalsMultiSpawned list as a GameObject.
+        /// </summary>
         public void AddToGoodGoalsMultiSpawned(GameObject ggm)
         {
             _goodGoalsMultiSpawned.Add(ggm.GetComponent<Goal>());
@@ -710,9 +711,9 @@ namespace ArenaBuilders
             return (paramList != null) ? paramList.Count : 0;
         }
 
-		/// <summary>
-		/// Returns the total number of objects spawned.
-		/// </summary>
+        /// <summary>
+        /// Returns the total number of objects spawned.
+        /// </summary>
         public int GetTotalObjectsSpawned()
         {
             return _totalObjectsSpawned;
