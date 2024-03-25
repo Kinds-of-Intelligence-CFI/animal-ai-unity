@@ -733,7 +733,7 @@ namespace ArenaBuilders
 					SP.SetColourOverride(color, true);
 				}
 
-				SP.SetSymbol(sName, true); // UpdatePosterboard() for color/symbol texture is called here!
+				SP.SetSymbol(sName, true);
 			}
 		}
 
@@ -742,7 +742,7 @@ namespace ArenaBuilders
 		/// </summary>
 		private void AssignTimingNumber<T>(string paramName, float value, T component)
 		{
-			paramName = paramName[0].ToString().ToUpper() + paramName.Substring(1); // "delay" -> "Delay" and so on...
+			paramName = paramName[0].ToString().ToUpper() + paramName.Substring(1);
 			MethodInfo SetMethod = component.GetType().GetMethod("Set" + (paramName));
 
 			if (SetMethod != null)
