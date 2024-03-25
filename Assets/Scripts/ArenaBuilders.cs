@@ -58,6 +58,9 @@ namespace ArenaBuilders
 
         #region Arena Constructor
 
+        /// <summary>
+        /// Constructor for the ArenaBuilder class.
+        /// </summary>
         public ArenaBuilder(
             GameObject arenaGameObject,
             GameObject spawnedObjectsHolder,
@@ -85,6 +88,10 @@ namespace ArenaBuilders
         #endregion
 
         #region Arena Builder
+
+        /// <summary>
+        /// Builds the arena by instantiating the Spawnable objects within the arena.
+        /// </summary>
         public void Build()
         {
             _totalObjectsSpawned = 0;
@@ -117,6 +124,9 @@ namespace ArenaBuilders
 
         #region Instantiate and Spawn Objects Methods
 
+        /// <summary>
+        /// Instantiates the Spawnable objects within the arena.
+        /// </summary>
         private void InstantiateSpawnables(GameObject spawnedObjectsHolder)
         {
             Debug.Log("Spawnables has " + Spawnables.Capacity + " entries");
@@ -124,9 +134,7 @@ namespace ArenaBuilders
                 .Where(x => x.gameObject != null && x.gameObject.CompareTag("agent"))
                 .ToList();
 
-            // If we are provided with an agent's caracteristics we want to instantiate it first and
-            // then ignore any item spawning at the same spot. Otherwise we spawn it last to allow
-            // more objects to spawn
+            // Instantiate the agent first based on its characteristics, then prevent item spawning at the same location; otherwise, spawn it last to enable more object spawns.
             if (agentSpawnablesFromUser.Any())
             {
                 _agentCollider.enabled = false;
@@ -143,6 +151,9 @@ namespace ArenaBuilders
             }
         }
 
+        /// <summary>
+        /// Spawns the objects within the arena.
+        /// </summary>
         private void SpawnObjects(GameObject spawnedObjectsHolder)
         {
             foreach (Spawnable spawnable in Spawnables)
@@ -157,16 +168,21 @@ namespace ArenaBuilders
             }
         }
 
+        /// <summary>
+        /// InstantiateSpawnable spawns game objects in a game environment.
+        /// It takes two parameters: a Spawnable object and a GameObject that serves as a holder for the spawned objects.
+        /// The method instantiates the game object, sets its layer, position, rotation, and scale, and then spawns the game object.
+        /// The method also sets the color of the game object and assigns a symbol name to the game object's SignBoard component.
+        /// </summary>
         private void InstantiateSpawnable(Spawnable spawnable, GameObject spawnedObjectsHolder)
         {
+            // Required parameters
             List<Vector3> positions = spawnable.positions;
             List<float> rotations = spawnable.rotations;
             List<Vector3> sizes = spawnable.sizes;
             List<Vector3> colors = spawnable.colors;
 
-            // ======== EXTRA/OPTIONAL PARAMETERS ========
-            // use for SignPosterboard symbols, Decay/SizeChange rates, Dispenser settings, etc.
-
+            // Optional parameters
             List<string> symbolNames = spawnable.symbolNames;
             List<float> delays = spawnable.delays;
             List<float> initialValues = spawnable.initialValues;
@@ -181,6 +197,7 @@ namespace ArenaBuilders
             List<float> moveDurations = spawnable.moveDurations;
             List<float> resetDurations = spawnable.resetDurations;
 
+            // Get the number of elements in the lists
             int numberOfPositions = positions.Count;
             int numberOfRotations = rotations.Count;
             int numberOfSizes = sizes.Count;
@@ -199,6 +216,7 @@ namespace ArenaBuilders
             int numberOfMoveDurations = optionalCount(moveDurations);
             int numberOfResetDurations = optionalCount(resetDurations);
 
+            // Get the number of elements in the lists
             int[] ns = new int[]
             {
                 numberOfPositions,
@@ -219,8 +237,10 @@ namespace ArenaBuilders
                 numberOfMoveDurations,
                 numberOfResetDurations
             };
+            // Get the maximum number of elements in the lists
             int n = ns.Max();
 
+            // Spawn the objects
             int k = 0;
             do
             {
@@ -235,7 +255,7 @@ namespace ArenaBuilders
                 Vector3 size = k < ns[2] ? sizes[k] : -Vector3.one;
                 Vector3 color = k < ns[3] ? colors[k] : -Vector3.one;
 
-                // For optional parameters, use default values if not provided.
+                // For optional parameters, use default values if not provided
                 string symbolName = k < ns[4] ? symbolNames[k] : null;
                 float delay = k < ns[5] ? delays[k] : 0;
                 bool tree = (spawnable.name.Contains("Tree"));
@@ -258,9 +278,7 @@ namespace ArenaBuilders
                 float spawnProbability = spawnable.SpawnProbability;
                 Vector3 rewardSpawnPos = spawnable.rewardSpawnPos;
 
-                // Group together in dictionary so can pass as one argument to Spawner...
-                // (means we won't have to keep updating the arguments of Spawner function...
-                // each time we add to optional parameters)
+                // Assign the optional parameters to a dictionary
                 Dictionary<string, object> optionals = new Dictionary<string, object>()
                 {
                     { nameof(symbolName), symbolName },
@@ -283,6 +301,7 @@ namespace ArenaBuilders
                     { "maxRewardCounts", spawnable.maxRewardCounts }
                 };
 
+                // Determines a suitable position and rotation for the object to spawn
                 PositionRotation spawnPosRot = SamplePositionRotation(
                     gameObjectInstance,
                     _maxSpawnAttemptsForPrefabs,
@@ -297,6 +316,10 @@ namespace ArenaBuilders
             } while (k < n);
         }
 
+        /// <summary>
+        /// The SpawnGameObject function in C# instantiates a game object with specified properties, sets its position, rotation, and color, assigns it a symbol name if provided,
+        /// ...adjusts properties of its Spawner_InteractiveButton and GoalSpawner components based on optional parameters, and assigns timing parameters to relevant components.
+        /// </summary>
         private void SpawnGameObject(
             Spawnable spawnable,
             GameObject gameObjectInstance,
@@ -483,6 +506,11 @@ namespace ArenaBuilders
 
         #region Spawn Agent
 
+        /// <summary>
+        /// The SpawnAgent function spawns an agent in a game environment.
+        /// It takes a Spawnable object as a parameter and spawns the agent at a specified position and rotation.
+        /// The function also sets the agent's skin and freeze delay.
+        /// </summary>
         private void SpawnAgent(Spawnable agentSpawnableFromUser)
         {
             PositionRotation agentToSpawnPosRot;
@@ -500,6 +528,7 @@ namespace ArenaBuilders
                 (agentSpawnableFromUser == null || !agentSpawnableFromUser.rotations.Any())
                     ? -1
                     : agentSpawnableFromUser.rotations[0];
+
             // Extra check for skins because optional param is not always initialised as a List<string> in Spawnable class
             if (agentSpawnableFromUser != null && agentSpawnableFromUser.skins == null)
             {
@@ -543,6 +572,11 @@ namespace ArenaBuilders
 
         #region Check Position/Rotation and Object Placement Methods
 
+        /// <summary>
+        /// The SamplePositionRotation function samples a position and rotation for a game object to spawn.
+        /// It takes five parameters: a game object instance, the maximum number of spawn attempts, a position, a rotation, and a size.
+        /// The function returns a PositionRotation object that contains the position and rotation of the game object to spawn.
+        /// </summary>
         private PositionRotation SamplePositionRotation(
             GameObject gameObjectInstance,
             int maxSpawnAttempt,
@@ -597,6 +631,11 @@ namespace ArenaBuilders
             return null;
         }
 
+        /// <summary>
+        /// The IsSpotFree function checks if a spot is free for a game object to spawn.
+        /// It takes three parameters: an array of colliders, a boolean value indicating if the object is an agent, and a boolean value indicating if the object is a zone.
+        /// The function returns true if the spot is free; otherwise, it returns false.
+        /// </summary>
         private bool IsSpotFree(Collider[] colliders, bool isAgent, bool isZone = false)
         {
             if (isZone)
@@ -612,6 +651,11 @@ namespace ArenaBuilders
                     || (colliders.All(collider => collider.isTrigger) && !isAgent);
         }
 
+        /// <summary>
+        /// The ObjectOutsideOfBounds function checks if a game object is outside of the arena bounds (walls).
+        /// It takes two parameters: a position and a bounding box.
+        /// The function returns true if the object is outside of the bounds; otherwise, it returns false.
+        /// </summary>
         private bool ObjectOutsideOfBounds(Vector3 position, Vector3 boundingBox)
         {
             return position.x > boundingBox.x
@@ -636,12 +680,18 @@ namespace ArenaBuilders
             }
         }
 
+		/// <summary>
+		/// Adds a goal to the goodGoalsMultiSpawned list.
+		/// </summary>
         public void AddToGoodGoalsMultiSpawned(Goal ggm)
         {
             _goodGoalsMultiSpawned.Add(ggm);
             updateGoodGoalsMulti();
         }
 
+		/// <summary>
+		/// Adds a goal to the goodGoalsMultiSpawned list as a GameObject.
+		/// </summary>
         public void AddToGoodGoalsMultiSpawned(GameObject ggm)
         {
             _goodGoalsMultiSpawned.Add(ggm.GetComponent<Goal>());
@@ -651,6 +701,7 @@ namespace ArenaBuilders
         #endregion
 
         #region Other Methods
+
         /// <summary>
         /// Returns the number of elements in a list if not null; otherwise, returns 0.
         /// </summary>
@@ -659,6 +710,9 @@ namespace ArenaBuilders
             return (paramList != null) ? paramList.Count : 0;
         }
 
+		/// <summary>
+		/// Returns the total number of objects spawned.
+		/// </summary>
         public int GetTotalObjectsSpawned()
         {
             return _totalObjectsSpawned;
