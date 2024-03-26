@@ -3,10 +3,13 @@ using UnityEngine;
 using YamlDotNet.Serialization;
 
 /// <summary>
-/// YAMLDefs namespace contains classes that are used to deserialize YAML files.
+/// YAMLDefs namespace contains classes that are used to deserialize YAML files. These classes are used to define the structure of the YAML files.
 /// </summary>
 namespace YAMLDefs
 {
+	/// <summary>
+	/// YAMLReader class is used to read YAML files. It uses YamlDotNet library to deserialize YAML files.
+	/// </summary>
 	public class YAMLReader
 	{
 		public YamlDotNet.Serialization.IDeserializer deserializer = new DeserializerBuilder()
@@ -19,6 +22,9 @@ namespace YAMLDefs
 			.Build();
 	}
 
+	/// <summary>
+	/// ArenaConfig class is used to deserialize the root object of the YAML file. It contains a dictionary of arenas and some global settings.
+	/// </summary>
 	public class ArenaConfig
 	{
 		public IDictionary<int, Arena> arenas { get; set; }
@@ -28,6 +34,9 @@ namespace YAMLDefs
 		public bool canChangePerspective { get; set; } = true;
 	}
 
+	/// <summary>
+	/// Arena class is used to deserialize the arena object in the YAML file. It contains the settings for the arena --> "local" settings.
+	/// </summary>
 	public class Arena
 	{
 		public int timeLimit { get; set; } = 0;
@@ -44,6 +53,9 @@ namespace YAMLDefs
 		public int randomSeed { get; set; } = 0;
 	}
 
+	/// <summary>
+	/// Item class is used to deserialize the item object in the YAML file.
+	/// </summary>
 	public class Item
 	{
 		// REQUIRED PARAMETERS
@@ -79,6 +91,8 @@ namespace YAMLDefs
 		public List<int> maxRewardCounts { get; set; } = new List<int>();
 	}
 
+	/// <summary>
+	/// RGB class is used to deserialize the RGB object in the YAML file, such as colors for the game objects.
 	public class RGB
 	{
 		public float r { get; set; } = 0;
@@ -86,6 +100,9 @@ namespace YAMLDefs
 		public float b { get; set; } = 0;
 	}
 
+	/// <summary>
+	/// AliasMapper class is used to map the old names of the game objects to the new names. This is used to maintain compatibility with the old YAML files.
+	/// </summary>
 	public static class AliasMapper
 	{
 		private static readonly Dictionary<string, string> AliasMap = new Dictionary<string, string>
