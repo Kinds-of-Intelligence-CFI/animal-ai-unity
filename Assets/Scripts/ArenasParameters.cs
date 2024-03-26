@@ -332,7 +332,7 @@ namespace ArenasParameters
 			}
 		}
 
-		public void Clear()
+		public void ClearConfigurations()
 		{
 			configurations.Clear();
 		}
