@@ -41,7 +41,7 @@ namespace YAMLDefs
 		}
 
 		public List<int> blackouts { get; set; } = new List<int>();
-		public int random_seed { get; set; } = 0;
+		public int randomSeed { get; set; } = 0;
 	}
 
 	public class Item

@@ -174,7 +174,7 @@ namespace ArenasParameters
 			lightsSwitch = new LightsSwitch(TimeLimit, blackouts);
 			toUpdate = true;
 			protoString = yamlArena.ToString();
-			randomSeed = yamlArena.random_seed;
+			randomSeed = yamlArena.randomSeed;
 		}
 
 		/// <summary>
