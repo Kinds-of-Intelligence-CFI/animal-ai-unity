@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 
 /// <summary>
-/// A class that manages the animal skins.
+/// A class that manages the animal skins. It allows to change the animal skin by name or by ID.
 /// </summary>
 [System.Serializable]
 public class MultiDimArray<T>
