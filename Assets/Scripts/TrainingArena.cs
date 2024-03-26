@@ -8,121 +8,159 @@ using Holders;
 using Random = UnityEngine.Random;
 using System.Linq;
 
-// TODO: REFACTOR THIS SCRIPT!
+/// <summary>
+/// This class is responsible for managing the training arena. 
+/// It contains the logic to reset the arena, update the light status, and handle the spawning of rewards.
+/// It also initializes the components required for the arena, such as the ArenaBuilder and the AAI3EnvironmentManager.
+/// </summary>
 public class TrainingArena : MonoBehaviour
 {
-	public ListOfPrefabs prefabs = new ListOfPrefabs();
-	public GameObject spawnedObjectsHolder;
-	public int maxSpawnAttemptsForAgent = 100;
-	public int maxSpawnAttemptsForPrefabs = 20;
-	public ListOfBlackScreens blackScreens = new ListOfBlackScreens();
+	[SerializeField]
+	private ListOfPrefabs prefabs;
+	[SerializeField]
+	private GameObject spawnedObjectsHolder;
+	[SerializeField]
+	private int maxSpawnAttemptsForAgent = 100;
+	[SerializeField]
+	private int maxSpawnAttemptsForPrefabs = 20;
+	[SerializeField]
+	private ListOfBlackScreens blackScreens;
 
 	[HideInInspector]
 	public int arenaID = -1;
 
-	[HideInInspector]
-	public int maxarenaID = -1;
-
-	[HideInInspector]
 	public TrainingAgent _agent;
+
 	private ArenaBuilder _builder;
-	public ArenaBuilder Builder
-	{
-		get { return _builder; }
-	}
 	private ArenaConfiguration _arenaConfiguration = new ArenaConfiguration();
 	private AAI3EnvironmentManager _environmentManager;
 	private List<Fade> _fades = new List<Fade>();
 	private bool _lightStatus = true;
-	private int _agentDecisionInterval; // How many frames between decisions, reads from agent's decision requester
-	private bool _firstReset = true;
+	private int _agentDecisionInterval;
+	private bool isFirstArenaReset = true;
 	private List<GameObject> spawnedRewards = new List<GameObject>();
+	private List<int> playedArenas = new List<int>();
+
 	public bool showNotification { get; set; }
-	private List<int> playedArenas = new List<int>(); // List to keep track of played arenas
+
+	public ArenaBuilder Builder
+	{
+		get { return _builder; }
+	}
+
+	public ArenaConfiguration ArenaConfig
+	{
+		get { return _arenaConfiguration; }
+	}
 
 	internal void Awake()
 	{
+		InitializeArenaComponents();
+	}
+
+	void FixedUpdate()
+	{
+		UpdateLigthStatus();
+	}
+
+	private void OnDestroy()
+	{
+		Spawner_InteractiveButton.RewardSpawned -= OnRewardSpawned;
+	}
+
+	/// <summary>
+	/// Initializes the components required for the arena, such as the ArenaBuilder and the AAI3EnvironmentManager.
+	/// </summary>
+	private void InitializeArenaComponents()
+	{
 		_builder = new ArenaBuilder(
-			gameObject,
-			spawnedObjectsHolder,
-			maxSpawnAttemptsForPrefabs,
-			maxSpawnAttemptsForAgent
+		gameObject,
+		spawnedObjectsHolder,
+		maxSpawnAttemptsForPrefabs,
+		maxSpawnAttemptsForAgent
 		);
 		_environmentManager = GameObject.FindObjectOfType<AAI3EnvironmentManager>();
 		_agent = FindObjectsOfType<TrainingAgent>(true)[0];
 		_agentDecisionInterval = _agent.GetComponentInChildren<DecisionRequester>().DecisionPeriod;
 		_fades = blackScreens.GetFades();
 
-		// Subscribe to the reward spawn event from spawner_InteractiveButton.cs
 		Spawner_InteractiveButton.RewardSpawned += OnRewardSpawned;
 	}
 
-	private void OnDestroy()
-	{
-		// Unsubscribe when the object is destroyed to avoid memory leaks
-		Spawner_InteractiveButton.RewardSpawned -= OnRewardSpawned;
-	}
-
-	private void OnRewardSpawned(GameObject reward)
-	{
-		spawnedRewards.Add(reward);
-	}
-
+	/// <summary>
+	/// Resets the arena by destroying existing objects and spawning new ones based on the current arena configuration.
+	/// This is a custom implementation of the ResetAcademy method from the MLAgents library. It is called by the TrainingAgent when it resets.
+	/// </summary>
 	public void ResetArena()
 	{
 		Debug.Log("Resetting Arena");
 
-		// Destroy existing objects in the arena
+		CleanUpSpawnedObjects();
+
+		DetermineNextArenaID();
+
+		if (!TryLoadArenaConfiguration(out ArenaConfiguration newConfiguration))
+		{
+			Debug.LogError("Failed to load arena configuration");
+			return;
+		}
+
+		ApplyNewArenaConfiguration(newConfiguration);
+
+		CleanupRewards();
+
+		NotifyArenaChange();
+
+	}
+
+	private void CleanUpSpawnedObjects()
+	{
 		foreach (GameObject holder in transform.FindChildrenWithTag("spawnedObjects"))
 		{
 			holder.SetActive(false);
 			Destroy(holder);
 		}
+	}
 
+	private void DetermineNextArenaID()
+	{
 		int totalArenas = _environmentManager.getMaxArenaID();
 		bool randomizeArenas = _environmentManager.GetRandomizeArenasStatus();
 
-		if (_firstReset)
+		if (isFirstArenaReset)
 		{
-			_firstReset = false;
+			isFirstArenaReset = false;
 			arenaID = randomizeArenas ? Random.Range(0, totalArenas) : 0;
 		}
 		else
 		{
-			if (randomizeArenas)
-			{
-				// Add the current arenaID to the played list
-				playedArenas.Add(arenaID);
-				if (playedArenas.Count >= totalArenas)
-				{
-					// Reset the played arenas list but keep the current arena in it to avoid immediate repetition
-					playedArenas = new List<int> { arenaID };
-				}
-
-				// Choose a random arena that hasn't been played yet and is not the current one
-				List<int> availableArenas = Enumerable.Range(0, totalArenas).Except(playedArenas).ToList();
-				arenaID = availableArenas[Random.Range(0, availableArenas.Count)];
-			}
-			else
-			{
-				// Sequential mode: proceed to the next arena, loop back if at the end
-				arenaID = (arenaID + 1) % totalArenas;
-			}
+			arenaID = randomizeArenas ? ChooseRandomArenaID(totalArenas) : (arenaID + 1) % totalArenas;
 		}
+	}
 
-		// Attempt to load the configuration for the chosen arenaID
-		if (!_environmentManager.GetConfiguration(arenaID, out ArenaConfiguration newConfiguration))
+	private int ChooseRandomArenaID(int totalArenas)
+	{
+		playedArenas.Add(arenaID);
+		if (playedArenas.Count >= totalArenas)
 		{
-			Debug.LogError($"Failed to load predefined arena configuration for Arena ID: {arenaID}. Total arenas: {totalArenas}");
-			return;
+			playedArenas = new List<int> { arenaID };
 		}
 
+		var availableArenas = Enumerable.Range(0, totalArenas).Except(playedArenas).ToList();
+		return availableArenas[Random.Range(0, availableArenas.Count)];
+	}
+
+	private bool TryLoadArenaConfiguration(out ArenaConfiguration newConfiguration)
+	{
+		return _environmentManager.GetConfiguration(arenaID, out newConfiguration);
+	}
+
+	private void ApplyNewArenaConfiguration(ArenaConfiguration newConfiguration)
+	{
 		_arenaConfiguration = newConfiguration;
-
-		// Updating showNotification from the global configuration
 		_agent.showNotification = ArenasConfigurations.Instance.showNotification;
-
 		Debug.Log("Updating Arena Configuration");
+
 		_arenaConfiguration.SetGameObject(prefabs.GetList());
 		_builder.Spawnables = _arenaConfiguration.spawnables;
 		_arenaConfiguration.toUpdate = false;
@@ -130,23 +168,35 @@ public class TrainingArena : MonoBehaviour
 		_agent.timeLimit = _arenaConfiguration.TimeLimit * _agentDecisionInterval;
 		_builder.Build();
 		_arenaConfiguration.lightsSwitch.Reset();
-		Debug.Log("TimeLimit set to: " + _arenaConfiguration.TimeLimit);
+
 		if (_arenaConfiguration.randomSeed != 0)
 		{
 			Random.InitState(_arenaConfiguration.randomSeed);
 		}
 
-		// Clear any spawned rewards
+		Debug.Log($"TimeLimit set to: {_arenaConfiguration.TimeLimit}");
+	}
+
+	private void NotifyArenaChange()
+	{
+		_environmentManager.TriggerArenaChangeEvent(arenaID, _environmentManager.GetTotalArenas());
+	}
+
+	/// <summary>
+	/// Destroys all spawned rewards in the arena.
+	/// </summary>
+	private void CleanupRewards()
+	{
 		foreach (var reward in spawnedRewards)
 		{
 			Destroy(reward);
 		}
 		spawnedRewards.Clear();
-
-		_environmentManager.TriggerArenaChangeEvent(arenaID, _environmentManager.GetTotalArenas());
-
 	}
 
+	/// <summary>
+	/// Updates the light status in the arena based on the current step count.
+	/// </summary>
 	public void UpdateLigthStatus()
 	{
 		int stepCount = _agent.StepCount;
@@ -164,20 +214,21 @@ public class TrainingArena : MonoBehaviour
 		}
 	}
 
-	void FixedUpdate()
-	{
-		UpdateLigthStatus();
-	}
-
-	public ArenaConfiguration ArenaConfig
-	{
-		get { return _arenaConfiguration; }
-	}
-
+	/// <summary>
+	/// Returns the total number of spawned objects in the arena.
+	/// </summary>
 	public int GetTotalSpawnedObjects()
 	{
 		Debug.Log("Total spawned objects: " + spawnedObjectsHolder.transform.childCount);
 		return spawnedObjectsHolder.transform.childCount;
+	}
+
+	/// <summary>
+	/// Callback for when a reward is spawned in the arena.
+	/// </summary>
+	private void OnRewardSpawned(GameObject reward)
+	{
+		spawnedRewards.Add(reward);
 	}
 
 }
