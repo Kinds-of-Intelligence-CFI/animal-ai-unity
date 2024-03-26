@@ -87,6 +87,8 @@ public class TrainingArena : MonoBehaviour
 		Spawner_InteractiveButton.RewardSpawned += OnRewardSpawned;
 	}
 
+	#region Arena Handling Methods
+
 	/// <summary>
 	/// Resets the arena by destroying existing objects and spawning new ones based on the current arena configuration.
 	/// This is a custom implementation of the ResetAcademy method from the MLAgents library. It is called by the TrainingAgent when it resets.
@@ -181,6 +183,10 @@ public class TrainingArena : MonoBehaviour
 	{
 		_environmentManager.TriggerArenaChangeEvent(arenaID, _environmentManager.GetTotalArenas());
 	}
+	
+	#endregion
+
+	#region Other Methods
 
 	/// <summary>
 	/// Destroys all spawned rewards in the arena.
@@ -231,4 +237,5 @@ public class TrainingArena : MonoBehaviour
 		spawnedRewards.Add(reward);
 	}
 
+	#endregion
 }
