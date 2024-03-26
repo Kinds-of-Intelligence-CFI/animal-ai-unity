@@ -38,7 +38,7 @@ public class ArenasParametersSideChannel : SideChannel
 			handler(this, arenasParametersEvent);
 		}
 	}
-	
+
 	/// <summary>
 	/// This event is triggered when new arenas parameters are received.
 	/// </summary>
