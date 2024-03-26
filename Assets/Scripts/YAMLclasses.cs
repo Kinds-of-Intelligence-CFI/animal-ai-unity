@@ -32,12 +32,12 @@ namespace YAMLDefs
 	{
 		public int timeLimit { get; set; } = 0;
 		public List<Item> items { get; set; } = new List<Item>();
-		public float pass_mark { get; set; } = 0;
+		public float passMark { get; set; } = 0;
 		public static float CurrentPassMark { get; private set; }
 
 		public void SetCurrentPassMark()
 		{
-			CurrentPassMark = pass_mark;
+			CurrentPassMark = passMark;
 		}
 
 		public List<int> blackouts { get; set; } = new List<int>();
