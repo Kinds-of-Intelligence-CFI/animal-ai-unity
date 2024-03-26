@@ -1,4 +1,5 @@
 !ArenaConfig
+# Testing the SpawnerButton with different rewards and spawn probabilities.
 randomizeArenas: false 
 showNotification: false 
 canResetEpisode: true 

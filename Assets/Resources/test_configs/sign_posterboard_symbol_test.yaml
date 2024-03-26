@@ -1,4 +1,5 @@
 !ArenaConfig
+# Testing the SignBoard with different symbols and sizes.
 arenas:
   0: !Arena
     passMark: 0
@@ -9,14 +10,6 @@ arenas:
       positions:
       - !Vector3 {x: 10, y: 0, z: 20}
       rotations: [90]
-    - !Item
-      name: GoodGoal
-      positions:
-      - !Vector3 {x: 5, y: 0, z: 30}
-      sizes:
-      - !Vector3 {x: 1, y: 1, z: 1}
-      symbolNames:
-      - "left-arrow"
     - !Item
       name: SignPosterboard
       positions:
