@@ -24,7 +24,7 @@ public class FlashingImage : MonoBehaviour
 
 	private void SetImageAlpha(float alpha)
 	{
-		if (imageToFlash != null) // Safety check
+		if (imageToFlash != null)
 		{
 			imageToFlash.color = new Color(imageToFlash.color.r, imageToFlash.color.g, imageToFlash.color.b, alpha);
 		}
@@ -33,7 +33,7 @@ public class FlashingImage : MonoBehaviour
 	public void StartFlashing()
 	{
 		isFlashing = true;
-		flashTimer = 0.0f; 
+		flashTimer = 0.0f;
 	}
 
 	public void StopFlashing()
