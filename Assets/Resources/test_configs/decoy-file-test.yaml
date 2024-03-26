@@ -17,7 +17,7 @@ arenas:
       sizes:
       - !Vector3 {x: 5, y: 5, z: 5}
   1: !Arena
-    pass_mark: 0
+    passMark: 0
     timeLimit: 10
     items:
     - !Item
