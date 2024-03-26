@@ -5,8 +5,8 @@ canResetEpisode: true
 canChangePerspective: true
 arenas:
   0: !Arena
-    pass_mark: 0
-    t: 250
+    passMark: 0
+    timeLimit: 250
     items:
     - !Item
       name: Agent

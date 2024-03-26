@@ -2,8 +2,8 @@
 # Testing all the animal skins on the agent in one yaml file in multiple arenas.
 arenas:
   0: !Arena
-    pass_mark: 0
-    t: 250
+    passMark: 0
+    timeLimit: 250
     items:
     - !Item
       name: Agent
@@ -12,7 +12,7 @@ arenas:
       rotations: [90]
       skins: ["panda"]
   1: !Arena
-    pass_mark: 0
+    passMark: 0
     t: 250
     items:
     - !Item
@@ -22,7 +22,7 @@ arenas:
       rotations: [90]
       skins: ["pig"]
   2: !Arena
-    pass_mark: 0
+    passMark: 0
     t: 250
     items:
     - !Item

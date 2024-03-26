@@ -1,7 +1,8 @@
 !ArenaConfig
 arenas:
   0: !Arena
-    t: 250 # The time limit for the arena in seconds. In other words, the time limit for the agent to complete the task (the arena resets after this time).
+    passMark: 0 # The pass mark for the arena. The agent must achieve this score to pass the arena.
+    timeLimit: 250 # The time limit for the arena in seconds. In other words, the time limit for the agent to complete the task (the arena resets after this time).
     - !Item
       name: Agent # Note that the agent will always be spawned first regardless of its position in the configuration.
       positions: 

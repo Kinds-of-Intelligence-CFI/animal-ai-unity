@@ -2,8 +2,8 @@
 # Testing the freeze delay countdown feature in multiple arenas.
 arenas:
   0: !Arena
-    pass_mark: 0
-    t: 250
+    passMark: 0
+    timeLimit: 250
     items:
     - !Item
       name: Agent
@@ -18,7 +18,7 @@ arenas:
       colors:
       - !RGB {r: 80, g: 0, b: 60}
   1: !Arena
-    pass_mark: 0
+    passMark: 0
     t: 1000
     items:
     - !Item
