@@ -2,7 +2,7 @@
 # Testing file for ongoing development. Will be removed once the feature is complete.
 arenas:
   0: !Arena
-    passMark: 0
+    passMark: 100
     timeLimit: 1
     items:
     - !Item
@@ -18,7 +18,7 @@ arenas:
       - !Vector3 {x: 5, y: 5, z: 5}
   1: !Arena
     passMark: 0
-    timeLimit: 10
+    timeLimit: 100
     items:
     - !Item
       name: Agent
