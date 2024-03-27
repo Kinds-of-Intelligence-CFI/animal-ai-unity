@@ -72,6 +72,7 @@ public class SignBoard : Prefab
 
     public void UpdateSignBoard()
     {
+        gameObject.SetActive(true);
         bool specialCodeCase = false;
 
         if (texIndex == -1)
