@@ -23,6 +23,7 @@ public class SignBoard : Prefab
 
     void Awake()
     {
+        gameObject.SetActive(true);
         _symbolMat = gameObject.GetComponent<MeshRenderer>().materials[2];
         if (!_symbolMat.name.Contains("symbol"))
         {
@@ -30,12 +31,6 @@ public class SignBoard : Prefab
         }
         SetSymbol(selectedSymbolName);
         _meshRenderer = gameObject.GetComponent<MeshRenderer>();
-        StartCoroutine(EnsureObjectIsActive());
-    }
-
-    void Start()
-    {
-        StartCoroutine(EnsureObjectIsActive());
     }
 
     public void SetSymbol(string s, bool needsUpdating = false)
@@ -281,18 +276,5 @@ public class SignBoard : Prefab
         }
 
         return texCols;
-    }
-
-    private IEnumerator EnsureObjectIsActive()
-    {
-        while (true)
-        {
-            if (!gameObject.activeSelf)
-            {
-                gameObject.SetActive(true);
-                Debug.LogWarning("GameObject was disabled and has been re-enabled.");
-            }
-            yield return new WaitForSeconds(1f);
-        }
     }
 }
