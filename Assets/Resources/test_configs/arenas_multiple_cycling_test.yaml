@@ -3,8 +3,8 @@
 # Also added check to see if arena index values below 0 will be handled correctly (they should be converted to positive and unique index values).
 arenas:
   0: !Arena
-    pass_mark: 1
-    t: 500
+    passMark: 1
+    timeLimit: 500
     items:
     - !Item
       name: Agent
@@ -18,7 +18,7 @@ arenas:
       sizes:
       - !Vector3 { x: 2, y: 2, z: 2 }
   1: !Arena
-    pass_mark: 1
+    passMark: 1
     t: 500
     items:
     - !Item
@@ -33,7 +33,7 @@ arenas:
       sizes:
       - !Vector3 { x: 2, y: 2, z: 2 }
   2: !Arena
-    pass_mark: 1
+    passMark: 1
     t: 500
     items:
     - !Item
@@ -48,7 +48,7 @@ arenas:
       sizes:
       - !Vector3 { x: 2, y: 2, z: 2 }
   -3: !Arena
-    pass_mark: 1
+    passMark: 1
     t: 500
     items:
     - !Item

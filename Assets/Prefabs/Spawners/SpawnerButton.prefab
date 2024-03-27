@@ -212,7 +212,6 @@ MonoBehaviour:
   moveOffset: {x: 0.09, y: 0, z: 0}
   rewardSpawnPoint: {fileID: 5820607059387166607}
   objectToControl: {fileID: 7150004164178407081, guid: b19f8e36bd5ca73489a251d8daa9acea, type: 3}
-  randomizeColor: 0
   showObject: 0
 --- !u!1 &2667445423738929804
 GameObject:
@@ -512,6 +511,6 @@ MonoBehaviour:
   sizeMax: {x: 80, y: 80, z: 80}
   canRandomizeColor: 0
   ratioSize: {x: 0.5, y: 0.5, z: 0.5}
-  sizeAdjustement: 0.999
+  sizeAdjustment: 0.999
   textureUVOverride: 0
   typicalOrigin: 0

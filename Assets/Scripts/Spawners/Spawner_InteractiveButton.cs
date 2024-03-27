@@ -4,15 +4,33 @@ using UnityEngine;
 using System.Linq;
 using ArenaBuilders;
 
+/// <summary>
+/// Spawns a reward when interacted with. The reward is chosen from a list of rewards with weights.
+/// </summary>
 public class Spawner_InteractiveButton : MonoBehaviour
 {
+    public List<string> RewardNames { get; set; }
+    public List<float> RewardWeights { get; set; }
+    public List<GameObject> Rewards { get; set; }
+    public Vector3 RewardSpawnPos { get; set; }
+    public List<int> MaxRewardCounts { get; set; }
+    public int ButtonPressCount { get; private set; }
+    public GameObject LastSpawnedReward { get; private set; }
+    public float SpawnProbability { get; set; } = 1f;
+    private List<GameObject> rewards;
+    private List<float> rewardWeights;
+    public Dictionary<GameObject, int> RewardSpawnCounts { get; private set; } =
+        new Dictionary<GameObject, int>();
     private bool IsMoving = false;
     private float lastInteractionTime;
     private float totalInteractionInterval = 0f;
-    public int ButtonPressCount { get; private set; }
-    public GameObject LastSpawnedReward { get; private set; }
-    public Dictionary<GameObject, int> RewardSpawnCounts { get; private set; } =
-        new Dictionary<GameObject, int>();
+    private float _moveDuration;
+    private float _resetDuration;
+
+    private ArenaBuilder arenaBuilder;
+    private Transform objectToControlSpawnPoint;
+    public delegate void OnRewardSpawned(GameObject reward);
+    public static event OnRewardSpawned RewardSpawned;
 
     [SerializeField]
     private GameObject childObjectToMove;
@@ -27,21 +45,8 @@ public class Spawner_InteractiveButton : MonoBehaviour
     private GameObject objectToControl;
 
     [SerializeField]
-    private bool randomizeColor = false;
-
-    [SerializeField]
     private bool showObject;
 
-    [SerializeField]
-    private ArenaBuilder arenaBuilder;
-    private Transform objectToControlSpawnPoint;
-    private List<GameObject> rewards;
-    private List<float> rewardWeights;
-    public delegate void OnRewardSpawned(GameObject reward);
-    public static event OnRewardSpawned RewardSpawned;
-    private float _moveDuration;
-    private float _resetDuration;
-    public float SpawnProbability { get; set; } = 1f;
     public float MoveDuration
     {
         get { return _moveDuration; }
@@ -52,16 +57,12 @@ public class Spawner_InteractiveButton : MonoBehaviour
         get { return _resetDuration; }
         set { _resetDuration = value; }
     }
-    public List<string> RewardNames { get; set; }
-    public List<float> RewardWeights { get; set; }
-    public List<GameObject> Rewards { get; set; }
-    public Vector3 RewardSpawnPos { get; set; }
-    public List<int> MaxRewardCounts { get; set; }
 
     void Start()
     {
         lastInteractionTime = Time.time;
-        UpdateObjectVisibility(); // Set the object to be visible or not based on the showObject flag
+
+        UpdateObjectVisibility();
 
         if (RewardNames != null && RewardNames.Count > 0)
         {
@@ -79,11 +80,6 @@ public class Spawner_InteractiveButton : MonoBehaviour
         }
 
         rewardWeights = RewardWeights;
-
-        if (randomizeColor)
-        {
-            RandomizeColor();
-        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -120,7 +116,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
         IsMoving = true;
 
         Vector3 originalPosition = childObjectToMove.transform.position;
-        Vector3 movementDirection = -transform.forward * moveOffset.x; // Use parent's negative local Z axis
+        Vector3 movementDirection = -transform.forward * moveOffset.x; // Use parent object's negative local Z axis
         Vector3 targetPosition = originalPosition + movementDirection;
         float startTime = Time.time;
 
@@ -141,7 +137,6 @@ public class Spawner_InteractiveButton : MonoBehaviour
 
         IsMoving = false;
     }
-
 
     private GameObject ChooseReward()
     {
@@ -229,8 +224,8 @@ public class Spawner_InteractiveButton : MonoBehaviour
             // Otherwise, random spawning.
             else
             {
-                float arenaWidth = arenaBuilder.GetArenaWidth();
-                float arenaDepth = arenaBuilder.GetArenaDepth();
+                float arenaWidth = arenaBuilder.ArenaWidth;
+                float arenaDepth = arenaBuilder.ArenaDepth;
 
                 // Randomly generate a spawn position within the bounds of the arena, as defined by Arenabuilders.cs.
                 spawnPosition = new Vector3(
@@ -242,13 +237,13 @@ public class Spawner_InteractiveButton : MonoBehaviour
             // Check for randomization flags for x and z axes
             if (RewardSpawnPos.x == -1)
             {
-                spawnPosition.x = Random.Range(0, arenaBuilder.GetArenaWidth());
+                spawnPosition.x = Random.Range(0, arenaBuilder.ArenaWidth);
             }
 
             if (RewardSpawnPos.y == -1)
             {
-                spawnPosition.y = Random.Range(0, 100);
-                Debug.Log("Randomized y: " + spawnPosition.y); // Random value between 0 and 100 for the y-axis to make sure no object is too high.
+                spawnPosition.y = Random.Range(0, 50);
+                Debug.Log("Randomized y: " + spawnPosition.y);
             }
             else
             {
@@ -258,7 +253,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
 
             if (RewardSpawnPos.z == -1)
             {
-                spawnPosition.z = Random.Range(0, arenaBuilder.GetArenaDepth());
+                spawnPosition.z = Random.Range(0, arenaBuilder.ArenaDepth);
             }
 
             LastSpawnedReward = Instantiate(rewardToSpawn, spawnPosition, Quaternion.identity);
@@ -295,22 +290,5 @@ public class Spawner_InteractiveButton : MonoBehaviour
             return 0;
 
         return totalInteractionInterval / ButtonPressCount;
-    }
-
-    private void RandomizeColor()
-    {
-        Color randomColor = new Color(Random.value, Random.value, Random.value, 1.0f);
-        Renderer rend = this.gameObject.GetComponent<Renderer>();
-
-        if (rend != null)
-        {
-            rend.material.color = randomColor;
-        }
-        else
-        {
-            Debug.LogWarning(
-                "No Renderer found on the Pillar-Button to set the color. Please add a Renderer to the Pillar-Button prefab."
-            );
-        }
     }
 }

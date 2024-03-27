@@ -1,108 +1,71 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
+/// <summary>
+/// Captures screenshots from a camera and saves them to the device's storage.
+/// </summary>
 [RequireComponent(typeof(Camera))]
 public class ScreenshotCamera : MonoBehaviour
 {
-	public int FileCounter = 0;
-	public RenderTexture RT;
-	public string FilePath = "ScreenshotTest"; // ...Of the form "/folder1/folder2/.../folderN/"
-	public string FileName = "capture"; // ...Of the form "name" (NO EXTENSION)
-	private Camera ScreenshotCam;
-	public bool TEST = false;
+	[Header("Screenshot Settings")]
+	public int fileCounter = 0;
+	public RenderTexture renderTexture;
+	public string filePath = "Screenshots";
+	public string fileName = "capture";
+	private Camera screenshotCam;
+	public bool testMode = false;
 
 	private void Awake()
 	{
-		FileCounter = 0;
-		ScreenshotCam = GetComponent<Camera>();
+		screenshotCam = GetComponent<Camera>();
+		InitializeRenderTexture();
+	}
 
-		if (!TEST)
+	private void InitializeRenderTexture()
+	{
+		if (!testMode && renderTexture != null)
 		{
-			ScreenshotCam.targetTexture = new RenderTexture(
-				RT.width,
-				RT.height,
-				RT.depth,
-				RT.format,
-				RenderTextureReadWrite.sRGB
-			);
-			Debug.Log(ScreenshotCam.targetTexture);
-			Debug.Log(ScreenshotCam.targetTexture.width);
-			Debug.Log(ScreenshotCam.targetTexture.height);
+			screenshotCam.targetTexture = new RenderTexture(renderTexture.width, renderTexture.height, renderTexture.depth, renderTexture.format, RenderTextureReadWrite.sRGB);
 		}
-
-		if (!TEST)
+		else
 		{
-			Activate(false);
+			Debug.LogWarning("RenderTexture is not assigned or in Test Mode.");
 		}
 	}
 
-	// Called by self or other object to activate (or deactivate!) screenshot camera
-	// Which will cause it to capture a single screenshot (see LateUpdate())
-	public void Activate(bool toggle = true)
+	public void Activate(bool enable = true)
 	{
-		ScreenshotCam.enabled = toggle;
+		screenshotCam.enabled = enable;
 	}
 
-	/*
-	 * Activation for screenshot on key press is currently handled by PlayerControls
-	 * Uncomment this section to migrate screenshot management to self
-	private void Update()
-	{
-		if (Input.GetKeyDown(KeyCode.F9))
-		{
-			Debug.Log("ScreenshotCam activated");
-			// activate camera ready to be picked up by LateUpdate() call
-			ScreenshotCam.Activate();
-		}
-	} */
-
-	// LateUpdate is generally best for camera updates because it's post-movement-computation
 	private void LateUpdate()
 	{
-		if (ScreenshotCam.enabled && !TEST)
+		if (screenshotCam.enabled && !testMode)
 		{
-			CameraCapture();
-			Debug.Log("capturing from ScreenshotCamera . . .");
-			Activate(false);
+			CaptureScreenshot();
+			Activate(false); // Deactivate the camera after capturing to prevent multiple captures.
 		}
 	}
 
-	void CameraCapture()
+	private void CaptureScreenshot()
 	{
-		// Actually need to tell it to render because it won't have done up to this point
-		ScreenshotCam.Render();
-		RenderTexture.active = ScreenshotCam.targetTexture;
-		Debug.Log(
-			RenderTexture.active + (RenderTexture.active != null ? " SUCCESS !" : " FAILURE")
-		);
+		screenshotCam.Render();
+		RenderTexture.active = screenshotCam.targetTexture;
 
-		Texture2D image = new Texture2D(
-			ScreenshotCam.targetTexture.width,
-			ScreenshotCam.targetTexture.height,
-			TextureFormat.RGB24,
-			true
-		);
-		image.ReadPixels(
-			new Rect(0, 0, ScreenshotCam.targetTexture.width, ScreenshotCam.targetTexture.height),
-			0,
-			0
-		);
+		Texture2D image = new Texture2D(screenshotCam.targetTexture.width, screenshotCam.targetTexture.height, TextureFormat.RGB24, false);
+		image.ReadPixels(new Rect(0, 0, screenshotCam.targetTexture.width, screenshotCam.targetTexture.height), 0, 0);
+		image.Apply();
 		byte[] bytes = image.EncodeToPNG();
-		Destroy(image);
+		Destroy(image); // Free the image from memory after encoding.
 
-		string path = string.Format(
-			"{0}/{1}/{2}{3}_{4}.png",
-			Application.dataPath,
-			FilePath,
-			FileName,
-			FileCounter,
-			System.DateTime.Now.ToString("dd-MM_HH-mm-ss")
-		);
-		Debug.Log(path);
-		File.WriteAllBytes(path, bytes);
-		FileCounter++;
+		string directoryPath = Path.Combine(Application.persistentDataPath, filePath);
+		Directory.CreateDirectory(directoryPath); // Ensure the directory exists.
+
+		string formattedFileName = $"{fileName}{fileCounter}_{System.DateTime.Now:dd-MM_HH-mm-ss}.png";
+		string fullPath = Path.Combine(directoryPath, formattedFileName);
+
+		File.WriteAllBytes(fullPath, bytes);
+		Debug.Log($"Screenshot saved to {fullPath}");
+		fileCounter++;
 	}
-
 }

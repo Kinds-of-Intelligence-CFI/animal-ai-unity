@@ -6,8 +6,8 @@ canResetEpisode: true # allow the user to change the perspective. Default is tru
 canChangePerspective: true # allow the user to change the perspective. Default is true.
 arenas:
   0: !Arena
-    pass_mark: 0
-    t: 250
+    passMark: 0
+    timeLimit: 250
     items:
     - !Item
       name: Agent
@@ -19,8 +19,8 @@ arenas:
       positions:
       - !Vector3 {x: 20, y: 0, z: 25}
   1: !Arena
-    pass_mark: 0
-    t: 250
+    passMark: 0
+    timeLimit: 250
     items:
     - !Item
       name: Agent
@@ -32,8 +32,8 @@ arenas:
       positions:
       - !Vector3 {x: 20, y: 0, z: 25}
   2: !Arena
-    pass_mark: 0
-    t: 250
+    passMark: 0
+    timeLimit: 250
     items:
     - !Item
       name: Agent

@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Extends Unity GameObjects and Transforms with useful functionalities.
+/// </summary>
 namespace UnityEngineExtensions
 {
     public static class TransformExtensions
@@ -27,7 +30,7 @@ namespace UnityEngineExtensions
                     return child.gameObject;
                 }
             }
-            return new GameObject();
+            return null; // Return null if no child is found with the tag
         }
     }
 
@@ -35,65 +38,31 @@ namespace UnityEngineExtensions
     {
         public static Bounds GetBoundsWithChildren(this GameObject gameObj)
         {
-            Bounds bound = new Bounds();
-            bool boundFound = false;
-            int k = 0;
-
-            foreach (Collider coll in gameObj.GetComponents<Collider>())
+            Bounds? bounds = null;
+            Collider[] colliders = gameObj.GetComponentsInChildren<Collider>();
+            foreach (Collider coll in colliders)
             {
-                k += 1;
-                if (boundFound)
+                if (bounds.HasValue)
                 {
-                    bound.Encapsulate(coll.bounds);
+                    bounds.Value.Encapsulate(coll.bounds);
                 }
                 else
                 {
-                    bound = coll.bounds;
-                    boundFound = true;
+                    bounds = coll.bounds;
                 }
             }
 
-            foreach (Transform child in gameObj.transform)
-            {
-                k += 1;
-                if (child.childCount > 0)
-                {
-                    if (boundFound)
-                    {
-                        bound.Encapsulate(child.gameObject.GetBoundsWithChildren());
-                    }
-                    else
-                    {
-                        bound = child.gameObject.GetBoundsWithChildren();
-                        ;
-                        boundFound = true;
-                    }
-                }
-
-                foreach (Collider coll in child.GetComponents<Collider>())
-                {
-                    k += 1;
-                    if (boundFound)
-                    {
-                        bound.Encapsulate(coll.bounds);
-                    }
-                    else
-                    {
-                        bound = coll.bounds;
-                        boundFound = true;
-                    }
-                }
-            }
-
-            return bound;
+            return bounds.HasValue
+                ? bounds.Value
+                : new Bounds(gameObj.transform.position, Vector3.zero);
         }
 
-        public static void SetLayer(this GameObject gameObj, int n)
+        public static void SetLayer(this GameObject gameObj, int layer)
         {
-            gameObj.layer = n;
+            gameObj.layer = layer;
             foreach (Transform child in gameObj.transform)
             {
-                child.gameObject.layer = n;
+                child.gameObject.layer = layer;
             }
         }
     }

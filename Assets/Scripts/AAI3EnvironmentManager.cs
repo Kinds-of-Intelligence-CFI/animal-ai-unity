@@ -2,37 +2,51 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
+using ArenasParameters;
 using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using Unity.MLAgents.SideChannels;
 using Unity.MLAgents.Policies;
-using ArenasParameters;
-using UnityEngineExtensions;
-using YamlDotNet.Serialization;
 
-/// Training scene must start automatically on launch by training process
-/// Academy must reset the scene to a valid starting point for each episode
-/// Training episode must have a definite end (MaxSteps or Agent.EndEpisode)
-///
-/// Scene requires:
-///     GameObject with tag "agent" and component CameraSensorComponent
-///     GameObject with tag MainCamera which views the full scene in Unity
-///
+/// <summary>
+/// Manages the environment settings and configurations for the AAI project.
+/// </summary>
 public class AAI3EnvironmentManager : MonoBehaviour
 {
-	public GameObject arena;
-	public GameObject uiCanvas;
-	public string configFile = "";
-	public int maximumResolution = 512;
-	public int minimumResolution = 4;
-	public int defaultResolution = 84;
-	public int defaultRaysPerSide = 2;
-	public int defaultRayMaxDegrees = 60;
-	public int defaultDecisionPeriod = 3;
-	public GameObject playerControls;
+	[Header("Arena Settings")]
+	[SerializeField]
+	private GameObject arena;
 
-	[HideInInspector]
-	public bool playerMode = true;
+	[SerializeField]
+	private GameObject uiCanvas;
+
+	[SerializeField]
+	private GameObject playerControls;
+
+	[Header("Configuration File")]
+	[SerializeField]
+	private string configFile = "";
+
+	[Header("Resolution Settings")]
+	[SerializeField]
+	private const int maximumResolution = 512;
+
+	[SerializeField]
+	private const int minimumResolution = 4;
+
+	[SerializeField]
+	private const int defaultResolution = 84;
+
+	[SerializeField]
+	private const int defaultRaysPerSide = 2;
+
+	[SerializeField]
+	private const int defaultRayMaxDegrees = 60;
+
+	[SerializeField]
+	private const int defaultDecisionPeriod = 3;
+
+	public bool PlayerMode { get; private set; } = true;
 
 	private ArenasConfigurations _arenasConfigurations;
 	private TrainingArena _instantiatedArena;
@@ -40,19 +54,11 @@ public class AAI3EnvironmentManager : MonoBehaviour
 
 	public static event Action<int, int> OnArenaChanged;
 
-
+	#region Initialisation Methods
 	public void Awake()
 	{
-		// This is used to initialise the ArenaParametersSideChannel wich is a subclass of MLAgents SideChannel
-		_arenasParametersSideChannel = new ArenasParametersSideChannel();
-		_arenasConfigurations = new ArenasConfigurations();
+		InitialiseSideChannel();
 
-		_arenasParametersSideChannel.NewArenasParametersReceived +=
-			_arenasConfigurations.UpdateWithConfigurationsReceived;
-
-		SideChannelManager.RegisterSideChannel(_arenasParametersSideChannel);
-
-		// Get all commandline arguments and update starting parameters
 		Dictionary<string, int> environmentParameters = RetrieveEnvironmentParameters();
 		int paramValue;
 		bool playerMode =
@@ -77,57 +83,27 @@ public class AAI3EnvironmentManager : MonoBehaviour
 			: defaultDecisionPeriod;
 		Debug.Log("Set playermode to " + playerMode);
 
-		if (Application.isEditor) // Default settings for tests in Editor
+		if (Application.isEditor)
 		{
-			Debug.Log("Using UnityEditor default configuration");
+			Debug.Log("Using Unity Editor Default Configuration");
 			playerMode = true;
 			useCamera = true;
 			resolution = 84;
 			grayscale = false;
 			useRayCasts = true;
 			raysPerSide = 2;
-			// If in editor mode load whichever config is specified in configFile field in editor
-			if (configFile != "")
-			{
-				var configYAML = Resources.Load<TextAsset>(configFile);
-				if (configYAML != null)
-				{ // If config file
-					var YAMLReader = new YAMLDefs.YAMLReader();
-					var parsed = YAMLReader.deserializer.Deserialize<YAMLDefs.ArenaConfig>(
-						configYAML.ToString()
-					);
-					_arenasConfigurations.UpdateWithYAML(parsed);
-				}
-				else
-				{ // If directory, then load all config files in the directory.
-					var configYAMLS = Resources.LoadAll<TextAsset>(configFile);
-					var YAMLReader = new YAMLDefs.YAMLReader();
-					foreach (TextAsset config in configYAMLS)
-					{
-						var parsed = YAMLReader.deserializer.Deserialize<YAMLDefs.ArenaConfig>(
-							config.ToString()
-						);
-						_arenasConfigurations.AddAdditionalArenas(parsed);
-					}
-				}
-			}
+
+			LoadYAMLFileInEditor();
 		}
 
 		resolution = Math.Max(minimumResolution, Math.Min(maximumResolution, resolution));
-
 		TrainingArena arena = FindObjectOfType<TrainingArena>();
-		InstantiateArenas(); // Instantiate every new arena with agent and objects. Agents are currently deactivated until we set the sensors.
 
-		//Add playerControls if in play mode
+		InstantiateArenas();
+
 		playerControls.SetActive(playerMode);
 		uiCanvas.GetComponent<Canvas>().enabled = playerMode;
 
-		// Destroy the sensors that aren't being used and update the values of those that are
-		// mlagents automatically registers cameras when the agent script is initialised so have to:
-		//  1) use FindObjectsOfType as this returns deactivated objects
-		//  2) start with agent deactivated and then set active after editing sensors
-		//  3) use DestroyImmediate so that it is destroyed before agent is initialised
-		// also sets agent decision period and the correct behaviour type for play mode
 		foreach (Agent a in FindObjectsOfType<Agent>(true))
 		{
 			a.GetComponentInChildren<DecisionRequester>().DecisionPeriod = decisionPeriod;
@@ -158,41 +134,85 @@ public class AAI3EnvironmentManager : MonoBehaviour
 			}
 			if (playerMode)
 			{
-				// The following does nothing under normal execution - but when loading the built version
-				// with the play script it sets the BehaviorType back to Heursitic
-				// from default as loading this autotamically attaches Academy for training (since mlagents 0.16.0)
 				a.GetComponentInChildren<BehaviorParameters>().BehaviorType =
 					BehaviorType.HeuristicOnly;
 			}
 		}
-
-		// Enable the agent now that their sensors have been set.
-		_instantiatedArena._agent.gameObject.SetActive(true);
-
-		Debug.Log(
-			"Environment loaded with options:"
-				+ "\n  PlayerMode: "
-				+ playerMode
-				+ "\n  useCamera: "
-				+ useCamera
-				+ "\n  Resolution: "
-				+ resolution
-				+ "\n  grayscale: "
-				+ grayscale
-				+ "\n  useRayCasts: "
-				+ useRayCasts
-				+ "\n  raysPerSide: "
-				+ raysPerSide
-				+ "\n  rayMaxDegrees: "
-				+ rayMaxDegrees
+		PrintDebugInfo(
+			playerMode,
+			useCamera,
+			resolution,
+			grayscale,
+			useRayCasts,
+			raysPerSide,
+			rayMaxDegrees
 		);
+		_instantiatedArena._agent.gameObject.SetActive(true);
 	}
+
+	private void InitialiseSideChannel()
+	{
+		_arenasConfigurations = new ArenasConfigurations();
+		_arenasParametersSideChannel = new ArenasParametersSideChannel();
+		_arenasParametersSideChannel.NewArenasParametersReceived +=
+			_arenasConfigurations.UpdateWithConfigurationsReceived;
+		SideChannelManager.RegisterSideChannel(_arenasParametersSideChannel);
+	}
+
+	private void InstantiateArenas()
+	{
+		GameObject arenaInst = Instantiate(arena, new Vector3(0f, 0f, 0f), Quaternion.identity);
+		_instantiatedArena = arenaInst.GetComponent<TrainingArena>();
+		_instantiatedArena.arenaID = 0;
+	}
+
+	private void LoadYAMLFileInEditor()
+	{
+		if (string.IsNullOrWhiteSpace(configFile))
+		{
+			Debug.LogWarning("Config file path is null or empty.");
+			return;
+		}
+
+		try
+		{
+			var configYAML = Resources.Load<TextAsset>(configFile);
+			if (configYAML != null)
+			{
+				var YAMLReader = new YAMLDefs.YAMLReader();
+				var parsed = YAMLReader.deserializer.Deserialize<YAMLDefs.ArenaConfig>(
+					configYAML.text
+				);
+				if (parsed != null)
+				{
+					_arenasConfigurations.UpdateWithYAML(parsed);
+				}
+				else
+				{
+					Debug.LogWarning("Deserialized YAML content is null.");
+				}
+			}
+			else
+			{
+				Debug.LogWarning($"YAML file '{configFile}' could not be found or loaded.");
+			}
+		}
+		catch (Exception ex)
+		{
+			Debug.LogError(
+				$"An error occurred while loading or processing the YAML file: {ex.Message}"
+			);
+		}
+	}
+
+	#endregion
+
+	#region Public Getter/Setter Methods
 
 	public void TriggerArenaChangeEvent(int currentArenaIndex, int totalArenas)
 	{
 		OnArenaChanged?.Invoke(currentArenaIndex, totalArenas);
 	}
-
 
 	public int getMaxArenaID()
 	{
@@ -214,6 +234,9 @@ public class AAI3EnvironmentManager : MonoBehaviour
 		return _arenasConfigurations.configurations.Count;
 	}
 
+	#endregion
+
+	#region Environment Configuration Methods
 	private void ChangeRayCasts(
 		RayPerceptionSensorComponent3D raySensor,
 		int no_raycasts,
@@ -236,39 +259,12 @@ public class AAI3EnvironmentManager : MonoBehaviour
 		cameraSensor.Grayscale = grayscale;
 	}
 
-	///<summary>
-	/// We organize the arenas in a grid and position the main camera at the center, high enough
-	/// to see all arenas at once.
-	///</summary>
-	private void InstantiateArenas()
-	{
-		GameObject arenaInst = Instantiate(arena, new Vector3(0f, 0f, 0f), Quaternion.identity);
-		_instantiatedArena = arenaInst.GetComponent<TrainingArena>();
-		_instantiatedArena.arenaID = 0;
-	}
-
-	///<summary>
-	/// Parses command line arguments for:
-	///--playerMode: if true then can change camera angles and have control of agent
-	///--receiveConfiguration - adds the configuration file to load
-	///--numberOfArenas - the number of Arenas to spawn (always set to 1 in playerMode)
-	///--useCamera - if true adds camera obseravations
-	///--resolution - the resolution for camera observations (default 84, min4, max 512)
-	///--grayscale
-	///--useRayCasts - if true adds raycast observations
-	///--raysPerSide - sets the number of rays per side (total = 2n+1)
-	///--rayAngle - sets the maximum angle of the rays (defaults to 60)
-	///--decisionPeriod - The frequency with which the agent requests a decision.
-	///     A DecisionPeriod of 5 means that the Agent will request a decision every 5 Academy steps.
-	///     Range: (1, 20)
-	///     Default: 3
-	/// ///</summary>
 	private Dictionary<string, int> RetrieveEnvironmentParameters()
 	{
 		Dictionary<string, int> environmentParameters = new Dictionary<string, int>();
-
 		string[] args = System.Environment.GetCommandLineArgs();
 		Debug.Log("Command Line Args: " + String.Join(" ", args));
+
 		for (int i = 0; i < args.Length; i++)
 		{
 			switch (args[i])
@@ -315,6 +311,10 @@ public class AAI3EnvironmentManager : MonoBehaviour
 		return environmentParameters;
 	}
 
+	#endregion
+
+	#region Configuration Management Methods
+
 	public bool GetConfiguration(int arenaID, out ArenaConfiguration arenaConfiguration)
 	{
 		return _arenasConfigurations.configurations.TryGetValue(arenaID, out arenaConfiguration);
@@ -325,6 +325,10 @@ public class AAI3EnvironmentManager : MonoBehaviour
 		_arenasConfigurations.configurations.Add(arenaID, arenaConfiguration);
 	}
 
+	#endregion
+
+	#region Other Methods
+
 	public void OnDestroy()
 	{
 		if (Academy.IsInitialized)
@@ -333,18 +337,45 @@ public class AAI3EnvironmentManager : MonoBehaviour
 		}
 	}
 
+	private void PrintDebugInfo(
+		bool playerMode,
+		bool useCamera,
+		int resolution,
+		bool grayscale,
+		bool useRayCasts,
+		int raysPerSide,
+		int rayMaxDegrees
+	)
+	{
+		Debug.Log(
+			"Environment loaded with options:"
+				+ "\n  PlayerMode: "
+				+ playerMode
+				+ "\n  useCamera: "
+				+ useCamera
+				+ "\n  Resolution: "
+				+ resolution
+				+ "\n  grayscale: "
+				+ grayscale
+				+ "\n  useRayCasts: "
+				+ useRayCasts
+				+ "\n  raysPerSide: "
+				+ raysPerSide
+				+ "\n  rayMaxDegrees: "
+				+ rayMaxDegrees
+		);
+	}
+
+	#endregion
+
+	#region Read Stream
+
 	public static byte[] ReadFully(Stream stream)
 	{
-		byte[] buffer = new byte[32768];
-		using (MemoryStream ms = new MemoryStream())
-		{
-			while (true)
-			{
-				int read = stream.Read(buffer, 0, buffer.Length);
-				if (read <= 0)
-					return ms.ToArray();
-				ms.Write(buffer, 0, read);
-			}
-		}
+		using var ms = new MemoryStream();
+		stream.CopyTo(ms);
+		return ms.ToArray();
 	}
+
+	#endregion
 }

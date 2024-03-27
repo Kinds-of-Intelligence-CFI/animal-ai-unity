@@ -2,16 +2,17 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
+/// <summary>
+/// Facilitates the management and retrieval of Fade components associated with a collection of GameObjects, black screens.
+/// </summary>
 namespace Lights
 {
 	public class InfiniteEnumerator : IEnumerator<int>
 	{
-		private int _initialValue = 0;
-		private int _currentValue = 0;
+		private int _initialValue;
+		private int _currentValue;
 
-		public InfiniteEnumerator() { }
-
-		public InfiniteEnumerator(int initialValue)
+		public InfiniteEnumerator(int initialValue = 0)
 		{
 			_initialValue = initialValue;
 			_currentValue = 0;
@@ -28,44 +29,46 @@ namespace Lights
 			_currentValue = 0;
 		}
 
-		public int Current
-		{
-			get { return _currentValue; }
-		}
+		public int Current => _currentValue;
 
-		object IEnumerator.Current
-		{
-			get { return Current; }
-		}
+		object IEnumerator.Current => Current;
 
-		void IDisposable.Dispose() { }
+		public void Dispose() { }
 	}
 
 	public class LightsSwitch
 	{
-		private int _episodeLength = 0;
+		private int _episodeLength;
 		private bool _lightStatus = true;
-		private List<int> _blackouts = new List<int>();
+		private List<int> _blackouts;
 		private IEnumerator<int> _blackoutsEnum;
 		private int _nextFrameSwitch = -1;
 
-		public LightsSwitch()
+		public LightsSwitch(int episodeLength = 0, List<int> blackouts = null)
 		{
-			_blackoutsEnum = _blackouts.GetEnumerator();
-		}
+			if (episodeLength < 0)
+				throw new ArgumentException("Episode length cannot be negative.");
 
-		public LightsSwitch(int episodeLength, List<int> blackouts)
-		{
 			_episodeLength = episodeLength;
-			_blackouts = blackouts;
-			if (_blackouts.Count > 0 && _blackouts[0] < 0)
+			_blackouts = blackouts ?? new List<int>();
+
+			if (_blackouts.Count > 0)
 			{
-				_blackoutsEnum = new InfiniteEnumerator(-_blackouts[0]);
+				foreach (var blackout in _blackouts)
+				{
+					if (blackout < 0 || blackout >= _episodeLength)
+						throw new ArgumentException("Blackout interval is invalid.");
+				}
+
+				_blackouts.Sort();
+
+				_blackoutsEnum = _blackouts[0] < 0 ? new InfiniteEnumerator(-_blackouts[0]) : _blackouts.GetEnumerator();
 			}
 			else
 			{
 				_blackoutsEnum = _blackouts.GetEnumerator();
 			}
+
 			Reset();
 		}
 
@@ -73,28 +76,20 @@ namespace Lights
 		{
 			_lightStatus = true;
 			_blackoutsEnum.Reset();
-			if (_blackoutsEnum.MoveNext())
-			{
-				_nextFrameSwitch = _blackoutsEnum.Current;
-			}
-			else
-			{
-				_nextFrameSwitch = -1;
-			}
+			_nextFrameSwitch = _blackoutsEnum.MoveNext() ? _blackoutsEnum.Current : -1;
 		}
 
 		public bool LightStatus(int step, int agentDecisionInterval)
 		{
+			if (step < 0 || agentDecisionInterval <= 0)
+				throw new ArgumentException("Step and agent decision interval must be positive.");
+
 			if (step == _nextFrameSwitch * agentDecisionInterval)
 			{
 				_lightStatus = !_lightStatus;
-				if (_blackoutsEnum.MoveNext())
-				{
-					_nextFrameSwitch = _blackoutsEnum.Current;
-				}
+				_nextFrameSwitch = _blackoutsEnum.MoveNext() ? _blackoutsEnum.Current : -1;
 			}
 			return _lightStatus;
 		}
 	}
-
 }

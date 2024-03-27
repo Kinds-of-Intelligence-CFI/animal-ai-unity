@@ -9,39 +9,67 @@ using PrefabInterface;
 using Unity.MLAgents.Sensors;
 using YAMLDefs;
 
-/// Actions are currently discrete. 2 branches of 0,1,2, 0,1,2
+/// <summary>
+/// The TrainingAgent class is a subclass of the Agent class in the ML-Agents library.
+/// It is used to define the behaviour of the agent in the training environment.
+/// Actions are currently discrete. 2 branches of 0,1,2, 0,1,2 for forward and rotate respectively.
+/// </summary>
 public class TrainingAgent : Agent, IPrefab
 {
+	[Header("Agent Settings")]
 	public float speed = 25f;
 	public float quickStopRatio = 0.9f;
 	public float rotationSpeed = 100f;
 	public float rotationAngle = 0.25f;
 
+	[Header("Agent State / Other Variables")]
 	[HideInInspector]
 	public int numberOfGoalsCollected = 0;
+
+	[HideInInspector]
 	public ProgressBar progBar;
 	private Rigidbody _rigidBody;
 	private bool _isGrounded;
 	private ContactPoint _lastContactPoint;
-	private TrainingArena _arena;
+
+	[Header("Agent Rewards & Score")]
 	private float _rewardPerStep;
 	private float _previousScore = 0;
 	private float _currentScore = 0;
 
-	[HideInInspector]
+	[Header("Agent Health")]
 	public float health = 100f;
 	private float _maxHealth = 100f;
 
-	[HideInInspector]
+	[Header("Agent Freeze & Countdown")]
 	public float timeLimit = 0f;
 	private float _nextUpdateHealth = 0f;
-	private bool _nextUpdateEpisodeEnd = false;
 	private float _freezeDelay = 0f;
 	private bool _isFrozen = false;
 
+	private bool _nextUpdateEpisodeEnd = false;
+
+	[Header("Agent Notification")]
 	public bool showNotification = false;
+	private TrainingArena _arena;
 	private bool _isCountdownActive = false;
 
+	public override void Initialize()
+	{
+		_arena = GetComponentInParent<TrainingArena>();
+		_rigidBody = GetComponent<Rigidbody>();
+		_rewardPerStep = timeLimit > 0 ? -1f / timeLimit : 0;
+		progBar = GameObject.Find("UI ProgressBar").GetComponent<ProgressBar>();
+		progBar.AssignAgent(this);
+		health = _maxHealth;
+	}
+
+	public float GetPreviousScore()
+	{
+		return _previousScore;
+	}
+
+	#region Agent Freeze Methods
 	public float GetFreezeDelay()
 	{
 		return _freezeDelay;
@@ -55,7 +83,7 @@ public class TrainingAgent : Agent, IPrefab
 			Debug.Log(
 				"Starting coroutine unfreezeCountdown() with wait seconds == " + GetFreezeDelay()
 			);
-			StartCoroutine(unfreezeCountdown()); // Start a new countdown if and only if the new delay is not zero.
+			StartCoroutine(unfreezeCountdown());
 		}
 	}
 
@@ -74,137 +102,51 @@ public class TrainingAgent : Agent, IPrefab
 		}
 	}
 
-	public override void Initialize()
+	private IEnumerator unfreezeCountdown()
 	{
-		_arena = GetComponentInParent<TrainingArena>();
-		_rigidBody = GetComponent<Rigidbody>();
-		_rewardPerStep = timeLimit > 0 ? -1f / timeLimit : 0; // No step reward for infinite episode by default
-		progBar = GameObject.Find("UI ProgressBar").GetComponent<ProgressBar>();
-		progBar.AssignAgent(this);
-		health = _maxHealth;
+		_isCountdownActive = true;
+		yield return new WaitForSeconds(GetFreezeDelay());
+
+		Debug.Log("unfreezing!");
+		SetFreezeDelay(0f);
+		_isCountdownActive = false;
 	}
 
-    // Agent additionally receives local observations of length 7
-    // [health, velocity x, velocity y, velocity z, position x, position y, position z]
-    public override void CollectObservations(VectorSensor sensor)
-    {
-        sensor.AddObservation(health);
-        Vector3 localVel = transform.InverseTransformDirection(_rigidBody.velocity);
-        sensor.AddObservation(localVel);
-        Vector3 localPos = transform.position;
-        sensor.AddObservation(localPos);
-        Debug.Log("Health:" + health + "\nVelocity: " + localVel + "\nPosition:" + localPos);
-    }
+	#endregion
+
+	#region Agent Core Methods
+	public override void CollectObservations(VectorSensor sensor)
+	{
+		sensor.AddObservation(health);
+		Vector3 localVel = transform.InverseTransformDirection(_rigidBody.velocity);
+		sensor.AddObservation(localVel);
+		Vector3 localPos = transform.position;
+		sensor.AddObservation(localPos);
+		Debug.Log("Health:" + health + "\nVelocity: " + localVel + "\nPosition:" + localPos);
+	}
 
 	public override void OnActionReceived(ActionBuffers action)
 	{
-		// Agent action
 		int actionForward = Mathf.FloorToInt(action.DiscreteActions[0]);
 		int actionRotate = Mathf.FloorToInt(action.DiscreteActions[1]);
 		if (!IsFrozen())
 		{
 			MoveAgent(actionForward, actionRotate);
 		}
-		// Agent health and reward update
-		UpdateHealth(_rewardPerStep); // Updates health and adds the reward in mlagents
-	}
 
-	public void UpdateHealthNextStep(float updateAmount, bool andEndEpisode = false)
-	{
-		/// <summary>
-		/// ML-Agents doesn't guarantee behaviour if an episode ends outside of OnActionReceived
-		/// Therefore we queue any health updates to happen on the next action step.
-		/// </summary>
-		_nextUpdateHealth += updateAmount;
-		if (andEndEpisode)
-		{
-			_nextUpdateEpisodeEnd = true;
-		}
-	}
-
-	public void UpdateHealth(float updateAmount, bool andEndEpisode = false)
-	{
-		Debug.Log($"Value of showNotification: {showNotification}");
-		if (NotificationManager.Instance == null && showNotification == true)
-		{
-			Debug.LogError("NotificationManager instance is not set.");
-			return;
-		}
-		/// <summary>
-		/// Update the health of the agent and reset any queued updates
-		/// If health reaches 0 or the episode is queued to end then call EndEpisode().
-		/// </summary>
-		if (!IsFrozen())
-		{
-			health += 100 * updateAmount; // Health = 100*reward
-			health += 100 * _nextUpdateHealth;
-			_nextUpdateHealth = 0;
-			AddReward(updateAmount);
-		}
-		_currentScore = GetCumulativeReward();
-		if (health > _maxHealth)
-		{
-			health = _maxHealth;
-		}
-		else if (health <= 0)
-		{
-			health = 0;
-			if (showNotification)
-			{
-				NotificationManager.Instance.ShowFailureNotification();
-			}
-			StartCoroutine(EndEpisodeAfterDelay());
-			return;
-		}
-		Debug.Log("Current Pass Mark: " + Arena.CurrentPassMark);
-		if (andEndEpisode || _nextUpdateEpisodeEnd)
-		{
-			float cumulativeReward = this.GetCumulativeReward();
-
-			if (cumulativeReward >= Arena.CurrentPassMark)
-			{
-				if (showNotification)
-				{
-					NotificationManager.Instance.ShowSuccessNotification();
-				}
-			}
-			else
-			{
-				if (showNotification)
-				{
-					NotificationManager.Instance.ShowFailureNotification();
-				}
-			}
-			_nextUpdateEpisodeEnd = false;
-			StartCoroutine(EndEpisodeAfterDelay());
-		}
-	}
-
-	IEnumerator EndEpisodeAfterDelay()
-	{
-		if (!showNotification)
-		{
-			EndEpisode();
-			yield break;
-		}
-
-		yield return new WaitForSeconds(2.5f);
-		NotificationManager.Instance.HideNotification();
-		EndEpisode();
+		UpdateHealth(_rewardPerStep);
 	}
 
 	private void MoveAgent(int actionForward, int actionRotate)
 	{
-		// Check if the agent should be frozen during notification
 		if (IsFrozen())
 		{
 			// If the agent is frozen, stop all movement and rotation
 			_rigidBody.velocity = Vector3.zero;
 			_rigidBody.angularVelocity = Vector3.zero;
-			return; // No further movement logic should be executed
+			return;
 		}
 
-		// Existing movement logic
 		Vector3 directionToGo = Vector3.zero;
 		Vector3 rotateDirection = Vector3.zero;
 		Vector3 quickStop = Vector3.zero;
@@ -236,12 +178,12 @@ public class TrainingAgent : Agent, IPrefab
 				break;
 		}
 
-		// Apply the rotation
 		transform.Rotate(rotateDirection, Time.fixedDeltaTime * rotationSpeed);
-		// Apply the force for movement
-		_rigidBody.AddForce(directionToGo.normalized * speed * 100f * Time.fixedDeltaTime, ForceMode.Acceleration);
+		_rigidBody.AddForce(
+			directionToGo.normalized * speed * 100f * Time.fixedDeltaTime,
+			ForceMode.Acceleration
+		);
 	}
-
 
 	public override void Heuristic(in ActionBuffers actionsOut)
 	{
@@ -266,21 +208,118 @@ public class TrainingAgent : Agent, IPrefab
 		}
 	}
 
+	#endregion
+
+	#region Agent Health Methods
+	public void UpdateHealthNextStep(float updateAmount, bool andEndEpisode = false)
+	{
+		/// <summary>
+		/// ML-Agents doesn't guarantee behaviour if an episode ends outside of OnActionReceived
+		/// Therefore we queue any health updates to happen on the next action step.
+		/// </summary>
+		_nextUpdateHealth += updateAmount;
+		if (andEndEpisode)
+		{
+			_nextUpdateEpisodeEnd = true;
+		}
+	}
+
+	public void UpdateHealth(float updateAmount, bool andEndEpisode = false)
+	{
+		if (NotificationManager.Instance == null && showNotification == true)
+		{
+			Debug.LogError("NotificationManager instance is not set.");
+			return;
+		}
+		/// <summary>
+		/// Update the health of the agent and reset any queued updates
+		/// If health reaches 0 or the episode is queued to end then call EndEpisode().
+		/// </summary>
+		if (!IsFrozen())
+		{
+			health += 100 * updateAmount;
+			health += 100 * _nextUpdateHealth;
+			_nextUpdateHealth = 0;
+			AddReward(updateAmount);
+		}
+		_currentScore = GetCumulativeReward();
+		if (health > _maxHealth)
+		{
+			health = _maxHealth;
+		}
+		else if (health <= 0)
+		{
+			health = 0;
+			if (showNotification)
+			{
+				NotificationManager.Instance.ShowFailureNotification();
+			}
+			StartCoroutine(EndEpisodeAfterDelay());
+			return;
+		}
+		if (andEndEpisode || _nextUpdateEpisodeEnd)
+		{
+			float cumulativeReward = this.GetCumulativeReward();
+
+			if (cumulativeReward >= Arena.CurrentPassMark)
+			{
+				if (showNotification)
+				{
+					NotificationManager.Instance.ShowSuccessNotification();
+				}
+			}
+			else
+			{
+				if (showNotification)
+				{
+					NotificationManager.Instance.ShowFailureNotification();
+				}
+			}
+			_nextUpdateEpisodeEnd = false;
+			StartCoroutine(EndEpisodeAfterDelay());
+		}
+	}
+
+	public void AddExtraReward(float rewardFactor)
+	{
+		UpdateHealth(Math.Min(rewardFactor * _rewardPerStep, -0.001f));
+	}
+
+	#endregion
+
+	#region Agent Episode Methods
+	IEnumerator EndEpisodeAfterDelay()
+	{
+		if (!showNotification)
+		{
+			EndEpisode();
+			yield break;
+		}
+
+		yield return new WaitForSeconds(2.5f);
+		NotificationManager.Instance.HideNotification();
+		EndEpisode();
+	}
+
 	public override void OnEpisodeBegin()
 	{
+		Debug.Log($"Value of showNotification: {showNotification}");
 		Debug.Log("Episode Begin");
-		StopCoroutine("unfreezeCountdown"); // When a new episode starts, any existing unfreeze countdown is cancelled.
+		StopCoroutine("unfreezeCountdown");
+		Debug.Log("Current Pass Mark: " + Arena.CurrentPassMark);
 		_previousScore = _currentScore;
 		numberOfGoalsCollected = 0;
 		_arena.ResetArena();
-		_rewardPerStep = timeLimit > 0 ? -1f / timeLimit : 0; // No step reward for infinite episode by default
+		_rewardPerStep = timeLimit > 0 ? -1f / timeLimit : 0;
 		_isGrounded = false;
 		health = _maxHealth;
 
-		// Initiate the freeze for the agent. Fix for erratic behaviour.
 		SetFreezeDelay(GetFreezeDelay());
 	}
 
+	#endregion
+
+	#region Collision Detection Methods
 	void OnCollisionEnter(Collision collision)
 	{
 		foreach (ContactPoint contact in collision.contacts)
@@ -313,25 +352,9 @@ public class TrainingAgent : Agent, IPrefab
 		}
 	}
 
-	public void AddExtraReward(float rewardFactor)
-	{
-		UpdateHealth(Math.Min(rewardFactor * _rewardPerStep, -0.001f));
-	}
+	#endregion
 
-	public float GetPreviousScore()
-	{
-		return _previousScore;
-	}
-
-	private IEnumerator unfreezeCountdown()
-	{
-		_isCountdownActive = true;
-		yield return new WaitForSeconds(GetFreezeDelay());
-
-		Debug.Log("unfreezing!");
-		SetFreezeDelay(0f);
-		_isCountdownActive = false;
-	}
+	#region Prefab Interface Methods
 
 	//******************************
 	//PREFAB INTERFACE FOR THE AGENT
@@ -373,4 +396,5 @@ public class TrainingAgent : Agent, IPrefab
 		return new Vector3(0, rotationY < 0 ? Random.Range(0f, 360f) : rotationY, 0);
 	}
 
+	#endregion
 }

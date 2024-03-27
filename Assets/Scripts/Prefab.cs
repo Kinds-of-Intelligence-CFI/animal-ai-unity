@@ -12,12 +12,15 @@ using System.Reflection;
 /// </summary>
 public class Prefab : MonoBehaviour, IPrefab
 {
+    [Header("Prefab Parameters")]
     public Vector2 rotationRange;
     public Vector3 sizeMin;
     public Vector3 sizeMax;
     public bool canRandomizeColor = true;
     public Vector3 ratioSize;
-    public float sizeAdjustement = 0.999f;
+    public float sizeAdjustment = 0.999f;
+
+    [Header("Texture Parameters")]
     // To scale textures on dynamically-sized objects:
     public bool textureUVOverride = false;
     public bool typicalOrigin = true;
@@ -49,7 +52,7 @@ public class Prefab : MonoBehaviour, IPrefab
 
     public virtual void SetSize(Vector3 size)
     {
-        Vector3 clippedSize = Vector3.Max(sizeMin, Vector3.Min(sizeMax, size)) * sizeAdjustement;
+        Vector3 clippedSize = Vector3.Max(sizeMin, Vector3.Min(sizeMax, size)) * sizeAdjustment;
         float sizeX = size.x < 0 ? Random.Range(sizeMin[0], sizeMax[0]) : clippedSize.x;
         float sizeY = size.y < 0 ? Random.Range(sizeMin[1], sizeMax[1]) : clippedSize.y;
         float sizeZ = size.z < 0 ? Random.Range(sizeMin[2], sizeMax[2]) : clippedSize.z;

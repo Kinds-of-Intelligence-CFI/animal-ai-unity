@@ -2,22 +2,32 @@ using Unity.MLAgents.SideChannels;
 using System;
 using ArenasParameters;
 
+/// <summary>
+/// This class is used to communicate the environment configurations to the Unity.
+/// </summary>
 public class ArenasParametersSideChannel : SideChannel
 {
+	/// <summary>
+	/// Initializes a new instance of the ArenasParametersSideChannel class.
+	/// </summary>
 	public ArenasParametersSideChannel()
 	{
 		ChannelId = new Guid("9c36c837-cad5-498a-b675-bc19c9370072");
 	}
 
+	/// <summary>
+	/// This method is called when a message is received from the Unity.
+	/// </summary>
 	protected override void OnMessageReceived(IncomingMessage msg)
 	{
-		// When a new message is received we trigger an event to signal the environment
-		// configurations to check if they need to update
 		ArenasParametersEventArgs args = new ArenasParametersEventArgs();
 		args.arenas_yaml = msg.GetRawBytes();
 		OnArenasParametersReceived(args);
 	}
 
+	/// <summary>
+	/// This method is called when the arenas parameters are received.
+	/// </summary>
 	protected virtual void OnArenasParametersReceived(
 		ArenasParametersEventArgs arenasParametersEvent
 	)
@@ -29,6 +39,9 @@ public class ArenasParametersSideChannel : SideChannel
 		}
 	}
 
+	/// <summary>
+	/// This event is triggered when new arenas parameters are received.
+	/// </summary>
 	public EventHandler<ArenasParametersEventArgs> NewArenasParametersReceived;
-	
+
 }

@@ -1,9 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
+/// <summary>
+/// This script is used to prevent the camera from colliding with objects in the scene.
+/// </summary>
 public class CameraCollision : MonoBehaviour
 {
+	[Header("Camera Collision Settings")]
 	public float minDistance = 1.0f;
 	public float maxDistance = 4.0f;
 	public float smooth = 10.0f;
@@ -16,8 +18,6 @@ public class CameraCollision : MonoBehaviour
 		dollyDir = transform.localPosition.normalized;
 		distance = transform.localPosition.magnitude;
 	}
-
-	void Start() { }
 
 	void Update()
 	{
@@ -39,5 +39,5 @@ public class CameraCollision : MonoBehaviour
 			Time.deltaTime * smooth
 		);
 	}
-	
+
 }

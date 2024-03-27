@@ -8,74 +8,60 @@ using Holders;
 using PrefabInterface;
 using ArenasParameters;
 
+/// <summary>
+/// An ArenaBuilder linked to an arena instantiates a list of Spawnable items within the arena each reset.
+/// It checks for pre-existing objects at the intended spawn positions.
+/// Unoccupied positions allow the object to be placed; otherwise, it's destroyed.
+/// User-defined or randomized positions, rotations, and scales are supported
+/// ... with repeated spawn attempts made for random placements until free space is found or the builder moves to the next item.
+/// </summary>
 namespace ArenaBuilders
 {
-	/// <summary>
-	/// An ArenaBuilder is attached to each instantiated arena. Each time the arena is reset the
-	/// Builder takes a list of items to spawn in the form of a list of Spawnable items, and
-	/// attempts to instantiate these in the arena. For each GameObject instantiated at a specific
-	/// position, the builder will check if any object is already present at this position. If not
-	/// the object is then moved to the desired position, if the position is occupied the object is
-	/// destroyed and therefore ignored. Positions, rotations and scales can be passed by the
-	/// user or randomized. In case they are randomized the builder will attempt to spawn items
-	/// a certain number of times before giving up and moving on to the next object if no free space was found.
-	/// </summary>
 	public class ArenaBuilder
 	{
-		// Range of values X and Y can take (basically the size of the arena)
+		#region Properties and Fields
+
+		// Arena size
 		private float _rangeX;
 		private float _rangeZ;
 
-		public float GetArenaWidth()
-		{
-			return _rangeX;
-		}
+		// Getters for the arena size (used for spawning objects within the arena bounds in other scripts)
+		public float ArenaWidth => _rangeX;
+		public float ArenaDepth => _rangeZ;
 
-		public float GetArenaDepth()
-		{
-			return _rangeZ;
-		}
-
-		// The arena we're in
+		// Arena to which the builder is attached
 		private Transform _arena;
 
-		// Empty gameobject that will hold all instantiated GameObjects
+		// Holder for all spawned objects
 		private GameObject _spawnedObjectsHolder;
 
-		// Maximum number of attempts to spawn the objects and the agent
+		// Max number of attempts to spawn an object or agent
 		private int _maxSpawnAttemptsForPrefabs;
 		private int _maxSpawnAttemptsForAgent;
 
-		// Agent and its components
+		// Agent components
 		private GameObject _agent;
 		private Collider _agentCollider;
 		private Rigidbody _agentRigidbody;
 
-		// List of good goals that have been instantiated, used to set numberOfGoals in these goals
+		// Total number of good goals instantiated
 		private List<Goal> _goodGoalsMultiSpawned;
 
+		// Total number of objects spawned (for UI)
 		private int _totalObjectsSpawned;
-
-
-		public void AddToGoodGoalsMultiSpawned(Goal ggm)
-		{
-			_goodGoalsMultiSpawned.Add(ggm);
-			updateGoodGoalsMulti();
-		}
-
-		public void AddToGoodGoalsMultiSpawned(GameObject ggm)
-		{
-			_goodGoalsMultiSpawned.Add(ggm.GetComponent<Goal>());
-			updateGoodGoalsMulti();
-		}
-
-		// Buffer to allow space around instantiated objects
-		// public Vector3 safeSpawnBuffer = Vector3.zero;
 
 		// The list of Spawnables the ArenaBuilder will attempt to spawn at each reset
 		[HideInInspector]
 		public List<Spawnable> Spawnables { get; set; }
 
+		#endregion
+
+		#region Arena Constructor
+
+		/// <summary>
+		/// Constructor for the ArenaBuilder class.
+		/// It initializes the arena, the spawned objects holder, and the maximum spawn attempts for prefabs and the agent.
+		/// </summary>
 		public ArenaBuilder(
 			GameObject arenaGameObject,
 			GameObject spawnedObjectsHolder,
@@ -100,6 +86,13 @@ namespace ArenaBuilders
 			_goodGoalsMultiSpawned = new List<Goal>();
 		}
 
+		#endregion
+
+		#region Arena Builder
+
+		/// <summary>
+		/// Builds the arena by instantiating the Spawnable objects within the arena.
+		/// </summary>
 		public void Build()
 		{
 			_totalObjectsSpawned = 0;
@@ -128,12 +121,13 @@ namespace ArenaBuilders
 			updateGoodGoalsMulti();
 		}
 
-		public int GetTotalObjectsSpawned()
-		{
-			return _totalObjectsSpawned;
-		}
+		#endregion
 
+		#region Instantiate and Spawn Objects Methods
 
+		/// <summary>
+		/// Instantiates the Spawnable objects within the arena.
+		/// </summary>
 		private void InstantiateSpawnables(GameObject spawnedObjectsHolder)
 		{
 			Debug.Log("Spawnables has " + Spawnables.Capacity + " entries");
@@ -141,11 +135,8 @@ namespace ArenaBuilders
 				.Where(x => x.gameObject != null && x.gameObject.CompareTag("agent"))
 				.ToList();
 
-
-
-			// If we are provided with an agent's caracteristics we want to instantiate it first and
-			// then ignore any item spawning at the same spot. Otherwise we spawn it last to allow
-			// more objects to spawn
+			// Instantiate the agent first based on its characteristics, then prevent item spawning at the same location;
+			// ... otherwise, spawn it last to enable more object spawns.
 			if (agentSpawnablesFromUser.Any())
 			{
 				_agentCollider.enabled = false;
@@ -162,6 +153,9 @@ namespace ArenaBuilders
 			}
 		}
 
+		/// <summary>
+		/// Spawns the objects within the arena.
+		/// </summary>
 		private void SpawnObjects(GameObject spawnedObjectsHolder)
 		{
 			foreach (Spawnable spawnable in Spawnables)
@@ -176,16 +170,21 @@ namespace ArenaBuilders
 			}
 		}
 
+		/// <summary>
+		/// InstantiateSpawnable spawns game objects in a game environment.
+		/// It takes two parameters: a Spawnable object and a GameObject that serves as a holder for the spawned objects.
+		/// The method instantiates the game object, sets its layer, position, rotation, and scale, and then spawns the game object.
+		/// The method also sets the color of the game object and assigns a symbol name to the game object's SignBoard component.
+		/// </summary>
 		private void InstantiateSpawnable(Spawnable spawnable, GameObject spawnedObjectsHolder)
 		{
+			// Required parameters
 			List<Vector3> positions = spawnable.positions;
 			List<float> rotations = spawnable.rotations;
 			List<Vector3> sizes = spawnable.sizes;
 			List<Vector3> colors = spawnable.colors;
 
-			// ======== EXTRA/OPTIONAL PARAMETERS ========
-			// use for SignPosterboard symbols, Decay/SizeChange rates, Dispenser settings, etc.
-
+			// Optional parameters
 			List<string> symbolNames = spawnable.symbolNames;
 			List<float> delays = spawnable.delays;
 			List<float> initialValues = spawnable.initialValues;
@@ -200,6 +199,7 @@ namespace ArenaBuilders
 			List<float> moveDurations = spawnable.moveDurations;
 			List<float> resetDurations = spawnable.resetDurations;
 
+			// Get the number of elements in the lists
 			int numberOfPositions = positions.Count;
 			int numberOfRotations = rotations.Count;
 			int numberOfSizes = sizes.Count;
@@ -218,6 +218,7 @@ namespace ArenaBuilders
 			int numberOfMoveDurations = optionalCount(moveDurations);
 			int numberOfResetDurations = optionalCount(resetDurations);
 
+			// Get the number of elements in the lists
 			int[] ns = new int[]
 			{
 				numberOfPositions,
@@ -238,8 +239,10 @@ namespace ArenaBuilders
 				numberOfMoveDurations,
 				numberOfResetDurations
 			};
+			// Get the maximum number of elements in the lists
 			int n = ns.Max();
 
+			// Spawn the objects
 			int k = 0;
 			do
 			{
@@ -254,7 +257,7 @@ namespace ArenaBuilders
 				Vector3 size = k < ns[2] ? sizes[k] : -Vector3.one;
 				Vector3 color = k < ns[3] ? colors[k] : -Vector3.one;
 
-				// For optional parameters, use default values if not provided.
+				// For optional parameters, use default values if not provided
 				string symbolName = k < ns[4] ? symbolNames[k] : null;
 				float delay = k < ns[5] ? delays[k] : 0;
 				bool tree = (spawnable.name.Contains("Tree"));
@@ -267,7 +270,7 @@ namespace ArenaBuilders
 					k < ns[7] ? finalValues[k] : (tree ? 1f : (ripen_or_grow ? 2.5f : 0.5f));
 				float changeRate = k < ns[8] ? changeRates[k] : -0.005f;
 				int spawnCount = k < ns[9] ? spawnCounts[k] : -1;
-				Vector3 spawnColor = k < ns[10] ? spawnColors[k] : -Vector3.one; // Special case to leave as default (HDR) spawn color
+				Vector3 spawnColor = k < ns[10] ? spawnColors[k] : -Vector3.one;
 				float timeBetweenSpawns = k < ns[11] ? timesBetweenSpawns[k] : (tree ? 4f : 1.5f);
 				float ripenTime = k < ns[12] ? ripenTimes[k] : 6f;
 				float doorDelay = k < ns[13] ? doorDelays[k] : 10f;
@@ -277,9 +280,7 @@ namespace ArenaBuilders
 				float spawnProbability = spawnable.SpawnProbability;
 				Vector3 rewardSpawnPos = spawnable.rewardSpawnPos;
 
-				// Group together in dictionary so can pass as one argument to Spawner...
-				// (means we won't have to keep updating the arguments of Spawner function...
-				// each time we add to optional parameters)
+				// Assign the optional parameters to a dictionary
 				Dictionary<string, object> optionals = new Dictionary<string, object>()
 				{
 					{ nameof(symbolName), symbolName },
@@ -302,6 +303,7 @@ namespace ArenaBuilders
 					{ "maxRewardCounts", spawnable.maxRewardCounts }
 				};
 
+				// Determines a suitable position and rotation for the object to spawn
 				PositionRotation spawnPosRot = SamplePositionRotation(
 					gameObjectInstance,
 					_maxSpawnAttemptsForPrefabs,
@@ -316,69 +318,10 @@ namespace ArenaBuilders
 			} while (k < n);
 		}
 
-		// Count of parameter entries in a list...
-		// used for optional YAML parameters where list could be null
-		private int optionalCount<T>(List<T> paramList)
-		{
-			return (paramList != null) ? paramList.Count : 0;
-		}
-
-		private void SpawnAgent(Spawnable agentSpawnableFromUser)
-		{
-			PositionRotation agentToSpawnPosRot;
-			Vector3 agentSize = _agent.transform.localScale;
-			Vector3 position;
-			float rotation;
-			string skin;
-			float freezeDelay;
-
-			position =
-				(agentSpawnableFromUser == null || !agentSpawnableFromUser.positions.Any())
-					? -Vector3.one
-					: agentSpawnableFromUser.positions[0];
-			rotation =
-				(agentSpawnableFromUser == null || !agentSpawnableFromUser.rotations.Any())
-					? -1
-					: agentSpawnableFromUser.rotations[0];
-			// Extra check for skins because optional param is not always initialised as a List<string> in Spawnable class
-			if (agentSpawnableFromUser != null && agentSpawnableFromUser.skins == null)
-			{
-				agentSpawnableFromUser.skins = new List<string>();
-			}
-			skin =
-				(agentSpawnableFromUser == null || !agentSpawnableFromUser.skins.Any())
-					? "random"
-					: agentSpawnableFromUser.skins[0];
-
-			// Extra check for freeze delay for same reason as above w/skins
-			if (agentSpawnableFromUser != null && agentSpawnableFromUser.frozenAgentDelays == null)
-			{
-				agentSpawnableFromUser.frozenAgentDelays = new List<float>();
-			}
-			freezeDelay =
-				(agentSpawnableFromUser == null || !agentSpawnableFromUser.frozenAgentDelays.Any())
-					? 0
-					: agentSpawnableFromUser.frozenAgentDelays[0];
-
-			agentToSpawnPosRot = SamplePositionRotation(
-				_agent,
-				_maxSpawnAttemptsForAgent,
-				position,
-				rotation,
-				agentSize
-			);
-
-			_agentRigidbody.angularVelocity = Vector3.zero;
-			_agentRigidbody.velocity = Vector3.zero;
-			_agent.transform.localPosition = agentToSpawnPosRot.Position;
-			_agent.transform.rotation = Quaternion.Euler(agentToSpawnPosRot.Rotation);
-
-			AnimalSkinManager ASM = _agent.GetComponentInChildren<AnimalSkinManager>();
-			Debug.Log("Setting AnimalSkin with ASM: " + ASM.ToString() + " and skin: " + skin);
-			ASM.SetAnimalSkin(skin);
-			_agent.GetComponent<TrainingAgent>().SetFreezeDelay(freezeDelay);
-		}
-
+		/// <summary>
+		/// The SpawnGameObject function instantiates a game object with specified properties, sets its position, rotation, and color, assigns it a symbol name if provided,
+		/// ...adjusts properties of its Spawner_InteractiveButton and GoalSpawner components based on optional parameters, and assigns timing parameters to relevant components.
+		/// </summary>
 		private void SpawnGameObject(
 			Spawnable spawnable,
 			GameObject gameObjectInstance,
@@ -561,33 +504,81 @@ namespace ArenaBuilders
 			}
 		}
 
-		// Calls SetSymbol on SignPosterboard if such a component can be found - overrides colour setting also
-		private void AssignSymbolName(GameObject gameObjectInstance, string sName, Vector3 color)
+		#endregion
+
+		#region Spawn Agent
+
+		/// <summary>
+		/// The SpawnAgent function spawns an agent in a game environment.
+		/// It takes a Spawnable object as a parameter and spawns the agent at a specified position and rotation.
+		/// The function also sets the agent's skin and freeze delay.
+		/// </summary>
+		private void SpawnAgent(Spawnable agentSpawnableFromUser)
 		{
-			SignPosterboard SP = gameObjectInstance.GetComponent<SignPosterboard>();
-			if (SP != null)
+			PositionRotation agentToSpawnPosRot;
+			Vector3 agentSize = _agent.transform.localScale;
+			Vector3 position;
+			float rotation;
+			string skin;
+			float freezeDelay;
+
+			position =
+				(agentSpawnableFromUser == null || !agentSpawnableFromUser.positions.Any())
+					? -Vector3.one
+					: agentSpawnableFromUser.positions[0];
+			rotation =
+				(agentSpawnableFromUser == null || !agentSpawnableFromUser.rotations.Any())
+					? -1
+					: agentSpawnableFromUser.rotations[0];
+
+			// Extra check for skins because optional param is not always initialised as a List<string> in Spawnable class
+			if (agentSpawnableFromUser != null && agentSpawnableFromUser.skins == null)
 			{
-				if (color != new Vector3(-1, -1, -1))
-				{
-					SP.SetColourOverride(color, true);
-				}
-				// Assertion-cast that symbolName is string (stored as object)
-				SP.SetSymbol(sName, true); // UpdatePosterboard() for color/symbol texture is called here!
+				agentSpawnableFromUser.skins = new List<string>();
 			}
+			skin =
+				(agentSpawnableFromUser == null || !agentSpawnableFromUser.skins.Any())
+					? "random"
+					: agentSpawnableFromUser.skins[0];
+
+			// Extra check for freeze delay for same reason as above w/skins
+			if (agentSpawnableFromUser != null && agentSpawnableFromUser.frozenAgentDelays == null)
+			{
+				agentSpawnableFromUser.frozenAgentDelays = new List<float>();
+			}
+			freezeDelay =
+				(agentSpawnableFromUser == null || !agentSpawnableFromUser.frozenAgentDelays.Any())
+					? 0
+					: agentSpawnableFromUser.frozenAgentDelays[0];
+
+			agentToSpawnPosRot = SamplePositionRotation(
+				_agent,
+				_maxSpawnAttemptsForAgent,
+				position,
+				rotation,
+				agentSize
+			);
+
+			_agentRigidbody.angularVelocity = Vector3.zero;
+			_agentRigidbody.velocity = Vector3.zero;
+			_agent.transform.localPosition = agentToSpawnPosRot.Position;
+			_agent.transform.rotation = Quaternion.Euler(agentToSpawnPosRot.Rotation);
+
+			AnimalSkinManager ASM = _agent.GetComponentInChildren<AnimalSkinManager>();
+			Debug.Log("Setting AnimalSkin with ASM: " + ASM.ToString() + " and skin: " + skin);
+			ASM.SetAnimalSkin(skin);
+			_agent.GetComponent<TrainingAgent>().SetFreezeDelay(freezeDelay);
 		}
 
-		// Calls correct Setter method according to arg paramName and corresponding method-name
-		private void AssignTimingNumber<T>(string paramName, float value, T component)
-		{
-			paramName = paramName[0].ToString().ToUpper() + paramName.Substring(1); // "delay" -> "Delay" and so on...
-			MethodInfo SetMethod = component.GetType().GetMethod("Set" + (paramName));
+		#endregion
 
-			if (SetMethod != null)
-			{
-				SetMethod.Invoke(component, new object[] { value });
-			}
-		}
+		#region Check Position/Rotation and Object Placement Methods
 
+		/// <summary>
+		/// The SamplePositionRotation function samples a position and rotation for a game object to spawn.
+		/// It takes five parameters: a game object instance, the maximum number of spawn attempts, a position, a rotation, and a size.
+		/// The function returns a PositionRotation object that contains the position and rotation of the game object to spawn.
+		/// </summary>
 		private PositionRotation SamplePositionRotation(
 			GameObject gameObjectInstance,
 			int maxSpawnAttempt,
@@ -642,6 +633,11 @@ namespace ArenaBuilders
 			return null;
 		}
 
+		/// <summary>
+		/// The IsSpotFree function checks if a spot is free for a game object to spawn.
+		/// It takes three parameters: an array of colliders, a boolean value indicating if the object is an agent, and a boolean value indicating if the object is a zone.
+		/// The function returns true if the spot is free; otherwise, it returns false.
+		/// </summary>
 		private bool IsSpotFree(Collider[] colliders, bool isAgent, bool isZone = false)
 		{
 			if (isZone)
@@ -657,6 +653,11 @@ namespace ArenaBuilders
 					|| (colliders.All(collider => collider.isTrigger) && !isAgent);
 		}
 
+		/// <summary>
+		/// The ObjectOutsideOfBounds function checks if a game object is outside of the arena bounds (walls).
+		/// It takes two parameters: a position and a bounding box.
+		/// The function returns true if the object is outside of the bounds; otherwise, it returns false.
+		/// </summary>
 		private bool ObjectOutsideOfBounds(Vector3 position, Vector3 boundingBox)
 		{
 			return position.x > boundingBox.x
@@ -665,6 +666,13 @@ namespace ArenaBuilders
 				&& position.z < _rangeZ - boundingBox.z;
 		}
 
+		#endregion
+
+		#region Goal Spawner-Logic Methods
+
+		/// <summary>
+		/// Updates the number of goals in the goodGoalsMultiSpawned list.
+		/// </summary>
 		private void updateGoodGoalsMulti()
 		{
 			int numberOfGoals = _goodGoalsMultiSpawned.Count;
@@ -673,5 +681,76 @@ namespace ArenaBuilders
 				goodGoalMulti.numberOfGoals = numberOfGoals;
 			}
 		}
+
+		/// <summary>
+		/// Adds a goal to the goodGoalsMultiSpawned list.
+		/// </summary>
+		public void AddToGoodGoalsMultiSpawned(Goal ggm)
+		{
+			_goodGoalsMultiSpawned.Add(ggm);
+			updateGoodGoalsMulti();
+		}
+
+		/// <summary>
+		/// Adds a goal to the goodGoalsMultiSpawned list as a GameObject.
+		/// </summary>
+		public void AddToGoodGoalsMultiSpawned(GameObject ggm)
+		{
+			_goodGoalsMultiSpawned.Add(ggm.GetComponent<Goal>());
+			updateGoodGoalsMulti();
+		}
+
+		#endregion
+
+		#region Other Methods
+
+		/// <summary>
+		/// Returns the number of elements in a list if not null; otherwise, returns 0.
+		/// </summary>
+		private int optionalCount<T>(List<T> paramList)
+		{
+			return (paramList != null) ? paramList.Count : 0;
+		}
+
+		/// <summary>
+		/// Returns the total number of objects spawned.
+		/// </summary>
+		public int GetTotalObjectsSpawned()
+		{
+			return _totalObjectsSpawned;
+		}
+
+		/// <summary>
+		/// Assigns a symbol name to a component's SignBoard.
+		/// </summary>
+		private void AssignSymbolName(GameObject gameObjectInstance, string sName, Vector3 color)
+		{
+			SignBoard SP = gameObjectInstance.GetComponent<SignBoard>();
+			if (SP != null)
+			{
+				if (color != new Vector3(-1, -1, -1))
+				{
+					SP.SetColourOverride(color, true);
+				}
+
+				SP.SetSymbol(sName, true);
+			}
+		}
+
+		/// <summary>
+		/// Assigns a float value to a component's timing parameter.
+		/// </summary>
+		private void AssignTimingNumber<T>(string paramName, float value, T component)
+		{
+			paramName = paramName[0].ToString().ToUpper() + paramName.Substring(1);
+			MethodInfo SetMethod = component.GetType().GetMethod("Set" + (paramName));
+
+			if (SetMethod != null)
+			{
+				SetMethod.Invoke(component, new object[] { value });
+			}
+		}
+
+		#endregion
 	}
 }
