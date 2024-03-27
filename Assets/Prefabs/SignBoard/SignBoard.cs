@@ -23,7 +23,6 @@ public class SignBoard : Prefab
 
     void Awake()
     {
-        gameObject.SetActive(true);
         _symbolMat = gameObject.GetComponent<MeshRenderer>().materials[2];
         if (!_symbolMat.name.Contains("symbol"))
         {
@@ -72,7 +71,6 @@ public class SignBoard : Prefab
 
     public void UpdateSignBoard()
     {
-        gameObject.SetActive(true);
         bool specialCodeCase = false;
 
         if (texIndex == -1)
