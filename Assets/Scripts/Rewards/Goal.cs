@@ -1,5 +1,4 @@
 using UnityEngine;
-// TODO: see if the trigger and collision methods can be moved or changed for efficiency.
 
 /// <summary>
 /// Goal class is a base class for all the goals in the environment.
