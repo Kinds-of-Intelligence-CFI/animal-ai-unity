@@ -734,8 +734,14 @@ namespace ArenaBuilders
 				}
 
 				SP.SetSymbol(sName, true);
+				Debug.Log("Assigned symbol name: " + sName + " to " + gameObjectInstance.name);
+			}
+			else
+			{
+				Debug.Log("No SignBoard component found on " + gameObjectInstance.name);
 			}
 		}
+
 
 		/// <summary>
 		/// Assigns a float value to a component's timing parameter.
