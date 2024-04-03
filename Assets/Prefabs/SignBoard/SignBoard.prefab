@@ -153,6 +153,21 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 6dc1f6d974554b9408589cde33c4a7eb, type: 3}
   - {fileID: 2800000, guid: 55946d4ff22139b48ab7254ce425ba9e, type: 3}
   - {fileID: 2800000, guid: 87a02abb0a046e94686df14879bf0f0d, type: 3}
-  colours: []
+  colours:
+  - {r: 0, g: 0, b: 0, a: 0}
+  - {r: 1, g: 1, b: 1, a: 1}
+  - {r: 1, g: 1, b: 1, a: 1}
+  - {r: 1, g: 1, b: 1, a: 1}
+  - {r: 1, g: 1, b: 1, a: 1}
+  - {r: 0.9433962, g: 0.9171746, b: 0.10145953, a: 1}
+  - {r: 0.9, g: 0.31500003, b: 0.31500003, a: 1}
+  - {r: 0.25500003, g: 0.85, b: 0.42500007, a: 1}
+  - {r: 0.25500003, g: 0.6990942, b: 0.85, a: 1}
+  - {r: 1, g: 1, b: 1, a: 1}
+  - {r: 1, g: 1, b: 1, a: 1}
+  - {r: 1, g: 1, b: 1, a: 1}
+  - {r: 1, g: 1, b: 1, a: 1}
+  - {r: 0.10635927, g: 0.8679245, b: 0.044214953, a: 1}
+  - {r: 0.9339623, g: 0.08282302, b: 0.08282302, a: 1}
   useDefaultColourArray: 0
-  assignedColourOverride: {r: 0, g: 0, b: 0, a: 0}
+  assignedColourOverride: {r: 0.239153, g: 0, b: 0.8396226, a: 1}
