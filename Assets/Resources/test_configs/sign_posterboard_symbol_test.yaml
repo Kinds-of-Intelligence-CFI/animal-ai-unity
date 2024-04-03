@@ -11,7 +11,7 @@ arenas:
       - !Vector3 {x: 10, y: 0, z: 20}
       rotations: [90]
     - !Item
-      name: SignPosterboard
+      name: SignBoard
       positions:
       - !Vector3 {x: 20, y: 0, z: 8}
       - !Vector3 {x: 20, y: 0, z: 14}
