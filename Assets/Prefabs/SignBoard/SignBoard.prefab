@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6907925748948253622}
   - component: {fileID: 8662980198616354684}
   - component: {fileID: -1495984043384320533}
-  - component: {fileID: -6601130326534759375}
+  - component: {fileID: 6172418358166716887}
   m_Layer: 0
   m_Name: SignBoard
   m_TagString: SignPoster
@@ -100,7 +100,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.100000024, y: 2, z: 3}
   m_Center: {x: 0, y: 1, z: 0}
---- !u!114 &-6601130326534759375
+--- !u!114 &6172418358166716887
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -115,7 +115,7 @@ MonoBehaviour:
   rotationRange: {x: 0, y: 0}
   sizeMin: {x: 1, y: 1, z: 1}
   sizeMax: {x: 1, y: 1, z: 1}
-  canRandomizeColor: 1
+  canRandomizeColor: 0
   ratioSize: {x: 1, y: 1, z: 1}
   sizeAdjustment: 0.999
   textureUVOverride: 0
@@ -139,20 +139,20 @@ MonoBehaviour:
   - cross
   textures:
   - {fileID: 2800000, guid: f47b3813406f70c4f9b951c5802eb29f, type: 3}
-  - {fileID: 2800000, guid: f397bc8541a95074893f24038d711d05, type: 3}
-  - {fileID: 2800000, guid: 19828ca507064434481e4eb56d28441b, type: 3}
   - {fileID: 2800000, guid: 366a404328d6e9b48abdb05b4c9e1546, type: 3}
-  - {fileID: 2800000, guid: 34aeef3bc8a968347ad66f8e48d69fd0, type: 3}
+  - {fileID: 2800000, guid: 19828ca507064434481e4eb56d28441b, type: 3}
   - {fileID: 2800000, guid: 6b6daa9c456102d41af8ced0596b3080, type: 3}
-  - {fileID: 2800000, guid: 62327cb5831fcd14f9d2eeee7c910a3c, type: 3}
-  - {fileID: 2800000, guid: 87a02abb0a046e94686df14879bf0f0d, type: 3}
+  - {fileID: 2800000, guid: f397bc8541a95074893f24038d711d05, type: 3}
+  - {fileID: 2800000, guid: 34aeef3bc8a968347ad66f8e48d69fd0, type: 3}
   - {fileID: 2800000, guid: f8e82359ab99ade4a90307f334ceda8d, type: 3}
   - {fileID: 2800000, guid: d219d9ab4b40ba54991601c802bc08bb, type: 3}
   - {fileID: 2800000, guid: a4bdfa80c8ae92546b8fcea87ea1f0e0, type: 3}
   - {fileID: 2800000, guid: 6d8d1c8f015d08341a995f3af7826e8e, type: 3}
+  - {fileID: 2800000, guid: e574e14b44c8297449bc6a3877c3a875, type: 3}
+  - {fileID: 2800000, guid: 62327cb5831fcd14f9d2eeee7c910a3c, type: 3}
   - {fileID: 2800000, guid: 6dc1f6d974554b9408589cde33c4a7eb, type: 3}
   - {fileID: 2800000, guid: 55946d4ff22139b48ab7254ce425ba9e, type: 3}
-  - {fileID: 2800000, guid: e574e14b44c8297449bc6a3877c3a875, type: 3}
+  - {fileID: 2800000, guid: 87a02abb0a046e94686df14879bf0f0d, type: 3}
   colours: []
   useDefaultColourArray: 0
   assignedColourOverride: {r: 0, g: 0, b: 0, a: 0}
