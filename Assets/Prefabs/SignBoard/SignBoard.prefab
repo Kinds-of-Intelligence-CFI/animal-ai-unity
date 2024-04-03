@@ -109,18 +109,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 7150004164178407081}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8788bee81c02404c9538b3be3a2681c, type: 3}
+  m_Script: {fileID: 11500000, guid: 5f05fe3fb204d4e48b9894927d244b17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rotationRange: {x: 0, y: 90}
-  sizeMin: {x: 0.5, y: 0.5, z: 0.5}
-  sizeMax: {x: 2.5, y: 2.5, z: 2.5}
-  canRandomizeColor: 0
+  rotationRange: {x: 0, y: 0}
+  sizeMin: {x: 1, y: 1, z: 1}
+  sizeMax: {x: 1, y: 1, z: 1}
+  canRandomizeColor: 1
   ratioSize: {x: 1, y: 1, z: 1}
   sizeAdjustment: 0.999
   textureUVOverride: 0
   typicalOrigin: 0
-  selectedSymbolName: right-arrow
+  selectedSymbolName: default
   symbolNames:
   - default
   - right-arrow
@@ -139,35 +139,20 @@ MonoBehaviour:
   - cross
   textures:
   - {fileID: 2800000, guid: f47b3813406f70c4f9b951c5802eb29f, type: 3}
-  - {fileID: 2800000, guid: 366a404328d6e9b48abdb05b4c9e1546, type: 3}
-  - {fileID: 2800000, guid: 19828ca507064434481e4eb56d28441b, type: 3}
-  - {fileID: 2800000, guid: 6b6daa9c456102d41af8ced0596b3080, type: 3}
   - {fileID: 2800000, guid: f397bc8541a95074893f24038d711d05, type: 3}
+  - {fileID: 2800000, guid: 19828ca507064434481e4eb56d28441b, type: 3}
+  - {fileID: 2800000, guid: 366a404328d6e9b48abdb05b4c9e1546, type: 3}
   - {fileID: 2800000, guid: 34aeef3bc8a968347ad66f8e48d69fd0, type: 3}
+  - {fileID: 2800000, guid: 6b6daa9c456102d41af8ced0596b3080, type: 3}
+  - {fileID: 2800000, guid: 62327cb5831fcd14f9d2eeee7c910a3c, type: 3}
+  - {fileID: 2800000, guid: 87a02abb0a046e94686df14879bf0f0d, type: 3}
   - {fileID: 2800000, guid: f8e82359ab99ade4a90307f334ceda8d, type: 3}
   - {fileID: 2800000, guid: d219d9ab4b40ba54991601c802bc08bb, type: 3}
   - {fileID: 2800000, guid: a4bdfa80c8ae92546b8fcea87ea1f0e0, type: 3}
   - {fileID: 2800000, guid: 6d8d1c8f015d08341a995f3af7826e8e, type: 3}
-  - {fileID: 2800000, guid: e574e14b44c8297449bc6a3877c3a875, type: 3}
-  - {fileID: 2800000, guid: 62327cb5831fcd14f9d2eeee7c910a3c, type: 3}
   - {fileID: 2800000, guid: 6dc1f6d974554b9408589cde33c4a7eb, type: 3}
   - {fileID: 2800000, guid: 55946d4ff22139b48ab7254ce425ba9e, type: 3}
-  - {fileID: 2800000, guid: 87a02abb0a046e94686df14879bf0f0d, type: 3}
-  colours:
-  - {r: 0, g: 0, b: 0, a: 0}
-  - {r: 1, g: 1, b: 1, a: 1}
-  - {r: 1, g: 1, b: 1, a: 1}
-  - {r: 1, g: 1, b: 1, a: 1}
-  - {r: 1, g: 1, b: 1, a: 1}
-  - {r: 0.9433962, g: 0.9171746, b: 0.10145953, a: 1}
-  - {r: 0.9, g: 0.31500003, b: 0.31500003, a: 1}
-  - {r: 0.25500003, g: 0.85, b: 0.42500007, a: 1}
-  - {r: 0.25500003, g: 0.6990942, b: 0.85, a: 1}
-  - {r: 1, g: 1, b: 1, a: 1}
-  - {r: 1, g: 1, b: 1, a: 1}
-  - {r: 1, g: 1, b: 1, a: 1}
-  - {r: 1, g: 1, b: 1, a: 1}
-  - {r: 0.10635927, g: 0.8679245, b: 0.044214953, a: 1}
-  - {r: 0.9339623, g: 0.08282302, b: 0.08282302, a: 1}
+  - {fileID: 2800000, guid: e574e14b44c8297449bc6a3877c3a875, type: 3}
+  colours: []
   useDefaultColourArray: 0
-  assignedColourOverride: {r: 0.239153, g: 0, b: 0.8396226, a: 1}
+  assignedColourOverride: {r: 0, g: 0, b: 0, a: 0}
