@@ -70,6 +70,7 @@ public class TrainingAgent : Agent, IPrefab
     }
 
     #region Agent Freeze Methods
+	
     public float GetFreezeDelay()
     {
         return _freezeDelay;
@@ -115,6 +116,7 @@ public class TrainingAgent : Agent, IPrefab
     #endregion
 
     #region Agent Core Methods
+
     public override void CollectObservations(VectorSensor sensor)
     {
         sensor.AddObservation(health);
@@ -211,6 +213,7 @@ public class TrainingAgent : Agent, IPrefab
     #endregion
 
     #region Agent Health Methods
+
     public void UpdateHealthNextStep(float updateAmount, bool andEndEpisode = false)
     {
         /// <summary>
@@ -288,6 +291,7 @@ public class TrainingAgent : Agent, IPrefab
     #endregion
 
     #region Agent Episode Methods
+
     IEnumerator EndEpisodeAfterDelay()
     {
         if (!showNotification)
@@ -327,6 +331,7 @@ public class TrainingAgent : Agent, IPrefab
     #endregion
 
     #region Collision Detection Methods
+
     void OnCollisionEnter(Collision collision)
     {
         foreach (ContactPoint contact in collision.contacts)
