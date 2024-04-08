@@ -307,7 +307,6 @@ public class AAI3EnvironmentManager : MonoBehaviour
 					break;
 			}
 		}
-		Debug.Log("Args parsed by Unity: " + string.Join(" ", environmentParameters));
 		return environmentParameters;
 	}
 
