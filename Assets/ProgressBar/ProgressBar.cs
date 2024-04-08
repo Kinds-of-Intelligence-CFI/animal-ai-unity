@@ -1,8 +1,11 @@
 ﻿using System;
 using UnityEngine;
-using TMPro; // Add this for TextMeshPro support
+using TMPro;
 using UnityEngine.UI;
 
+/// <summary>
+/// A progress bar that is used to display the health of an agent. The progress bar has a title, a bar, and a pass marker.
+/// </summary>
 [ExecuteInEditMode]
 public class ProgressBar : MonoBehaviour
 {
@@ -30,12 +33,14 @@ public class ProgressBar : MonoBehaviour
     private TMP_Text _txtTitle;
     private TrainingAgent _agent;
 
+    [Header("Pass Mark Settings")]
     private float _pass_mark_proportion;
     private float _min_pass_color_pivot;
     private float _pass_max_color_pivot;
 
     private int _barSize;
     private float _barValue;
+
     public float BarValue
     {
         get { return _barValue; }
@@ -50,7 +55,6 @@ public class ProgressBar : MonoBehaviour
     private void Awake()
     {
         _bar = transform.Find("Bar").GetComponent<Image>();
-        _barBackground = GetComponent<Image>();
         _txtTitle = transform.Find("Text").GetComponent<TMP_Text>();
         _barBackground = transform.Find("BarBackground").GetComponent<Image>();
         _passMarker = transform.Find("PassMarker").GetComponent<RectTransform>();
