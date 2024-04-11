@@ -214,11 +214,6 @@ public class AAI3EnvironmentManager : MonoBehaviour
 		OnArenaChanged?.Invoke(currentArenaIndex, totalArenas);
 	}
 
-	public int getArenaCount()
-	{
-		return _arenasConfigurations.configurations.Count;
-	}
-
 	public bool GetRandomizeArenasStatus()
 	{
 		return _arenasConfigurations.randomizeArenas;
@@ -314,9 +309,14 @@ public class AAI3EnvironmentManager : MonoBehaviour
 
 	#region Configuration Management Methods
 
-	public bool GetConfiguration(int arenaID, out ArenaConfiguration arenaConfiguration)
+	public ArenaConfiguration GetConfiguration(int arenaID)
 	{
-		return _arenasConfigurations.configurations.TryGetValue(arenaID, out arenaConfiguration);
+		ArenaConfiguration returnConfiguration;
+		if (!_arenasConfigurations.configurations.TryGetValue(arenaID, out returnConfiguration))
+		{
+			throw new KeyNotFoundException($"Tried to load arena {arenaID} but it did not exist");
+		}
+		return returnConfiguration;
 	}
 
 	public void AddConfiguration(int arenaID, ArenaConfiguration arenaConfiguration)

@@ -102,20 +102,13 @@ public class TrainingArena : MonoBehaviour
 	private List<int> GetMergedArenas()
 	{
 		List<int> mergedArenas = new List<int>();
-		int totalArenas = _environmentManager.getArenaCount();
-		ArenaConfiguration currentArena;
-		if (!_environmentManager.GetConfiguration(0, out currentArena))
-		{
-			Debug.LogError("Critical error: Failed to load arena configuration for arena 0");
-		}
+		int totalArenas = _environmentManager.GetTotalArenas();
+		ArenaConfiguration currentArena = _environmentManager.GetConfiguration(0);
 		bool currentlyMerged = currentArena.mergeNextArena;
 		for (int i = 1; i < totalArenas; i++)
 		{
 			if (currentlyMerged) { mergedArenas.Add(i); }
-			if (!_environmentManager.GetConfiguration(i, out currentArena))
-			{
-				Debug.LogError($"Critical error: Failed to load arena configuration for arena {i}");
-			}
+			currentArena = _environmentManager.GetConfiguration(i);
 			currentlyMerged = currentArena.mergeNextArena;
 		}
 		return mergedArenas;
@@ -150,13 +143,7 @@ public class TrainingArena : MonoBehaviour
 		CleanUpSpawnedObjects();
 
 		arenaID += 1;
-		// We need an arena to sequentially follow the current one to LoadNextArena
-		if (!_environmentManager.GetConfiguration(arenaID, out _))
-		{
-			// TODO: This is the error hit if mergeNextArena is put in the final arena. Add some validation to move this from a runtime error
-			throw new InvalidOperationException($"Tried to LoadNextArena but arena {arenaID} did not exist");
-		}
-
+		// TODO: If mergeNextArena is put in the final arena this will throw. Add some validation to move this failure sooner in execution
 		UpdateActiveArenaToCurrentArenaID();
 	}
 
@@ -171,7 +158,7 @@ public class TrainingArena : MonoBehaviour
 
 	private void SetNextArenaID()
 	{
-		int totalArenas = _environmentManager.getArenaCount();
+		int totalArenas = _environmentManager.GetTotalArenas();
 		bool randomizeArenas = _environmentManager.GetRandomizeArenasStatus();
 
 		if (isFirstArenaReset)
@@ -192,11 +179,7 @@ public class TrainingArena : MonoBehaviour
 				arenaID = (arenaID + 1) % totalArenas;
 				while (preceedingArena.mergeNextArena)
 				{
-					if (!_environmentManager.GetConfiguration(arenaID, out preceedingArena))
-					{
-						Debug.LogError($"Critical error: Failed to load arena configuration for arena {arenaID}");
-						return;
-					}
+					preceedingArena = _environmentManager.GetConfiguration(arenaID);
 					arenaID = (arenaID + 1) % totalArenas;
 				}
 			}
@@ -220,13 +203,8 @@ public class TrainingArena : MonoBehaviour
 	}
 
 	private void UpdateActiveArenaToCurrentArenaID() {
-		// Try to load the new configuration, throwing if it fails
-		ArenaConfiguration newConfiguration;
-		if (!_environmentManager.GetConfiguration(arenaID, out newConfiguration))
-		{
-			Debug.LogError($"Critical error: Failed to load arena configuration for arena {arenaID}");
-			return;
-		}
+		// Load the new configuration
+		ArenaConfiguration newConfiguration = _environmentManager.GetConfiguration(arenaID);
 
 		// Apply the new arena configuration
 		Debug.Log("Updating Arena Configuration");
