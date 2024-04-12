@@ -39,7 +39,8 @@ jobs:
         dotnet-version: '5.0'
 
     - name: Build with dotnet
-      run: dotnet build YourSolution.sln --configuration Release
+      run: dotnet build animal-ai-unity.sln --configuration Release
+
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
