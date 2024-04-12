@@ -32,14 +32,10 @@ jobs:
       with:
         languages: ${{ matrix.language }}
 
-    # Removed Autobuild step
-    # - name: Autobuild (Commented out because custom build steps are required)
-    #   uses: github/codeql-action/autobuild@v3
-
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: '3.1' # Specify your .NET Core version here
+        dotnet-version: '4.0'
 
     - name: Build with dotnet
       run: dotnet build YourSolution.sln --configuration Release
