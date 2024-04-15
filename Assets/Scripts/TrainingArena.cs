@@ -128,7 +128,14 @@ public class TrainingArena : MonoBehaviour
 
 		SetNextArenaID();
 
-		UpdateActiveArenaToCurrentArenaID();
+		// Load the new configuration
+		ArenaConfiguration newConfiguration = _environmentManager.GetConfiguration(arenaID);
+
+		ApplyNewArenaConfiguration(newConfiguration);
+
+		CleanupRewards();
+
+		NotifyArenaChange();
 	}
 
 	public void LoadNextArena()
@@ -143,8 +150,15 @@ public class TrainingArena : MonoBehaviour
 		CleanUpSpawnedObjects();
 
 		arenaID += 1;
+		// Load the new configuration
 		// TODO: If mergeNextArena is put in the final arena this will throw. Add some validation to move this failure sooner in execution
-		UpdateActiveArenaToCurrentArenaID();
+		ArenaConfiguration newConfiguration = _environmentManager.GetConfiguration(arenaID);
+
+		ApplyNewArenaConfiguration(newConfiguration);
+
+		CleanupRewards();
+
+		NotifyArenaChange();
 	}
 
 	private void CleanUpSpawnedObjects()
@@ -202,14 +216,15 @@ public class TrainingArena : MonoBehaviour
 
 	}
 
-	private void UpdateActiveArenaToCurrentArenaID() {
-		// Load the new configuration
-		ArenaConfiguration newConfiguration = _environmentManager.GetConfiguration(arenaID);
-
-		// Apply the new arena configuration
-		Debug.Log("Updating Arena Configuration");
+	/* Note: to update the active arena to a new ID the following must be called in sequence
+	   GetConfiguration, ApplyNewArenaConfiguration, CleanupRewards, NotifyArenaChange
+	*/
+	private void ApplyNewArenaConfiguration(ArenaConfiguration newConfiguration)
+	{
 		_arenaConfiguration = newConfiguration;
 		_agent.showNotification = ArenasConfigurations.Instance.showNotification;
+		Debug.Log("Updating Arena Configuration");
+
 		_arenaConfiguration.SetGameObject(prefabs.GetList());
 		_builder.Spawnables = _arenaConfiguration.spawnables;
 		_arenaConfiguration.toUpdate = false;
@@ -223,21 +238,28 @@ public class TrainingArena : MonoBehaviour
 			Random.InitState(_arenaConfiguration.randomSeed);
 		}
 		Debug.Log($"TimeLimit set to: {_arenaConfiguration.TimeLimit}");
+	}
 
-		// Destroy all spawned rewards in the arena.
-		foreach (var reward in spawnedRewards)
-		{
-			Destroy(reward);
-		}
-		spawnedRewards.Clear();
-
-		// Notify Arena Change
+	private void NotifyArenaChange()
+	{
 		_environmentManager.TriggerArenaChangeEvent(arenaID, _environmentManager.GetTotalArenas());
 	}
 	
 	#endregion
 
 	#region Other Methods
+
+	/// <summary>
+	/// Destroys all spawned rewards in the arena.
+	/// </summary>
+	private void CleanupRewards()
+	{
+		foreach (var reward in spawnedRewards)
+		{
+			Destroy(reward);
+		}
+		spawnedRewards.Clear();
+	}
 
 	/// <summary>
 	/// Updates the light status in the arena based on the current step count.
