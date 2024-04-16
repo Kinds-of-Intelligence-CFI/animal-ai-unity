@@ -51,6 +51,7 @@ namespace YAMLDefs
 
 		public List<int> blackouts { get; set; } = new List<int>();
 		public int randomSeed { get; set; } = 0;
+		public bool mergeNextArena { get; set; } = false;
 	}
 
 	/// <summary>

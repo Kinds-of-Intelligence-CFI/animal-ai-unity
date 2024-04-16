@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.MLAgents;
@@ -40,8 +41,15 @@ public class TrainingArena : MonoBehaviour
 	private bool isFirstArenaReset = true;
 	private List<GameObject> spawnedRewards = new List<GameObject>();
 	private List<int> playedArenas = new List<int>();
+	private List<int> _mergedArenas = null;
 
 	public bool showNotification { get; set; }
+	public bool mergeNextArena
+	{
+		get {
+			return _arenaConfiguration.mergeNextArena;
+		}
+	}
 
 	public ArenaBuilder Builder
 	{
@@ -87,6 +95,25 @@ public class TrainingArena : MonoBehaviour
 		Spawner_InteractiveButton.RewardSpawned += OnRewardSpawned;
 	}
 
+	/// <summary>
+	/// Provides a list of the arenas in the current config file that are preceeded by an arena with
+	/// the mergeNextArena property, so that we can avoid loading them when arenas are randomised.
+	/// </summary>
+	private List<int> GetMergedArenas()
+	{
+		List<int> mergedArenas = new List<int>();
+		int totalArenas = _environmentManager.GetTotalArenas();
+		ArenaConfiguration currentArena = _environmentManager.GetConfiguration(0);
+		bool currentlyMerged = currentArena.mergeNextArena;
+		for (int i = 1; i < totalArenas; i++)
+		{
+			if (currentlyMerged) { mergedArenas.Add(i); }
+			currentArena = _environmentManager.GetConfiguration(i);
+			currentlyMerged = currentArena.mergeNextArena;
+		}
+		return mergedArenas;
+	}
+
 	#region Arena Handling Methods
 
 	/// <summary>
@@ -99,20 +126,39 @@ public class TrainingArena : MonoBehaviour
 
 		CleanUpSpawnedObjects();
 
-		DetermineNextArenaID();
+		SetNextArenaID();
 
-		if (!TryLoadArenaConfiguration(out ArenaConfiguration newConfiguration))
-		{
-			Debug.LogError("Failed to load arena configuration");
-			return;
-		}
+		// Load the new configuration
+		ArenaConfiguration newConfiguration = _environmentManager.GetConfiguration(arenaID);
 
 		ApplyNewArenaConfiguration(newConfiguration);
 
 		CleanupRewards();
 
 		NotifyArenaChange();
+	}
 
+	public void LoadNextArena()
+	{
+		// TrainingArena must have reset() called at first to initialise arenaID
+		if (isFirstArenaReset)
+		{
+			throw new InvalidOperationException("LoadNextArena called before first reset");
+		}
+
+		Debug.Log($"Loading next arena. Previous: {arenaID}, next: {arenaID + 1}");
+		CleanUpSpawnedObjects();
+
+		arenaID += 1;
+		// Load the new configuration
+		// TODO: If mergeNextArena is put in the final arena this will throw. Add some validation to move this failure sooner in execution
+		ArenaConfiguration newConfiguration = _environmentManager.GetConfiguration(arenaID);
+
+		ApplyNewArenaConfiguration(newConfiguration);
+
+		CleanupRewards();
+
+		NotifyArenaChange();
 	}
 
 	private void CleanUpSpawnedObjects()
@@ -124,39 +170,55 @@ public class TrainingArena : MonoBehaviour
 		}
 	}
 
-	private void DetermineNextArenaID()
+	private void SetNextArenaID()
 	{
-		int totalArenas = _environmentManager.getMaxArenaID();
+		int totalArenas = _environmentManager.GetTotalArenas();
 		bool randomizeArenas = _environmentManager.GetRandomizeArenasStatus();
 
 		if (isFirstArenaReset)
 		{
 			isFirstArenaReset = false;
-			arenaID = randomizeArenas ? Random.Range(0, totalArenas) : 0;
+			arenaID = randomizeArenas ? ChooseRandomArenaID(totalArenas) : 0;
 		}
 		else
 		{
-			arenaID = randomizeArenas ? ChooseRandomArenaID(totalArenas) : (arenaID + 1) % totalArenas;
+			if (randomizeArenas)
+			{
+				arenaID = ChooseRandomArenaID(totalArenas);
+			}
+			else
+			{
+				// If the next arena is merged, sequentially search for the next unmerged one
+				ArenaConfiguration preceedingArena = _arenaConfiguration;
+				arenaID = (arenaID + 1) % totalArenas;
+				while (preceedingArena.mergeNextArena)
+				{
+					preceedingArena = _environmentManager.GetConfiguration(arenaID);
+					arenaID = (arenaID + 1) % totalArenas;
+				}
+			}
 		}
 	}
 
 	private int ChooseRandomArenaID(int totalArenas)
 	{
+		// Populate the list of merged arenas if needed
+		if (_mergedArenas == null){ _mergedArenas = GetMergedArenas(); }
+
 		playedArenas.Add(arenaID);
 		if (playedArenas.Count >= totalArenas)
 		{
 			playedArenas = new List<int> { arenaID };
 		}
 
-		var availableArenas = Enumerable.Range(0, totalArenas).Except(playedArenas).ToList();
+		var availableArenas = Enumerable.Range(0, totalArenas).Except(playedArenas).Except(_mergedArenas).ToList();
 		return availableArenas[Random.Range(0, availableArenas.Count)];
+
 	}
 
-	private bool TryLoadArenaConfiguration(out ArenaConfiguration newConfiguration)
-	{
-		return _environmentManager.GetConfiguration(arenaID, out newConfiguration);
-	}
-
+	/* Note: to update the active arena to a new ID the following must be called in sequence
+	   GetConfiguration, ApplyNewArenaConfiguration, CleanupRewards, NotifyArenaChange
+	*/
 	private void ApplyNewArenaConfiguration(ArenaConfiguration newConfiguration)
 	{
 		_arenaConfiguration = newConfiguration;
@@ -175,7 +237,6 @@ public class TrainingArena : MonoBehaviour
 		{
 			Random.InitState(_arenaConfiguration.randomSeed);
 		}
-
 		Debug.Log($"TimeLimit set to: {_arenaConfiguration.TimeLimit}");
 	}
 
