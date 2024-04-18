@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7012086464886610056}
   - component: {fileID: 7155127522094660233}
   m_Layer: 0
-  m_Name: Hollow-Obj1
+  m_Name: Hollow-Obj
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

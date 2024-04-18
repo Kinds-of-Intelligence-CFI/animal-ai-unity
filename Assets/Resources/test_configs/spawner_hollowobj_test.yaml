@@ -1,0 +1,23 @@
+!ArenaConfig
+# Testing the SpawnerButton with different rewards and spawn probabilities.
+randomizeArenas: false 
+showNotification: false 
+canResetEpisode: true 
+canChangePerspective: true
+arenas:
+  0: !Arena
+    passMark: 0
+    timeLimit: 250
+    items:
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 20, y: 0, z: 20}
+      rotations: [0]
+    - !Item
+      name: HollowObj
+      positions:
+      - !Vector3 {x: 20, y: 0, z: 25}
+      rotations: [0]
+
+  
