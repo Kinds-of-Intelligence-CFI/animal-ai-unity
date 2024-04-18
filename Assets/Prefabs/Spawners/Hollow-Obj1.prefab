@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7012086464886610056}
+  - component: {fileID: 7155127522094660233}
   m_Layer: 0
   m_Name: Hollow-Obj1
   m_TagString: Untagged
@@ -32,6 +33,26 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7155127522094660233
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3105226629790840520}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbc092bd4fa17904f9060b81e01c11d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rotationRange: {x: 0, y: 360}
+  sizeMin: {x: 1, y: 1, z: 1}
+  sizeMax: {x: 1, y: 1, z: 1}
+  canRandomizeColor: 1
+  ratioSize: {x: 1, y: 1, z: 1}
+  sizeAdjustment: 0.999
+  textureUVOverride: 0
+  typicalOrigin: 1
 --- !u!1001 &5974215295510198779
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -124,3 +145,15 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.02, y: 0.019999996, z: 0.019999996}
   m_Center: {x: 0, y: 0, z: 0.009999998}
+--- !u!114 &2293860920167386494
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6785170889225405610}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13a25c48c2f26d844bfaf24c7430ad20, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
