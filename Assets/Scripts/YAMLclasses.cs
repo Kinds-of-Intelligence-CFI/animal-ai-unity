@@ -93,10 +93,11 @@ namespace YAMLDefs
 		public List<int> maxRewardCounts { get; set; } = new List<int>();
 
 		// Spawner HollowObj
-		public Vector3 rewardSpawnPosition { get; set; } = new Vector3(0, 0, 0);
 		public List<string> rewardToSpawn { get; set; } = new List<string>();
-		public List<float> delayTime { get; set; } = new List<float>();
+		public Vector3 rewardSpawnPosition { get; set; } = new Vector3(0, 0, 0);
 		public List<bool> delayRewardSpawn { get; set; } = new List<bool>();
+		public List<float> delayTime { get; set; } = new List<float>();
+
 	}
 
 	/// <summary>
