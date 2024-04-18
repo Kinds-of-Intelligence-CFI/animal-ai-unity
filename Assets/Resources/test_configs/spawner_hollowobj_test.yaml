@@ -1,5 +1,5 @@
 !ArenaConfig
-# Testing the SpawnerButton with different rewards and spawn probabilities.
+# Testing the Hollow-Obj with foundational parameters.
 randomizeArenas: false 
 showNotification: false 
 canResetEpisode: true 
