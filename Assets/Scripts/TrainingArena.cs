@@ -74,6 +74,7 @@ public class TrainingArena : MonoBehaviour
 	private void OnDestroy()
 	{
 		Spawner_InteractiveButton.RewardSpawned -= OnRewardSpawned;
+		HollowObjSpawner.RewardSpawned -= OnRewardSpawned;
 	}
 
 	/// <summary>
@@ -93,6 +94,7 @@ public class TrainingArena : MonoBehaviour
 		_fades = blackScreens.GetFades();
 
 		Spawner_InteractiveButton.RewardSpawned += OnRewardSpawned;
+		HollowObjSpawner.RewardSpawned += OnRewardSpawned;
 	}
 
 	/// <summary>

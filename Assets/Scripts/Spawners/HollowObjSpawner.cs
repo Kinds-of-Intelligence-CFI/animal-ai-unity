@@ -20,6 +20,10 @@ public class HollowObjSpawner : MonoBehaviour
 
 	private ArenaBuilder arenaBuilder;
 	public List<GameObject> Rewards { get; set; }
+	public GameObject LastSpawnedReward { get; private set; }
+
+	public delegate void OnRewardSpawned(GameObject reward);
+	public static event OnRewardSpawned RewardSpawned;
 
 	void Start()
 	{
@@ -62,8 +66,9 @@ public class HollowObjSpawner : MonoBehaviour
 	private IEnumerator SpawnReward(GameObject reward, Vector3 position, float delay)
 	{
 		yield return new WaitForSeconds(delay);
-		Instantiate(reward, position, Quaternion.identity);
+		LastSpawnedReward = Instantiate(reward, position, Quaternion.identity);
 		Debug.Log($"Spawned {reward.name} after a delay of {delay} seconds at position {position}");
+		RewardSpawned?.Invoke(LastSpawnedReward);
 	}
 
 	private void DebugLogs()
