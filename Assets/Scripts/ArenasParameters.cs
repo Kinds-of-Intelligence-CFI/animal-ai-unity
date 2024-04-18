@@ -68,7 +68,7 @@ namespace ArenasParameters
 		public List<string> rewardToSpawn { get; set; }
 		public Vector3 rewardSpawnPosition { get; set; }
 		public List<bool> delayRewardSpawn { get; set; }
-		public List<float> delayTimes { get; set; }
+		public List<float> delayTime { get; set; }
 
 		/// <summary>
 		/// The purpose of this constructor is to initialize the Spawnable object with the properties of the provided GameObject. 
@@ -126,7 +126,7 @@ namespace ArenasParameters
 			rewardToSpawn = yamlItem.rewardToSpawn;
 			rewardSpawnPosition = yamlItem.rewardSpawnPosition;
 			delayRewardSpawn = yamlItem.delayRewardSpawn;
-			delayTimes = yamlItem.delayTime;
+			delayTime = yamlItem.delayTime;
 		}
 
 		/// <summary>
