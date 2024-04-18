@@ -61,7 +61,14 @@ namespace ArenasParameters
 		public List<float> RewardWeights { get; private set; }
 		public Vector3 rewardSpawnPos { get; private set; }
 		public List<int> maxRewardCounts { get; private set; }
+
 		public Dictionary<int, int> originalToNewIDMapping = new Dictionary<int, int>();
+
+		// [Spawner] HollowObj
+		public List<string> rewardToSpawn { get; set; }
+		public Vector3 rewardSpawnPosition { get; set; }
+		public List<bool> delayRewardSpawn { get; set; }
+		public List<float> delayTimes { get; set; }
 
 		/// <summary>
 		/// The purpose of this constructor is to initialize the Spawnable object with the properties of the provided GameObject. 
@@ -114,6 +121,12 @@ namespace ArenasParameters
 			RewardWeights = yamlItem.rewardWeights;
 			rewardSpawnPos = yamlItem.rewardSpawnPos;
 			maxRewardCounts = yamlItem.maxRewardCounts;
+
+			// [Spawner] HollowObj
+			rewardToSpawn = yamlItem.rewardToSpawn;
+			rewardSpawnPosition = yamlItem.rewardSpawnPosition;
+			delayRewardSpawn = yamlItem.delayRewardSpawn;
+			delayTimes = yamlItem.delayTime;
 		}
 
 		/// <summary>
