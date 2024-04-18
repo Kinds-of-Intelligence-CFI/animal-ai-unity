@@ -19,9 +19,9 @@ arenas:
       positions:
       - !Vector3 {x: 20, y: 0, z: 25}
       rotations: [0]
-      rewardToSpawn: ["GoodGoal"]
-      rewardSpawnPosition: !Vector3 {x: 20, y: 5, z: 25}
-      delayRewardSpawn: [true]
-      delayTime: [10]
+      rewardToSpawn: ["DecoyGoal"] # Can be any rewards
+      rewardSpawnPosition: !Vector3 {x: 20, y: 5, z: 25} # Spawns the reward 5 units above the Hollow-Obj
+      delayRewardSpawn: [false] # Spawns the reward immediately if set false, otherwise, spawns after delayTime
+      delayTime: [10] # Spawns the reward after 10 seconds
 
   
