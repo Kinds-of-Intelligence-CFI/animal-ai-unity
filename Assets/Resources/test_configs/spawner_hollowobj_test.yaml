@@ -19,5 +19,9 @@ arenas:
       positions:
       - !Vector3 {x: 20, y: 0, z: 25}
       rotations: [0]
+      rewardToSpawn: ["GoodGoal"]
+      rewardSpawnPosition: !Vector3 {x: 20, y: 5, z: 25}
+      delayRewardSpawn: [true]
+      delayTime: [10]
 
   
