@@ -279,6 +279,8 @@ namespace ArenaBuilders
 				float resetDuration = k < ns[16] ? resetDurations[k] : 1.0f;
 				float spawnProbability = spawnable.SpawnProbability;
 				Vector3 rewardSpawnPos = spawnable.rewardSpawnPos;
+				Vector3 rewardSpawnPosition = spawnable.rewardSpawnPosition;
+				
 
 				// Assign the optional parameters to a dictionary
 				Dictionary<string, object> optionals = new Dictionary<string, object>()
@@ -300,7 +302,13 @@ namespace ArenaBuilders
 					{ "rewardNames", spawnable.RewardNames },
 					{ "rewardWeights", spawnable.RewardWeights },
 					{ "rewardSpawnPos", rewardSpawnPos },
-					{ "maxRewardCounts", spawnable.maxRewardCounts }
+					{ "maxRewardCounts", spawnable.maxRewardCounts },
+
+					{ "rewardToSpawn", spawnable.rewardToSpawn },
+					{ "rewardSpawnPosition", spawnable.rewardSpawnPosition },
+					{ "delayRewardSpawn", spawnable.delayRewardSpawn },
+					{ "delayTime", spawnable.delayTime }
+
 				};
 
 				// Determines a suitable position and rotation for the object to spawn
@@ -406,6 +414,40 @@ namespace ArenaBuilders
 						)
 						{
 							spawnerInteractiveButton.MaxRewardCounts = maxRewardCounts;
+						}
+					}
+
+					var spawnerHollowObj =
+						gameObjectInstance.GetComponentInChildren<HollowObjSpawner>();
+					if (spawnerHollowObj != null)
+					{
+						if (
+							optionals.TryGetValue("rewardSpawnPosition", out var rewardSpawnPositionValue)
+							&& rewardSpawnPositionValue is Vector3 rewardSpawnPosition
+						)
+						{
+							spawnerHollowObj.RewardSpawnPosition = rewardSpawnPosition;
+						}
+						if (
+							optionals.TryGetValue("rewardToSpawn", out var rewardToSpawnValue)
+							&& rewardToSpawnValue is List<string> rewardToSpawn
+						)
+						{
+							spawnerHollowObj.RewardToSpawn = rewardToSpawn;
+						}
+						if (
+							optionals.TryGetValue("delayRewardSpawn", out var delayRewardSpawnValue)
+							&& delayRewardSpawnValue is List<bool> delayRewardSpawn
+						)
+						{
+							spawnerHollowObj.DelayRewardSpawn = delayRewardSpawn;
+						}
+						if (
+							optionals.TryGetValue("delayTime", out var delayTimeValue)
+							&& delayTimeValue is List<float> delayTime
+						)
+						{
+							spawnerHollowObj.DelayTime = delayTime;
 						}
 					}
 
