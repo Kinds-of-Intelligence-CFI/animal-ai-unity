@@ -4,6 +4,10 @@ using UnityEngine;
 using System.Linq;
 using ArenaBuilders;
 
+/// <summary>
+/// Spawns hollow objects in the arena. 
+/// Hollow objects are game objects that have an accompanying reward object that is spawned at start or after a delay, just above the hollow object.
+/// </summary>
 public class HollowObjSpawner : MonoBehaviour
 {
 	[SerializeField]
@@ -11,8 +15,8 @@ public class HollowObjSpawner : MonoBehaviour
 	public List<string> RewardToSpawn { get; set; }
 	public List<bool> DelayRewardSpawn { get; set; }
 	public List<float> DelayTime { get; set; }
-
-
+	
+	[SerializeField]
 	private Vector3 rewardSpawnPosition { get; set; }
 	private List<string> rewardToSpawn { get; set; }
 	private List<bool> delayRewardSpawn { get; set; }
