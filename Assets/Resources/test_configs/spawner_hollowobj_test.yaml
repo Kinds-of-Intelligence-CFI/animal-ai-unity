@@ -23,5 +23,3 @@ arenas:
       rewardSpawnPosition: !Vector3 {x: 20, y: 5, z: 25} # Spawns the reward 5 units above the Hollow-Obj
       delayRewardSpawn: [false] # Spawns the reward immediately if set false, otherwise, spawns after delayTime
       delayTime: [10] # Spawns the reward after 10 seconds
-
-  
