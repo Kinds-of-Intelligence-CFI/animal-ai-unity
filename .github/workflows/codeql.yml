@@ -7,7 +7,6 @@ on:
     branches: [ "main" ]
   schedule:
     - cron: '29 17 * * 0'
-  workflow_dispatch:
 
 jobs:
   analyze:
@@ -33,14 +32,17 @@ jobs:
       with:
         languages: ${{ matrix.language }}
 
+    # Removed Autobuild step
+    # - name: Autobuild (Commented out because custom build steps are required)
+    #   uses: github/codeql-action/autobuild@v3
+
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: '5.0'
+        dotnet-version: '3.1' # Specify your .NET Core version here
 
     - name: Build with dotnet
-      run: dotnet build animal-ai-unity.sln --configuration Release
-
+      run: dotnet build YourSolution.sln --configuration Release
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
