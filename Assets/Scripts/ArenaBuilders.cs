@@ -303,7 +303,8 @@ namespace ArenaBuilders
 					{ "rewardWeights", spawnable.RewardWeights },
 					{ "rewardSpawnPos", rewardSpawnPos },
 					{ "maxRewardCounts", spawnable.maxRewardCounts },
-
+					
+					// SpawnerHollowBox
 					{ "rewardToSpawn", spawnable.rewardToSpawn },
 					{ "rewardSpawnPosition", spawnable.rewardSpawnPosition },
 					{ "delayRewardSpawn", spawnable.delayRewardSpawn },
