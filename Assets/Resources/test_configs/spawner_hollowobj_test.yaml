@@ -15,7 +15,7 @@ arenas:
       - !Vector3 {x: 20, y: 0, z: 20}
       rotations: [0]
     - !Item
-      name: Hollow-Obj
+      name: SpawnerHollowBox
       positions:
       - !Vector3 {x: 20, y: 0, z: 25}
       colors: # can be randomized by removing this field
