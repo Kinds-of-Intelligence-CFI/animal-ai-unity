@@ -64,7 +64,7 @@ namespace ArenasParameters
 
 		public Dictionary<int, int> originalToNewIDMapping = new Dictionary<int, int>();
 
-		// SpawnerHollowBox
+		// [Spawner] HollowObj
 		public List<string> rewardToSpawn { get; set; }
 		public Vector3 rewardSpawnPosition { get; set; }
 		public List<bool> delayRewardSpawn { get; set; }
