@@ -4,6 +4,8 @@ using UnityEngine;
 using System.Linq;
 using ArenaBuilders;
 
+/// THIS SCRIPT IS CURRENTLY NOT USED IN THE PROJECT
+
 /// <summary>
 /// Spawns hollow objects in the arena. 
 /// Hollow objects are game objects that have an accompanying reward object that is spawned at start or after a delay, just above the hollow object.
