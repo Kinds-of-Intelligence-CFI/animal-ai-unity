@@ -61,6 +61,7 @@ namespace ArenasParameters
 		public List<float> RewardWeights { get; private set; }
 		public Vector3 rewardSpawnPos { get; private set; }
 		public List<int> maxRewardCounts { get; private set; }
+
 		public Dictionary<int, int> originalToNewIDMapping = new Dictionary<int, int>();
 
 		/// <summary>

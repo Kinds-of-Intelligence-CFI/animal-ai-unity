@@ -858,6 +858,7 @@ MonoBehaviour:
     - {fileID: 6599169884992408241, guid: c382c2a5deefcec4493637923a912932, type: 3}
     - {fileID: 1323439192758780, guid: 70289c4d2c6d4a94eb4d73531e1a9ce6, type: 3}
     - {fileID: 8069506010422567580, guid: 2e66c94a6ed25c641ad85c58ce7e981b, type: 3}
+    - {fileID: 3105226629790840520, guid: f98e4e70443f6744e989e7879513b47c, type: 3}
   spawnedObjectsHolder: {fileID: 6276814220842007455, guid: ff9a0b038a04e8747a9f95217df0b26f, type: 3}
   maxSpawnAttemptsForAgent: 100
   maxSpawnAttemptsForPrefabs: 20
@@ -866,7 +867,6 @@ MonoBehaviour:
     - {fileID: 7334380931721050334}
     - {fileID: 2049938451244076549}
   arenaID: -1
-  maxarenaID: -1
   _agent: {fileID: 0}
 --- !u!1 &1583564189836146
 GameObject:

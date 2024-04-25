@@ -280,6 +280,7 @@ namespace ArenaBuilders
 				float spawnProbability = spawnable.SpawnProbability;
 				Vector3 rewardSpawnPos = spawnable.rewardSpawnPos;
 
+
 				// Assign the optional parameters to a dictionary
 				Dictionary<string, object> optionals = new Dictionary<string, object>()
 				{
@@ -300,7 +301,7 @@ namespace ArenaBuilders
 					{ "rewardNames", spawnable.RewardNames },
 					{ "rewardWeights", spawnable.RewardWeights },
 					{ "rewardSpawnPos", rewardSpawnPos },
-					{ "maxRewardCounts", spawnable.maxRewardCounts }
+					{ "maxRewardCounts", spawnable.maxRewardCounts },
 				};
 
 				// Determines a suitable position and rotation for the object to spawn

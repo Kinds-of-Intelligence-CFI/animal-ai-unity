@@ -83,6 +83,7 @@ namespace YAMLDefs
 		public List<float> changeRates { get; set; } = new List<float>();
 		public List<float> ripenTimes { get; set; } = new List<float>();
 
+		// SpawnerButton
 		public List<float> moveDurations { get; set; } = new List<float>();
 		public List<float> resetDurations { get; set; } = new List<float>();
 		public float spawnProbability { get; set; } = 1f;

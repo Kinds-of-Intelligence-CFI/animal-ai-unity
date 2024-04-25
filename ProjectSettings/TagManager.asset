@@ -30,6 +30,7 @@ TagManager:
   - SignPoster
   - DecoyGoal
   - DecoyGoalBounce
+  - HollowObj
   layers:
   - Default
   - TransparentFX
