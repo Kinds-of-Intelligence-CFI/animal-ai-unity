@@ -57,8 +57,9 @@ public class TrainingAgent : Agent, IPrefab
 
 	[Header("CSV Logging")]
 	public string csvFilePath = "Observations.csv";
+	private StreamWriter writer;
 	private bool headerWritten = false;
-	
+
 	public override void Initialize()
 	{
 		_arena = GetComponentInParent<TrainingArena>();
@@ -67,10 +68,26 @@ public class TrainingAgent : Agent, IPrefab
 		progBar = GameObject.Find("UI ProgressBar").GetComponent<ProgressBar>();
 		progBar.AssignAgent(this);
 		health = _maxHealth;
-		
-		if (!File.Exists(csvFilePath))
+
+		writer = new StreamWriter(csvFilePath, true);
+		if (!File.Exists(csvFilePath) || new FileInfo(csvFilePath).Length == 0)
 		{
-			headerWritten = false; // If the file doesn't exist, we need to write the header
+			// Write header if the file is new or empty
+			writer.WriteLine("Episode,Step,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition");
+			headerWritten = true;
+		}
+	}
+
+	protected override void OnDisable()
+	{
+		// Call the base class method to ensure any of its functionality is executed
+		base.OnDisable();
+
+		// Your additional code
+		if (writer != null)
+		{
+			writer.Close();
+			writer = null; // Ensure proper disposal of the resource
 		}
 	}
 
@@ -139,16 +156,15 @@ public class TrainingAgent : Agent, IPrefab
 
 	private void LogToCSV(Vector3 velocity, Vector3 position)
 	{
-		using (StreamWriter sw = new StreamWriter(csvFilePath, true))
+		if (!headerWritten)
 		{
-			if (!headerWritten)
-			{
-				sw.WriteLine("Step,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition");
-				headerWritten = true;
-			}
-			sw.WriteLine($"{StepCount},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z}");
+			writer.WriteLine("Episode,Step,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition");
+			headerWritten = true;
 		}
+		writer.WriteLine($"{Academy.Instance.EpisodeCount},{StepCount},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z}");
+		writer.Flush();  // Ensure data is written immediately
 	}
+
 
 	public override void OnActionReceived(ActionBuffers action)
 	{
@@ -336,6 +352,8 @@ public class TrainingAgent : Agent, IPrefab
 
 	public override void OnEpisodeBegin()
 	{
+		writer.WriteLine($"\nNew Episode,{Academy.Instance.EpisodeCount},,,,,,,,");
+		writer.Flush();
 		EpisodeDebugLog();
 
 		StopCoroutine("unfreezeCountdown");
