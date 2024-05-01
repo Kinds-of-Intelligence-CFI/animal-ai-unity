@@ -105,6 +105,16 @@ public class TrainingAgent : Agent, IPrefab
 		}
 	}
 
+	private void LogToCSV(Vector3 velocity, Vector3 position)
+	{
+		if (!headerWritten)
+		{
+			writer.WriteLine("Episode,Step,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition");
+			headerWritten = true;
+		}
+		writer.WriteLine($"{Academy.Instance.EpisodeCount},{StepCount},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z}");
+		writer.Flush();  // Ensure data is written immediately
+	}
 
 	// TODO: does this method need to exist? i created it as it gave an error and the documentation said to override it
 	protected override void OnDisable()
@@ -174,17 +184,6 @@ public class TrainingAgent : Agent, IPrefab
 		Vector3 localPos = transform.position;
 		sensor.AddObservation(localPos);
 		LogToCSV(localVel, localPos);
-	}
-
-	private void LogToCSV(Vector3 velocity, Vector3 position)
-	{
-		if (!headerWritten)
-		{
-			writer.WriteLine("Episode,Step,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition");
-			headerWritten = true;
-		}
-		writer.WriteLine($"{Academy.Instance.EpisodeCount},{StepCount},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z}");
-		writer.Flush();  // Ensure data is written immediately
 	}
 
 
