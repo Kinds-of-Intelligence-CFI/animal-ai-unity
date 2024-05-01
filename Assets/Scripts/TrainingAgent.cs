@@ -99,7 +99,7 @@ public class TrainingAgent : Agent, IPrefab
 		writer = new StreamWriter(csvFilePath, true);
 		if (!File.Exists(csvFilePath) || new FileInfo(csvFilePath).Length == 0)
 		{
-			// Attributes for the CSV file --> can be changed as needed
+			// Attribute headers for the CSV file --> can be changed as needed
 			writer.WriteLine("Episode,Step,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition");
 			headerWritten = true;
 		}
