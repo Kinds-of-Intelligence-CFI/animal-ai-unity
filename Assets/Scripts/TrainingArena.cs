@@ -46,7 +46,8 @@ public class TrainingArena : MonoBehaviour
 	public bool showNotification { get; set; }
 	public bool mergeNextArena
 	{
-		get {
+		get
+		{
 			return _arenaConfiguration.mergeNextArena;
 		}
 	}
@@ -113,8 +114,6 @@ public class TrainingArena : MonoBehaviour
 		}
 		return mergedArenas;
 	}
-
-	#region Arena Handling Methods
 
 	/// <summary>
 	/// Resets the arena by destroying existing objects and spawning new ones based on the current arena configuration.
@@ -203,7 +202,7 @@ public class TrainingArena : MonoBehaviour
 	private int ChooseRandomArenaID(int totalArenas)
 	{
 		// Populate the list of merged arenas if needed
-		if (_mergedArenas == null){ _mergedArenas = GetMergedArenas(); }
+		if (_mergedArenas == null) { _mergedArenas = GetMergedArenas(); }
 
 		playedArenas.Add(arenaID);
 		if (playedArenas.Count >= totalArenas)
@@ -244,10 +243,6 @@ public class TrainingArena : MonoBehaviour
 	{
 		_environmentManager.TriggerArenaChangeEvent(arenaID, _environmentManager.GetTotalArenas());
 	}
-	
-	#endregion
-
-	#region Other Methods
 
 	/// <summary>
 	/// Destroys all spawned rewards in the arena.
@@ -297,6 +292,4 @@ public class TrainingArena : MonoBehaviour
 	{
 		spawnedRewards.Add(reward);
 	}
-
-	#endregion
 }

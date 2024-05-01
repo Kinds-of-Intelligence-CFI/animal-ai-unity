@@ -128,8 +128,6 @@ public class TrainingAgent : Agent, IPrefab
 		return _previousScore;
 	}
 
-	#region Agent Freeze Methods
-
 	public float GetFreezeDelay()
 	{
 		return _freezeDelay;
@@ -172,10 +170,6 @@ public class TrainingAgent : Agent, IPrefab
 		_isCountdownActive = false;
 	}
 
-	#endregion
-
-	#region Agent Core Methods
-
 	public override void CollectObservations(VectorSensor sensor)
 	{
 		sensor.AddObservation(health);
@@ -185,7 +179,6 @@ public class TrainingAgent : Agent, IPrefab
 		sensor.AddObservation(localPos);
 		LogToCSV(localVel, localPos);
 	}
-
 
 	public override void OnActionReceived(ActionBuffers action)
 	{
@@ -270,10 +263,6 @@ public class TrainingAgent : Agent, IPrefab
 		}
 	}
 
-	#endregion
-
-	#region Agent Health Methods
-
 	public void UpdateHealthNextStep(float updateAmount, bool andCompleteArena = false)
 	{
 		/// <summary>
@@ -354,10 +343,6 @@ public class TrainingAgent : Agent, IPrefab
 		UpdateHealth(Math.Min(rewardFactor * _rewardPerStep, -0.001f));
 	}
 
-	#endregion
-
-	#region Episode End Methods
-
 	IEnumerator EndEpisodeAfterDelay()
 	{
 		if (!showNotification)
@@ -396,10 +381,6 @@ public class TrainingAgent : Agent, IPrefab
 		Debug.Log("Number of Goals Collected: " + numberOfGoalsCollected);
 	}
 
-	#endregion
-
-	#region Collision Detection Methods
-
 	void OnCollisionEnter(Collision collision)
 	{
 		foreach (ContactPoint contact in collision.contacts)
@@ -431,10 +412,6 @@ public class TrainingAgent : Agent, IPrefab
 			_isGrounded = false;
 		}
 	}
-
-	#endregion
-
-	#region Prefab Interface Methods
 
 	//******************************
 	//PREFAB INTERFACE FOR THE AGENT
@@ -475,6 +452,4 @@ public class TrainingAgent : Agent, IPrefab
 	{
 		return new Vector3(0, rotationY < 0 ? Random.Range(0f, 360f) : rotationY, 0);
 	}
-
-	#endregion
 }
