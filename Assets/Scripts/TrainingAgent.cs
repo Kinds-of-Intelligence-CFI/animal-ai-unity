@@ -69,43 +69,42 @@ public class TrainingAgent : Agent, IPrefab
 		progBar.AssignAgent(this);
 		health = _maxHealth;
 
-		//base path for the logs to be stored
+		// Base path for the logs to be stored
 		string basePath;
 
-		// not relevant to training but useful for debugging
 		if (Application.isEditor)
 		{
-			// setting the base path to the root of the project
+			// The root directory is the parent of the Assets folder
 			basePath = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
 		}
 		else
 		{
-			// if were running a build version, set the base path to the data path. might need to be changed...
-			basePath = Application.dataPath;
+			// Important! For builds, use the parent of the directory where the executable resides
+			basePath = Path.GetDirectoryName(Application.dataPath);
 		}
 
-		// observationLogs folder directory
+		// Folder for the CSV logs
 		string directoryPath = Path.Combine(basePath, "observationLogs");
 
-		// simple check if the folder exists, if not create it
+		// Simple check to see if the directory exists, if not create it
 		if (!Directory.Exists(directoryPath))
 		{
 			Directory.CreateDirectory(directoryPath);
 		}
 
-		// so this is the path to the csv file. the first parameter is the directory path, the second is the file name. the file name should be changed...
+		// Full path for the CSV file
 		// TODO: change the file name to something more descriptive
 		csvFilePath = Path.Combine(directoryPath, "Observations.csv");
 
-		//initialize the stream writer
 		writer = new StreamWriter(csvFilePath, true);
 		if (!File.Exists(csvFilePath) || new FileInfo(csvFilePath).Length == 0)
 		{
-			// need to do some testing here...
+			// Attributes for the CSV file --> can be changed as needed
 			writer.WriteLine("Episode,Step,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition");
 			headerWritten = true;
 		}
 	}
+
 
 	// TODO: does this method need to exist? i created it as it gave an error and the documentation said to override it
 	protected override void OnDisable()
