@@ -356,7 +356,7 @@ public class TrainingAgent : Agent, IPrefab
 
 	#endregion
 
-	#region Agent Episode Methods
+	#region Episode End Methods
 
 	IEnumerator EndEpisodeAfterDelay()
 	{
