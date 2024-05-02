@@ -23,6 +23,9 @@ public class TrainingAgent : Agent, IPrefab
 	public float rotationSpeed = 100f;
 	public float rotationAngle = 0.25f;
 
+	private int lastActionForward = 0;
+	private int lastActionRotate = 0;
+
 	[Header("Agent State / Other Variables")]
 	[HideInInspector]
 	public int numberOfGoalsCollected = 0;
@@ -100,27 +103,25 @@ public class TrainingAgent : Agent, IPrefab
 		if (!File.Exists(csvFilePath) || new FileInfo(csvFilePath).Length == 0)
 		{
 			// Attribute headers for the CSV file --> can be changed as needed
-			writer.WriteLine("Episode,Step,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition");
+			writer.WriteLine("Episode,Step,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate");
 			headerWritten = true;
 		}
 	}
 
-	private void LogToCSV(Vector3 velocity, Vector3 position)
+	private void LogToCSV(Vector3 velocity, Vector3 position, int lastActionForward, int lastActionRotate)
 	{
-		if (!headerWritten)
-		{
-			writer.WriteLine("Episode,Step,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition");
-			headerWritten = true;
-		}
-		writer.WriteLine($"{Academy.Instance.EpisodeCount},{StepCount},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z}");
-		writer.Flush();  // Ensure data is written immediately
+		writer.WriteLine($"{Academy.Instance.EpisodeCount},{StepCount},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate}");
+		writer.Flush();
 	}
 
-	// TODO: does this method need to exist? i created it as it gave an error and the documentation said to override it
 	protected override void OnDisable()
 	{
-		// close the writer when the agent is disabled
 		base.OnDisable();
+		if (writer != null)
+		{
+			writer.Flush();
+			writer.Close();
+		}
 	}
 
 	public float GetPreviousScore()
@@ -177,20 +178,24 @@ public class TrainingAgent : Agent, IPrefab
 		sensor.AddObservation(localVel);
 		Vector3 localPos = transform.position;
 		sensor.AddObservation(localPos);
-		LogToCSV(localVel, localPos);
+		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate);
 	}
 
 	public override void OnActionReceived(ActionBuffers action)
 	{
-		int actionForward = Mathf.FloorToInt(action.DiscreteActions[0]);
-		int actionRotate = Mathf.FloorToInt(action.DiscreteActions[1]);
+		lastActionForward = Mathf.FloorToInt(action.DiscreteActions[0]);
+		lastActionRotate = Mathf.FloorToInt(action.DiscreteActions[1]);
 		if (!IsFrozen())
 		{
-			MoveAgent(actionForward, actionRotate);
+			MoveAgent(lastActionForward, lastActionRotate);
 		}
 
+		Vector3 localVel = transform.InverseTransformDirection(_rigidBody.velocity);
+		Vector3 localPos = transform.position;
+		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate);
 		UpdateHealth(_rewardPerStep);
 	}
+
 
 	private void MoveAgent(int actionForward, int actionRotate)
 	{
