@@ -72,6 +72,12 @@ public class TrainingAgent : Agent, IPrefab
 		progBar.AssignAgent(this);
 		health = _maxHealth;
 
+		InitialiseCSVProcess();
+
+	}
+
+	private void InitialiseCSVProcess()
+	{
 		// Base path for the logs to be stored
 		string basePath;
 
