@@ -101,9 +101,10 @@ public class TrainingAgent : Agent, IPrefab
 			Directory.CreateDirectory(directoryPath);
 		}
 
-		// Full path for the CSV file
-		// TODO: change the file name to something more descriptive
-		csvFilePath = Path.Combine(directoryPath, "Observations.csv");
+		// Generate a filename with a date stamp - this will be unique for each run
+		string dateTimeString = DateTime.Now.ToString("dd-MM-yy_HHmm");
+		string filename = $"Observations_{dateTimeString}.csv";
+		csvFilePath = Path.Combine(directoryPath, filename);
 
 		writer = new StreamWriter(csvFilePath, true);
 		if (!File.Exists(csvFilePath) || new FileInfo(csvFilePath).Length == 0)
