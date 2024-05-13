@@ -147,9 +147,9 @@ public class TrainingAgent : Agent, IPrefab
 		if (v != 0f && !_isCountdownActive)
 		{
 			Debug.Log(
-				"Starting coroutine unfreezeCountdown() with wait seconds == " + GetFreezeDelay()
+				"Starting coroutine UnfreezeCountdown() with wait seconds == " + GetFreezeDelay()
 			);
-			StartCoroutine(unfreezeCountdown());
+			StartCoroutine(UnfreezeCountdown());
 		}
 	}
 
@@ -168,7 +168,7 @@ public class TrainingAgent : Agent, IPrefab
 		}
 	}
 
-	private IEnumerator unfreezeCountdown()
+	private IEnumerator UnfreezeCountdown()
 	{
 		_isCountdownActive = true;
 		yield return new WaitForSeconds(GetFreezeDelay());
@@ -370,11 +370,11 @@ public class TrainingAgent : Agent, IPrefab
 
 	public override void OnEpisodeBegin()
 	{
-		writer.WriteLine($"\nNew Episode,{Academy.Instance.EpisodeCount},,,,,,,,");
+		writer.WriteLine($"\nNew Episode,{Academy.Instance.EpisodeCount}-----");
 		writer.Flush();
 		EpisodeDebugLog();
 
-		StopCoroutine("unfreezeCountdown");
+		StopCoroutine("UnfreezeCountdown");
 		_previousScore = _currentScore;
 		numberOfGoalsCollected = 0;
 		_arena.ResetArena();
