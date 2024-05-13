@@ -791,8 +791,8 @@
     <Reference Include="Unity.Barracuda.iOSBLAS">
         <HintPath>C:\Users\ia424\Desktop\animal-ai-unity\Library\ScriptAssemblies\Unity.Barracuda.iOSBLAS.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.Barracuda.ONNX">
-        <HintPath>C:\Users\ia424\Desktop\animal-ai-unity\Library\ScriptAssemblies\Unity.Barracuda.ONNX.dll</HintPath>
+    <Reference Include="Unity.Recorder.Editor">
+        <HintPath>C:\Users\ia424\Desktop\animal-ai-unity\Library\ScriptAssemblies\Unity.Recorder.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VSCode.Editor">
         <HintPath>C:\Users\ia424\Desktop\animal-ai-unity\Library\ScriptAssemblies\Unity.VSCode.Editor.dll</HintPath>
@@ -800,8 +800,14 @@
     <Reference Include="Unity.Barracuda.BurstBLAS">
         <HintPath>C:\Users\ia424\Desktop\animal-ai-unity\Library\ScriptAssemblies\Unity.Barracuda.BurstBLAS.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.Barracuda.ONNX">
+        <HintPath>C:\Users\ia424\Desktop\animal-ai-unity\Library\ScriptAssemblies\Unity.Barracuda.ONNX.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.RenderPipelines.Universal.Shaders">
         <HintPath>C:\Users\ia424\Desktop\animal-ai-unity\Library\ScriptAssemblies\Unity.RenderPipelines.Universal.Shaders.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Recorder.Base">
+        <HintPath>C:\Users\ia424\Desktop\animal-ai-unity\Library\ScriptAssemblies\Unity.Recorder.Base.dll</HintPath>
     </Reference>
     <Reference Include="Unity.RenderPipelines.Universal.Runtime">
         <HintPath>C:\Users\ia424\Desktop\animal-ai-unity\Library\ScriptAssemblies\Unity.RenderPipelines.Universal.Runtime.dll</HintPath>
@@ -898,6 +904,9 @@
     </Reference>
     <Reference Include="Unity.SysrootPackage.Editor">
         <HintPath>C:\Users\ia424\Desktop\animal-ai-unity\Library\ScriptAssemblies\Unity.SysrootPackage.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Recorder">
+        <HintPath>C:\Users\ia424\Desktop\animal-ai-unity\Library\ScriptAssemblies\Unity.Recorder.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
