@@ -93,7 +93,7 @@ public class TrainingAgent : Agent, IPrefab
 		}
 
 		// Folder for the CSV logs
-		string directoryPath = Path.Combine(basePath, "observationLogs");
+		string directoryPath = Path.Combine(basePath, "ObservationLogs");
 
 		// Simple check to see if the directory exists, if not create it
 		if (!Directory.Exists(directoryPath))
