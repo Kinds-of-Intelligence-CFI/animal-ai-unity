@@ -203,7 +203,6 @@ public class TrainingAgent : Agent, IPrefab
 		UpdateHealth(_rewardPerStep);
 	}
 
-
 	private void MoveAgent(int actionForward, int actionRotate)
 	{
 		if (IsFrozen())
