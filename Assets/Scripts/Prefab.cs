@@ -7,7 +7,7 @@ using PrefabInterface;
 using System.Reflection;
 
 /// <summary>
-/// A Prefab represents a GameObject that cna be spawned in an arena, it also contains the range of
+/// A Prefab represents a GameObject that can be spawned in an arena, it also contains the range of
 /// values that the user can pass as parameters
 /// </summary>
 public class Prefab : MonoBehaviour, IPrefab
