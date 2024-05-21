@@ -120,6 +120,9 @@ namespace YAMLDefs
 			{ "Pillar-Button", "SpawnerButton" },
 		};
 
+		/// <summary>
+		/// ResolveAlias method is used to resolve the alias of the game object name for backwards-compatibility.
+		/// </summary>
 		public static string ResolveAlias(string name)
 		{
 			if (AliasMap.TryGetValue(name, out string newName))
