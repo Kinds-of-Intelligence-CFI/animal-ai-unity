@@ -85,6 +85,11 @@ public class TrainingAgent : Agent, IPrefab
 		}
 	}
 
+	public void SetYamlFileName(string fileName)
+	{
+		yamlFileName = fileName;
+	}
+
 	private void InitialiseCSVProcess()
 	{
 		// Base path for the logs to be stored
@@ -118,27 +123,23 @@ public class TrainingAgent : Agent, IPrefab
 		writer = new StreamWriter(csvFilePath, true);
 		if (!File.Exists(csvFilePath) || new FileInfo(csvFilePath).Length == 0)
 		{
-			// Attribute headers for the CSV file --> can be changed as needed
-			writer.WriteLine("Episode,Step,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,IsFrozen?");
+			writer.WriteLine("Episode,Step,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen");
 			headerWritten = true;
 		}
 	}
 
-	public void SetYamlFileName(string fileName)
-	{
-		yamlFileName = fileName;
-	}
-
 	private void LogToCSV(
-		Vector3 velocity,
-		Vector3 position,
-		int lastActionForward,
-		int lastActionRotate,
-		bool isFrozen
+	Vector3 velocity,
+	Vector3 position,
+	int lastActionForward,
+	int lastActionRotate,
+	string actionForwardDescription,
+	string actionRotateDescription,
+	bool isFrozen
 	)
 	{
 		writer.WriteLine(
-			$"{Academy.Instance.EpisodeCount},{StepCount},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{isFrozen}"
+			$"{Academy.Instance.EpisodeCount},{StepCount},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen}"
 		);
 		writer.Flush();
 	}
@@ -204,11 +205,11 @@ public class TrainingAgent : Agent, IPrefab
 	{
 		sensor.AddObservation(health);
 		Vector3 localVel = transform.InverseTransformDirection(_rigidBody.velocity);
-		sensor.AddObservation(localVel);
 		Vector3 localPos = transform.position;
-		sensor.AddObservation(localPos);
 		bool isFrozen = IsFrozen();
-		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, isFrozen);
+		string actionForwardDescription = DescribeActionForward(lastActionForward);
+		string actionRotateDescription = DescribeActionRotate(lastActionRotate);
+		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen);
 	}
 
 	public override void OnActionReceived(ActionBuffers action)
@@ -223,8 +224,33 @@ public class TrainingAgent : Agent, IPrefab
 		Vector3 localVel = transform.InverseTransformDirection(_rigidBody.velocity);
 		Vector3 localPos = transform.position;
 		bool isFrozen = IsFrozen();
-		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, isFrozen);
+		string actionForwardDescription = DescribeActionForward(lastActionForward);
+		string actionRotateDescription = DescribeActionRotate(lastActionRotate);
+		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen);
 		UpdateHealth(_rewardPerStep);
+	}
+
+
+	private string DescribeActionForward(int actionForward)
+	{
+		return actionForward switch
+		{
+			0 => "No Movement",
+			1 => "Move Forward",
+			2 => "Move Backward",
+			_ => "Unknown Forward Action"
+		};
+	}
+
+	private string DescribeActionRotate(int actionRotate)
+	{
+		return actionRotate switch
+		{
+			0 => "No Rotation",
+			1 => "Rotate Right",
+			2 => "Rotate Left",
+			_ => "Unknown Rotation Action"
+		};
 	}
 
 	private void MoveAgent(int actionForward, int actionRotate)
