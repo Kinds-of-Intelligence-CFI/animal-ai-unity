@@ -17,450 +17,476 @@ using System.IO;
 /// </summary>
 public class TrainingAgent : Agent, IPrefab
 {
-	[Header("Agent Settings")]
-	public float speed = 25f;
-	public float quickStopRatio = 0.9f;
-	public float rotationSpeed = 100f;
-	public float rotationAngle = 0.25f;
+    [Header("Agent Settings")]
+    public float speed = 25f;
+    public float quickStopRatio = 0.9f;
+    public float rotationSpeed = 100f;
+    public float rotationAngle = 0.25f;
 
-	private int lastActionForward = 0;
-	private int lastActionRotate = 0;
+    private int lastActionForward = 0;
+    private int lastActionRotate = 0;
 
-	[Header("Agent State / Other Variables")]
-	[HideInInspector]
-	public int numberOfGoalsCollected = 0;
+    [Header("Agent State / Other Variables")]
+    [HideInInspector]
+    public int numberOfGoalsCollected = 0;
 
-	[HideInInspector]
-	public ProgressBar progBar;
-	private Rigidbody _rigidBody;
-	private bool _isGrounded;
-	private ContactPoint _lastContactPoint;
+    [HideInInspector]
+    public ProgressBar progBar;
+    private Rigidbody _rigidBody;
+    private bool _isGrounded;
+    private ContactPoint _lastContactPoint;
 
-	[Header("Agent Rewards & Score")]
-	private float _rewardPerStep;
-	private float _previousScore = 0;
-	private float _currentScore = 0;
+    [Header("Agent Rewards & Score")]
+    private float _rewardPerStep;
+    private float _previousScore = 0;
+    private float _currentScore = 0;
 
-	[Header("Agent Health")]
-	public float health = 100f;
-	private float _maxHealth = 100f;
+    [Header("Agent Health")]
+    public float health = 100f;
+    private float _maxHealth = 100f;
 
-	[Header("Agent Freeze & Countdown")]
-	public float timeLimit = 0f;
-	private float _nextUpdateHealth = 0f;
-	private float _freezeDelay = 0f;
-	private bool _isFrozen = false;
+    [Header("Agent Freeze & Countdown")]
+    public float timeLimit = 0f;
+    private float _nextUpdateHealth = 0f;
+    private float _freezeDelay = 0f;
+    private bool _isFrozen = false;
 
-	private bool _nextUpdateCompleteArena = false;
+    private bool _nextUpdateCompleteArena = false;
 
-	[Header("Agent Notification")]
-	public bool showNotification = false;
-	private TrainingArena _arena;
-	private bool _isCountdownActive = false;
+    [Header("Agent Notification")]
+    public bool showNotification = false;
+    private TrainingArena _arena;
+    private bool _isCountdownActive = false;
 
-	[Header("CSV Logging")]
-	public string csvFilePath = "Observations.csv";
-	private StreamWriter writer;
-	private bool headerWritten = false;
+    [Header("CSV Logging")]
+    public string csvFilePath = "Observations.csv";
+    private StreamWriter writer;
+    private bool headerWritten = false;
+    private string yamlFileName = "";
 
-	public override void Initialize()
-	{
-		_arena = GetComponentInParent<TrainingArena>();
-		_rigidBody = GetComponent<Rigidbody>();
-		_rewardPerStep = timeLimit > 0 ? -1f / timeLimit : 0;
-		progBar = GameObject.Find("UI ProgressBar").GetComponent<ProgressBar>();
-		progBar.AssignAgent(this);
-		health = _maxHealth;
+    public override void Initialize()
+    {
+        _arena = GetComponentInParent<TrainingArena>();
+        _rigidBody = GetComponent<Rigidbody>();
+        _rewardPerStep = timeLimit > 0 ? -1f / timeLimit : 0;
+        progBar = GameObject.Find("UI ProgressBar").GetComponent<ProgressBar>();
+        progBar.AssignAgent(this);
+        health = _maxHealth;
 
-		InitialiseCSVProcess();
+        InitialiseCSVProcess();
 
-	}
+        if (!Application.isEditor)
+        {
+            AAI3EnvironmentManager envManager = FindObjectOfType<AAI3EnvironmentManager>();
+            if (envManager != null)
+            {
+                SetYamlFileName(envManager.GetCurrentYamlFileName());
+            }
+        }
+    }
 
-	private void InitialiseCSVProcess()
-	{
-		// Base path for the logs to be stored
-		string basePath;
+    public void SetYamlFileName(string fileName)
+    {
+        yamlFileName = Path.GetFileNameWithoutExtension(fileName);
+        Debug.Log($"Set YAML file name: {yamlFileName}");
+    }
 
-		if (Application.isEditor)
-		{
-			// The root directory is the parent of the Assets folder
-			basePath = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
-		}
-		else
-		{
-			// Important! For builds, use the parent of the directory where the executable resides
-			basePath = Path.GetDirectoryName(Application.dataPath);
-		}
+    private void InitialiseCSVProcess()
+    {
+        // Base path for the logs to be stored
+        string basePath;
 
-		// Folder for the CSV logs
-		string directoryPath = Path.Combine(basePath, "ObservationLogs");
+        if (Application.isEditor)
+        {
+            // The root directory is the parent of the Assets folder
+            basePath = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+        }
+        else
+        {
+            // Important! For builds, use the parent of the directory where the executable resides
+            basePath = Path.GetDirectoryName(Application.dataPath);
+        }
 
-		// Simple check to see if the directory exists, if not create it
-		if (!Directory.Exists(directoryPath))
-		{
-			Directory.CreateDirectory(directoryPath);
-		}
+        // Folder for the CSV logs
+        string directoryPath = Path.Combine(basePath, "ObservationLogs");
 
-		// Generate a filename with a date stamp - this will be unique for each run
-		string dateTimeString = DateTime.Now.ToString("dd-MM-yy_HHmm");
-		string filename = $"Observations_{dateTimeString}.csv";
-		csvFilePath = Path.Combine(directoryPath, filename);
+        // Simple check to see if the directory exists, if not create it
+        if (!Directory.Exists(directoryPath))
+        {
+            Directory.CreateDirectory(directoryPath);
+        }
 
-		writer = new StreamWriter(csvFilePath, true);
-		if (!File.Exists(csvFilePath) || new FileInfo(csvFilePath).Length == 0)
-		{
-			// Attribute headers for the CSV file --> can be changed as needed
-			writer.WriteLine("Episode,Step,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate");
-			headerWritten = true;
-		}
-	}
+        // Generate a filename with a date stamp - this will be unique for each run
+        string dateTimeString = DateTime.Now.ToString("dd-MM-yy_HHmm");
+        string filename = Application.isEditor
+            ? $"Observations_{yamlFileName}_{dateTimeString}.csv"
+            : $"Observations_{dateTimeString}.csv";
+        csvFilePath = Path.Combine(directoryPath, filename);
 
-	private void LogToCSV(Vector3 velocity, Vector3 position, int lastActionForward, int lastActionRotate)
-	{
-		writer.WriteLine($"{Academy.Instance.EpisodeCount},{StepCount},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate}");
-		writer.Flush();
-	}
+        writer = new StreamWriter(csvFilePath, true);
+        if (!File.Exists(csvFilePath) || new FileInfo(csvFilePath).Length == 0)
+        {
+            // Attribute headers for the CSV file --> can be changed as needed
+            writer.WriteLine(
+                "Episode,Step,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate"
+            );
+            headerWritten = true;
+        }
+    }
 
-	protected override void OnDisable()
-	{
-		base.OnDisable();
-		if (writer != null)
-		{
-			writer.Flush();
-			writer.Close();
-		}
-	}
+    private void LogToCSV(
+        Vector3 velocity,
+        Vector3 position,
+        int lastActionForward,
+        int lastActionRotate
+    )
+    {
+        writer.WriteLine(
+            $"{Academy.Instance.EpisodeCount},{StepCount},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate}"
+        );
+        writer.Flush();
+    }
 
-	public float GetPreviousScore()
-	{
-		return _previousScore;
-	}
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        if (writer != null)
+        {
+            writer.Flush();
+            writer.Close();
+        }
+    }
 
-	public float GetFreezeDelay()
-	{
-		return _freezeDelay;
-	}
+    public float GetPreviousScore()
+    {
+        return _previousScore;
+    }
 
-	public void SetFreezeDelay(float v)
-	{
-		_freezeDelay = Mathf.Clamp(v, 0f, v);
-		if (v != 0f && !_isCountdownActive)
-		{
-			Debug.Log(
-				"Starting coroutine UnfreezeCountdown() with wait seconds == " + GetFreezeDelay()
-			);
-			StartCoroutine(UnfreezeCountdown());
-		}
-	}
+    public float GetFreezeDelay()
+    {
+        return _freezeDelay;
+    }
 
-	public bool IsFrozen()
-	{
-		return _freezeDelay > 0f || _isFrozen;
-	}
+    public void SetFreezeDelay(float v)
+    {
+        _freezeDelay = Mathf.Clamp(v, 0f, v);
+        if (v != 0f && !_isCountdownActive)
+        {
+            Debug.Log(
+                "Starting coroutine UnfreezeCountdown() with wait seconds == " + GetFreezeDelay()
+            );
+            StartCoroutine(UnfreezeCountdown());
+        }
+    }
 
-	public void FreezeAgent(bool freeze)
-	{
-		_isFrozen = freeze;
-		if (_isFrozen)
-		{
-			_rigidBody.velocity = Vector3.zero;
-			_rigidBody.angularVelocity = Vector3.zero;
-		}
-	}
+    public bool IsFrozen()
+    {
+        return _freezeDelay > 0f || _isFrozen;
+    }
 
-	private IEnumerator UnfreezeCountdown()
-	{
-		_isCountdownActive = true;
-		yield return new WaitForSeconds(GetFreezeDelay());
+    public void FreezeAgent(bool freeze)
+    {
+        _isFrozen = freeze;
+        if (_isFrozen)
+        {
+            _rigidBody.velocity = Vector3.zero;
+            _rigidBody.angularVelocity = Vector3.zero;
+        }
+    }
 
-		Debug.Log("unfreezing!");
-		SetFreezeDelay(0f);
-		_isCountdownActive = false;
-	}
+    private IEnumerator UnfreezeCountdown()
+    {
+        _isCountdownActive = true;
+        yield return new WaitForSeconds(GetFreezeDelay());
 
-	public override void CollectObservations(VectorSensor sensor)
-	{
-		sensor.AddObservation(health);
-		Vector3 localVel = transform.InverseTransformDirection(_rigidBody.velocity);
-		sensor.AddObservation(localVel);
-		Vector3 localPos = transform.position;
-		sensor.AddObservation(localPos);
-		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate);
-	}
+        Debug.Log("unfreezing!");
+        SetFreezeDelay(0f);
+        _isCountdownActive = false;
+    }
 
-	public override void OnActionReceived(ActionBuffers action)
-	{
-		lastActionForward = Mathf.FloorToInt(action.DiscreteActions[0]);
-		lastActionRotate = Mathf.FloorToInt(action.DiscreteActions[1]);
-		if (!IsFrozen())
-		{
-			MoveAgent(lastActionForward, lastActionRotate);
-		}
+    public override void CollectObservations(VectorSensor sensor)
+    {
+        sensor.AddObservation(health);
+        Vector3 localVel = transform.InverseTransformDirection(_rigidBody.velocity);
+        sensor.AddObservation(localVel);
+        Vector3 localPos = transform.position;
+        sensor.AddObservation(localPos);
+        LogToCSV(localVel, localPos, lastActionForward, lastActionRotate);
+    }
 
-		Vector3 localVel = transform.InverseTransformDirection(_rigidBody.velocity);
-		Vector3 localPos = transform.position;
-		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate);
-		UpdateHealth(_rewardPerStep);
-	}
+    public override void OnActionReceived(ActionBuffers action)
+    {
+        lastActionForward = Mathf.FloorToInt(action.DiscreteActions[0]);
+        lastActionRotate = Mathf.FloorToInt(action.DiscreteActions[1]);
+        if (!IsFrozen())
+        {
+            MoveAgent(lastActionForward, lastActionRotate);
+        }
 
-	private void MoveAgent(int actionForward, int actionRotate)
-	{
-		if (IsFrozen())
-		{
-			// If the agent is frozen, stop all movement and rotation
-			_rigidBody.velocity = Vector3.zero;
-			_rigidBody.angularVelocity = Vector3.zero;
-			return;
-		}
+        Vector3 localVel = transform.InverseTransformDirection(_rigidBody.velocity);
+        Vector3 localPos = transform.position;
+        LogToCSV(localVel, localPos, lastActionForward, lastActionRotate);
+        UpdateHealth(_rewardPerStep);
+    }
 
-		Vector3 directionToGo = Vector3.zero;
-		Vector3 rotateDirection = Vector3.zero;
-		Vector3 quickStop = Vector3.zero;
+    private void MoveAgent(int actionForward, int actionRotate)
+    {
+        if (IsFrozen())
+        {
+            // If the agent is frozen, stop all movement and rotation
+            _rigidBody.velocity = Vector3.zero;
+            _rigidBody.angularVelocity = Vector3.zero;
+            return;
+        }
 
-		if (_isGrounded)
-		{
-			switch (actionForward)
-			{
-				case 1:
-					directionToGo = transform.forward * 1f;
-					break;
-				case 2:
-					directionToGo = transform.forward * -1f;
-					break;
-				case 0: // Slow down faster than drag with no input
-					quickStop = _rigidBody.velocity * quickStopRatio;
-					_rigidBody.velocity = quickStop;
-					break;
-			}
-		}
+        Vector3 directionToGo = Vector3.zero;
+        Vector3 rotateDirection = Vector3.zero;
+        Vector3 quickStop = Vector3.zero;
 
-		switch (actionRotate)
-		{
-			case 1:
-				rotateDirection = transform.up * 1f;
-				break;
-			case 2:
-				rotateDirection = transform.up * -1f;
-				break;
-		}
+        if (_isGrounded)
+        {
+            switch (actionForward)
+            {
+                case 1:
+                    directionToGo = transform.forward * 1f;
+                    break;
+                case 2:
+                    directionToGo = transform.forward * -1f;
+                    break;
+                case 0: // Slow down faster than drag with no input
+                    quickStop = _rigidBody.velocity * quickStopRatio;
+                    _rigidBody.velocity = quickStop;
+                    break;
+            }
+        }
 
-		transform.Rotate(rotateDirection, Time.fixedDeltaTime * rotationSpeed);
-		_rigidBody.AddForce(
-			directionToGo.normalized * speed * 100f * Time.fixedDeltaTime,
-			ForceMode.Acceleration
-		);
-	}
+        switch (actionRotate)
+        {
+            case 1:
+                rotateDirection = transform.up * 1f;
+                break;
+            case 2:
+                rotateDirection = transform.up * -1f;
+                break;
+        }
 
-	public override void Heuristic(in ActionBuffers actionsOut)
-	{
-		var discreteActionsOut = actionsOut.DiscreteActions;
-		discreteActionsOut[0] = 0;
-		discreteActionsOut[1] = 0;
-		if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
-		{
-			discreteActionsOut[0] = 1;
-		}
-		if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
-		{
-			discreteActionsOut[0] = 2;
-		}
-		if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
-		{
-			discreteActionsOut[1] = 1;
-		}
-		if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
-		{
-			discreteActionsOut[1] = 2;
-		}
-	}
+        transform.Rotate(rotateDirection, Time.fixedDeltaTime * rotationSpeed);
+        _rigidBody.AddForce(
+            directionToGo.normalized * speed * 100f * Time.fixedDeltaTime,
+            ForceMode.Acceleration
+        );
+    }
 
-	public void UpdateHealthNextStep(float updateAmount, bool andCompleteArena = false)
-	{
-		/// <summary>
-		/// ML-Agents doesn't guarantee behaviour if an episode ends outside of OnActionReceived
-		/// Therefore we queue any health updates to happen on the next action step.
-		/// </summary>
-		_nextUpdateHealth += updateAmount;
-		if (andCompleteArena)
-		{
-			_nextUpdateCompleteArena = true;
-		}
-	}
+    public override void Heuristic(in ActionBuffers actionsOut)
+    {
+        var discreteActionsOut = actionsOut.DiscreteActions;
+        discreteActionsOut[0] = 0;
+        discreteActionsOut[1] = 0;
+        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
+        {
+            discreteActionsOut[0] = 1;
+        }
+        if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+        {
+            discreteActionsOut[0] = 2;
+        }
+        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+        {
+            discreteActionsOut[1] = 1;
+        }
+        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+        {
+            discreteActionsOut[1] = 2;
+        }
+    }
 
-	public void UpdateHealth(float updateAmount, bool andCompleteArena = false)
-	{
-		if (NotificationManager.Instance == null && showNotification == true)
-		{
-			Debug.LogError("NotificationManager instance is not set.");
-			return;
-		}
-		/// <summary>
-		/// Update the health of the agent and reset any queued updates
-		/// If health reaches 0 or the episode is queued to end then call EndEpisode().
-		/// </summary>
-		if (!IsFrozen())
-		{
-			health += 100 * updateAmount;
-			health += 100 * _nextUpdateHealth;
-			_nextUpdateHealth = 0;
-			AddReward(updateAmount);
-		}
-		_currentScore = GetCumulativeReward();
-		if (health > _maxHealth)
-		{
-			health = _maxHealth;
-		}
-		else if (health <= 0)
-		{
-			health = 0;
-			if (showNotification)
-			{
-				NotificationManager.Instance.ShowFailureNotification();
-			}
-			StartCoroutine(EndEpisodeAfterDelay());
-			return;
-		}
-		if (andCompleteArena || _nextUpdateCompleteArena)
-		{
-			_nextUpdateCompleteArena = false;
-			float cumulativeReward = this.GetCumulativeReward();
+    public void UpdateHealthNextStep(float updateAmount, bool andCompleteArena = false)
+    {
+        /// <summary>
+        /// ML-Agents doesn't guarantee behaviour if an episode ends outside of OnActionReceived
+        /// Therefore we queue any health updates to happen on the next action step.
+        /// </summary>
+        _nextUpdateHealth += updateAmount;
+        if (andCompleteArena)
+        {
+            _nextUpdateCompleteArena = true;
+        }
+    }
 
-			if (cumulativeReward >= Arena.CurrentPassMark)
-			{
-				// If passed and the next arena is merged load that without ending the episode
-				if (_arena.mergeNextArena)
-				{
-					_arena.LoadNextArena();
-					return;
-				}
-				if (showNotification)
-				{
-					NotificationManager.Instance.ShowSuccessNotification();
-				}
-			}
-			else
-			{
-				if (showNotification)
-				{
-					NotificationManager.Instance.ShowFailureNotification();
-				}
-			}
-			StartCoroutine(EndEpisodeAfterDelay());
-		}
-	}
+    public void UpdateHealth(float updateAmount, bool andCompleteArena = false)
+    {
+        if (NotificationManager.Instance == null && showNotification == true)
+        {
+            Debug.LogError("NotificationManager instance is not set.");
+            return;
+        }
+        /// <summary>
+        /// Update the health of the agent and reset any queued updates
+        /// If health reaches 0 or the episode is queued to end then call EndEpisode().
+        /// </summary>
+        if (!IsFrozen())
+        {
+            health += 100 * updateAmount;
+            health += 100 * _nextUpdateHealth;
+            _nextUpdateHealth = 0;
+            AddReward(updateAmount);
+        }
+        _currentScore = GetCumulativeReward();
+        if (health > _maxHealth)
+        {
+            health = _maxHealth;
+        }
+        else if (health <= 0)
+        {
+            health = 0;
+            if (showNotification)
+            {
+                NotificationManager.Instance.ShowFailureNotification();
+            }
+            StartCoroutine(EndEpisodeAfterDelay());
+            return;
+        }
+        if (andCompleteArena || _nextUpdateCompleteArena)
+        {
+            _nextUpdateCompleteArena = false;
+            float cumulativeReward = this.GetCumulativeReward();
 
-	public void AddExtraReward(float rewardFactor)
-	{
-		UpdateHealth(Math.Min(rewardFactor * _rewardPerStep, -0.001f));
-	}
+            if (cumulativeReward >= Arena.CurrentPassMark)
+            {
+                // If passed and the next arena is merged load that without ending the episode
+                if (_arena.mergeNextArena)
+                {
+                    _arena.LoadNextArena();
+                    return;
+                }
+                if (showNotification)
+                {
+                    NotificationManager.Instance.ShowSuccessNotification();
+                }
+            }
+            else
+            {
+                if (showNotification)
+                {
+                    NotificationManager.Instance.ShowFailureNotification();
+                }
+            }
+            StartCoroutine(EndEpisodeAfterDelay());
+        }
+    }
 
-	IEnumerator EndEpisodeAfterDelay()
-	{
-		if (!showNotification)
-		{
-			EndEpisode();
-			yield break;
-		}
+    public void AddExtraReward(float rewardFactor)
+    {
+        UpdateHealth(Math.Min(rewardFactor * _rewardPerStep, -0.001f));
+    }
 
-		yield return new WaitForSeconds(2.5f);
-		NotificationManager.Instance.HideNotification();
-		EndEpisode();
-	}
+    IEnumerator EndEpisodeAfterDelay()
+    {
+        if (!showNotification)
+        {
+            EndEpisode();
+            yield break;
+        }
 
-	public override void OnEpisodeBegin()
-	{
-		writer.WriteLine($"\nNew Episode,{Academy.Instance.EpisodeCount}-----");
-		writer.Flush();
-		EpisodeDebugLog();
+        yield return new WaitForSeconds(2.5f);
+        NotificationManager.Instance.HideNotification();
+        EndEpisode();
+    }
 
-		StopCoroutine("UnfreezeCountdown");
-		_previousScore = _currentScore;
-		numberOfGoalsCollected = 0;
-		_arena.ResetArena();
-		_rewardPerStep = timeLimit > 0 ? -1f / timeLimit : 0;
-		_isGrounded = false;
-		health = _maxHealth;
+    public override void OnEpisodeBegin()
+    {
+        writer.WriteLine($"\nNew Episode,{Academy.Instance.EpisodeCount}-----");
+        writer.Flush();
+        EpisodeDebugLog();
 
-		SetFreezeDelay(GetFreezeDelay());
-	}
+        StopCoroutine("UnfreezeCountdown");
+        _previousScore = _currentScore;
+        numberOfGoalsCollected = 0;
+        _arena.ResetArena();
+        _rewardPerStep = timeLimit > 0 ? -1f / timeLimit : 0;
+        _isGrounded = false;
+        health = _maxHealth;
 
-	private void EpisodeDebugLog()
-	{
-		Debug.Log("Episode Begin");
-		Debug.Log($"Value of showNotification: {showNotification}");
-		Debug.Log("Current Pass Mark: " + Arena.CurrentPassMark);
-		Debug.Log("Number of Goals Collected: " + numberOfGoalsCollected);
-	}
+        SetFreezeDelay(GetFreezeDelay());
+    }
 
-	void OnCollisionEnter(Collision collision)
-	{
-		foreach (ContactPoint contact in collision.contacts)
-		{
-			if (contact.normal.y > 0)
-			{
-				_isGrounded = true;
-			}
-		}
-		_lastContactPoint = collision.contacts.Last();
-	}
+    private void EpisodeDebugLog()
+    {
+        Debug.Log("Episode Begin");
+        Debug.Log($"Value of showNotification: {showNotification}");
+        Debug.Log("Current Pass Mark: " + Arena.CurrentPassMark);
+        Debug.Log("Number of Goals Collected: " + numberOfGoalsCollected);
+    }
 
-	void OnCollisionStay(Collision collision)
-	{
-		foreach (ContactPoint contact in collision.contacts)
-		{
-			if (contact.normal.y > 0)
-			{
-				_isGrounded = true;
-			}
-		}
-		_lastContactPoint = collision.contacts.Last();
-	}
+    void OnCollisionEnter(Collision collision)
+    {
+        foreach (ContactPoint contact in collision.contacts)
+        {
+            if (contact.normal.y > 0)
+            {
+                _isGrounded = true;
+            }
+        }
+        _lastContactPoint = collision.contacts.Last();
+    }
 
-	void OnCollisionExit(Collision collision)
-	{
-		if (_lastContactPoint.normal.y > 0)
-		{
-			_isGrounded = false;
-		}
-	}
+    void OnCollisionStay(Collision collision)
+    {
+        foreach (ContactPoint contact in collision.contacts)
+        {
+            if (contact.normal.y > 0)
+            {
+                _isGrounded = true;
+            }
+        }
+        _lastContactPoint = collision.contacts.Last();
+    }
 
-	//******************************
-	//PREFAB INTERFACE FOR THE AGENT
-	//******************************
-	public void SetColor(Vector3 color) { }
+    void OnCollisionExit(Collision collision)
+    {
+        if (_lastContactPoint.normal.y > 0)
+        {
+            _isGrounded = false;
+        }
+    }
 
-	public void SetSize(Vector3 scale) { }
+    //******************************
+    //PREFAB INTERFACE FOR THE AGENT
+    //******************************
+    public void SetColor(Vector3 color) { }
 
-	/// <summary>
-	/// Returns a random position within the range for the object.
-	/// </summary>
-	public virtual Vector3 GetPosition(
-		Vector3 position,
-		Vector3 boundingBox,
-		float rangeX,
-		float rangeZ
-	)
-	{
-		float xBound = boundingBox.x;
-		float zBound = boundingBox.z;
-		float xOut =
-			position.x < 0
-				? Random.Range(xBound, rangeX - xBound)
-				: Math.Max(0, Math.Min(position.x, rangeX));
-		float yOut = Math.Max(position.y, 0) + transform.localScale.y / 2 + 0.01f;
-		float zOut =
-			position.z < 0
-				? Random.Range(zBound, rangeZ - zBound)
-				: Math.Max(0, Math.Min(position.z, rangeZ));
+    public void SetSize(Vector3 scale) { }
 
-		return new Vector3(xOut, yOut, zOut);
-	}
+    /// <summary>
+    /// Returns a random position within the range for the object.
+    /// </summary>
+    public virtual Vector3 GetPosition(
+        Vector3 position,
+        Vector3 boundingBox,
+        float rangeX,
+        float rangeZ
+    )
+    {
+        float xBound = boundingBox.x;
+        float zBound = boundingBox.z;
+        float xOut =
+            position.x < 0
+                ? Random.Range(xBound, rangeX - xBound)
+                : Math.Max(0, Math.Min(position.x, rangeX));
+        float yOut = Math.Max(position.y, 0) + transform.localScale.y / 2 + 0.01f;
+        float zOut =
+            position.z < 0
+                ? Random.Range(zBound, rangeZ - zBound)
+                : Math.Max(0, Math.Min(position.z, rangeZ));
 
-	///<summary>
-	/// If rotationY set to < 0 change to random rotation.
-	///</summary>
-	public virtual Vector3 GetRotation(float rotationY)
-	{
-		return new Vector3(0, rotationY < 0 ? Random.Range(0f, 360f) : rotationY, 0);
-	}
+        return new Vector3(xOut, yOut, zOut);
+    }
+
+    ///<summary>
+    /// If rotationY set to < 0 change to random rotation.
+    ///</summary>
+    public virtual Vector3 GetRotation(float rotationY)
+    {
+        return new Vector3(0, rotationY < 0 ? Random.Range(0f, 360f) : rotationY, 0);
+    }
 }
