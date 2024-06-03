@@ -119,7 +119,7 @@ public class TrainingAgent : Agent, IPrefab
 		if (!File.Exists(csvFilePath) || new FileInfo(csvFilePath).Length == 0)
 		{
 			// Attribute headers for the CSV file --> can be changed as needed
-			writer.WriteLine("Episode,Step,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate");
+			writer.WriteLine("Episode,Step,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,IsFrozen?");
 			headerWritten = true;
 		}
 	}
@@ -133,11 +133,12 @@ public class TrainingAgent : Agent, IPrefab
 		Vector3 velocity,
 		Vector3 position,
 		int lastActionForward,
-		int lastActionRotate
+		int lastActionRotate,
+		bool isFrozen
 	)
 	{
 		writer.WriteLine(
-			$"{Academy.Instance.EpisodeCount},{StepCount},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate}"
+			$"{Academy.Instance.EpisodeCount},{StepCount},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{isFrozen}"
 		);
 		writer.Flush();
 	}
@@ -206,7 +207,8 @@ public class TrainingAgent : Agent, IPrefab
 		sensor.AddObservation(localVel);
 		Vector3 localPos = transform.position;
 		sensor.AddObservation(localPos);
-		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate);
+		bool isFrozen = IsFrozen();
+		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, isFrozen);
 	}
 
 	public override void OnActionReceived(ActionBuffers action)
@@ -220,7 +222,8 @@ public class TrainingAgent : Agent, IPrefab
 
 		Vector3 localVel = transform.InverseTransformDirection(_rigidBody.velocity);
 		Vector3 localPos = transform.position;
-		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate);
+		bool isFrozen = IsFrozen();
+		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, isFrozen);
 		UpdateHealth(_rewardPerStep);
 	}
 
