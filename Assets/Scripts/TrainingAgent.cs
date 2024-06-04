@@ -123,7 +123,7 @@ public class TrainingAgent : Agent, IPrefab
 		writer = new StreamWriter(csvFilePath, true);
 		if (!File.Exists(csvFilePath) || new FileInfo(csvFilePath).Length == 0)
 		{
-			writer.WriteLine("Episode,Step,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen,Reward");
+			writer.WriteLine("Episode,Step,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen,Reward,NotificationState");
 			headerWritten = true;
 		}
 	}
@@ -136,11 +136,12 @@ public class TrainingAgent : Agent, IPrefab
 	string actionForwardDescription,
 	string actionRotateDescription,
 	bool isFrozen,
-	float reward
+	float reward,
+	string notificationState
 	)
 	{
 		writer.WriteLine(
-			$"{Academy.Instance.EpisodeCount},{StepCount},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{reward}"
+			$"{Academy.Instance.EpisodeCount},{StepCount},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{reward},{notificationState}"
 		);
 		writer.Flush();
 	}
@@ -202,6 +203,16 @@ public class TrainingAgent : Agent, IPrefab
 		_isCountdownActive = false;
 	}
 
+	private string GetNotificationState()
+	{
+		if (NotificationManager.Instance == null)
+		{
+			return "None";
+		}
+
+		return NotificationManager.Instance.GetCurrentNotificationState();
+	}
+
 	public override void CollectObservations(VectorSensor sensor)
 	{
 		sensor.AddObservation(health);
@@ -210,8 +221,10 @@ public class TrainingAgent : Agent, IPrefab
 		bool isFrozen = IsFrozen();
 		string actionForwardDescription = DescribeActionForward(lastActionForward);
 		string actionRotateDescription = DescribeActionRotate(lastActionRotate);
-		float reward = GetCumulativeReward(); // Get the cumulative reward
-		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen, reward);
+		float reward = GetCumulativeReward();
+		string notificationState = GetNotificationState();
+
+		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen, reward, notificationState);
 	}
 
 	public override void OnActionReceived(ActionBuffers action)
@@ -228,8 +241,10 @@ public class TrainingAgent : Agent, IPrefab
 		bool isFrozen = IsFrozen();
 		string actionForwardDescription = DescribeActionForward(lastActionForward);
 		string actionRotateDescription = DescribeActionRotate(lastActionRotate);
-		float reward = GetCumulativeReward(); // Get the cumulative reward
-		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen, reward);
+		float reward = GetCumulativeReward();
+		string notificationState = GetNotificationState();
+
+		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen, reward, notificationState);
 		UpdateHealth(_rewardPerStep);
 	}
 
@@ -422,7 +437,16 @@ public class TrainingAgent : Agent, IPrefab
 
 	public override void OnEpisodeBegin()
 	{
-		writer.WriteLine($"\nNew Episode,{Academy.Instance.EpisodeCount}-----");
+		if (!_arena.IsFirstArenaReset) // Don't logging for the first initialization
+		{
+			writer.WriteLine($"Number of Goals Collected: {numberOfGoalsCollected}");
+			writer.WriteLine("---Episode End---");
+			writer.Flush();
+		}
+
+		numberOfGoalsCollected = 0;
+
+		writer.WriteLine($"\n---New Episode---");
 		writer.Flush();
 		EpisodeDebugLog();
 

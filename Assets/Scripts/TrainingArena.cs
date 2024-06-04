@@ -42,8 +42,13 @@ public class TrainingArena : MonoBehaviour
 	private List<GameObject> spawnedRewards = new List<GameObject>();
 	private List<int> playedArenas = new List<int>();
 	private List<int> _mergedArenas = null;
-
 	public bool showNotification { get; set; }
+
+	public bool IsFirstArenaReset
+	{
+		get { return isFirstArenaReset; }
+		set { isFirstArenaReset = value; }
+	}
 	public bool mergeNextArena
 	{
 		get

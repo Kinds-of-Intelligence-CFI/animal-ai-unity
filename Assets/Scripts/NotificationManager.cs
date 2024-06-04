@@ -19,6 +19,7 @@ public class NotificationManager : MonoBehaviour
 	private int currentFrame = 0;
 
 	private Coroutine gifCoroutine;
+	private string currentNotificationState = "None";
 
 	public TrainingAgent trainingAgent;
 	public GameObject notificationPanel;
@@ -59,12 +60,14 @@ public class NotificationManager : MonoBehaviour
 	{
 		ShowNotification(true);
 		trainingAgent.FreezeAgent(true);
+		currentNotificationState = "Success";
 	}
 
 	public void ShowFailureNotification()
 	{
 		ShowNotification(false);
 		trainingAgent.FreezeAgent(true);
+		currentNotificationState = "Failure";
 	}
 
 	private void ShowNotification(bool isSuccess)
@@ -99,6 +102,12 @@ public class NotificationManager : MonoBehaviour
 
 		currentFrame = 0;
 		trainingAgent.FreezeAgent(false);
+		currentNotificationState = "None";
+	}
+
+	public string GetCurrentNotificationState()
+	{
+		return currentNotificationState;
 	}
 
 	IEnumerator AnimateSprite(Sprite[] animationFrames)
