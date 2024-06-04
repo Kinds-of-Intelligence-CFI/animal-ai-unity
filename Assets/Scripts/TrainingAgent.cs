@@ -10,6 +10,8 @@ using Unity.MLAgents.Sensors;
 using YAMLDefs;
 using System.IO;
 
+// TODO: Implement a buffered writer for the CSV logs for improved performance and reduced IO operations.
+
 /// <summary>
 /// The TrainingAgent class is a subclass of the Agent class in the ML-Agents library.
 /// It is used to define the behaviour of the agent in the training environment.
