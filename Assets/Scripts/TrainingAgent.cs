@@ -63,6 +63,7 @@ public class TrainingAgent : Agent, IPrefab
 	private StreamWriter writer;
 	private bool headerWritten = false;
 	private string yamlFileName;
+	private int customEpisodeCount = 0;
 
 	public override void Initialize()
 	{
@@ -137,11 +138,12 @@ public class TrainingAgent : Agent, IPrefab
 	string actionRotateDescription,
 	bool isFrozen,
 	float reward,
-	string notificationState
+	string notificationState,
+	int customEpisodeCount
 	)
 	{
 		writer.WriteLine(
-			$"{Academy.Instance.EpisodeCount},{StepCount},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{reward},{notificationState}"
+			$"{customEpisodeCount},{StepCount},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{reward},{notificationState}"
 		);
 		writer.Flush();
 	}
@@ -224,7 +226,7 @@ public class TrainingAgent : Agent, IPrefab
 		float reward = GetCumulativeReward();
 		string notificationState = GetNotificationState();
 
-		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen, reward, notificationState);
+		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen, reward, notificationState, customEpisodeCount);
 	}
 
 	public override void OnActionReceived(ActionBuffers action)
@@ -244,7 +246,7 @@ public class TrainingAgent : Agent, IPrefab
 		float reward = GetCumulativeReward();
 		string notificationState = GetNotificationState();
 
-		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen, reward, notificationState);
+		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen, reward, notificationState, customEpisodeCount);
 		UpdateHealth(_rewardPerStep);
 	}
 
@@ -445,6 +447,7 @@ public class TrainingAgent : Agent, IPrefab
 		}
 
 		numberOfGoalsCollected = 0;
+		customEpisodeCount++;
 
 		writer.WriteLine($"\n---New Episode---");
 		writer.Flush();
