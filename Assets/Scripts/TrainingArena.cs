@@ -49,6 +49,7 @@ public class TrainingArena : MonoBehaviour
 		get { return isFirstArenaReset; }
 		set { isFirstArenaReset = value; }
 	}
+
 	public bool mergeNextArena
 	{
 		get
