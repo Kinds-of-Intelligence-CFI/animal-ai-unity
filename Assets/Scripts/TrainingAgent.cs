@@ -441,6 +441,7 @@ public class TrainingAgent : Agent, IPrefab
 	{
 		if (!_arena.IsFirstArenaReset) // Don't logging for the first initialization
 		{
+			writer.WriteLine("");
 			writer.WriteLine($"Number of Goals Collected: {numberOfGoalsCollected}");
 			writer.WriteLine("---Episode End---");
 			writer.Flush();
