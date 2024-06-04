@@ -123,7 +123,7 @@ public class TrainingAgent : Agent, IPrefab
 		writer = new StreamWriter(csvFilePath, true);
 		if (!File.Exists(csvFilePath) || new FileInfo(csvFilePath).Length == 0)
 		{
-			writer.WriteLine("Episode,Step,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen");
+			writer.WriteLine("Episode,Step,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen,Reward");
 			headerWritten = true;
 		}
 	}
@@ -135,11 +135,12 @@ public class TrainingAgent : Agent, IPrefab
 	int lastActionRotate,
 	string actionForwardDescription,
 	string actionRotateDescription,
-	bool isFrozen
+	bool isFrozen,
+	float reward
 	)
 	{
 		writer.WriteLine(
-			$"{Academy.Instance.EpisodeCount},{StepCount},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen}"
+			$"{Academy.Instance.EpisodeCount},{StepCount},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{reward}"
 		);
 		writer.Flush();
 	}
@@ -209,7 +210,8 @@ public class TrainingAgent : Agent, IPrefab
 		bool isFrozen = IsFrozen();
 		string actionForwardDescription = DescribeActionForward(lastActionForward);
 		string actionRotateDescription = DescribeActionRotate(lastActionRotate);
-		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen);
+		float reward = GetCumulativeReward(); // Get the cumulative reward
+		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen, reward);
 	}
 
 	public override void OnActionReceived(ActionBuffers action)
@@ -226,7 +228,8 @@ public class TrainingAgent : Agent, IPrefab
 		bool isFrozen = IsFrozen();
 		string actionForwardDescription = DescribeActionForward(lastActionForward);
 		string actionRotateDescription = DescribeActionRotate(lastActionRotate);
-		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen);
+		float reward = GetCumulativeReward(); // Get the cumulative reward
+		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen, reward);
 		UpdateHealth(_rewardPerStep);
 	}
 
