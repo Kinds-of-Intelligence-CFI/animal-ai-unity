@@ -61,7 +61,7 @@ public class TrainingAgent : Agent, IPrefab
 	private bool _isCountdownActive = false;
 
 	[Header("CSV Logging")]
-	public string csvFilePath = "Observations.csv";
+	public string csvFilePath = "";
 	private StreamWriter writer;
 	private bool headerWritten = false;
 	private string yamlFileName;
