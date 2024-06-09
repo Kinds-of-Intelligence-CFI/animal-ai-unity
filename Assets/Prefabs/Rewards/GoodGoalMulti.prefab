@@ -138,4 +138,4 @@ MonoBehaviour:
   numberOfGoals: 1
   reward: 1
   isMulti: 1
-  rewardType: GoodGoalBounce
+  rewardType: GoodGoalMulti
