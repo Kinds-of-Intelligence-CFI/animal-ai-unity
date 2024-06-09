@@ -136,10 +136,18 @@ public class TrainingAgent : Agent, IPrefab
 		csvFilePath = Path.Combine(directoryPath, filename);
 
 		writer = new StreamWriter(csvFilePath, true);
+		
 		if (!File.Exists(csvFilePath) || new FileInfo(csvFilePath).Length == 0)
 		{
-			writer.WriteLine("Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen,NotificationState");
-			headerWritten = true;
+			if (!headerWritten)
+			{
+				writer.WriteLine("Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen,NotificationState");
+				headerWritten = true;
+			}
+			else
+			{
+				Debug.LogError("Header already written to CSV file.");
+			}
 		}
 	}
 
