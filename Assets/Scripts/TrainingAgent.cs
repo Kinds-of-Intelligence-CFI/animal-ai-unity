@@ -12,9 +12,6 @@ using System.IO;
 using System.Collections.Concurrent;
 using System.Threading;
 
-// Remaining objectives:
-// TODO: Implement/finish code to extract yaml name from side channel.
-
 /// <summary>
 /// The TrainingAgent class is a subclass of the Agent class in the ML-Agents library.
 /// It is used to define the behaviour of the agent in the training environment.
@@ -70,8 +67,20 @@ public class TrainingAgent : Agent, IPrefab
 	private string yamlFileName;
 	private int customEpisodeCount = 0;
 	private ConcurrentQueue<string> logQueue = new ConcurrentQueue<string>();
-	private const int bufferSize = 300;
+	private const int bufferSize = 150; // Corresponds to rows in the CSV file to keep in memory before flushing to disk
 	private bool isFlushing = false;
+	private string lastCollectedRewardType = "None";
+
+	public void RecordRewardType(string type)
+	{
+		lastCollectedRewardType = type;
+		Debug.Log($"Reward type collected: {type}");
+	}
+
+	public void SetYamlFileName(string fileName)
+	{
+		yamlFileName = fileName;
+	}
 
 	public override void Initialize()
 	{
@@ -94,11 +103,6 @@ public class TrainingAgent : Agent, IPrefab
 		}
 
 		StartFlushThread();
-	}
-
-	public void SetYamlFileName(string fileName)
-	{
-		yamlFileName = fileName;
 	}
 
 	private void InitialiseCSVProcess()
@@ -126,7 +130,7 @@ public class TrainingAgent : Agent, IPrefab
 			Directory.CreateDirectory(directoryPath);
 		}
 
-		// Generate a filename with the YAML file name and a date stamp
+		// Generate a filename with the YAML file name and a date stamp to prevent overwriting. TODO: Extract YAML name from side channel message
 		string dateTimeString = DateTime.Now.ToString("dd-MM-yy_HHmm");
 		string filename = $"Observations_{yamlFileName}_{dateTimeString}.csv";
 		csvFilePath = Path.Combine(directoryPath, filename);
@@ -134,7 +138,7 @@ public class TrainingAgent : Agent, IPrefab
 		writer = new StreamWriter(csvFilePath, true);
 		if (!File.Exists(csvFilePath) || new FileInfo(csvFilePath).Length == 0)
 		{
-			writer.WriteLine("Episode,Step,Reward,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen,NotificationState");
+			writer.WriteLine("Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen,NotificationState");
 			headerWritten = true;
 		}
 	}
@@ -152,9 +156,11 @@ public class TrainingAgent : Agent, IPrefab
 	int customEpisodeCount
 	)
 	{
-		string logEntry = $"{customEpisodeCount},{StepCount},{reward},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{notificationState}";
+		string logEntry = $"{customEpisodeCount},{StepCount},{reward},{lastCollectedRewardType},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{notificationState}";
 		logQueue.Enqueue(logEntry);
+		lastCollectedRewardType = "None";
 	}
+
 
 	private void FlushLogQueue()
 	{
@@ -163,7 +169,7 @@ public class TrainingAgent : Agent, IPrefab
 			writer.WriteLine(logEntry);
 		}
 		writer.Flush();
-		Debug.Log("Flushed log queue");
+		Debug.Log("Flushed log queue to CSV file.");
 	}
 
 	private void StartFlushThread()
@@ -188,7 +194,7 @@ public class TrainingAgent : Agent, IPrefab
 		base.OnDisable();
 		if (writer != null)
 		{
-			FlushLogQueue(); // Ensure all buffered data is written to the file before closing
+			FlushLogQueue(); // Ensures all buffered data is written to the file before closing (important for builds)
 			writer.Close();
 		}
 	}
@@ -474,7 +480,7 @@ public class TrainingAgent : Agent, IPrefab
 
 	public override void OnEpisodeBegin()
 	{
-		if (!_arena.IsFirstArenaReset) // Don't logging for the first initialization
+		if (!_arena.IsFirstArenaReset) // Don't log for the first initialization of the arena
 		{
 			writer.WriteLine($"Number of Goals Collected: {numberOfGoalsCollected}");
 			writer.Flush();
