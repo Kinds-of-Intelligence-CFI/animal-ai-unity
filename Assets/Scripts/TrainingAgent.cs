@@ -9,8 +9,11 @@ using PrefabInterface;
 using Unity.MLAgents.Sensors;
 using YAMLDefs;
 using System.IO;
+using System.Collections.Concurrent;
+using System.Threading;
 
-// TODO: Implement a buffered writer for the CSV logs for improved performance and reduced IO operations.
+// Remaining objectives:
+// TODO: Implement/finish code to extract yaml name from side channel.
 
 /// <summary>
 /// The TrainingAgent class is a subclass of the Agent class in the ML-Agents library.
@@ -66,6 +69,9 @@ public class TrainingAgent : Agent, IPrefab
 	private bool headerWritten = false;
 	private string yamlFileName;
 	private int customEpisodeCount = 0;
+	private ConcurrentQueue<string> logQueue = new ConcurrentQueue<string>();
+	private const int bufferSize = 300;
+	private bool isFlushing = false;
 
 	public override void Initialize()
 	{
@@ -86,6 +92,8 @@ public class TrainingAgent : Agent, IPrefab
 				SetYamlFileName(envManager.GetCurrentYamlFileName());
 			}
 		}
+
+		StartFlushThread();
 	}
 
 	public void SetYamlFileName(string fileName)
@@ -126,7 +134,7 @@ public class TrainingAgent : Agent, IPrefab
 		writer = new StreamWriter(csvFilePath, true);
 		if (!File.Exists(csvFilePath) || new FileInfo(csvFilePath).Length == 0)
 		{
-			writer.WriteLine("Episode,Step,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen,Reward,NotificationState");
+			writer.WriteLine("Episode,Step,Reward,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen,NotificationState");
 			headerWritten = true;
 		}
 	}
@@ -144,10 +152,35 @@ public class TrainingAgent : Agent, IPrefab
 	int customEpisodeCount
 	)
 	{
-		writer.WriteLine(
-			$"{customEpisodeCount},{StepCount},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{reward},{notificationState}"
-		);
+		string logEntry = $"{customEpisodeCount},{StepCount},{reward},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{notificationState}";
+		logQueue.Enqueue(logEntry);
+	}
+
+	private void FlushLogQueue()
+	{
+		while (logQueue.TryDequeue(out var logEntry))
+		{
+			writer.WriteLine(logEntry);
+		}
 		writer.Flush();
+		Debug.Log("Flushed log queue");
+	}
+
+	private void StartFlushThread()
+	{
+		new Thread(() =>
+		{
+			while (true)
+			{
+				if (logQueue.Count >= bufferSize && !isFlushing)
+				{
+					isFlushing = true;
+					FlushLogQueue();
+					isFlushing = false;
+				}
+				Thread.Sleep(100); // polls every 100ms to check if the queue is full. This is to prevent the thread from running continuously and hogging resources.
+			}
+		}).Start();
 	}
 
 	protected override void OnDisable()
@@ -155,7 +188,7 @@ public class TrainingAgent : Agent, IPrefab
 		base.OnDisable();
 		if (writer != null)
 		{
-			writer.Flush();
+			FlushLogQueue(); // Ensure all buffered data is written to the file before closing
 			writer.Close();
 		}
 	}
@@ -443,16 +476,13 @@ public class TrainingAgent : Agent, IPrefab
 	{
 		if (!_arena.IsFirstArenaReset) // Don't logging for the first initialization
 		{
-			writer.WriteLine("");
 			writer.WriteLine($"Number of Goals Collected: {numberOfGoalsCollected}");
-			writer.WriteLine("---Episode End---");
 			writer.Flush();
 		}
 
 		numberOfGoalsCollected = 0;
 		customEpisodeCount++;
 
-		writer.WriteLine($"\n---New Episode---");
 		writer.Flush();
 		EpisodeDebugLog();
 
