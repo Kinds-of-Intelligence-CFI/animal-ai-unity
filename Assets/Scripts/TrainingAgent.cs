@@ -12,6 +12,9 @@ using System.IO;
 using System.Collections.Concurrent;
 using System.Threading;
 
+// TODO: add new column to CSV file for dispensed reward boolean for more clarity and debugging
+// TODO: need to check/handle what happens if two dispensed rewards are collected in the same step
+
 /// <summary>
 /// The TrainingAgent class is a subclass of the Agent class in the ML-Agents library.
 /// It is used to define the behaviour of the agent in the training environment.
@@ -70,11 +73,18 @@ public class TrainingAgent : Agent, IPrefab
 	private const int bufferSize = 150; // Corresponds to rows in the CSV file to keep in memory before flushing to disk
 	private bool isFlushing = false;
 	private string lastCollectedRewardType = "None";
+	private string dispensedRewardType = "None";
 
 	public void RecordRewardType(string type)
 	{
 		lastCollectedRewardType = type;
 		Debug.Log($"Reward type collected: {type}");
+	}
+
+	public void RecordDispensedRewardType(string type)
+	{
+		dispensedRewardType = type;
+		Debug.Log($"Reward type dispensed: {type}");
 	}
 
 	public void SetYamlFileName(string fileName)
@@ -136,12 +146,12 @@ public class TrainingAgent : Agent, IPrefab
 		csvFilePath = Path.Combine(directoryPath, filename);
 
 		writer = new StreamWriter(csvFilePath, true);
-		
+
 		if (!File.Exists(csvFilePath) || new FileInfo(csvFilePath).Length == 0)
 		{
 			if (!headerWritten)
 			{
-				writer.WriteLine("Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen,NotificationState");
+				writer.WriteLine("Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen,NotificationState,DispensedRewardType");
 				headerWritten = true;
 			}
 			else
@@ -161,10 +171,11 @@ public class TrainingAgent : Agent, IPrefab
 	bool isFrozen,
 	float reward,
 	string notificationState,
-	int customEpisodeCount
+	int customEpisodeCount,
+	string DispensedRewardType
 	)
 	{
-		string logEntry = $"{customEpisodeCount},{StepCount},{reward},{lastCollectedRewardType},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{notificationState}";
+		string logEntry = $"{customEpisodeCount},{StepCount},{reward},{lastCollectedRewardType},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{notificationState},{DispensedRewardType}";
 		logQueue.Enqueue(logEntry);
 		lastCollectedRewardType = "None";
 	}
@@ -275,7 +286,8 @@ public class TrainingAgent : Agent, IPrefab
 		float reward = GetCumulativeReward();
 		string notificationState = GetNotificationState();
 
-		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen, reward, notificationState, customEpisodeCount);
+		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen, reward, notificationState, customEpisodeCount, dispensedRewardType);
+		dispensedRewardType = "None";
 	}
 
 	public override void OnActionReceived(ActionBuffers action)
@@ -295,7 +307,9 @@ public class TrainingAgent : Agent, IPrefab
 		float reward = GetCumulativeReward();
 		string notificationState = GetNotificationState();
 
-		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen, reward, notificationState, customEpisodeCount);
+		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen, reward, notificationState, customEpisodeCount, dispensedRewardType);
+		dispensedRewardType = "None";
+		
 		UpdateHealth(_rewardPerStep);
 	}
 
