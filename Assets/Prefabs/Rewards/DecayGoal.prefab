@@ -134,16 +134,17 @@ MonoBehaviour:
   sizeMax: {x: 0, y: 0, z: 0}
   canRandomizeColor: 1
   ratioSize: {x: 1, y: 1, z: 1}
-  sizeAdjustement: 0.999
+  sizeAdjustment: 0.999
   textureUVOverride: 0
   typicalOrigin: 1
   numberOfGoals: 1
   reward: 2.5
   isMulti: 1
+  rewardType: DecayGoal
   initialReward: 3
   finalReward: 0
+  decayRate: -0.005
   initialColour: {r: 0.913099, g: 0.72305536, b: 0.13843165, a: 1}
   finalColour: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
-  decayRate: -0.005
   flipDecayDirection: 0
   fixedFrameDelay: 150

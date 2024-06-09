@@ -132,9 +132,10 @@ MonoBehaviour:
   sizeMax: {x: 5, y: 5, z: 5}
   canRandomizeColor: 0
   ratioSize: {x: 1, y: 1, z: 1}
-  sizeAdjustement: 0.999
+  sizeAdjustment: 0.999
   textureUVOverride: 0
   typicalOrigin: 1
   numberOfGoals: 1
   reward: 0
   isMulti: 0
+  rewardType: DecoyGoal
