@@ -11,7 +11,7 @@ arenas:
       - !Vector3 {x: 10, y: 0, z: 20}
       rotations: [90]
     - !Item
-      name: DecayGoal
+      name: GoodGoal
       positions:
       - !Vector3 {x: 25, y: 0, z: 25}
       sizes:
@@ -26,7 +26,7 @@ arenas:
       - !Vector3 {x: 10, y: 0, z: 20}
       rotations: [90]
     - !Item
-      name: DecayGoal
+      name: BadGoal
       positions:
       - !Vector3 {x: 25, y: 0, z: 25}
       sizes:
