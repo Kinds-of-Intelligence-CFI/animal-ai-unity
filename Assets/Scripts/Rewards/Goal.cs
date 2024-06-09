@@ -23,8 +23,8 @@ public class Goal : Prefab
 			TrainingAgent agent = other.GetComponent<TrainingAgent>();
 			if (agent != null)
 			{
+				agent.RecordRewardType(rewardType); // Important to record the reward type before logging to .csv file
 				agent.UpdateHealth(reward, true);
-				agent.RecordRewardType(rewardType);
 			}
 		}
 	}
@@ -36,10 +36,11 @@ public class Goal : Prefab
 			TrainingAgent agent = collision.gameObject.GetComponent<TrainingAgent>();
 			if (agent != null)
 			{
+				agent.RecordRewardType(rewardType);
 				if (!isMulti)
 				{
 					agent.UpdateHealth(reward, true);
-					agent.RecordRewardType(rewardType);
+					Debug.Log($"OnCollisionEnter: Reward type {rewardType} recorded for agent.");
 				}
 				else
 				{
@@ -47,7 +48,7 @@ public class Goal : Prefab
 					if (agent.numberOfGoalsCollected >= numberOfGoals)
 					{
 						agent.UpdateHealth(reward, true);
-						agent.RecordRewardType(rewardType);
+						Debug.Log($"OnCollisionEnter (Multi): Reward type {rewardType} recorded for agent.");
 					}
 					else
 					{
