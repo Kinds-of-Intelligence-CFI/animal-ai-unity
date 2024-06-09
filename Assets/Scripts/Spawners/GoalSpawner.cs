@@ -105,6 +105,16 @@ public class GoalSpawner : Prefab
 		if (variableSize)
 			SetVariableSize(newGoal);
 
+		TrainingAgent agent = FindObjectOfType<TrainingAgent>();
+		if (agent != null)
+		{
+			agent.RecordDispensedRewardType(newGoal.rewardType);  // Track the dispensed reward type
+		}
+		else
+		{
+			Debug.LogError("Training Agent not found in the scene.");
+		}
+
 		return newGoal;
 	}
 
