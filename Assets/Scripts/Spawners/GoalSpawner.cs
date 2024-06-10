@@ -108,7 +108,8 @@ public class GoalSpawner : Prefab
 		TrainingAgent agent = FindObjectOfType<TrainingAgent>();
 		if (agent != null)
 		{
-			agent.RecordDispensedRewardType(newGoal.rewardType);  // Track the dispensed reward type
+			agent.RecordDispensedRewardType(newGoal.rewardType); // Track the dispensed reward type
+			agent.RecordDispensedReward(); // Track if a reward was dispensed (no matter the type)
 		}
 		else
 		{

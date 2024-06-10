@@ -74,6 +74,13 @@ public class TrainingAgent : Agent, IPrefab
 	private bool isFlushing = false;
 	private string lastCollectedRewardType = "None";
 	private string dispensedRewardType = "None";
+	private bool wasRewardDispensed = false;
+
+	public void RecordDispensedReward()
+	{
+		wasRewardDispensed = true;  // Set the flag when a reward is dispensed
+		Debug.Log($"Reward was dispensed.");
+	}
 
 	public void RecordRewardType(string type)
 	{
@@ -151,7 +158,7 @@ public class TrainingAgent : Agent, IPrefab
 		{
 			if (!headerWritten)
 			{
-				writer.WriteLine("Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen,NotificationState,DispensedRewardType");
+				writer.WriteLine("Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen,NotificationState,DispensedRewardType,WasRewardDispensed");
 				headerWritten = true;
 			}
 			else
@@ -172,10 +179,11 @@ public class TrainingAgent : Agent, IPrefab
 	float reward,
 	string notificationState,
 	int customEpisodeCount,
-	string DispensedRewardType
+	string DispensedRewardType,
+	bool wasRewardDispensed
 	)
 	{
-		string logEntry = $"{customEpisodeCount},{StepCount},{reward},{lastCollectedRewardType},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{notificationState},{DispensedRewardType}";
+		string logEntry = $"{customEpisodeCount},{StepCount},{reward},{lastCollectedRewardType},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{notificationState},{DispensedRewardType},{wasRewardDispensed}";
 		logQueue.Enqueue(logEntry);
 		lastCollectedRewardType = "None";
 	}
@@ -286,8 +294,9 @@ public class TrainingAgent : Agent, IPrefab
 		float reward = GetCumulativeReward();
 		string notificationState = GetNotificationState();
 
-		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen, reward, notificationState, customEpisodeCount, dispensedRewardType);
+		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen, reward, notificationState, customEpisodeCount, dispensedRewardType, wasRewardDispensed);
 		dispensedRewardType = "None";
+		wasRewardDispensed = false;
 	}
 
 	public override void OnActionReceived(ActionBuffers action)
@@ -307,9 +316,10 @@ public class TrainingAgent : Agent, IPrefab
 		float reward = GetCumulativeReward();
 		string notificationState = GetNotificationState();
 
-		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen, reward, notificationState, customEpisodeCount, dispensedRewardType);
+		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen, reward, notificationState, customEpisodeCount, dispensedRewardType, wasRewardDispensed);
 		dispensedRewardType = "None";
-		
+		wasRewardDispensed = false;
+
 		UpdateHealth(_rewardPerStep);
 	}
 
