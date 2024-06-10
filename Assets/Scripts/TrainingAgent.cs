@@ -12,8 +12,8 @@ using System.IO;
 using System.Collections.Concurrent;
 using System.Threading;
 
-// TODO: add new column to CSV file for dispensed reward boolean for more clarity and debugging
 // TODO: need to check/handle what happens if two dispensed rewards are collected in the same step
+// TODO: raycasts? how to handle them in the agent? per timeframe or per step? whats the time complexity? does it slow the training down?
 
 /// <summary>
 /// The TrainingAgent class is a subclass of the Agent class in the ML-Agents library.
