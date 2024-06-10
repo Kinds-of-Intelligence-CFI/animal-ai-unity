@@ -11,6 +11,7 @@ using YAMLDefs;
 using System.IO;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.ComponentModel;
 
 // TODO: need to check/handle what happens if two dispensed rewards are collected in the same step
 // TODO: raycasts? how to handle them in the agent? per timeframe or per step? whats the time complexity? does it slow the training down?
@@ -171,6 +172,9 @@ public class TrainingAgent : Agent, IPrefab
 		}
 	}
 
+	/// <summary>
+	/// Logs the agent's state to a CSV file. This is called every step. The data is stored in a queue and flushed to the file in a separate thread.
+	/// </summary>
 	private void LogToCSV(
 	Vector3 velocity,
 	Vector3 position,
@@ -193,7 +197,9 @@ public class TrainingAgent : Agent, IPrefab
 		lastCollectedRewardType = "None";
 	}
 
-
+	/// <summary>
+	/// Flushes the log queue to the CSV file. This is called in a separate thread to prevent the main thread from being blocked.
+	/// </summary>
 	private void FlushLogQueue()
 	{
 		while (logQueue.TryDequeue(out var logEntry))
@@ -204,6 +210,10 @@ public class TrainingAgent : Agent, IPrefab
 		Debug.Log("Flushed log queue to CSV file.");
 	}
 
+	/// <summary>
+	/// Starts a thread that checks if the log queue is full and flushes it to the CSV file if it is.
+	// WARNING: im not sure if this is the best way to handle this, but it works for now
+	/// </summary>
 	private void StartFlushThread()
 	{
 		new Thread(() =>
@@ -221,6 +231,9 @@ public class TrainingAgent : Agent, IPrefab
 		}).Start();
 	}
 
+	/// <summary>
+	/// OnDisable is called when the training session is stopped form mlagents. It closes the CSV file and flushes the log queue at whatever the current size is.
+	/// </summary>
 	protected override void OnDisable()
 	{
 		base.OnDisable();
