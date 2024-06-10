@@ -113,3 +113,4 @@ Assets/Prefabs/Other-Unique/SignPosterboard.prefab
 .plastic/plastic.changes
 .plastic/plastic.wktree
 /ObservationLogs
+*.csv
