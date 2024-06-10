@@ -17,6 +17,7 @@ using System.ComponentModel;
 // TODO: raycasts? how to handle them in the agent? per timeframe or per step? whats the time complexity? does it slow the training down?
 // TODO: raycast data is 3+2*raycastCount, and rays per direction is 3, so 3+2*3 = 9, so 9 raycasts per direction, 27 in total resulting in 27*3 = 81 raycasts per step
 // add tags of what was hit by the raycast, and the distance to the hit object (?)
+// batched raycasts? (https://github.com/Unity-Technologies/ml-agents/blob/main/docs/Learning-Environment-Design-Agents.md#raycast-observations)
 // TODO: clean up the code, remove unnecessary comments, and make sure the code is readable and understandable
 
 /// <summary>
