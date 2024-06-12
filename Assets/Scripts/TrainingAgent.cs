@@ -255,6 +255,8 @@ public class TrainingAgent : Agent, IPrefab
 			FlushLogQueue(); // Ensures all buffered data is written to the file before closing (important for builds)
 			writer.Close();
 		}
+
+		Spawner_InteractiveButton.RewardSpawned -= OnRewardSpawned;
 	}
 
 	public float GetPreviousScore()
