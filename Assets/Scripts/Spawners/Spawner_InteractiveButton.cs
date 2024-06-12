@@ -17,7 +17,6 @@ public class Spawner_InteractiveButton : MonoBehaviour
 	public int ButtonPressCount { get; private set; }
 	public GameObject LastSpawnedReward { get; private set; }
 	public float SpawnProbability { get; set; } = 1f;
-	private List<GameObject> rewards;
 	private List<float> rewardWeights;
 	public Dictionary<GameObject, int> RewardSpawnCounts { get; private set; } =
 		new Dictionary<GameObject, int>();
@@ -28,7 +27,6 @@ public class Spawner_InteractiveButton : MonoBehaviour
 	private float _resetDuration;
 
 	private ArenaBuilder arenaBuilder;
-	private Transform objectToControlSpawnPoint;
 	public delegate void OnRewardSpawned(GameObject reward);
 	public static event OnRewardSpawned RewardSpawned;
 
@@ -40,12 +38,6 @@ public class Spawner_InteractiveButton : MonoBehaviour
 
 	[SerializeField]
 	private Transform rewardSpawnPoint;
-
-	[SerializeField]
-	private GameObject objectToControl;
-
-	[SerializeField]
-	private bool showObject;
 
 	public float MoveDuration
 	{
@@ -61,8 +53,6 @@ public class Spawner_InteractiveButton : MonoBehaviour
 	void Start()
 	{
 		lastInteractionTime = Time.time;
-
-		UpdateObjectVisibility();
 
 		if (RewardNames != null && RewardNames.Count > 0)
 		{
@@ -94,14 +84,6 @@ public class Spawner_InteractiveButton : MonoBehaviour
 			ButtonPressCount++;
 			StartCoroutine(MoveAndReset());
 			RewardSpawned?.Invoke(null);
-		}
-	}
-
-	private void UpdateObjectVisibility()
-	{
-		if (objectToControl != null)
-		{
-			objectToControl.SetActive(showObject);
 		}
 	}
 
@@ -231,7 +213,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
 				// Randomly generate a spawn position within the bounds of the arena, as defined by Arenabuilders.cs.
 				spawnPosition = new Vector3(
 					Random.Range(0, arenaWidth),
-					0, // Assuming spawning on the ground.
+					0,
 					Random.Range(0, arenaDepth)
 				);
 			}
@@ -266,15 +248,6 @@ public class Spawner_InteractiveButton : MonoBehaviour
 			else
 			{
 				RewardSpawnCounts[rewardToSpawn] = 1;
-			}
-
-			if (showObject && objectToControl != null)
-			{
-				Instantiate(
-					objectToControl,
-					objectToControlSpawnPoint.transform.position,
-					Quaternion.identity
-				);
 			}
 
 			float currentInteractionTime = Time.time;

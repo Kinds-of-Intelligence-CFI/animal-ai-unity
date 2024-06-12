@@ -211,8 +211,6 @@ MonoBehaviour:
   childObjectToMove: {fileID: 2667445423738929804}
   moveOffset: {x: 0.09, y: 0, z: 0}
   rewardSpawnPoint: {fileID: 5820607059387166607}
-  objectToControl: {fileID: 7150004164178407081, guid: b19f8e36bd5ca73489a251d8daa9acea, type: 3}
-  showObject: 0
 --- !u!1 &2667445423738929804
 GameObject:
   m_ObjectHideFlags: 0
@@ -245,7 +243,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 9108657385940890846}
-  - {fileID: 5127077261990454499}
   - {fileID: 5820607059387166607}
   m_Father: {fileID: 5827418943653793803}
   m_RootOrder: 1
@@ -340,37 +337,6 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.055199996, y: 0, z: -0.17469999}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 360676509772820413}
-  m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &4555237295060351392
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 5127077261990454499}
-  m_Layer: 0
-  m_Name: SignPosterSpawnLocation
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &5127077261990454499
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4555237295060351392}
-  m_LocalRotation: {x: -0, y: -0.7071067, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0.0050915945, y: 0.05213615, z: -0.0027317442}
-  m_LocalScale: {x: 2.529393, y: 2.529394, z: 2.529393}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 360676509772820413}
