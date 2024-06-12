@@ -14,7 +14,6 @@ using System.Threading;
 using System.ComponentModel;
 
 // TODO: need to check/handle what happens if two dispensed rewards are collected in the same step
-// TODO: raycasts? how to handle them in the agent? per timeframe or per step? whats the time complexity? does it slow the training down?
 // TODO: raycast data is (Observation Stacks) * (1 + 2 * Rays Per Direction) * (Num Detectable Tags + 2) --> corrected calculation
 // add tags of what was hit by the raycast, and the distance to the hit object (?)
 // batched raycasts? (https://github.com/Unity-Technologies/ml-agents/blob/main/docs/Learning-Environment-Design-Agents.md#raycast-observations)
