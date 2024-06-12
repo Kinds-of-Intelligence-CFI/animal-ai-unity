@@ -598,12 +598,6 @@ namespace ArenaBuilders
 			{
 				gameObjectInstanceIPrefab.SetSize(size);
 				gameObjectBoundingBox = gameObjectInstance.GetBoundsWithChildren().extents;
-				if (positionIn.y == -1)
-				{
-					float minY = 0;
-					float maxY = 100;
-					positionIn.y = UnityEngine.Random.Range(minY, maxY);
-				}
 
 				positionOut = gameObjectInstanceIPrefab.GetPosition(
 					positionIn,
