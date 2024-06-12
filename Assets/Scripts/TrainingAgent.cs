@@ -371,7 +371,7 @@ public class TrainingAgent : Agent, IPrefab
 		float reward = GetCumulativeReward();
 		string notificationState = GetNotificationState();
 
-		// Collect raycast observations
+		// Collect raycast observations and tags directly from the RayPerceptionSensorComponent3D
 		(float[] raycastObservations, string[] raycastTags) = CollectRaycastObservations();
 
 		LogToCSV(
@@ -615,7 +615,7 @@ public class TrainingAgent : Agent, IPrefab
 		customEpisodeCount++;
 
 		writer.Flush();
-		EpisodeDebugLog();
+		EpisodeDebugLogs();
 
 		StopCoroutine("UnfreezeCountdown");
 		_previousScore = _currentScore;
@@ -628,7 +628,7 @@ public class TrainingAgent : Agent, IPrefab
 		SetFreezeDelay(GetFreezeDelay());
 	}
 
-	private void EpisodeDebugLog()
+	private void EpisodeDebugLogs()
 	{
 		Debug.Log("Episode Begin");
 		Debug.Log($"Value of showNotification: {showNotification}");
