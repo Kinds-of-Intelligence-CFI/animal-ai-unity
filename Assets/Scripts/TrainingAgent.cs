@@ -11,11 +11,9 @@ using YAMLDefs;
 using System.IO;
 using System.Collections.Concurrent;
 using System.Threading;
-using System.ComponentModel;
 
 // TODO: need to check/handle what happens if two dispensed rewards are collected in the same step
 // TODO: raycast data is (Observation Stacks) * (1 + 2 * Rays Per Direction) * (Num Detectable Tags + 2) --> corrected calculation
-// add tags of what was hit by the raycast, and the distance to the hit object (?)
 // batched raycasts? (https://github.com/Unity-Technologies/ml-agents/blob/main/docs/Learning-Environment-Design-Agents.md#raycast-observations)
 // TODO: clean up the code, remove unnecessary comments, and make sure the code is readable and understandable
 
@@ -79,6 +77,12 @@ public class TrainingAgent : Agent, IPrefab
 	private string lastCollectedRewardType = "None";
 	private string dispensedRewardType = "None";
 	private bool wasRewardDispensed = false;
+	private bool wasButtonPressed = false;
+
+	private void OnRewardSpawned(GameObject reward)
+	{
+		wasButtonPressed = true;
+	}
 
 	public void RecordDispensedReward()
 	{
@@ -124,6 +128,7 @@ public class TrainingAgent : Agent, IPrefab
 		}
 
 		StartFlushThread();
+		Spawner_InteractiveButton.RewardSpawned += OnRewardSpawned;
 	}
 
 	private void InitialiseCSVProcess()
@@ -163,7 +168,7 @@ public class TrainingAgent : Agent, IPrefab
 			if (!headerWritten)
 			{
 				writer.WriteLine(
-					"Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen,NotificationState,DispensedRewardType,WasRewardDispensed,RaycastObservations,RaycastTags"
+					"Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen,NotificationState,DispensedRewardType,WasRewardDispensed,WasButtonPressed,RaycastObservations,RaycastTags"
 				);
 				headerWritten = true;
 			}
@@ -190,14 +195,16 @@ public class TrainingAgent : Agent, IPrefab
 		int customEpisodeCount,
 		string DispensedRewardType,
 		bool wasRewardDispensed,
+		bool wasButtonPressed,
 		float[] raycastObservations,
 		string[] raycastTags
+
 	)
 	{
 		string raycastData = string.Join(",", raycastObservations);
 		string raycastTagsData = string.Join(",", raycastTags);
 		string logEntry =
-			$"{customEpisodeCount},{StepCount},{reward},{lastCollectedRewardType},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{notificationState},{DispensedRewardType},{wasRewardDispensed},{raycastData},{raycastTagsData}";
+			$"{customEpisodeCount},{StepCount},{reward},{lastCollectedRewardType},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{notificationState},{DispensedRewardType},{wasRewardDispensed},{wasButtonPressed},{raycastData},{raycastTagsData}";
 		logQueue.Enqueue(logEntry);
 		lastCollectedRewardType = "None";
 	}
@@ -336,11 +343,14 @@ public class TrainingAgent : Agent, IPrefab
 			customEpisodeCount,
 			dispensedRewardType,
 			wasRewardDispensed,
+			wasButtonPressed,
 			raycastObservations,
 			raycastTags
+
 		);
 		dispensedRewardType = "None";
 		wasRewardDispensed = false;
+		wasButtonPressed = false;
 	}
 
 	public override void OnActionReceived(ActionBuffers action)
@@ -376,11 +386,13 @@ public class TrainingAgent : Agent, IPrefab
 			customEpisodeCount,
 			dispensedRewardType,
 			wasRewardDispensed,
+			wasButtonPressed,
 			raycastObservations,
 			raycastTags
 		);
 		dispensedRewardType = "None";
 		wasRewardDispensed = false;
+		wasButtonPressed = false;
 
 		UpdateHealth(_rewardPerStep);
 	}
