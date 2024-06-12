@@ -29,7 +29,6 @@ public class TrainingAgent : Agent, IPrefab
 	public float quickStopRatio = 0.9f;
 	public float rotationSpeed = 100f;
 	public float rotationAngle = 0.25f;
-
 	private int lastActionForward = 0;
 	private int lastActionRotate = 0;
 
@@ -82,6 +81,7 @@ public class TrainingAgent : Agent, IPrefab
 	private void OnRewardSpawned(GameObject reward)
 	{
 		wasButtonPressed = true;
+		Debug.Log("Button was pressed.");
 	}
 
 	public void RecordDispensedReward()
