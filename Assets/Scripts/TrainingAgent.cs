@@ -116,6 +116,8 @@ public class TrainingAgent : Agent, IPrefab
 		progBar.AssignAgent(this);
 		health = _maxHealth;
 
+		Spawner_InteractiveButton.RewardSpawned += OnRewardSpawned;
+
 		InitialiseCSVProcess();
 
 		if (!Application.isEditor)
@@ -128,7 +130,6 @@ public class TrainingAgent : Agent, IPrefab
 		}
 
 		StartFlushThread();
-		Spawner_InteractiveButton.RewardSpawned += OnRewardSpawned;
 	}
 
 	private void InitialiseCSVProcess()
