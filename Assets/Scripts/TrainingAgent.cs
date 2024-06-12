@@ -83,7 +83,7 @@ public class TrainingAgent : Agent, IPrefab
 
 	public void RecordDispensedReward()
 	{
-		wasRewardDispensed = true;  // Set the flag when a reward is dispensed
+		wasRewardDispensed = true;
 		Debug.Log($"Reward was dispensed.");
 	}
 
@@ -163,7 +163,9 @@ public class TrainingAgent : Agent, IPrefab
 		{
 			if (!headerWritten)
 			{
-				writer.WriteLine("Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen,NotificationState,DispensedRewardType,WasRewardDispensed,RaycastObservations");
+				writer.WriteLine(
+					"Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen,NotificationState,DispensedRewardType,WasRewardDispensed,RaycastObservations,RaycastTags"
+				);
 				headerWritten = true;
 			}
 			else
@@ -177,23 +179,26 @@ public class TrainingAgent : Agent, IPrefab
 	/// Logs the agent's state to a CSV file. This is called every step. The data is stored in a queue and flushed to the file in a separate thread.
 	/// </summary>
 	private void LogToCSV(
-	Vector3 velocity,
-	Vector3 position,
-	int lastActionForward,
-	int lastActionRotate,
-	string actionForwardDescription,
-	string actionRotateDescription,
-	bool isFrozen,
-	float reward,
-	string notificationState,
-	int customEpisodeCount,
-	string DispensedRewardType,
-	bool wasRewardDispensed,
-	float[] raycastObservations
+		Vector3 velocity,
+		Vector3 position,
+		int lastActionForward,
+		int lastActionRotate,
+		string actionForwardDescription,
+		string actionRotateDescription,
+		bool isFrozen,
+		float reward,
+		string notificationState,
+		int customEpisodeCount,
+		string DispensedRewardType,
+		bool wasRewardDispensed,
+		float[] raycastObservations,
+		string[] raycastTags
 	)
 	{
 		string raycastData = string.Join(",", raycastObservations);
-		string logEntry = $"{customEpisodeCount},{StepCount},{reward},{lastCollectedRewardType},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{notificationState},{DispensedRewardType},{wasRewardDispensed},{raycastData}";
+		string raycastTagsData = string.Join(",", raycastTags);
+		string logEntry =
+			$"{customEpisodeCount},{StepCount},{reward},{lastCollectedRewardType},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{notificationState},{DispensedRewardType},{wasRewardDispensed},{raycastData},{raycastTagsData}";
 		logQueue.Enqueue(logEntry);
 		lastCollectedRewardType = "None";
 	}
@@ -313,14 +318,28 @@ public class TrainingAgent : Agent, IPrefab
 		float reward = GetCumulativeReward();
 		string notificationState = GetNotificationState();
 
-		// Collect raycast observations
-		float[] raycastObservations = CollectRaycastObservations();
+		(float[] raycastObservations, string[] raycastTags) = CollectRaycastObservations();
 		foreach (float observation in raycastObservations)
 		{
 			sensor.AddObservation(observation);
 		}
 
-		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen, reward, notificationState, customEpisodeCount, dispensedRewardType, wasRewardDispensed, raycastObservations);
+		LogToCSV(
+			localVel,
+			localPos,
+			lastActionForward,
+			lastActionRotate,
+			actionForwardDescription,
+			actionRotateDescription,
+			isFrozen,
+			reward,
+			notificationState,
+			customEpisodeCount,
+			dispensedRewardType,
+			wasRewardDispensed,
+			raycastObservations,
+			raycastTags
+		);
 		dispensedRewardType = "None";
 		wasRewardDispensed = false;
 	}
@@ -343,28 +362,48 @@ public class TrainingAgent : Agent, IPrefab
 		string notificationState = GetNotificationState();
 
 		// Collect raycast observations
-		float[] raycastObservations = CollectRaycastObservations();
+		(float[] raycastObservations, string[] raycastTags) = CollectRaycastObservations();
 
-		LogToCSV(localVel, localPos, lastActionForward, lastActionRotate, actionForwardDescription, actionRotateDescription, isFrozen, reward, notificationState, customEpisodeCount, dispensedRewardType, wasRewardDispensed, raycastObservations);
+		LogToCSV(
+			localVel,
+			localPos,
+			lastActionForward,
+			lastActionRotate,
+			actionForwardDescription,
+			actionRotateDescription,
+			isFrozen,
+			reward,
+			notificationState,
+			customEpisodeCount,
+			dispensedRewardType,
+			wasRewardDispensed,
+			raycastObservations,
+			raycastTags
+		);
 		dispensedRewardType = "None";
 		wasRewardDispensed = false;
 
 		UpdateHealth(_rewardPerStep);
 	}
 
-	private float[] CollectRaycastObservations()
+	private (float[] hitFractions, string[] hitTags) CollectRaycastObservations()
 	{
-		RayPerceptionSensorComponent3D rayPerception = GetComponent<RayPerceptionSensorComponent3D>();
+		RayPerceptionSensorComponent3D rayPerception =
+			GetComponent<RayPerceptionSensorComponent3D>();
 		if (rayPerception == null)
 		{
-			return new float[0];
+			return (new float[0], new string[0]);
 		}
 
 		var rayPerceptionInput = rayPerception.GetRayPerceptionInput();
 		var rayPerceptionOutput = RayPerceptionSensor.Perceive(rayPerceptionInput);
-		return rayPerceptionOutput.RayOutputs.Select(r => r.HitFraction).ToArray();
-	}
+		float[] hitFractions = rayPerceptionOutput.RayOutputs.Select(r => r.HitFraction).ToArray();
+		string[] hitTags = rayPerceptionOutput.RayOutputs
+			.Select(r => r.HitGameObject?.tag ?? "None")
+			.ToArray();
 
+		return (hitFractions, hitTags);
+	}
 
 	private string DescribeActionForward(int actionForward)
 	{
