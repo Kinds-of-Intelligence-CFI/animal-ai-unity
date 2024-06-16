@@ -58,6 +58,7 @@ public class NotificationManager : MonoBehaviour
 
 	public void ShowSuccessNotification()
 	{
+		Debug.Log("Showing Success Notification");
 		ShowNotification(true);
 		trainingAgent.FreezeAgent(true);
 		currentNotificationState = "Success";
@@ -65,6 +66,7 @@ public class NotificationManager : MonoBehaviour
 
 	public void ShowFailureNotification()
 	{
+		Debug.Log("Showing Failure Notification");
 		ShowNotification(false);
 		trainingAgent.FreezeAgent(true);
 		currentNotificationState = "Failure";
@@ -94,6 +96,7 @@ public class NotificationManager : MonoBehaviour
 
 	public void HideNotification()
 	{
+		Debug.Log("Hiding Notification");
 		notificationPanel.SetActive(false);
 		successGradientBorderImage.gameObject.SetActive(false);
 		failureGradientBorderImage.gameObject.SetActive(false);
