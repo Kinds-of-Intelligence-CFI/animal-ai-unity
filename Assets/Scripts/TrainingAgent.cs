@@ -527,15 +527,14 @@ public class TrainingAgent : Agent, IPrefab
 
 	public void UpdateHealth(float updateAmount, bool andCompleteArena = false)
 	{
-		if (NotificationManager.Instance == null && showNotification == true)
+		// Sanity check for NotificationManager instance
+		if (NotificationManager.Instance == null && showNotification)
 		{
 			Debug.LogError("NotificationManager instance is not set.");
 			return;
 		}
-		/// <summary>
-		/// Update the health of the agent and reset any queued updates
-		/// If health reaches 0 or the episode is queued to end then call EndEpisode().
-		/// </summary>
+
+		// Updating health only if the agent is not frozen
 		if (!IsFrozen())
 		{
 			health += 100 * updateAmount;
@@ -543,48 +542,58 @@ public class TrainingAgent : Agent, IPrefab
 			_nextUpdateHealth = 0;
 			AddReward(updateAmount);
 		}
+
 		_currentScore = GetCumulativeReward();
+
+		// Ensure health does not exceed maximum limits
 		if (health > _maxHealth)
 		{
 			health = _maxHealth;
 		}
+		// Handling scenarios when health drops to zero or below
 		else if (health <= 0)
 		{
 			health = 0;
-			if (showNotification)
+			HandleEpisodeEnd("Failure");
+			return;
+		}
+
+		if (andCompleteArena || _nextUpdateCompleteArena)
+		{
+			HandleArenaCompletion();
+		}
+	}
+
+	private void HandleEpisodeEnd(string result)
+	{
+		if (showNotification)
+		{
+			if (result == "Failure")
 			{
 				NotificationManager.Instance.ShowFailureNotification();
 			}
-			StartCoroutine(EndEpisodeAfterDelay());
+			else if (result == "Success")
+			{
+				NotificationManager.Instance.ShowSuccessNotification();
+			}
+		}
+		StartCoroutine(EndEpisodeAfterDelay()); // Ending the episode after a delay
+	}
+
+	private void HandleArenaCompletion()
+	{
+		_nextUpdateCompleteArena = false;
+		float cumulativeReward = GetCumulativeReward();
+
+		if (cumulativeReward >= Arena.CurrentPassMark && _arena.mergeNextArena)
+		{
+			_arena.LoadNextArena();
 			return;
 		}
-		if (andCompleteArena || _nextUpdateCompleteArena)
-		{
-			_nextUpdateCompleteArena = false;
-			float cumulativeReward = this.GetCumulativeReward();
 
-			if (cumulativeReward >= Arena.CurrentPassMark)
-			{
-				// If passed and the next arena is merged load that without ending the episode
-				if (_arena.mergeNextArena)
-				{
-					_arena.LoadNextArena();
-					return;
-				}
-				if (showNotification)
-				{
-					NotificationManager.Instance.ShowSuccessNotification();
-				}
-			}
-			else
-			{
-				if (showNotification)
-				{
-					NotificationManager.Instance.ShowFailureNotification();
-				}
-			}
-			StartCoroutine(EndEpisodeAfterDelay());
-		}
+		// Determining the result based on the cumulative reward
+		string result = cumulativeReward >= Arena.CurrentPassMark ? "Success" : "Failure";
+		HandleEpisodeEnd(result);
 	}
 
 	public void AddExtraReward(float rewardFactor)
