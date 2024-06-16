@@ -527,15 +527,13 @@ public class TrainingAgent : Agent, IPrefab
 
 	public void UpdateHealth(float updateAmount, bool andCompleteArena = false)
 	{
-		if (NotificationManager.Instance == null && showNotification == true)
+		if (NotificationManager.Instance == null && showNotification)
 		{
 			Debug.LogError("NotificationManager instance is not set.");
 			return;
 		}
-		/// <summary>
-		/// Update the health of the agent and reset any queued updates
-		/// If health reaches 0 or the episode is queued to end then call EndEpisode().
-		/// </summary>
+
+		// Update the health of the agent and reset any queued updates
 		if (!IsFrozen())
 		{
 			health += 100 * updateAmount;
@@ -543,7 +541,11 @@ public class TrainingAgent : Agent, IPrefab
 			_nextUpdateHealth = 0;
 			AddReward(updateAmount);
 		}
+
 		_currentScore = GetCumulativeReward();
+		Debug.Log($"Current cumulative reward: {_currentScore}, Current pass mark: {Arena.CurrentPassMark}");
+
+		// Ensure health does not exceed maximum limits
 		if (health > _maxHealth)
 		{
 			health = _maxHealth;
@@ -551,6 +553,7 @@ public class TrainingAgent : Agent, IPrefab
 		else if (health <= 0)
 		{
 			health = 0;
+			Debug.Log("Health reached 0, showing failure notification.");
 			if (showNotification)
 			{
 				NotificationManager.Instance.ShowFailureNotification();
@@ -558,21 +561,30 @@ public class TrainingAgent : Agent, IPrefab
 			StartCoroutine(EndEpisodeAfterDelay());
 			return;
 		}
+
+		// Handle arena completion or episode ending
 		if (andCompleteArena || _nextUpdateCompleteArena)
 		{
 			_nextUpdateCompleteArena = false;
-			float cumulativeReward = this.GetCumulativeReward();
+			float cumulativeReward = GetCumulativeReward();
+			Debug.Log($"Current pass mark: {Arena.CurrentPassMark}");
 
-			if (cumulativeReward >= Arena.CurrentPassMark)
+			bool proceedToNext = Arena.CurrentPassMark == 0 || cumulativeReward >= Arena.CurrentPassMark;
+			Debug.Log($"Proceed to next arena: {proceedToNext}, Merge next arena: {_arena.mergeNextArena}");
+
+			if (proceedToNext)
 			{
-				// If passed and the next arena is merged load that without ending the episode
+				// If the next arena is merged, load that without ending the episode
 				if (_arena.mergeNextArena)
 				{
+					Debug.Log("Merging to next arena without ending episode.");
 					_arena.LoadNextArena();
 					return;
 				}
+
 				if (showNotification)
 				{
+					Debug.Log("Showing success notification.");
 					NotificationManager.Instance.ShowSuccessNotification();
 				}
 			}
@@ -580,16 +592,13 @@ public class TrainingAgent : Agent, IPrefab
 			{
 				if (showNotification)
 				{
+					Debug.Log("Showing failure notification due to insufficient reward.");
 					NotificationManager.Instance.ShowFailureNotification();
 				}
 			}
+
 			StartCoroutine(EndEpisodeAfterDelay());
 		}
-	}
-
-	public void AddExtraReward(float rewardFactor)
-	{
-		UpdateHealth(Math.Min(rewardFactor * _rewardPerStep, -0.001f));
 	}
 
 	IEnumerator EndEpisodeAfterDelay()
@@ -600,8 +609,11 @@ public class TrainingAgent : Agent, IPrefab
 			yield break;
 		}
 
+		Debug.Log("Starting delay before ending episode.");
 		yield return new WaitForSeconds(2.5f);
+
 		NotificationManager.Instance.HideNotification();
+		Debug.Log("Ending episode after delay.");
 		EndEpisode();
 	}
 
@@ -619,7 +631,7 @@ public class TrainingAgent : Agent, IPrefab
 		writer.Flush();
 		EpisodeDebugLogs();
 
-		StopCoroutine("UnfreezeCountdown");
+		StopAllCoroutines();
 		_previousScore = _currentScore;
 		numberOfGoalsCollected = 0;
 		_arena.ResetArena();
@@ -628,6 +640,12 @@ public class TrainingAgent : Agent, IPrefab
 		health = _maxHealth;
 
 		SetFreezeDelay(GetFreezeDelay());
+		Debug.Log("Agent state reset in OnEpisodeBegin.");
+	}
+
+	public void AddExtraReward(float rewardFactor)
+	{
+		UpdateHealth(Math.Min(rewardFactor * _rewardPerStep, -0.001f));
 	}
 
 	private void EpisodeDebugLogs()
@@ -673,8 +691,11 @@ public class TrainingAgent : Agent, IPrefab
 	//******************************
 	//PREFAB INTERFACE FOR THE AGENT
 	//******************************
-	public void SetColor(Vector3 color) { }
 
+	/// <summary>
+	/// Sets the colour and size of the agent. Not used in this implementation.
+	/// </summary>
+	public void SetColor(Vector3 color) { }
 	public void SetSize(Vector3 scale) { }
 
 	/// <summary>
