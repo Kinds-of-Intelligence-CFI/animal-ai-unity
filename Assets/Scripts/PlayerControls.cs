@@ -28,7 +28,6 @@ public class PlayerControls : MonoBehaviour
 	private ScreenshotCamera screenshotCam;
 	private TrainingAgent agent;
 	private ArenasConfigurations arenasConfigurations;
-	public UIManager uiManager;
 
 	[Header("Score Settings")]
 	public float prevScore = 0;
