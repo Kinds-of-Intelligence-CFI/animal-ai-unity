@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7046777348394065180}
   - component: {fileID: 7013282172734433842}
   - component: {fileID: 7056487143949059500}
+  - component: {fileID: -689990793451022363}
   m_Layer: 0
   m_Name: DataZone
   m_TagString: Untagged
@@ -50,7 +51,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7041498159436349378}
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
@@ -97,3 +98,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &-689990793451022363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7041498159436349378}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee16993e0d02ef64c8ed59aa0b63ac82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rotationRange: {x: 0, y: 360}
+  sizeMin: {x: 1, y: 0.5, z: 1}
+  sizeMax: {x: 40, y: 10, z: 40}
+  canRandomizeColor: 0
+  ratioSize: {x: 1, y: 1, z: 1}
+  sizeAdjustment: 0.999
+  textureUVOverride: 0
+  typicalOrigin: 1
+  numberOfGoals: 0
+  reward: 0
+  isMulti: 0
+  rewardType: DataZone
