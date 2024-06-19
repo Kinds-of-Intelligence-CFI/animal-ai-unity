@@ -551,6 +551,7 @@ public class TrainingAgent : Agent, IPrefab
         }
 
         // Handle arena completion or episode ending
+		// TODO: Debug current pass mark for arena == 0
         if (andCompleteArena || _nextUpdateCompleteArena)
         {
             _nextUpdateCompleteArena = false;
@@ -596,12 +597,10 @@ public class TrainingAgent : Agent, IPrefab
             EndEpisode();
             yield break;
         }
-
-        Debug.Log("Starting delay before ending episode.");
         yield return new WaitForSeconds(2.5f);
 
         NotificationManager.Instance.HideNotification();
-        Debug.Log("Ending episode after delay.");
+
         EndEpisode();
     }
 
