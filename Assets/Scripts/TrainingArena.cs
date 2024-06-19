@@ -35,7 +35,6 @@ public class TrainingArena : MonoBehaviour
     public int arenaID = -1;
 
     public TrainingAgent _agent;
-
     private ArenaBuilder _builder;
     private ArenaConfiguration _arenaConfiguration = new ArenaConfiguration();
     private AAI3EnvironmentManager _environmentManager;
@@ -160,7 +159,6 @@ public class TrainingArena : MonoBehaviour
 
         arenaID += 1;
 
-        // Load the new configuration
         ArenaConfiguration newConfiguration = _environmentManager.GetConfiguration(arenaID);
 
         // Checks if its final arena in config file and if mergeNextArena is set to true, throws an exception
@@ -240,15 +238,14 @@ public class TrainingArena : MonoBehaviour
         return availableArenas[Random.Range(0, availableArenas.Count)];
     }
 
-    /* Note: to update the active arena to a new ID the following must be called in sequence
+    /*
+       Note: to update the active arena to a new ID the following must be called in sequence
        GetConfiguration, ApplyNewArenaConfiguration, CleanupRewards, NotifyArenaChange
     */
     private void ApplyNewArenaConfiguration(ArenaConfiguration newConfiguration)
     {
         _arenaConfiguration = newConfiguration;
         _agent.showNotification = ArenasConfigurations.Instance.showNotification;
-        Debug.Log("Updating Arena Configuration");
-
         _arenaConfiguration.SetGameObject(prefabs.GetList());
         _builder.Spawnables = _arenaConfiguration.spawnables;
         _arenaConfiguration.toUpdate = false;
@@ -261,7 +258,6 @@ public class TrainingArena : MonoBehaviour
         {
             Random.InitState(_arenaConfiguration.randomSeed);
         }
-        Debug.Log($"TimeLimit set to: {_arenaConfiguration.TimeLimit}");
     }
 
     private void NotifyArenaChange()
@@ -306,7 +302,6 @@ public class TrainingArena : MonoBehaviour
     /// </summary>
     public int GetTotalSpawnedObjects()
     {
-        Debug.Log("Total spawned objects: " + spawnedObjectsHolder.transform.childCount);
         return spawnedObjectsHolder.transform.childCount;
     }
 
