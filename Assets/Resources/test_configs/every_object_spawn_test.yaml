@@ -1,5 +1,5 @@
-!ArenaConfig
 # Testing to make sure every object can spawn in the arena. !CORE TEST!
+!ArenaConfig
 arenas:
   0: !Arena
     passMark: 0 # The pass mark for the arena. The agent must achieve this score to pass the arena.

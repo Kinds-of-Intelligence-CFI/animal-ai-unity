@@ -1,6 +1,6 @@
-!ArenaConfig
 # Testing all the animal skins to make sure they are all working correctly.
 arenas:
+!ArenaConfig
   0: !Arena
     passMark: 0
     timeLimit: 250

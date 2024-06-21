@@ -1,5 +1,5 @@
-!ArenaConfig
 # Testing the freeze delay countdown feature in multiple arenas.
+!ArenaConfig
 arenas:
   0: !Arena
     passMark: 0

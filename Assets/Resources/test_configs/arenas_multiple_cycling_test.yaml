@@ -1,6 +1,6 @@
-!ArenaConfig
 # Checking whether the arenas are cycling sequentially and randomly in PLAY mode only.
 # Also added check to see if arena index values below 0 will be handled correctly (they should be converted to positive and unique index values).
+!ArenaConfig
 arenas:
   0: !Arena
     passMark: 1

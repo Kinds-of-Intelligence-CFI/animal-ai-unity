@@ -1,5 +1,5 @@
-!ArenaConfig
 # Testing file for ongoing development. Will be removed once the feature is complete.
+!ArenaConfig
 arenas:
   0: !Arena
     passMark: 0

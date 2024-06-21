@@ -1,5 +1,5 @@
-!ArenaConfig
 # Testing the SignBoard with different symbols and sizes.
+!ArenaConfig
 arenas:
   0: !Arena
     passMark: 0
