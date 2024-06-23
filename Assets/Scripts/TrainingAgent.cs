@@ -75,8 +75,14 @@ public class TrainingAgent : Agent, IPrefab
     private bool isFlushing = false;
     private string lastCollectedRewardType = "None";
     private string dispensedRewardType = "None";
+    private string wasInDataZone = "No";
     private bool wasRewardDispensed = false;
     private bool wasButtonPressed = false;
+
+    private void OnInDataZone(GameObject zone)
+    {
+        wasInDataZone = "Agent was in DataZone";
+    }
 
     private void OnRewardSpawned(GameObject reward)
     {
@@ -113,6 +119,7 @@ public class TrainingAgent : Agent, IPrefab
         health = _maxHealth;
 
         Spawner_InteractiveButton.RewardSpawned += OnRewardSpawned;
+        DataZone.OnInDataZone += OnInDataZone;
 
         InitialiseCSVProcess();
 
@@ -165,7 +172,7 @@ public class TrainingAgent : Agent, IPrefab
             if (!headerWritten)
             {
                 writer.WriteLine(
-                    "Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen,NotificationState,DispensedRewardType,WasRewardDispensed,WasButtonPressed,RaycastObservations,RaycastTags"
+                    "Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen,NotificationState,DispensedRewardType,WasRewardDispensed,WasButtonPressed,RaycastObservations,RaycastTags,WasInDataZone"
                 );
                 headerWritten = true;
             }
@@ -194,13 +201,14 @@ public class TrainingAgent : Agent, IPrefab
         bool wasRewardDispensed,
         bool wasButtonPressed,
         float[] raycastObservations,
-        string[] raycastTags
+        string[] raycastTags,
+        string wasInDataZone
     )
     {
         string raycastData = string.Join(",", raycastObservations);
         string raycastTagsData = string.Join(",", raycastTags);
         string logEntry =
-            $"{customEpisodeCount},{StepCount},{reward},{lastCollectedRewardType},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{notificationState},{DispensedRewardType},{wasRewardDispensed},{wasButtonPressed},{raycastData},{raycastTagsData}";
+            $"{customEpisodeCount},{StepCount},{reward},{lastCollectedRewardType},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{notificationState},{DispensedRewardType},{wasRewardDispensed},{wasButtonPressed},{raycastData},{raycastTagsData},{wasInDataZone}";
         logQueue.Enqueue(logEntry);
         lastCollectedRewardType = "None";
     }
@@ -252,6 +260,7 @@ public class TrainingAgent : Agent, IPrefab
         }
 
         Spawner_InteractiveButton.RewardSpawned -= OnRewardSpawned;
+        DataZone.OnInDataZone -= OnInDataZone;
     }
 
     public float GetPreviousScore()
@@ -343,11 +352,13 @@ public class TrainingAgent : Agent, IPrefab
             wasRewardDispensed,
             wasButtonPressed,
             raycastObservations,
-            raycastTags
+            raycastTags,
+            wasInDataZone
         );
         dispensedRewardType = "None";
         wasRewardDispensed = false;
         wasButtonPressed = false;
+        wasInDataZone = "No";
     }
 
     public override void OnActionReceived(ActionBuffers action)
@@ -386,11 +397,13 @@ public class TrainingAgent : Agent, IPrefab
             wasRewardDispensed,
             wasButtonPressed,
             raycastObservations,
-            raycastTags
+            raycastTags,
+            wasInDataZone
         );
         dispensedRewardType = "None";
         wasRewardDispensed = false;
         wasButtonPressed = false;
+        wasInDataZone = "No";
 
         UpdateHealth(_rewardPerStep);
     }
@@ -551,7 +564,7 @@ public class TrainingAgent : Agent, IPrefab
         }
 
         // Handle arena completion or episode ending
-		// TODO: Debug current pass mark for arena == 0
+        // TODO: Debug current pass mark for arena == 0
         if (andCompleteArena || _nextUpdateCompleteArena)
         {
             _nextUpdateCompleteArena = false;
