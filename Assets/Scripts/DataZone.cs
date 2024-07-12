@@ -1,20 +1,21 @@
 using UnityEngine;
 
 /// <summary>
-/// A zone that triggers an event when an agent enters it. It's primary use is to trigger data collection.
+/// A zone that triggers an event when an agent enters it. It's primary use is to trigger a log event when an agent enters a trigger/data zone.
 /// </summary>
 public class DataZone : Prefab
 {
-    // TODO: Add logic to differentiate between different datazones
-    // TODO: Implement parameter to specify zone names/sections in yaml file (under the datazones Item)
-    public delegate void InDataZoneHandler(GameObject zone);
+    public delegate void InDataZoneHandler(string TriggerZoneID);
     public static event InDataZoneHandler OnInDataZone;
+
+    public string TriggerZoneID { get; set; }
 
     private void OnCollisionEnter(Collision other)
     {
         if (other.gameObject.CompareTag("agent"))
         {
-            OnInDataZone?.Invoke(gameObject);
+            Debug.Log("Agent entered data zone: " + TriggerZoneID);
+            OnInDataZone?.Invoke(TriggerZoneID);
         }
     }
 }

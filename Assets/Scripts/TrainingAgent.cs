@@ -13,9 +13,6 @@ using System.Collections.Concurrent;
 using System.Threading;
 
 // TODO: need to check/handle what happens if two dispensed rewards are collected in the same step
-// TODO: raycast data is (Observation Stacks) * (1 + 2 * Rays Per Direction) * (Num Detectable Tags + 2) --> corrected calculation
-// batched raycasts? (https://github.com/Unity-Technologies/ml-agents/blob/main/docs/Learning-Environment-Design-Agents.md#raycast-observations)
-// TODO: clean up the code, remove unnecessary comments, and make sure the code is readable and understandable
 
 /// <summary>
 /// The TrainingAgent class is a subclass of the Agent class in the ML-Agents library.
@@ -79,9 +76,9 @@ public class TrainingAgent : Agent, IPrefab
     private bool wasRewardDispensed = false;
     private bool wasButtonPressed = false;
 
-    private void OnInDataZone(GameObject zone)
+    public void OnInDataZone(string zoneLogString)
     {
-        wasInDataZone = "Agent was in DataZone";
+        wasInDataZone = "Agent was in DataZone: " + zoneLogString;
     }
 
     private void OnRewardSpawned(GameObject reward)
@@ -172,7 +169,7 @@ public class TrainingAgent : Agent, IPrefab
             if (!headerWritten)
             {
                 writer.WriteLine(
-                    "Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen,NotificationState,DispensedRewardType,WasRewardDispensed,WasButtonPressed,RaycastObservations,RaycastTags,WasInDataZone"
+                    "Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen?,NotificationState,DispensedRewardType,WasRewardDispensed?,WasButtonPressed?,RaycastObservations,RaycastTags,WasInDataZone?"
                 );
                 headerWritten = true;
             }
