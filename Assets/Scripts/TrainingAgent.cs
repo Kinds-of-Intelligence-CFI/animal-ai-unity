@@ -12,8 +12,6 @@ using System.IO;
 using System.Collections.Concurrent;
 using System.Threading;
 
-// TODO: need to check/handle what happens if two dispensed rewards are collected in the same step
-
 /// <summary>
 /// The TrainingAgent class is a subclass of the Agent class in the ML-Agents library.
 /// It is used to define the behaviour of the agent in the training environment.
