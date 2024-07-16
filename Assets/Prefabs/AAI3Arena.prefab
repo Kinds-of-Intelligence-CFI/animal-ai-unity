@@ -859,6 +859,8 @@ MonoBehaviour:
     - {fileID: 1323439192758780, guid: 70289c4d2c6d4a94eb4d73531e1a9ce6, type: 3}
     - {fileID: 8069506010422567580, guid: 2e66c94a6ed25c641ad85c58ce7e981b, type: 3}
     - {fileID: 7041498159436349378, guid: 00c912a41dbd87a4ba31cad3fe3ec871, type: 3}
+    - {fileID: 1311020654520240, guid: 4ab9cee937b1d44788ffc287caba796b, type: 3}
+    - {fileID: 1311020654520240, guid: 6a410b42e9ae8480ca41567b3afb30f0, type: 3}
   spawnedObjectsHolder: {fileID: 6276814220842007455, guid: ff9a0b038a04e8747a9f95217df0b26f, type: 3}
   maxSpawnAttemptsForAgent: 100
   maxSpawnAttemptsForPrefabs: 20
