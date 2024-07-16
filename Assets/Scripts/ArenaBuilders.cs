@@ -198,7 +198,8 @@ namespace ArenaBuilders
             List<float> timesBetweenDoorOpens = spawnable.timesBetweenDoorOpens;
             List<float> moveDurations = spawnable.moveDurations;
             List<float> resetDurations = spawnable.resetDurations;
-            List<string> triggerDataZoneIDs = spawnable.triggerZoneIDs;
+            List<string> triggerZoneIDs = spawnable.triggerZoneIDs ?? new List<string>();
+            bool zoneVisibility = spawnable.zoneVisibility;
 
             // Get the number of elements in the lists
             int numberOfPositions = positions.Count;
@@ -302,7 +303,8 @@ namespace ArenaBuilders
                     { "rewardWeights", spawnable.RewardWeights },
                     { "rewardSpawnPos", rewardSpawnPos },
                     { "maxRewardCounts", spawnable.maxRewardCounts },
-                    { "triggerZoneIDs", spawnable.triggerZoneIDs }
+                    { "triggerZoneIDs", spawnable.triggerZoneIDs },
+                    { "zoneVisibility", spawnable.zoneVisibility }
                 };
 
                 // Determines a suitable position and rotation for the object to spawn
@@ -497,16 +499,27 @@ namespace ArenaBuilders
                             }
                         }
                     }
-                    if (
-                        gameObjectInstance.CompareTag("DataZone")
-                        && optionals.TryGetValue("triggerZoneIDs", out var triggerZoneIDsValue)
-                        && triggerZoneIDsValue is List<string> triggerZoneIDs
-                    )
+                    if (gameObjectInstance.CompareTag("DataZone"))
                     {
                         DataZone dataZone = gameObjectInstance.GetComponent<DataZone>();
-                        if (dataZone != null && triggerZoneIDs.Count > 0)
+                        if (dataZone != null)
                         {
-                            dataZone.TriggerZoneID = triggerZoneIDs[0];
+                            if (
+                                optionals.TryGetValue("triggerZoneIDs", out var triggerZoneIDsValue)
+                                && triggerZoneIDsValue is List<string> triggerZoneIDs
+                                && triggerZoneIDs.Count > 0
+                            )
+                            {
+                                dataZone.TriggerZoneID = triggerZoneIDs[0];
+                            }
+
+                            if (
+                                optionals.TryGetValue("zoneVisibility", out var zoneVisibilityValue)
+                                && zoneVisibilityValue is bool zoneVisibility
+                            )
+                            {
+                                dataZone.SetVisibility(zoneVisibility);
+                            }
                         }
                     }
                 }

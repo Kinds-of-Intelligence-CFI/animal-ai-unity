@@ -55,23 +55,26 @@ namespace YAMLDefs
 	}
 
 	/// <summary>
-	/// Item class is used to deserialize the item object in the YAML file.
+	/// Item class is used to deserialize the item object in the YAML file. It contains the settings for the game objects in the arena.
+	/// Each game object will require the following required and optional parameters in the yaml file under Item tags.
 	/// </summary>
 	public class Item
 	{
-		// REQUIRED PARAMETERS
+		/* MANDATORY OR REQUIRED PARAMETERS */
 		public string name { get; set; } = "";
 		public List<Vector3> positions { get; set; } = new List<Vector3>();
 		public List<float> rotations { get; set; } = new List<float>();
 		public List<Vector3> sizes { get; set; } = new List<Vector3>();
 		public List<RGB> colors { get; set; } = new List<RGB>();
 
-		// EXTRA/OPTIONAL PARAMETERS
+		/* EXTRA OR OPTIONAL PARAMETERS */
 		public List<string> skins { get; set; } = new List<string>();
 		public List<float> frozenAgentDelays { get; set; } = new List<float>();
 
+		// SignBoard
 		public List<string> symbolNames { get; set; } = new List<string>();
 
+		// Spawner/Dispensers
 		public List<float> delays { get; set; } = new List<float>();
 		public List<float> initialValues { get; set; } = new List<float>();
 		public List<float> finalValues { get; set; } = new List<float>();
@@ -83,6 +86,7 @@ namespace YAMLDefs
 		public List<float> changeRates { get; set; } = new List<float>();
 		public List<float> ripenTimes { get; set; } = new List<float>();
 
+		// SpawnerButton
 		public List<float> moveDurations { get; set; } = new List<float>();
 		public List<float> resetDurations { get; set; } = new List<float>();
 		public float spawnProbability { get; set; } = 1f;
@@ -91,7 +95,9 @@ namespace YAMLDefs
 		public Vector3 rewardSpawnPos { get; set; } = new Vector3(0, 0, 0);
 		public List<int> maxRewardCounts { get; set; } = new List<int>();
 		
+		// DataZone
 		public List<string> triggerZoneIDs { get; set; } = new List<string>();
+		public bool zoneVisibility { get; set; } = true;
 	}
 
 	/// <summary>
@@ -129,7 +135,7 @@ namespace YAMLDefs
 		{
 			if (AliasMap.TryGetValue(name, out string newName))
 			{
-				Debug.Log($"Alias found: '{name}' is mapped to '{newName}'");
+				Debug.Log($"Alias/old name for game object found. '{name}' is mapped to '{newName}'");
 				return newName;
 			}
 			return name;

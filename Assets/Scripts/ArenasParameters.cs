@@ -66,6 +66,7 @@ namespace ArenasParameters
 
         // Trigger/DataZone
         public List<string> triggerZoneIDs = null;
+        public bool zoneVisibility = true;
 
         /// <summary>
         /// The purpose of this constructor is to initialize the Spawnable object with the properties of the provided GameObject.
@@ -120,6 +121,7 @@ namespace ArenasParameters
             maxRewardCounts = yamlItem.maxRewardCounts;
 
             triggerZoneIDs = yamlItem.triggerZoneIDs;
+            zoneVisibility = yamlItem.zoneVisibility;
         }
 
         /// <summary>
