@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: -228958769421370408}
   m_Layer: 0
   m_Name: GrowGoal
-  m_TagString: goodGoalMulti
+  m_TagString: GrowGoal
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

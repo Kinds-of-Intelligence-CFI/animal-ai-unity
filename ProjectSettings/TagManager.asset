@@ -31,6 +31,10 @@ TagManager:
   - DecoyGoal
   - DecoyGoalBounce
   - DataZone
+  - RipenGoal
+  - DecayGoal
+  - GrowGoal
+  - ShrinkGoal
   layers:
   - Default
   - TransparentFX
