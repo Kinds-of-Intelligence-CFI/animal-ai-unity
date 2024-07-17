@@ -140,6 +140,19 @@ namespace ArenaBuilders
             if (agentSpawnablesFromUser.Any())
             {
                 _agentCollider.enabled = false;
+                Vector3 agentPosition = agentSpawnablesFromUser[0].positions[0];
+
+                // Checking if Agent positions do not conflict with Arena default position (0, 0, 0)
+                if (
+                    agentPosition == Vector3.zero
+                    || (agentPosition.x == 1 && agentPosition.y == 0 && agentPosition.z == 0)
+                    || (agentPosition.x == 0 && agentPosition.y == 0 && agentPosition.z == 1)
+                )
+                {
+                    agentPosition = new Vector3(1, 0, 1); // Buffer position
+                    agentSpawnablesFromUser[0].positions[0] = agentPosition;
+                }
+
                 SpawnAgent(agentSpawnablesFromUser[0]);
                 _agentCollider.enabled = true;
                 SpawnObjects(spawnedObjectsHolder);
