@@ -198,7 +198,7 @@ namespace ArenaBuilders
             List<float> timesBetweenDoorOpens = spawnable.timesBetweenDoorOpens;
             List<float> moveDurations = spawnable.moveDurations;
             List<float> resetDurations = spawnable.resetDurations;
-            List<string> triggerZoneIDs = spawnable.triggerZoneIDs ?? new List<string>();
+            List<string> triggerZoneID = spawnable.triggerZoneID;
             bool zoneVisibility = spawnable.zoneVisibility;
 
             // Get the number of elements in the lists
@@ -303,7 +303,7 @@ namespace ArenaBuilders
                     { "rewardWeights", spawnable.RewardWeights },
                     { "rewardSpawnPos", rewardSpawnPos },
                     { "maxRewardCounts", spawnable.maxRewardCounts },
-                    { "triggerZoneIDs", spawnable.triggerZoneIDs },
+                    { "triggerZoneID", spawnable.triggerZoneID },
                     { "zoneVisibility", spawnable.zoneVisibility }
                 };
 
@@ -505,7 +505,7 @@ namespace ArenaBuilders
                         if (dataZone != null)
                         {
                             if (
-                                optionals.TryGetValue("triggerZoneIDs", out var triggerZoneIDsValue)
+                                optionals.TryGetValue("triggerZoneID", out var triggerZoneIDsValue)
                                 && triggerZoneIDsValue is List<string> triggerZoneIDs
                                 && triggerZoneIDs.Count > 0
                             )

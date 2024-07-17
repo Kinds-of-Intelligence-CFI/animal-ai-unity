@@ -65,7 +65,7 @@ namespace ArenasParameters
         public Dictionary<int, int> originalToNewIDMapping = new Dictionary<int, int>();
 
         // Trigger/DataZone
-        public List<string> triggerZoneIDs = null;
+        public List<string> triggerZoneID = null;
         public bool zoneVisibility = true;
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace ArenasParameters
             rewardSpawnPos = yamlItem.rewardSpawnPos;
             maxRewardCounts = yamlItem.maxRewardCounts;
 
-            triggerZoneIDs = yamlItem.triggerZoneIDs;
+            triggerZoneID = yamlItem.triggerZoneID;
             zoneVisibility = yamlItem.zoneVisibility;
         }
 

@@ -96,7 +96,7 @@ namespace YAMLDefs
 		public List<int> maxRewardCounts { get; set; } = new List<int>();
 		
 		// DataZone
-		public List<string> triggerZoneIDs { get; set; } = new List<string>();
+		public List<string> triggerZoneID { get; set; } = new List<string>();
 		public bool zoneVisibility { get; set; } = true;
 	}
 
