@@ -37,7 +37,6 @@ public class DataZone : Prefab
         if (other.CompareTag("agent") && !isAgentInZone)
         {
             isAgentInZone = true;
-            Debug.Log("Agent entered data zone: " + TriggerZoneID);
             OnInDataZone?.Invoke(TriggerZoneID);
         }
     }
@@ -47,7 +46,6 @@ public class DataZone : Prefab
         if (other.CompareTag("agent"))
         {
             isAgentInZone = false;
-            Debug.Log("Agent exited data zone: " + TriggerZoneID);
             OnOutDataZone?.Invoke(TriggerZoneID);
         }
     }
