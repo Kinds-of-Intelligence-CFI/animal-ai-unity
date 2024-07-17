@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// A zone that triggers an event when an agent enters it. 
+/// A zone that triggers an event when an agent enters it.
 /// It's primary use is to trigger a log event when an agent enters a datazone gameobject.
 /// </summary>
 public class DataZone : Prefab
@@ -12,6 +12,16 @@ public class DataZone : Prefab
     public bool ZoneVisibility { get; set; } = true;
     public bool isAgentInZone { get; set; } = false;
 
+    private void Start()
+    {
+        SetVisibility(ZoneVisibility);
+        var collider = GetComponent<Collider>();
+        if (collider != null)
+        {
+            collider.isTrigger = true;
+        }
+    }
+
     public void SetVisibility(bool visibility)
     {
         var renderers = GetComponentsInChildren<Renderer>();
@@ -21,9 +31,9 @@ public class DataZone : Prefab
         }
     }
 
-    private void OnCollisionEnter(Collision other)
+    private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("agent") && !isAgentInZone)
+        if (other.CompareTag("agent") && !isAgentInZone)
         {
             isAgentInZone = true;
             Debug.Log("Agent entered data zone: " + TriggerZoneID);
@@ -31,9 +41,9 @@ public class DataZone : Prefab
         }
     }
 
-    private void OnCollisionExit(Collision other)
+    private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.CompareTag("agent"))
+        if (other.CompareTag("agent"))
         {
             isAgentInZone = false;
             Debug.Log("Agent exited data zone: " + TriggerZoneID);
