@@ -79,6 +79,11 @@ public class TrainingAgent : Agent, IPrefab
         wasInDataZone = "Agent was in DataZone: " + zoneLogString;
     }
 
+    public void OnOutDataZone(string zoneLogString)
+    {
+        wasInDataZone = "Agent left DataZone: " + zoneLogString;
+    }
+
     private void OnRewardSpawned(GameObject reward)
     {
         wasButtonPressed = true;
@@ -115,6 +120,7 @@ public class TrainingAgent : Agent, IPrefab
 
         Spawner_InteractiveButton.RewardSpawned += OnRewardSpawned;
         DataZone.OnInDataZone += OnInDataZone;
+        DataZone.OnOutDataZone += OnOutDataZone;
 
         InitialiseCSVProcess();
 
@@ -256,6 +262,7 @@ public class TrainingAgent : Agent, IPrefab
 
         Spawner_InteractiveButton.RewardSpawned -= OnRewardSpawned;
         DataZone.OnInDataZone -= OnInDataZone;
+        DataZone.OnOutDataZone -= OnOutDataZone;
     }
 
     public float GetPreviousScore()

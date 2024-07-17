@@ -6,8 +6,9 @@ using UnityEngine;
 /// </summary>
 public class DataZone : Prefab
 {
-    public delegate void InDataZoneHandler(string TriggerZoneID);
-    public static event InDataZoneHandler OnInDataZone;
+    public delegate void DataZoneHandler(string TriggerZoneID);
+    public static event DataZoneHandler OnInDataZone;
+    public static event DataZoneHandler OnOutDataZone;
     public string TriggerZoneID { get; set; }
     public bool ZoneVisibility { get; set; } = true;
     public bool isAgentInZone { get; set; } = false;
@@ -47,6 +48,7 @@ public class DataZone : Prefab
         {
             isAgentInZone = false;
             Debug.Log("Agent exited data zone: " + TriggerZoneID);
+            OnOutDataZone?.Invoke(TriggerZoneID);
         }
     }
 }
