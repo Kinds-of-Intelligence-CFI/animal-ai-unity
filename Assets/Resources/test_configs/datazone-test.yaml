@@ -11,7 +11,7 @@ arenas:
       - !Vector3 {x: 10, y: 0, z: 20}
       rotations: [90]
     - !Item
-      name: DataZone # The name of the game object.
+      name: DataZone
       positions:
       - !Vector3 {x: 25, y: 0, z: 25}
       sizes:
