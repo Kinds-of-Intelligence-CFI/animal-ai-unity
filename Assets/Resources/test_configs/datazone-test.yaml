@@ -1,0 +1,20 @@
+# This is a test config file for the DataZone game object.
+!ArenaConfig
+arenas:
+  0: !Arena
+    passMark: 0
+    timeLimit: 100
+    items:
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 10, y: 0, z: 20}
+      rotations: [90]
+    - !Item
+      name: DataZone # The name of the game object.
+      positions:
+      - !Vector3 {x: 25, y: 0, z: 25}
+      sizes:
+      - !Vector3 {x: 5, y: 0, z: 5}
+      zoneVisibility: true # This is a boolean value that determines whether the zone is visible or not.
+      triggerZoneID: ["Agent has entered the DataZone 1"] # This is a string value that is used to identify the zone.
