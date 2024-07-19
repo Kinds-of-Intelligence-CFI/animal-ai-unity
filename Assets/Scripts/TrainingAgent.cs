@@ -17,6 +17,8 @@ using System.Threading;
 /// It is used to define the behaviour of the agent in the training environment.
 /// Actions are currently discrete. 2 branches of 0,1,2, 0,1,2 for forward and rotate respectively.
 /// </summary>
+
+// TODO: Clean, optimize and refactor the this script.
 public class TrainingAgent : Agent, IPrefab
 {
     [Header("Agent Settings")]
