@@ -173,7 +173,7 @@ public class TrainingAgent : Agent, IPrefab
             if (!headerWritten)
             {
                 writer.WriteLine(
-                    "Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen?,NotificationState,DispensedRewardType,WasRewardDispensed?,WasButtonPressed?,RaycastObservations,RaycastTags,WasInDataZone?"
+                    "Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen?,NotificationState,DispensedRewardType,WasRewardDispensed?,WasButtonPressed?,CombinedRaycastData,WasInDataZone?"
                 );
                 headerWritten = true;
             }
@@ -182,6 +182,11 @@ public class TrainingAgent : Agent, IPrefab
                 Debug.LogError("Header/Columns already written to CSV file.");
             }
         }
+    }
+
+    private string CombineRaycastData(float[] observations, string[] tags)
+    {
+        return string.Join(";", observations.Zip(tags, (obs, tag) => $"{obs}:{tag}"));
     }
 
     /// <summary>
@@ -198,18 +203,15 @@ public class TrainingAgent : Agent, IPrefab
         float reward,
         string notificationState,
         int customEpisodeCount,
-        string DispensedRewardType,
+        string dispensedRewardType,
         bool wasRewardDispensed,
         bool wasButtonPressed,
-        float[] raycastObservations,
-        string[] raycastTags,
+        string combinedRaycastData,
         string wasInDataZone
     )
     {
-        string raycastData = string.Join(",", raycastObservations);
-        string raycastTagsData = string.Join(",", raycastTags);
         string logEntry =
-            $"{customEpisodeCount},{StepCount},{reward},{lastCollectedRewardType},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{notificationState},{DispensedRewardType},{wasRewardDispensed},{wasButtonPressed},{raycastData},{raycastTagsData},{wasInDataZone}";
+            $"{customEpisodeCount},{StepCount},{reward},{lastCollectedRewardType},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{notificationState},{dispensedRewardType},{wasRewardDispensed},{wasButtonPressed},{combinedRaycastData},{wasInDataZone}";
         logQueue.Enqueue(logEntry);
         lastCollectedRewardType = "None";
     }
@@ -339,6 +341,8 @@ public class TrainingAgent : Agent, IPrefab
             sensor.AddObservation(observation);
         }
 
+        string combinedRaycastData = CombineRaycastData(raycastObservations, raycastTags);
+
         LogToCSV(
             localVel,
             localPos,
@@ -353,8 +357,7 @@ public class TrainingAgent : Agent, IPrefab
             dispensedRewardType,
             wasRewardDispensed,
             wasButtonPressed,
-            raycastObservations,
-            raycastTags,
+            combinedRaycastData,
             wasInDataZone
         );
         dispensedRewardType = "None";
@@ -380,9 +383,9 @@ public class TrainingAgent : Agent, IPrefab
         float reward = GetCumulativeReward();
         string notificationState = GetNotificationState();
 
-        // Collect raycast observations and tags directly from the RayPerceptionSensorComponent3D
-        // TODO: Need to check if this is the correct way to collect raycast observations
         (float[] raycastObservations, string[] raycastTags) = CollectRaycastObservations();
+
+        string combinedRaycastData = CombineRaycastData(raycastObservations, raycastTags);
 
         LogToCSV(
             localVel,
@@ -398,8 +401,7 @@ public class TrainingAgent : Agent, IPrefab
             dispensedRewardType,
             wasRewardDispensed,
             wasButtonPressed,
-            raycastObservations,
-            raycastTags,
+            combinedRaycastData,
             wasInDataZone
         );
         dispensedRewardType = "None";
