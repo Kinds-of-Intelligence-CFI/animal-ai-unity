@@ -15,6 +15,8 @@ using ArenasParameters;
 /// User-defined or randomized positions, rotations, and scales are supported
 /// ... with repeated spawn attempts made for random placements until free space is found or the builder moves to the next item.
 /// </summary>
+
+// TODO: Optimize and refactor the this script.
 namespace ArenaBuilders
 {
     public class ArenaBuilder
@@ -140,16 +142,13 @@ namespace ArenaBuilders
             if (agentSpawnablesFromUser.Any())
             {
                 _agentCollider.enabled = false;
-                Vector3 agentPosition = agentSpawnablesFromUser[0].positions[0];
 
-                // Checking if Agent positions do not conflict with Arena default position (0, 0, 0)
-                if (
-                    agentPosition == Vector3.zero
-                    || (agentPosition.x == 1 && agentPosition.y == 0 && agentPosition.z == 0)
-                    || (agentPosition.x == 0 && agentPosition.y == 0 && agentPosition.z == 1)
-                )
+                // Check for problematic positions and adjust if necessary
+                Vector3 agentPosition = agentSpawnablesFromUser[0].positions[0];
+                if (IsProblematicPosition(agentPosition))
                 {
-                    agentPosition = new Vector3(1, 0, 1); // Buffer position
+                    Debug.LogWarning("Agent position is problematic. Adjusting to (1, 0, 1)");
+                    agentPosition = new Vector3(1, 0, 1);
                     agentSpawnablesFromUser[0].positions[0] = agentPosition;
                 }
 
@@ -164,6 +163,12 @@ namespace ArenaBuilders
                 SpawnAgent(null);
                 _agentCollider.enabled = true;
             }
+        }
+
+        // Helper method to check for agent position problems. When arena size can be changed, this method will need to be updated.
+        private bool IsProblematicPosition(Vector3 position)
+        {
+            return position.x == 0 || position.z == 0 || position.x == 40 || position.z == 40;
         }
 
         /// <summary>
