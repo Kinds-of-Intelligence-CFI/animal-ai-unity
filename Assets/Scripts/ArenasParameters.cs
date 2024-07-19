@@ -7,8 +7,11 @@ using System.Linq;
 using YAMLDefs;
 
 /// <summary>
-/// The classes in this file are used to store the parameters for the arenas.
+/// The classes in this file are used to store the parameters for the arenas. 
+/// These parameters are read from a YAML file and used to configure the arenas.
 /// </summary>
+
+// TODO: Optimize and refactor this script.
 namespace ArenasParameters
 {
     /// <summary>
@@ -30,6 +33,7 @@ namespace ArenasParameters
     /// </summary>
     public class Spawnable
     {
+        // ======== REQUIRED PARAMETERS ========
         public string name = "";
         public GameObject gameObject = null;
         public List<Vector3> positions = null;
