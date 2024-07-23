@@ -81,7 +81,6 @@ public class AAI3EnvironmentManager : MonoBehaviour
         int decisionPeriod = environmentParameters.TryGetValue("decisionPeriod", out paramValue)
             ? paramValue
             : defaultDecisionPeriod;
-        Debug.Log("Set playermode to " + playerMode);
 
         if (Application.isEditor)
         {
@@ -263,7 +262,6 @@ public class AAI3EnvironmentManager : MonoBehaviour
     {
         Dictionary<string, int> environmentParameters = new Dictionary<string, int>();
         string[] args = System.Environment.GetCommandLineArgs();
-        Debug.Log("Command Line Args: " + String.Join(" ", args));
 
         for (int i = 0; i < args.Length; i++)
         {
