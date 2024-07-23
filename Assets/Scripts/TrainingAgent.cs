@@ -75,6 +75,19 @@ public class TrainingAgent : Agent, IPrefab
     private string wasInDataZone = "No";
     private bool wasRewardDispensed = false;
     private bool wasButtonPressed = false;
+    private string combinedSpawnerInfo = "";
+
+    public void RecordSpawnerInfo(string spawnerInfo)
+    {
+        if (string.IsNullOrEmpty(combinedSpawnerInfo))
+        {
+            combinedSpawnerInfo = spawnerInfo;
+        }
+        else
+        {
+            combinedSpawnerInfo += $"|{spawnerInfo}";
+        }
+    }
 
     public void OnInDataZone(string zoneLogString)
     {
@@ -175,7 +188,7 @@ public class TrainingAgent : Agent, IPrefab
             if (!headerWritten)
             {
                 writer.WriteLine(
-                    "Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen?,NotificationState,DispensedRewardType,WasRewardDispensed?,WasButtonPressed?,CombinedRaycastData,WasInDataZone?"
+                    "Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen?,NotificationState,DispensedRewardType,WasRewardDispensed?,WasButtonPressed?,CombinedRaycastData,WasInDataZone?,CombinedSpawnerInfo"
                 );
                 headerWritten = true;
             }
@@ -209,11 +222,12 @@ public class TrainingAgent : Agent, IPrefab
         bool wasRewardDispensed,
         bool wasButtonPressed,
         string combinedRaycastData,
-        string wasInDataZone
+        string wasInDataZone,
+        string combinedSpawnerInfo
     )
     {
         string logEntry =
-            $"{customEpisodeCount},{StepCount},{reward},{lastCollectedRewardType},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{notificationState},{dispensedRewardType},{wasRewardDispensed},{wasButtonPressed},{combinedRaycastData},{wasInDataZone}";
+            $"{customEpisodeCount},{StepCount},{reward},{lastCollectedRewardType},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{notificationState},{dispensedRewardType},{wasRewardDispensed},{wasButtonPressed},{combinedRaycastData},{wasInDataZone},{combinedSpawnerInfo.Replace(",", ";")}";
         logQueue.Enqueue(logEntry);
         lastCollectedRewardType = "None";
     }
@@ -228,7 +242,7 @@ public class TrainingAgent : Agent, IPrefab
             writer.WriteLine(logEntry);
         }
         writer.Flush();
-        Debug.Log("Flushed log queue to CSV file.");
+        Debug.Log("Flush initiated. Flushed log queue to CSV file.");
     }
 
     /// <summary>
@@ -360,12 +374,14 @@ public class TrainingAgent : Agent, IPrefab
             wasRewardDispensed,
             wasButtonPressed,
             combinedRaycastData,
-            wasInDataZone
+            wasInDataZone,
+            combinedSpawnerInfo // Pass the combined spawner info
         );
         dispensedRewardType = "None";
         wasRewardDispensed = false;
         wasButtonPressed = false;
         wasInDataZone = "No";
+        combinedSpawnerInfo = ""; // Reset after logging
     }
 
     public override void OnActionReceived(ActionBuffers action)
@@ -404,12 +420,14 @@ public class TrainingAgent : Agent, IPrefab
             wasRewardDispensed,
             wasButtonPressed,
             combinedRaycastData,
-            wasInDataZone
+            wasInDataZone,
+            combinedSpawnerInfo
         );
         dispensedRewardType = "None";
         wasRewardDispensed = false;
         wasButtonPressed = false;
         wasInDataZone = "No";
+        combinedSpawnerInfo = ""; // Reset after logging
 
         UpdateHealth(_rewardPerStep);
     }
