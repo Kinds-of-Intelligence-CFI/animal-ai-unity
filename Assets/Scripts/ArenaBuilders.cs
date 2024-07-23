@@ -610,7 +610,6 @@ namespace ArenaBuilders
             _agent.transform.rotation = Quaternion.Euler(agentToSpawnPosRot.Rotation);
 
             AnimalSkinManager ASM = _agent.GetComponentInChildren<AnimalSkinManager>();
-            Debug.Log("Setting AnimalSkin with ASM: " + ASM.ToString() + " and skin: " + skin);
             ASM.SetAnimalSkin(skin);
             _agent.GetComponent<TrainingAgent>().SetFreezeDelay(freezeDelay);
         }
