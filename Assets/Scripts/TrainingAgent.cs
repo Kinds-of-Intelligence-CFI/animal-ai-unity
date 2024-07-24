@@ -72,9 +72,9 @@ public class TrainingAgent : Agent, IPrefab
     private bool isFlushing = false;
     private string lastCollectedRewardType = "None";
     private string dispensedRewardType = "None";
-    private string wasInDataZone = "No";
+    private string wasAgentInDataZone = "No";
     private bool wasRewardDispensed = false;
-    private bool wasButtonPressed = false;
+    private bool wasSpawnerButtonTriggered = false;
     private string combinedSpawnerInfo = "";
 
     public void RecordSpawnerInfo(string spawnerInfo)
@@ -91,17 +91,17 @@ public class TrainingAgent : Agent, IPrefab
 
     public void OnInDataZone(string zoneLogString)
     {
-        wasInDataZone = "Agent was in DataZone: " + zoneLogString;
+        wasAgentInDataZone = "Agent was in DataZone: " + zoneLogString;
     }
 
     public void OnOutDataZone(string zoneLogString)
     {
-        wasInDataZone = "Agent left DataZone: " + zoneLogString;
+        wasAgentInDataZone = "Agent left DataZone: " + zoneLogString;
     }
 
     private void OnRewardSpawned(GameObject reward)
     {
-        wasButtonPressed = true;
+        wasSpawnerButtonTriggered = true;
     }
 
     public void RecordDispensedReward()
@@ -193,7 +193,7 @@ public class TrainingAgent : Agent, IPrefab
             if (!headerWritten)
             {
                 writer.WriteLine(
-                    "Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,NotificationState,DispensedRewardType,WasRewardDispensed?,WasButtonPressed?,CombinedRaycastData,WasInDataZone?,CombinedSpawnerInfo"
+                    "Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,NotificationState,DispensedRewardType,WasRewardDispensed?,WasSpawnerButtonTriggered?,CombinedRaycastData,WasAgentInDatazone?,CombinedSpawnerInfo"
                 );
                 headerWritten = true;
             }
@@ -218,14 +218,14 @@ public class TrainingAgent : Agent, IPrefab
         int customEpisodeCount,
         string dispensedRewardType,
         bool wasRewardDispensed,
-        bool wasButtonPressed,
+        bool wasSpawnerButtonTriggered,
         string combinedRaycastData,
-        string wasInDataZone,
+        string wasAgentInDataZone,
         string combinedSpawnerInfo
     )
     {
         string logEntry =
-            $"{customEpisodeCount},{StepCount},{reward},{lastCollectedRewardType},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{actionForwardWithDescription},{actionRotateWithDescription},{wasAgentFrozen},{notificationState},{dispensedRewardType},{wasRewardDispensed},{wasButtonPressed},{combinedRaycastData},{wasInDataZone},{combinedSpawnerInfo.Replace(",", ";")}";
+            $"{customEpisodeCount},{StepCount},{reward},{lastCollectedRewardType},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{actionForwardWithDescription},{actionRotateWithDescription},{wasAgentFrozen},{notificationState},{dispensedRewardType},{wasRewardDispensed},{wasSpawnerButtonTriggered},{combinedRaycastData},{wasAgentInDataZone},{combinedSpawnerInfo.Replace(",", ";")}";
         logQueue.Enqueue(logEntry);
         lastCollectedRewardType = "None";
     }
@@ -370,15 +370,15 @@ public class TrainingAgent : Agent, IPrefab
             customEpisodeCount,
             dispensedRewardType,
             wasRewardDispensed,
-            wasButtonPressed,
+            wasSpawnerButtonTriggered,
             combinedRaycastData,
-            wasInDataZone,
+            wasAgentInDataZone,
             combinedSpawnerInfo
         );
         dispensedRewardType = "None";
         wasRewardDispensed = false;
-        wasButtonPressed = false;
-        wasInDataZone = "No";
+        wasSpawnerButtonTriggered = false;
+        wasAgentInDataZone = "No";
         combinedSpawnerInfo = "";
     }
 
@@ -386,6 +386,7 @@ public class TrainingAgent : Agent, IPrefab
     {
         lastActionForward = Mathf.FloorToInt(action.DiscreteActions[0]);
         lastActionRotate = Mathf.FloorToInt(action.DiscreteActions[1]);
+
         if (!IsFrozen())
         {
             MoveAgent(lastActionForward, lastActionRotate);
@@ -416,15 +417,15 @@ public class TrainingAgent : Agent, IPrefab
             customEpisodeCount,
             dispensedRewardType,
             wasRewardDispensed,
-            wasButtonPressed,
+            wasSpawnerButtonTriggered,
             combinedRaycastData,
-            wasInDataZone,
+            wasAgentInDataZone,
             combinedSpawnerInfo
         );
         dispensedRewardType = "None";
         wasRewardDispensed = false;
-        wasButtonPressed = false;
-        wasInDataZone = "No";
+        wasSpawnerButtonTriggered = false;
+        wasAgentInDataZone = "No";
         combinedSpawnerInfo = "";
 
         UpdateHealth(_rewardPerStep);
