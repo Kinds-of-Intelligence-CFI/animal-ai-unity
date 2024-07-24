@@ -22,6 +22,7 @@ using System.Threading;
 
 // TODO: rework flushing method
 // TODO: rework when total collected goals statement is displayed (currently sporadic)
+// TODO: test each column works and confirm expected data
 public class TrainingAgent : Agent, IPrefab
 {
     [Header("Agent Settings")]
