@@ -19,6 +19,9 @@ using System.Threading;
 /// </summary>
 
 // TODO: Clean, optimize and refactor the this script.
+
+// TODO: rework flushing method
+// TODO: rework when total collected goals statement is displayed (currently sporadic)
 public class TrainingAgent : Agent, IPrefab
 {
     [Header("Agent Settings")]
