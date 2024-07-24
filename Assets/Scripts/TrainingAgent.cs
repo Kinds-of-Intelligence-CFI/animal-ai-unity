@@ -124,6 +124,11 @@ public class TrainingAgent : Agent, IPrefab
         yamlFileName = fileName;
     }
 
+    private string CombineRaycastData(float[] observations, string[] tags)
+    {
+        return string.Join(";", observations.Zip(tags, (obs, tag) => $"{obs}:{tag}"));
+    }
+
     public override void Initialize()
     {
         _arena = GetComponentInParent<TrainingArena>();
@@ -188,7 +193,7 @@ public class TrainingAgent : Agent, IPrefab
             if (!headerWritten)
             {
                 writer.WriteLine(
-                    "Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,IsFrozen?,NotificationState,DispensedRewardType,WasRewardDispensed?,WasButtonPressed?,CombinedRaycastData,WasInDataZone?,CombinedSpawnerInfo"
+                    "Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,WasAgentFrozen?,NotificationState,DispensedRewardType,WasRewardDispensed?,WasButtonPressed?,CombinedRaycastData,WasInDataZone?,CombinedSpawnerInfo"
                 );
                 headerWritten = true;
             }
@@ -197,11 +202,6 @@ public class TrainingAgent : Agent, IPrefab
                 Debug.LogError("Header/Columns already written to CSV file.");
             }
         }
-    }
-
-    private string CombineRaycastData(float[] observations, string[] tags)
-    {
-        return string.Join(";", observations.Zip(tags, (obs, tag) => $"{obs}:{tag}"));
     }
 
     /// <summary>
@@ -214,7 +214,7 @@ public class TrainingAgent : Agent, IPrefab
         int lastActionRotate,
         string actionForwardDescription,
         string actionRotateDescription,
-        bool isFrozen,
+        bool wasAgentFrozen,
         float reward,
         string notificationState,
         int customEpisodeCount,
@@ -227,7 +227,7 @@ public class TrainingAgent : Agent, IPrefab
     )
     {
         string logEntry =
-            $"{customEpisodeCount},{StepCount},{reward},{lastCollectedRewardType},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{isFrozen},{notificationState},{dispensedRewardType},{wasRewardDispensed},{wasButtonPressed},{combinedRaycastData},{wasInDataZone},{combinedSpawnerInfo.Replace(",", ";")}";
+            $"{customEpisodeCount},{StepCount},{reward},{lastCollectedRewardType},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{wasAgentFrozen},{notificationState},{dispensedRewardType},{wasRewardDispensed},{wasButtonPressed},{combinedRaycastData},{wasInDataZone},{combinedSpawnerInfo.Replace(",", ";")}";
         logQueue.Enqueue(logEntry);
         lastCollectedRewardType = "None";
     }
@@ -345,7 +345,7 @@ public class TrainingAgent : Agent, IPrefab
         sensor.AddObservation(health);
         Vector3 localVel = transform.InverseTransformDirection(_rigidBody.velocity);
         Vector3 localPos = transform.position;
-        bool isFrozen = IsFrozen();
+        bool wasAgentFrozen = IsFrozen();
         string actionForwardDescription = DescribeActionForward(lastActionForward);
         string actionRotateDescription = DescribeActionRotate(lastActionRotate);
         float reward = GetCumulativeReward();
@@ -366,7 +366,7 @@ public class TrainingAgent : Agent, IPrefab
             lastActionRotate,
             actionForwardDescription,
             actionRotateDescription,
-            isFrozen,
+            wasAgentFrozen,
             reward,
             notificationState,
             customEpisodeCount,
@@ -395,7 +395,7 @@ public class TrainingAgent : Agent, IPrefab
 
         Vector3 localVel = transform.InverseTransformDirection(_rigidBody.velocity);
         Vector3 localPos = transform.position;
-        bool isFrozen = IsFrozen();
+        bool wasAgentFrozen = IsFrozen();
         string actionForwardDescription = DescribeActionForward(lastActionForward);
         string actionRotateDescription = DescribeActionRotate(lastActionRotate);
         float reward = GetCumulativeReward();
@@ -412,7 +412,7 @@ public class TrainingAgent : Agent, IPrefab
             lastActionRotate,
             actionForwardDescription,
             actionRotateDescription,
-            isFrozen,
+            wasAgentFrozen,
             reward,
             notificationState,
             customEpisodeCount,
