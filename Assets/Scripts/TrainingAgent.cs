@@ -172,10 +172,8 @@ public class TrainingAgent : Agent, IPrefab
             basePath = Path.GetDirectoryName(Application.dataPath);
         }
 
-        // Folder for the CSV logs
         string directoryPath = Path.Combine(basePath, "ObservationLogs");
 
-        // Simple check to see if the directory exists, if not create it
         if (!Directory.Exists(directoryPath))
         {
             Directory.CreateDirectory(directoryPath);
@@ -259,13 +257,14 @@ public class TrainingAgent : Agent, IPrefab
                     FlushLogQueue();
                     isFlushing = false;
                 }
-                Thread.Sleep(100); // polls every 100ms to check if the queue is full. This is to prevent the thread from running continuously and hogging resources.
+                Thread.Sleep(100); // polls every 100ms to check if the queue is full to prevent the thread from running continuously and hogging resources
             }
         }).Start();
     }
 
     /// <summary>
-    /// OnDisable is called when the training session is stopped form mlagents. It closes the CSV file and flushes the log queue at whatever the current size is.
+    /// OnDisable is called when the training session is stopped form mlagents.
+    /// It closes the CSV file and flushes the log queue at whatever the current size is.
     /// </summary>
     protected override void OnDisable()
     {
@@ -546,6 +545,7 @@ public class TrainingAgent : Agent, IPrefab
     public void UpdateHealthNextStep(float updateAmount, bool andCompleteArena = false)
     {
         /*
+            IMPORTANT!
             ML-Agents doesn't guarantee behaviour if an episode ends outside of OnActionReceived
             Therefore we queue any health updates to happen on the next action step.
         */
@@ -558,7 +558,6 @@ public class TrainingAgent : Agent, IPrefab
 
     public void UpdateHealth(float updateAmount, bool andCompleteArena = false)
     {
-        // Update the health of the agent and reset any queued updates
         if (!IsFrozen())
         {
             health += 100 * updateAmount;
@@ -596,9 +595,6 @@ public class TrainingAgent : Agent, IPrefab
 
             bool proceedToNext =
                 Arena.CurrentPassMark == 0 || cumulativeReward >= Arena.CurrentPassMark;
-            Debug.Log(
-                $"Proceed to next arena: {proceedToNext}, Merge next arena: {_arena.mergeNextArena}"
-            );
 
             if (proceedToNext)
             {
@@ -663,7 +659,6 @@ public class TrainingAgent : Agent, IPrefab
         health = _maxHealth;
 
         SetFreezeDelay(GetFreezeDelay());
-        Debug.Log("Agent state reset in OnEpisodeBegin.");
     }
 
     public void AddExtraReward(float rewardFactor)
@@ -715,9 +710,6 @@ public class TrainingAgent : Agent, IPrefab
     //PREFAB INTERFACE FOR THE AGENT
     //******************************
 
-    /// <summary>
-    /// Sets the colour and size of the agent. Not used in this implementation.
-    /// </summary>
     public void SetColor(Vector3 color) { }
 
     public void SetSize(Vector3 scale) { }
@@ -748,7 +740,7 @@ public class TrainingAgent : Agent, IPrefab
     }
 
     ///<summary>
-    /// If rotationY set to < 0 change to random rotation.
+    /// If rotationY set to < 0, then change to random rotation.
     ///</summary>
     public virtual Vector3 GetRotation(float rotationY)
     {
