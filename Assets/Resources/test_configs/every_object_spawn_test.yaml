@@ -5,6 +5,7 @@ arenas:
     passMark: 0 # The pass mark for the arena. The agent must achieve this score to pass the arena.
     timeLimit: 250 # The time limit for the arena in seconds. In other words, the time limit for the agent to complete the task (the arena resets after this time).
     items:  # This line indicates the start of the items list
+# AGENT
     - !Item 
       name: Agent # Note that the agent will always be spawned first regardless of its position in the configuration.
       positions:
@@ -266,6 +267,7 @@ arenas:
       - !Vector3 {x: 1, y: 1, z: 1}
 
 # ZONES
+
     - !Item
       name: HotZone
       positions:
@@ -279,4 +281,14 @@ arenas:
       - !Vector3 {x: 14, y: 34, z: 18}
       sizes:
       - !Vector3 {x: 1, y: 1, z: 1}
+
+    - !Item
+      name: DataZone
+      positions:
+      - !Vector3 {x: 20, y: 0, z: 20}
+      sizes:
+      - !Vector3 {x: 5, y: 0, z: 5}
+      zoneVisibility: true # Whether the zone is visible or not. If false, the zone will be invisible. True by default
+      triggerZoneID: ["Agent entered Datazone located in the center of the arena."] # The message that will be displayed when the agent enters the zone.
+
 
