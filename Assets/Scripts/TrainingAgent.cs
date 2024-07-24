@@ -191,7 +191,7 @@ public class TrainingAgent : Agent, IPrefab
             if (!headerWritten)
             {
                 writer.WriteLine(
-                    "Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,NotificationState,DispensedRewardType,WasRewardDispensed?,WasSpawnerButtonTriggered?,CombinedRaycastData,WasAgentInDatazone?,CombinedSpawnerInfo"
+                    "Episode,Step,Health,Reward,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,NotificationState,CollectedRewardType,DispensedRewardType,WasRewardDispensed?,WasButtonPressed?,CombinedSpawnerInfo,WasAgentInDataZone?,CombinedRaycastData"
                 );
                 headerWritten = true;
             }
@@ -210,22 +210,46 @@ public class TrainingAgent : Agent, IPrefab
         Vector3 position,
         string actionForwardWithDescription,
         string actionRotateWithDescription,
-        bool wasAgentFrozen,
+        string wasAgentFrozen,
         float reward,
         string notificationState,
         int customEpisodeCount,
         string dispensedRewardType,
         bool wasRewardDispensed,
         bool wasSpawnerButtonTriggered,
-        string combinedRaycastData,
+        string combinedSpawnerInfo,
         string wasAgentInDataZone,
-        string combinedSpawnerInfo
+        string combinedRaycastData
     )
     {
-        string logEntry =
-            $"{customEpisodeCount},{StepCount},{reward},{lastCollectedRewardType},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{actionForwardWithDescription},{actionRotateWithDescription},{wasAgentFrozen},{notificationState},{dispensedRewardType},{wasRewardDispensed},{wasSpawnerButtonTriggered},{combinedRaycastData},{wasAgentInDataZone},{combinedSpawnerInfo.Replace(",", ";")}";
+        string logEntry = string.Format(
+            "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20}",
+            customEpisodeCount,
+            StepCount,
+            health,
+            reward,
+            velocity.x,
+            velocity.y,
+            velocity.z,
+            position.x,
+            position.y,
+            position.z,
+            actionForwardWithDescription,
+            actionRotateWithDescription,
+            wasAgentFrozen,
+            notificationState,
+            lastCollectedRewardType,
+            dispensedRewardType,
+            wasRewardDispensed ? "Yes" : "No",
+            wasSpawnerButtonTriggered ? "Yes" : "No",
+            combinedSpawnerInfo.Replace(",", ";"),
+            wasAgentInDataZone,
+            combinedRaycastData
+        );
+
         logQueue.Enqueue(logEntry);
         lastCollectedRewardType = "None";
+        Debug.Log($"Logging from {nameof(OnEpisodeBegin)} at Step {StepCount}");
     }
 
     /// <summary>
@@ -349,36 +373,8 @@ public class TrainingAgent : Agent, IPrefab
         string actionRotateWithDescription = $"{lastActionRotate} ({actionRotateDescription})";
         float reward = GetCumulativeReward();
         string notificationState = GetNotificationState();
-
         (float[] raycastObservations, string[] raycastTags) = CollectRaycastObservations();
-        foreach (float observation in raycastObservations)
-        {
-            sensor.AddObservation(observation);
-        }
-
         string combinedRaycastData = CombineRaycastData(raycastObservations, raycastTags);
-
-        LogToCSV(
-            localVel,
-            localPos,
-            actionForwardWithDescription,
-            actionRotateWithDescription,
-            wasAgentFrozen,
-            reward,
-            notificationState,
-            customEpisodeCount,
-            dispensedRewardType,
-            wasRewardDispensed,
-            wasSpawnerButtonTriggered,
-            combinedRaycastData,
-            wasAgentInDataZone,
-            combinedSpawnerInfo
-        );
-        dispensedRewardType = "None";
-        wasRewardDispensed = false;
-        wasSpawnerButtonTriggered = false;
-        wasAgentInDataZone = "No";
-        combinedSpawnerInfo = "";
     }
 
     public override void OnActionReceived(ActionBuffers action)
@@ -402,7 +398,6 @@ public class TrainingAgent : Agent, IPrefab
         string notificationState = GetNotificationState();
 
         (float[] raycastObservations, string[] raycastTags) = CollectRaycastObservations();
-
         string combinedRaycastData = CombineRaycastData(raycastObservations, raycastTags);
 
         LogToCSV(
@@ -410,22 +405,23 @@ public class TrainingAgent : Agent, IPrefab
             localPos,
             actionForwardWithDescription,
             actionRotateWithDescription,
-            wasAgentFrozen,
+            wasAgentFrozen ? "Yes" : "No",
             reward,
             notificationState,
             customEpisodeCount,
             dispensedRewardType,
             wasRewardDispensed,
             wasSpawnerButtonTriggered,
-            combinedRaycastData,
+            combinedSpawnerInfo,
             wasAgentInDataZone,
-            combinedSpawnerInfo
+            combinedRaycastData
         );
+
         dispensedRewardType = "None";
         wasRewardDispensed = false;
         wasSpawnerButtonTriggered = false;
         wasAgentInDataZone = "No";
-        combinedSpawnerInfo = "";
+        combinedSpawnerInfo = "N/A";
 
         UpdateHealth(_rewardPerStep);
     }
