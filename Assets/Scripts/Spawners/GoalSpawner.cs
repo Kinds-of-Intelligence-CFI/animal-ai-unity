@@ -129,7 +129,7 @@ public class GoalSpawner : Prefab
         if (agent != null)
         {
             string combinedSpawnerInfo =
-                $"SpawnerID:{spawnerID},Position:{transform.position.x},{transform.position.y},{transform.position.z},RewardType:{newGoal.rewardType}";
+                $"SpawnerID:{spawnerID}, Position:{transform.position.x},{transform.position.y},{transform.position.z}, RewardType:{newGoal.rewardType}";
             agent.RecordSpawnerInfo(combinedSpawnerInfo);
             agent.RecordDispensedRewardType(newGoal.rewardType);
             agent.RecordDispensedReward();
