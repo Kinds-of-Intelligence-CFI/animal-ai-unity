@@ -10,6 +10,7 @@ arenas:
       positions:
       - !Vector3 {x: 2, y: 1, z: 2}   # The position of the item. This is a Vector3 object with x, y, and z coordinates. Leave values for random spawning.
       rotations: [0] # The rotations of the items. It can be in any angle but default is 0 degrees.
+      frozenAgentDelays: [1] # The time in seconds the agent will be frozen at the start of the arena. This is useful for delayed start scenarios.
 
 # IMMOVABLE OBJECTS (Note: RAMP is immovable but has a special tag of "ramp" for the agent to detect).
 
