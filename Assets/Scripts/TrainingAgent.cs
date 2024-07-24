@@ -193,7 +193,7 @@ public class TrainingAgent : Agent, IPrefab
             if (!headerWritten)
             {
                 writer.WriteLine(
-                    "Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForward,ActionRotate,ActionForwardDescription,ActionRotateDescription,WasAgentFrozen?,NotificationState,DispensedRewardType,WasRewardDispensed?,WasButtonPressed?,CombinedRaycastData,WasInDataZone?,CombinedSpawnerInfo"
+                    "Episode,Step,Reward,CollectedRewardType,Health,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,NotificationState,DispensedRewardType,WasRewardDispensed?,WasButtonPressed?,CombinedRaycastData,WasInDataZone?,CombinedSpawnerInfo"
                 );
                 headerWritten = true;
             }
@@ -210,10 +210,8 @@ public class TrainingAgent : Agent, IPrefab
     private void LogToCSV(
         Vector3 velocity,
         Vector3 position,
-        int lastActionForward,
-        int lastActionRotate,
-        string actionForwardDescription,
-        string actionRotateDescription,
+        string actionForwardWithDescription,
+        string actionRotateWithDescription,
         bool wasAgentFrozen,
         float reward,
         string notificationState,
@@ -227,7 +225,7 @@ public class TrainingAgent : Agent, IPrefab
     )
     {
         string logEntry =
-            $"{customEpisodeCount},{StepCount},{reward},{lastCollectedRewardType},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{lastActionForward},{lastActionRotate},{actionForwardDescription},{actionRotateDescription},{wasAgentFrozen},{notificationState},{dispensedRewardType},{wasRewardDispensed},{wasButtonPressed},{combinedRaycastData},{wasInDataZone},{combinedSpawnerInfo.Replace(",", ";")}";
+            $"{customEpisodeCount},{StepCount},{reward},{lastCollectedRewardType},{health},{velocity.x},{velocity.y},{velocity.z},{position.x},{position.y},{position.z},{actionForwardWithDescription},{actionRotateWithDescription},{wasAgentFrozen},{notificationState},{dispensedRewardType},{wasRewardDispensed},{wasButtonPressed},{combinedRaycastData},{wasInDataZone},{combinedSpawnerInfo.Replace(",", ";")}";
         logQueue.Enqueue(logEntry);
         lastCollectedRewardType = "None";
     }
@@ -348,6 +346,8 @@ public class TrainingAgent : Agent, IPrefab
         bool wasAgentFrozen = IsFrozen();
         string actionForwardDescription = DescribeActionForward(lastActionForward);
         string actionRotateDescription = DescribeActionRotate(lastActionRotate);
+        string actionForwardWithDescription = $"{lastActionForward} ({actionForwardDescription})";
+        string actionRotateWithDescription = $"{lastActionRotate} ({actionRotateDescription})";
         float reward = GetCumulativeReward();
         string notificationState = GetNotificationState();
 
@@ -362,10 +362,8 @@ public class TrainingAgent : Agent, IPrefab
         LogToCSV(
             localVel,
             localPos,
-            lastActionForward,
-            lastActionRotate,
-            actionForwardDescription,
-            actionRotateDescription,
+            actionForwardWithDescription,
+            actionRotateWithDescription,
             wasAgentFrozen,
             reward,
             notificationState,
@@ -375,13 +373,13 @@ public class TrainingAgent : Agent, IPrefab
             wasButtonPressed,
             combinedRaycastData,
             wasInDataZone,
-            combinedSpawnerInfo // Pass the combined spawner info
+            combinedSpawnerInfo
         );
         dispensedRewardType = "None";
         wasRewardDispensed = false;
         wasButtonPressed = false;
         wasInDataZone = "No";
-        combinedSpawnerInfo = ""; // Reset after logging
+        combinedSpawnerInfo = "";
     }
 
     public override void OnActionReceived(ActionBuffers action)
@@ -398,6 +396,8 @@ public class TrainingAgent : Agent, IPrefab
         bool wasAgentFrozen = IsFrozen();
         string actionForwardDescription = DescribeActionForward(lastActionForward);
         string actionRotateDescription = DescribeActionRotate(lastActionRotate);
+        string actionForwardWithDescription = $"{lastActionForward} ({actionForwardDescription})";
+        string actionRotateWithDescription = $"{lastActionRotate} ({actionRotateDescription})";
         float reward = GetCumulativeReward();
         string notificationState = GetNotificationState();
 
@@ -408,10 +408,8 @@ public class TrainingAgent : Agent, IPrefab
         LogToCSV(
             localVel,
             localPos,
-            lastActionForward,
-            lastActionRotate,
-            actionForwardDescription,
-            actionRotateDescription,
+            actionForwardWithDescription,
+            actionRotateWithDescription,
             wasAgentFrozen,
             reward,
             notificationState,
@@ -427,7 +425,7 @@ public class TrainingAgent : Agent, IPrefab
         wasRewardDispensed = false;
         wasButtonPressed = false;
         wasInDataZone = "No";
-        combinedSpawnerInfo = ""; // Reset after logging
+        combinedSpawnerInfo = "";
 
         UpdateHealth(_rewardPerStep);
     }
