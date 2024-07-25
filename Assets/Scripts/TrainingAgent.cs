@@ -482,7 +482,7 @@ public class TrainingAgent : Agent, IPrefab
     {
         if (IsFrozen())
         {
-            // If the agent is frozen, stop all movement and rotation
+            /* If the agent is frozen, stop all movement and rotation */
             _rigidBody.velocity = Vector3.zero;
             _rigidBody.angularVelocity = Vector3.zero;
             return;
@@ -575,7 +575,7 @@ public class TrainingAgent : Agent, IPrefab
 
         _currentScore = GetCumulativeReward();
 
-        // Ensure health does not exceed maximum limits
+        /* Ensure health does not exceed maximum limits */
         if (health > _maxHealth)
         {
             health = _maxHealth;
@@ -592,7 +592,6 @@ public class TrainingAgent : Agent, IPrefab
             return;
         }
 
-        // Handle arena completion or episode ending
         // TODO: Debug current pass mark for arena == 0
         if (andCompleteArena || _nextUpdateCompleteArena)
         {
