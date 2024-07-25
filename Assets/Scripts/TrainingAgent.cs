@@ -643,6 +643,7 @@ public class TrainingAgent : Agent, IPrefab
         NotificationManager.Instance.HideNotification();
 
         EndEpisode();
+        FlushLogQueue();
     }
 
     public override void OnEpisodeBegin()
