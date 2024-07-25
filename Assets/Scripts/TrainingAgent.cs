@@ -14,12 +14,9 @@ using System.Threading;
 
 /// <summary>
 /// The TrainingAgent class is a subclass of the Agent class in the ML-Agents library.
-/// It is used to define the behaviour of the agent in the training environment.
 /// Actions are currently discrete. 2 branches of 0,1,2, 0,1,2 for forward and rotate respectively.
 /// </summary>
 
-// TODO: Clean, optimize and refactor the this script.
-// TODO: test each column works and confirm expected data
 public class TrainingAgent : Agent, IPrefab
 {
     [Header("Agent Settings")]
