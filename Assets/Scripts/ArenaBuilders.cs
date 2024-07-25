@@ -17,6 +17,7 @@ using ArenasParameters;
 /// </summary>
 
 // TODO: Optimize and refactor the this script.
+// TODO: Overhaul object spawn and agent spawn logic for a more unified and central implementation (for all objects, inc. agent)
 namespace ArenaBuilders
 {
     public class ArenaBuilder
