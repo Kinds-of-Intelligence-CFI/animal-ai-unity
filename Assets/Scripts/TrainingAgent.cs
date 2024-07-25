@@ -19,9 +19,6 @@ using System.Threading;
 /// </summary>
 
 // TODO: Clean, optimize and refactor the this script.
-
-// TODO: rework flushing method
-// TODO: rework when total collected goals statement is displayed (currently sporadic)
 // TODO: test each column works and confirm expected data
 public class TrainingAgent : Agent, IPrefab
 {
@@ -209,7 +206,8 @@ public class TrainingAgent : Agent, IPrefab
     }
 
     /// <summary>
-    /// Logs the agent's state to a CSV file. This is called every step. The data is stored in a queue and flushed to the file in a separate thread.
+    /// Logs the agent's state to a CSV file. This is called every step.
+    /// The data is stored in a queue and flushed to the file in a separate thread.
     /// </summary>
     private void LogToCSV(
         Vector3 velocity,
@@ -648,9 +646,9 @@ public class TrainingAgent : Agent, IPrefab
 
     public override void OnEpisodeBegin()
     {
-        if (!_arena.IsFirstArenaReset) // Don't log for the first initialization of the arena
+        if (!_arena.IsFirstArenaReset)
         {
-            writer.WriteLine($"Number of Goals Collected: {numberOfGoalsCollected}");
+            writer.WriteLine($"Goals Collected: {numberOfGoalsCollected}");
             writer.Flush();
         }
 
