@@ -72,7 +72,7 @@ public class TrainingAgent : Agent, IPrefab
     private string yamlFileName;
     private int customEpisodeCount = 0;
     private ConcurrentQueue<string> logQueue = new ConcurrentQueue<string>();
-    private const int bufferSize = 150; /* Corresponds to rows in the CSV file to keep in memory before flushing to disk */
+    private const int bufferSize = 101; /* Corresponds to rows in the CSV file to keep in memory before flushing to disk */
     private bool isFlushing = false;
     private string lastCollectedRewardType = "None";
     private string dispensedRewardType = "None";
@@ -80,6 +80,8 @@ public class TrainingAgent : Agent, IPrefab
     private bool wasRewardDispensed = false;
     private bool wasSpawnerButtonTriggered = false;
     private string combinedSpawnerInfo = "";
+
+    private AutoResetEvent flushEvent = new AutoResetEvent(false);
 
     public void RecordSpawnerInfo(string spawnerInfo)
     {
@@ -195,7 +197,7 @@ public class TrainingAgent : Agent, IPrefab
             if (!headerWritten)
             {
                 writer.WriteLine(
-                    "Episode,Step,Health,Reward,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,NotificationState,CollectedRewardType,DispensedRewardType,WasRewardDispensed?,WasButtonPressed?,CombinedSpawnerInfo,WasAgentInDataZone?,CombinedRaycastData"
+                    "Episode,Step,Health,Reward,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,NotificationShown?,CollectedRewardType,DispensedRewardType,WasRewardDispensed?,WasSpawnerButtonTriggered?,CombinedSpawnerInfo,WasAgentInDataZone?,CombinedRaycastData"
                 );
                 headerWritten = true;
             }
@@ -253,7 +255,11 @@ public class TrainingAgent : Agent, IPrefab
 
         logQueue.Enqueue(logEntry);
         lastCollectedRewardType = "None";
-        Debug.Log($"Logging from {nameof(OnEpisodeBegin)} at Step {StepCount}");
+
+        if (logQueue.Count >= bufferSize)
+        {
+            flushEvent.Set();
+        }
     }
 
     /// <summary>
@@ -261,12 +267,15 @@ public class TrainingAgent : Agent, IPrefab
     /// </summary>
     private void FlushLogQueue()
     {
-        while (logQueue.TryDequeue(out var logEntry))
+        lock (logQueue)
         {
-            writer.WriteLine(logEntry);
+            while (logQueue.TryDequeue(out var logEntry))
+            {
+                writer.WriteLine(logEntry);
+            }
+            writer.Flush();
+            Debug.Log("Flushed log queue to CSV file.");
         }
-        writer.Flush();
-        Debug.Log("Flush initiated. Flushed log queue to CSV file.");
     }
 
     /// <summary>
@@ -279,13 +288,13 @@ public class TrainingAgent : Agent, IPrefab
         {
             while (true)
             {
+                flushEvent.WaitOne(); // Wait until signaled
                 if (logQueue.Count >= bufferSize && !isFlushing)
                 {
                     isFlushing = true;
                     FlushLogQueue();
                     isFlushing = false;
                 }
-                Thread.Sleep(100); // polls every 100ms to check if the queue is full to prevent the thread from running continuously and hogging resources
             }
         }).Start();
     }
@@ -299,7 +308,7 @@ public class TrainingAgent : Agent, IPrefab
         base.OnDisable();
         if (writer != null)
         {
-            FlushLogQueue(); // Ensures all buffered data is written to the file before closing (important for builds)
+            FlushLogQueue(); // Ensures all buffered data is written to the file before closing
             writer.Close();
         }
 
@@ -425,7 +434,7 @@ public class TrainingAgent : Agent, IPrefab
         wasRewardDispensed = false;
         wasSpawnerButtonTriggered = false;
         wasAgentInDataZone = "No";
-        combinedSpawnerInfo = "N/A";
+        combinedSpawnerInfo = "";
 
         UpdateHealth(_rewardPerStep);
     }
