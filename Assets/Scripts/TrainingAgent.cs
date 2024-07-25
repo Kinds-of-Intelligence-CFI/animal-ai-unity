@@ -601,7 +601,6 @@ public class TrainingAgent : Agent, IPrefab
 
             if (proceedToNext)
             {
-                // If the next arena is merged, load that without ending the episode
                 if (_arena.mergeNextArena)
                 {
                     _arena.LoadNextArena();
