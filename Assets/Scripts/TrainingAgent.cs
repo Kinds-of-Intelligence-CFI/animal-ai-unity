@@ -59,6 +59,9 @@ public class TrainingAgent : Agent, IPrefab
     private TrainingArena _arena;
     private bool _isCountdownActive = false;
 
+    [Header("External References")]
+    public PlayerControls playerControls;
+
     [Header("CSV Logging")]
     public string csvFilePath = "";
     private StreamWriter writer;
@@ -74,7 +77,6 @@ public class TrainingAgent : Agent, IPrefab
     private bool wasRewardDispensed = false;
     private bool wasSpawnerButtonTriggered = false;
     private string combinedSpawnerInfo = "";
-
     private AutoResetEvent flushEvent = new AutoResetEvent(false);
 
     public void RecordSpawnerInfo(string spawnerInfo)
@@ -142,6 +144,8 @@ public class TrainingAgent : Agent, IPrefab
         DataZone.OnInDataZone += OnInDataZone;
         DataZone.OnOutDataZone += OnOutDataZone;
 
+        playerControls = GameObject.FindObjectOfType<PlayerControls>();
+
         InitialiseCSVProcess();
 
         if (!Application.isEditor)
@@ -191,7 +195,7 @@ public class TrainingAgent : Agent, IPrefab
             if (!headerWritten)
             {
                 writer.WriteLine(
-                    "Episode,Step,Health,Reward,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,NotificationShown?,CollectedRewardType,DispensedRewardType,WasRewardDispensed?,WasSpawnerButtonTriggered?,CombinedSpawnerInfo,WasAgentInDataZone?,CombinedRaycastData"
+                    "Episode,Step,Health,Reward,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,NotificationShown?,CollectedRewardType,DispensedRewardType,WasRewardDispensed?,WasSpawnerButtonTriggered?,CombinedSpawnerInfo,WasAgentInDataZone?,CombinedRaycastData,ActiveCamera"
                 );
                 headerWritten = true;
             }
@@ -220,11 +224,12 @@ public class TrainingAgent : Agent, IPrefab
         bool wasSpawnerButtonTriggered,
         string combinedSpawnerInfo,
         string wasAgentInDataZone,
-        string combinedRaycastData
+        string combinedRaycastData,
+        string activeCameraDescription
     )
     {
         string logEntry = string.Format(
-            "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20}",
+            "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21}",
             customEpisodeCount,
             StepCount,
             health,
@@ -245,7 +250,8 @@ public class TrainingAgent : Agent, IPrefab
             wasSpawnerButtonTriggered ? "Yes" : "No",
             combinedSpawnerInfo.Replace(",", ";"),
             wasAgentInDataZone,
-            combinedRaycastData
+            combinedRaycastData,
+            activeCameraDescription
         );
 
         logQueue.Enqueue(logEntry);
@@ -422,7 +428,8 @@ public class TrainingAgent : Agent, IPrefab
             wasSpawnerButtonTriggered,
             combinedSpawnerInfo,
             wasAgentInDataZone,
-            combinedRaycastData
+            combinedRaycastData,
+            playerControls.GetActiveCameraDescription()
         );
 
         dispensedRewardType = "None";
