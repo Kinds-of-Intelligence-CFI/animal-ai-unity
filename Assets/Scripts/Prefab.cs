@@ -20,7 +20,7 @@ public class Prefab : MonoBehaviour, IPrefab
     public float sizeAdjustment = 0.999f;
 
     [Header("Texture Parameters")]
-    // To scale textures on dynamically-sized objects:
+    /* To scale textures on dynamically-sized objects */
     public bool textureUVOverride = false;
     public bool typicalOrigin = true;
     protected float _height;
@@ -42,7 +42,7 @@ public class Prefab : MonoBehaviour, IPrefab
             foreach (Renderer r in GetComponentsInChildren<Renderer>())
             {
                 if (
-                    r.material.GetFloat("_Surface") != 1 /*=Transparent*/
+                    r.material.GetFloat("_Surface") != 1 /* meaning 'Transparent' */
                 )
                     r.material.color = newColor;
             }
@@ -116,8 +116,7 @@ public class Prefab : MonoBehaviour, IPrefab
             MF.sharedMesh = Instantiate<Mesh>(MF.mesh);
             Mesh MESH = MF.sharedMesh;
 
-            Transform T = /*(child) ? transform.parent :*/
-            transform;
+            Transform T = transform;
 
             Vector2[] uvs = new Vector2[MESH.uv.Length];
             Dictionary<Vector3, Vector2Int> uvStretchLookup = new Dictionary<Vector3, Vector2Int>

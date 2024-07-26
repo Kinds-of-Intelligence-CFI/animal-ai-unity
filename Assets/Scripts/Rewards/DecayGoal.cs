@@ -20,7 +20,7 @@ public class DecayGoal : BallGoal
     public Color finalColour;
 
     public bool flipDecayDirection = false;
-    public int fixedFrameDelay = 150; // Controls how long the goal waits before starting to decay
+    public int fixedFrameDelay = 150; /* Controls how long the goal waits before starting to decay */
 
     private Material _basemat;
     private Material _radialmat;
@@ -51,7 +51,7 @@ public class DecayGoal : BallGoal
     public override void SetDelay(float v)
     {
         fixedFrameDelay = Mathf.RoundToInt(v);
-        delayCounter = fixedFrameDelay; // Reset delay counter to new value
+        delayCounter = fixedFrameDelay; /* Reset delay counter to new value */
     }
 
     private void CheckIfNeedToFlip()
@@ -87,8 +87,8 @@ public class DecayGoal : BallGoal
         SetSize((flipDecayDirection ? finalReward : initialReward) * Vector3.one);
 
         CheckIfNeedToFlip();
-        delayCounter = fixedFrameDelay;
 
+        delayCounter = fixedFrameDelay;
         tag = "goodGoalMulti";
         reward = initialReward;
 

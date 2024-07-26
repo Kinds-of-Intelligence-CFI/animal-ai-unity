@@ -30,7 +30,7 @@ namespace UnityEngineExtensions
                     return child.gameObject;
                 }
             }
-            return null; // Return null if no child is found with the tag
+            return null;
         }
     }
 

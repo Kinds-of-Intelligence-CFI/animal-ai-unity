@@ -113,7 +113,7 @@ public class PlayerControls : MonoBehaviour
             return;
         }
 
-        activeCameraIndex = canChangePerspective ? 0 : 2; // If can't change perspectives, use the 3rd person camera
+        activeCameraIndex = canChangePerspective ? 0 : 2; /* If can't change perspectives, use the bird's-eye camera */
         Debug.Log(
             $"Initializing Cameras. Can Change Perspective: {canChangePerspective}, Active Camera Index: {activeCameraIndex}"
         );

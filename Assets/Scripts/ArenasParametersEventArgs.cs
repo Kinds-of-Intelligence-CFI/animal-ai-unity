@@ -9,6 +9,7 @@ namespace ArenasParameters
     {
         public byte[] arenas_yaml { get; set; }
         public string yamlFileName { get; set; }
-        public ArenasParametersEventArgs() { } // Empty constructor
+
+        public ArenasParametersEventArgs() { } /* Empty constructor for ArenasParametersEventArgs */
     }
 }

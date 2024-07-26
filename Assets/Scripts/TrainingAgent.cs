@@ -162,28 +162,29 @@ public class TrainingAgent : Agent, IPrefab
 
     private void InitialiseCSVProcess()
     {
-        // Base path for the logs to be stored
+        /* Base path for the logs to be stored */
         string basePath;
 
         if (Application.isEditor)
         {
-            // The root directory is the parent of the Assets folder
+            /* The root directory is the parent of the Assets folder */
             basePath = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
         }
         else
         {
-            // Important! For builds, use the parent of the directory where the executable resides
+            /* Important! For builds, use the parent of the directory where the executable resides */
             basePath = Path.GetDirectoryName(Application.dataPath);
         }
 
-        string directoryPath = Path.Combine(basePath, "ObservationLogs");
+        string directoryPath = Path.Combine(basePath, "ObservationLogs"); /* Directory to store the logs under folder "ObservationLogs" */
 
         if (!Directory.Exists(directoryPath))
         {
             Directory.CreateDirectory(directoryPath);
         }
 
-        // Generate a filename with the YAML file name and a date stamp to prevent overwriting. TODO: Extract YAML name from side channel message
+        /* Generate a filename with the YAML file name and a date stamp to prevent overwriting. */
+        // TODO: Extract YAML name from side channel message.
         string dateTimeString = DateTime.Now.ToString("dd-MM-yy_HHmm");
         string filename = $"Observations_{yamlFileName}_{dateTimeString}.csv";
         csvFilePath = Path.Combine(directoryPath, filename);
@@ -281,7 +282,6 @@ public class TrainingAgent : Agent, IPrefab
 
     /// <summary>
     /// Starts a thread that checks if the log queue is full and flushes it to the CSV file if it is.
-    // WARNING: im not sure if this is the best way to handle this, but it works for now
     /// </summary>
     private void StartFlushThread()
     {
@@ -289,7 +289,7 @@ public class TrainingAgent : Agent, IPrefab
         {
             while (true)
             {
-                flushEvent.WaitOne(); // Wait until signaled
+                flushEvent.WaitOne();
                 if (logQueue.Count >= bufferSize && !isFlushing)
                 {
                     isFlushing = true;
@@ -309,7 +309,7 @@ public class TrainingAgent : Agent, IPrefab
         base.OnDisable();
         if (writer != null)
         {
-            FlushLogQueue(); // Ensures all buffered data is written to the file before closing
+            FlushLogQueue(); /* Flush any remaining logs in the queue */
             writer.Close();
         }
 

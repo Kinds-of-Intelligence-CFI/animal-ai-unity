@@ -7,119 +7,118 @@ using System.Collections;
 /// </summary>
 public class NotificationManager : MonoBehaviour
 {
-	[Header("Notification Settings")]
-	public Image notificationBackgroundImage;
-	public Image successGradientBorderImage;
-	public Image failureGradientBorderImage;
+    [Header("Notification Settings")]
+    public Image notificationBackgroundImage;
+    public Image successGradientBorderImage;
+    public Image failureGradientBorderImage;
 
-	[Header("GIF Settings")]
-	public Sprite[] successFrames;
-	public Sprite[] failureFrames;
-	public float frameRate = 0.1f;
-	private int currentFrame = 0;
+    [Header("GIF Settings")]
+    public Sprite[] successFrames;
+    public Sprite[] failureFrames;
+    public float frameRate = 0.1f;
+    private int currentFrame = 0;
 
-	private Coroutine gifCoroutine;
-	private string currentNotificationState = "None";
+    private Coroutine gifCoroutine;
+    private string currentNotificationState = "None";
 
-	public TrainingAgent trainingAgent;
-	public GameObject notificationPanel;
-	public static NotificationManager Instance;
+    public TrainingAgent trainingAgent;
+    public GameObject notificationPanel;
+    public static NotificationManager Instance;
 
-	void Start()
-	{
-		LoadFrames();
-		trainingAgent = FindObjectOfType<TrainingAgent>();
-		HideNotification();
-	}
+    void Start()
+    {
+        LoadFrames();
+        trainingAgent = FindObjectOfType<TrainingAgent>();
+        HideNotification();
+    }
 
-	void LoadFrames()
-	{
-		successFrames = Resources.LoadAll<Sprite>("happyGIF");
-		failureFrames = Resources.LoadAll<Sprite>("sadGIF");
-	}
+    void LoadFrames()
+    {
+        successFrames = Resources.LoadAll<Sprite>("happyGIF");
+        failureFrames = Resources.LoadAll<Sprite>("sadGIF");
+    }
 
-	private void Awake()
-	{
-		SingletonCheck();
-	}
+    private void Awake()
+    {
+        SingletonCheck();
+    }
 
-	void SingletonCheck()
-	{
-		if (Instance == null)
-		{
-			Instance = this;
-			DontDestroyOnLoad(gameObject);
-		}
-		else
-		{
-			Destroy(gameObject);
-		}
-	}
+    void SingletonCheck()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
-	public void ShowSuccessNotification()
-	{
-		Debug.Log("Showing Success Notification");
-		ShowNotification(true);
-		trainingAgent.FreezeAgent(true);
-		currentNotificationState = "Success";
-	}
+    public void ShowSuccessNotification()
+    {
+        ShowNotification(true);
+        trainingAgent.FreezeAgent(true);
+        currentNotificationState = "Success";
+    }
 
-	public void ShowFailureNotification()
-	{
-		Debug.Log("Showing Failure Notification");
-		ShowNotification(false);
-		trainingAgent.FreezeAgent(true);
-		currentNotificationState = "Failure";
-	}
+    public void ShowFailureNotification()
+    {
+        ShowNotification(false);
+        trainingAgent.FreezeAgent(true);
+        currentNotificationState = "Failure";
+    }
 
-	private void ShowNotification(bool isSuccess)
-	{
-		Sprite[] framesToShow = isSuccess ? successFrames : failureFrames;
-		Image gradientBorderToShow = isSuccess ? successGradientBorderImage : failureGradientBorderImage;
+    private void ShowNotification(bool isSuccess)
+    {
+        Sprite[] framesToShow = isSuccess ? successFrames : failureFrames;
+        Image gradientBorderToShow = isSuccess
+            ? successGradientBorderImage
+            : failureGradientBorderImage;
 
-		notificationPanel.SetActive(true);
-		successGradientBorderImage.gameObject.SetActive(isSuccess);
-		failureGradientBorderImage.gameObject.SetActive(!isSuccess);
+        notificationPanel.SetActive(true);
+        successGradientBorderImage.gameObject.SetActive(isSuccess);
+        failureGradientBorderImage.gameObject.SetActive(!isSuccess);
 
-		StopPreviousAnimation();
+        StopPreviousAnimation();
 
-		gifCoroutine = StartCoroutine(AnimateSprite(framesToShow));
-	}
+        gifCoroutine = StartCoroutine(AnimateSprite(framesToShow));
+    }
 
-	void StopPreviousAnimation()
-	{
-		if (gifCoroutine != null)
-		{
-			StopCoroutine(gifCoroutine);
-		}
-	}
+    void StopPreviousAnimation()
+    {
+        if (gifCoroutine != null)
+        {
+            StopCoroutine(gifCoroutine);
+        }
+    }
 
-	public void HideNotification()
-	{
-		Debug.Log("Hiding Notification");
-		notificationPanel.SetActive(false);
-		successGradientBorderImage.gameObject.SetActive(false);
-		failureGradientBorderImage.gameObject.SetActive(false);
+    public void HideNotification()
+    {
+        notificationPanel.SetActive(false);
+        successGradientBorderImage.gameObject.SetActive(false);
+        failureGradientBorderImage.gameObject.SetActive(false);
 
-		StopPreviousAnimation();
+        StopPreviousAnimation();
 
-		currentFrame = 0;
-		trainingAgent.FreezeAgent(false);
-		currentNotificationState = "None";
-	}
+        currentFrame = 0;
+        trainingAgent.FreezeAgent(false);
+        currentNotificationState = "None";
+    }
 
-	public string GetCurrentNotificationState()
-	{
-		return currentNotificationState;
-	}
+    public string GetCurrentNotificationState()
+    {
+        return currentNotificationState;
+    }
 
-	IEnumerator AnimateSprite(Sprite[] animationFrames)
-	{
-		while (true)
-		{
-			notificationBackgroundImage.sprite = animationFrames[currentFrame];
-			currentFrame = (currentFrame + 1) % animationFrames.Length;
-			yield return new WaitForSeconds(frameRate);
-		}
-	}
+    IEnumerator AnimateSprite(Sprite[] animationFrames)
+    {
+        while (true)
+        {
+            notificationBackgroundImage.sprite = animationFrames[currentFrame];
+            currentFrame = (currentFrame + 1) % animationFrames.Length;
+            yield return new WaitForSeconds(frameRate);
+        }
+    }
 }

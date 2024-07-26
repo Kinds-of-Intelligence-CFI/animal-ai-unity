@@ -16,6 +16,7 @@ public class SizeChangeGoal : BallGoal
         Constant,
         Linear
     }
+
     [Header("Interpolation Method")]
     public InterpolationMethod interpolationMethod;
     public bool rewardSizeTracking = true;
@@ -106,11 +107,11 @@ public class SizeChangeGoal : BallGoal
 
             if (!finishedSizeChange && freeToGrow)
             {
-                if ((int)interpolationMethod == 0) /*Constant*/
+                if ((int)interpolationMethod == 0) /* Constant */
                 {
                     SetSize((_height + sizeChangeRate) * Vector3.one);
                 }
-                else if ((int)interpolationMethod > 0) /*Polynomial*/
+                else if ((int)interpolationMethod > 0) /* Polynomial */
                 {
                     PolyInterpolationUpdate();
                 }

@@ -5,21 +5,20 @@ using UnityEngine;
 /// </summary>
 public class CollisionImpulseTracker : MonoBehaviour
 {
-	[Tooltip("Tracks the cumulative impulse magnitude from collisions this frame.")]
-	public float impulseMagnitude;
+    public float impulseMagnitude;
 
-	private void FixedUpdate()
-	{
-		impulseMagnitude = 0;
-	}
+    private void FixedUpdate()
+    {
+        impulseMagnitude = 0;
+    }
 
-	private void OnCollisionEnter(Collision col)
-	{
-		impulseMagnitude += col.impulse.magnitude;
-	}
+    private void OnCollisionEnter(Collision col)
+    {
+        impulseMagnitude += col.impulse.magnitude;
+    }
 
-	private void OnCollisionStay(Collision col)
-	{
-		impulseMagnitude += col.impulse.magnitude;
-	}
+    private void OnCollisionStay(Collision col)
+    {
+        impulseMagnitude += col.impulse.magnitude;
+    }
 }

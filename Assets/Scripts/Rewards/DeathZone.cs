@@ -5,10 +5,9 @@ using UnityEngine;
 /// </summary>
 public class DeathZone : Goal
 {
-    // Adjusts the size of the death zone within specified limits
     public override void SetSize(Vector3 size)
     {
-        // Clip size to within specified limits
+        /* Clip size to within specified limits */
         Vector3 clippedSize = Vector3.Max(sizeMin, Vector3.Min(sizeMax, size)) * sizeAdjustment;
 
         // Adjust individual size components if any are negative
@@ -16,7 +15,7 @@ public class DeathZone : Goal
         float sizeY = size.y < 0 ? Random.Range(sizeMin.y, sizeMax.y) : clippedSize.y;
         float sizeZ = size.z < 0 ? Random.Range(sizeMin.z, sizeMax.z) : clippedSize.z;
 
-        // Set height and scale of the death zone
+        /* Set height and scale of the deathzone */
         _height = sizeY;
         transform.localScale = new Vector3(
             sizeX * ratioSize.x,
@@ -24,13 +23,12 @@ public class DeathZone : Goal
             sizeZ * ratioSize.z
         );
 
-        // Set object scale for shader effects
+        /* Set object scale for shader effects */
         GetComponent<Renderer>().material.SetVector("_ObjScale", new Vector3(sizeX, sizeY, sizeZ));
     }
 
-    // Adjusts the Y position of the death zone
     protected override float AdjustY(float yIn)
     {
-        return -0.15f; // Adjust Y position by a fixed value
+        return -0.15f;
     }
 }

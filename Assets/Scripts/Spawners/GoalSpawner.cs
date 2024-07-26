@@ -16,19 +16,19 @@ public class GoalSpawner : Prefab
     public bool variableSpawnPosition;
     public float sphericalSpawnRadius;
     public Vector3 defaultSpawnPosition;
-    public float timeToRipen; // Seconds
-    public float timeBetweenSpawns; // Seconds
-    public float delaySeconds; // Seconds
-    public int spawnCount; // '-1' = infinite spawning
+    public float timeToRipen; /* Seconds */
+    public float timeBetweenSpawns; /* Seconds */
+    public float delaySeconds; /* Seconds */
+    public int spawnCount;
 
     [ColorUsage(true, true)]
     private Color colourOverride;
 
-    // Random Seeds
+    /* Random Seeds */
     public int objSpawnSeed = 0;
     public int spawnSizeSeed = 0;
 
-    // RNGs
+    /* Random Number Generators (RNGs) */
     private System.Random[] RNGs = new System.Random[4];
 
     private enum E

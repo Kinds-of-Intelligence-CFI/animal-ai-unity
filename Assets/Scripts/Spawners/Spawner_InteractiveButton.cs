@@ -105,7 +105,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
         IsMoving = true;
 
         Vector3 originalPosition = childObjectToMove.transform.position;
-        Vector3 movementDirection = -transform.forward * moveOffset.x; // Use parent object's negative local Z axis
+        Vector3 movementDirection = -transform.forward * moveOffset.x; /* Use parent object's negative local Z axis */
         Vector3 targetPosition = originalPosition + movementDirection;
         float startTime = Time.time;
 
@@ -164,7 +164,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
             }
         }
 
-        // If no reward is selected within the loop (which should not happen), return the last reward
+        /* If no reward is selected within the loop (which should not happen), return the last reward */
         return Rewards[Rewards.Count - 1];
     }
 
@@ -226,20 +226,19 @@ public class Spawner_InteractiveButton : MonoBehaviour
             {
                 spawnPosition = RewardSpawnPos;
             }
-            // Otherwise, random spawning.
-            else
+            else /* Randomize spawn position within the arena bounds */
             {
                 float arenaWidth = arenaBuilder.ArenaWidth;
                 float arenaDepth = arenaBuilder.ArenaDepth;
 
-                // Randomly generate a spawn position within the bounds of the arena, as defined by Arenabuilders.cs.
+                /* Randomly generate a spawn position within the bounds of the arena, as defined by Arenabuilders.cs. */
                 spawnPosition = new Vector3(
                     Random.Range(0, arenaWidth),
                     0,
                     Random.Range(0, arenaDepth)
                 );
             }
-            // Check for randomization flags for x and z axes
+            
             if (RewardSpawnPos.x == -1)
             {
                 spawnPosition.x = Random.Range(0, arenaBuilder.ArenaWidth);

@@ -10,7 +10,7 @@ public class SpawnerStockpiler : GoalSpawner
 {
     [Header("Stockpiling Settings")]
     public bool isStockpiling = true;
-    public int doorOpenDelay = -1; // '-1' means "open indefinitely"
+    public int doorOpenDelay = -1; /* '-1' means "open indefinitely" */
     public bool isDoorOpenInfinite = false;
     public float timeUntilDoorOpens = 1.5f;
     public float timeUntilDoorCloses = 1.5f;
@@ -60,7 +60,9 @@ public class SpawnerStockpiler : GoalSpawner
         canRandomizeColor = true;
     }
 
-    // Door control coroutine
+    /// <summary>
+    /// Manages the door's opening and closing animations.
+    /// </summary>
     private IEnumerator ManageDoor(bool includeInitDelay = true, bool isDoorOpening = true)
     {
         if (includeInitDelay)
@@ -118,7 +120,6 @@ public class SpawnerStockpiler : GoalSpawner
         }
     }
 
-    // Check if there is space to materialize a new goal
     private bool FreeToMaterialize(float radius, BallGoal goal = null)
     {
         Collider[] sphereCheck = Physics.OverlapSphere(
@@ -136,7 +137,9 @@ public class SpawnerStockpiler : GoalSpawner
         return true;
     }
 
-    // Physically materialize or dematerialize a spawned goal
+    /// <summary>
+    /// Physically materialize or dematerialize a spawned goal.
+    /// </summary>
     private void ChangeImmaterialStorage(BallGoal goal, bool isMaterializing)
     {
         goal.GetComponent<MeshRenderer>().enabled = isMaterializing;

@@ -7,65 +7,81 @@ using UnityEngine;
 [RequireComponent(typeof(Camera))]
 public class ScreenshotCamera : MonoBehaviour
 {
-	[Header("Screenshot Settings")]
-	public int fileCounter = 0;
-	public RenderTexture renderTexture;
-	public string filePath = "Screenshots";
-	public string fileName = "capture";
-	private Camera screenshotCam;
-	public bool testMode = false;
+    [Header("Screenshot Settings")]
+    public int fileCounter = 0;
+    public RenderTexture renderTexture;
+    public string filePath = "Screenshots";
+    public string fileName = "capture";
+    private Camera screenshotCam;
+    public bool testMode = false;
 
-	private void Awake()
-	{
-		screenshotCam = GetComponent<Camera>();
-		InitializeRenderTexture();
-	}
+    private void Awake()
+    {
+        screenshotCam = GetComponent<Camera>();
+        InitializeRenderTexture();
+    }
 
-	private void InitializeRenderTexture()
-	{
-		if (!testMode && renderTexture != null)
-		{
-			screenshotCam.targetTexture = new RenderTexture(renderTexture.width, renderTexture.height, renderTexture.depth, renderTexture.format, RenderTextureReadWrite.sRGB);
-		}
-		else
-		{
-			Debug.LogWarning("RenderTexture is not assigned or in Test Mode.");
-		}
-	}
+    private void InitializeRenderTexture()
+    {
+        if (!testMode && renderTexture != null)
+        {
+            screenshotCam.targetTexture = new RenderTexture(
+                renderTexture.width,
+                renderTexture.height,
+                renderTexture.depth,
+                renderTexture.format,
+                RenderTextureReadWrite.sRGB
+            );
+        }
+        else
+        {
+            Debug.LogWarning("RenderTexture is not assigned or in Test Mode.");
+        }
+    }
 
-	public void Activate(bool enable = true)
-	{
-		screenshotCam.enabled = enable;
-	}
+    public void Activate(bool enable = true)
+    {
+        screenshotCam.enabled = enable;
+    }
 
-	private void LateUpdate()
-	{
-		if (screenshotCam.enabled && !testMode)
-		{
-			CaptureScreenshot();
-			Activate(false); // Deactivate the camera after capturing to prevent multiple captures.
-		}
-	}
+    private void LateUpdate()
+    {
+        if (screenshotCam.enabled && !testMode)
+        {
+            CaptureScreenshot();
+            Activate(false); // Deactivate the camera after capturing to prevent multiple captures.
+        }
+    }
 
-	private void CaptureScreenshot()
-	{
-		screenshotCam.Render();
-		RenderTexture.active = screenshotCam.targetTexture;
+    private void CaptureScreenshot()
+    {
+        screenshotCam.Render();
+        RenderTexture.active = screenshotCam.targetTexture;
 
-		Texture2D image = new Texture2D(screenshotCam.targetTexture.width, screenshotCam.targetTexture.height, TextureFormat.RGB24, false);
-		image.ReadPixels(new Rect(0, 0, screenshotCam.targetTexture.width, screenshotCam.targetTexture.height), 0, 0);
-		image.Apply();
-		byte[] bytes = image.EncodeToPNG();
-		Destroy(image); // Free the image from memory after encoding.
+        Texture2D image = new Texture2D(
+            screenshotCam.targetTexture.width,
+            screenshotCam.targetTexture.height,
+            TextureFormat.RGB24,
+            false
+        );
+        image.ReadPixels(
+            new Rect(0, 0, screenshotCam.targetTexture.width, screenshotCam.targetTexture.height),
+            0,
+            0
+        );
+        image.Apply();
+        byte[] bytes = image.EncodeToPNG();
+        Destroy(image);
 
-		string directoryPath = Path.Combine(Application.persistentDataPath, filePath);
-		Directory.CreateDirectory(directoryPath); // Ensure the directory exists.
+        string directoryPath = Path.Combine(Application.persistentDataPath, filePath);
+        Directory.CreateDirectory(directoryPath);
 
-		string formattedFileName = $"{fileName}{fileCounter}_{System.DateTime.Now:dd-MM_HH-mm-ss}.png";
-		string fullPath = Path.Combine(directoryPath, formattedFileName);
+        string formattedFileName =
+            $"{fileName}{fileCounter}_{System.DateTime.Now:dd-MM_HH-mm-ss}.png";
+        string fullPath = Path.Combine(directoryPath, formattedFileName);
 
-		File.WriteAllBytes(fullPath, bytes);
-		Debug.Log($"Screenshot saved to {fullPath}");
-		fileCounter++;
-	}
+        File.WriteAllBytes(fullPath, bytes);
+        Debug.Log($"Screenshot saved to {fullPath}");
+        fileCounter++;
+    }
 }

@@ -135,8 +135,7 @@ public class TrainingArena : MonoBehaviour
         CleanUpSpawnedObjects();
 
         SetNextArenaID();
-
-        // Load the new configuration
+        
         ArenaConfiguration newConfiguration = _environmentManager.GetConfiguration(arenaID);
 
         ApplyNewArenaConfiguration(newConfiguration);
@@ -148,7 +147,6 @@ public class TrainingArena : MonoBehaviour
 
     public void LoadNextArena()
     {
-        // TrainingArena must have reset() called at first to initialise arenaID
         if (isFirstArenaReset)
         {
             throw new InvalidOperationException("LoadNextArena called before first reset");
@@ -161,7 +159,6 @@ public class TrainingArena : MonoBehaviour
 
         ArenaConfiguration newConfiguration = _environmentManager.GetConfiguration(arenaID);
 
-        // Checks if its final arena in config file and if mergeNextArena is set to true, throws an exception
         int totalArenas = _environmentManager.GetTotalArenas();
         if (arenaID == totalArenas - 1 && newConfiguration.mergeNextArena)
         {
@@ -218,7 +215,6 @@ public class TrainingArena : MonoBehaviour
 
     private int ChooseRandomArenaID(int totalArenas)
     {
-        // Populate the list of merged arenas if needed
         if (_mergedArenas == null)
         {
             _mergedArenas = GetMergedArenas();
@@ -265,9 +261,6 @@ public class TrainingArena : MonoBehaviour
         _environmentManager.TriggerArenaChangeEvent(arenaID, _environmentManager.GetTotalArenas());
     }
 
-    /// <summary>
-    /// Destroys all spawned rewards in the arena.
-    /// </summary>
     private void CleanupRewards()
     {
         foreach (var reward in spawnedRewards)
@@ -277,9 +270,6 @@ public class TrainingArena : MonoBehaviour
         spawnedRewards.Clear();
     }
 
-    /// <summary>
-    /// Updates the light status in the arena based on the current step count.
-    /// </summary>
     public void UpdateLigthStatus()
     {
         int stepCount = _agent.StepCount;
@@ -297,17 +287,11 @@ public class TrainingArena : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Returns the total number of spawned objects in the arena.
-    /// </summary>
     public int GetTotalSpawnedObjects()
     {
         return spawnedObjectsHolder.transform.childCount;
     }
 
-    /// <summary>
-    /// Callback for when a reward is spawned in the arena.
-    /// </summary>
     private void OnRewardSpawned(GameObject reward)
     {
         spawnedRewards.Add(reward);

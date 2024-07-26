@@ -14,6 +14,7 @@ public class AnimalSkinManager : MonoBehaviour
 {
     [Header("Animal Skins Settings")]
     public const int AnimalCount = 3;
+
     [Range(0, AnimalCount - 1)]
     public int AnimalSkinID;
     public string[] AnimalNames = new string[AnimalCount];
