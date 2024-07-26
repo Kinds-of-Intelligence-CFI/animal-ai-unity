@@ -196,7 +196,7 @@ public class TrainingAgent : Agent, IPrefab
             if (!headerWritten)
             {
                 writer.WriteLine(
-                    "Episode,Step,Health,Reward,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,NotificationShown?,CollectedRewardType,DispensedRewardType,WasRewardDispensed?,WasSpawnerButtonTriggered?,CombinedSpawnerInfo,WasAgentInDataZone?,CombinedRaycastData,ActiveCamera"
+                    "Episode,Step,Health,Reward,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,NotificationShown?,CollectedRewardType,DispensedRewardType,WasRewardDispensed?,WasSpawnerButtonTriggered?,CombinedSpawnerInfo,WasAgentInDataZone?,ActiveCamera,CombinedRaycastData"
                 );
                 headerWritten = true;
             }
@@ -225,8 +225,8 @@ public class TrainingAgent : Agent, IPrefab
         bool wasSpawnerButtonTriggered,
         string combinedSpawnerInfo,
         string wasAgentInDataZone,
-        string combinedRaycastData,
-        string activeCameraDescription
+        string activeCameraDescription,
+        string combinedRaycastData
     )
     {
         string logEntry = string.Format(
@@ -251,8 +251,8 @@ public class TrainingAgent : Agent, IPrefab
             wasSpawnerButtonTriggered ? "Yes" : "No",
             combinedSpawnerInfo.Replace(",", ";"),
             wasAgentInDataZone,
-            combinedRaycastData,
-            activeCameraDescription
+            activeCameraDescription,
+            combinedRaycastData
         );
 
         logQueue.Enqueue(logEntry);
@@ -428,8 +428,8 @@ public class TrainingAgent : Agent, IPrefab
             wasSpawnerButtonTriggered,
             combinedSpawnerInfo,
             wasAgentInDataZone,
-            combinedRaycastData,
-            playerControls.GetActiveCameraDescription()
+            playerControls.GetActiveCameraDescription(),
+            combinedRaycastData
         );
 
         dispensedRewardType = "None";
