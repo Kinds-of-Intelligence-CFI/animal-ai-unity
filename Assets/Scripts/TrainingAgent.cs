@@ -176,7 +176,8 @@ public class TrainingAgent : Agent, IPrefab
             basePath = Path.GetDirectoryName(Application.dataPath);
         }
 
-        string directoryPath = Path.Combine(basePath, "ObservationLogs"); /* Directory to store the logs under folder "ObservationLogs" */
+        /* Directory to store the logs under folder "ObservationLogs" */
+        string directoryPath = Path.Combine(basePath, "ObservationLogs");
 
         if (!Directory.Exists(directoryPath))
         {
