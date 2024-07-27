@@ -132,6 +132,9 @@ public class TrainingAgent : Agent, IPrefab
         return string.Join(";", observations.Zip(tags, (obs, tag) => $"{obs}:{tag}"));
     }
 
+    /// <summary>
+    /// Initialize is called when the training session is started from mlagents. It sets up the agent's initial state.
+    /// </summary>
     public override void Initialize()
     {
         _arena = GetComponentInParent<TrainingArena>();
@@ -161,6 +164,171 @@ public class TrainingAgent : Agent, IPrefab
         StartFlushThread();
     }
 
+    /// <summary>
+    /// OnDisable is called when the training session is stopped form mlagents.
+    /// It closes the CSV file and flushes the log queue at whatever the current size is.
+    /// </summary>
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        if (writer != null)
+        {
+            FlushLogQueue(); /* Flush any remaining logs in the queue */
+            writer.Close();
+        }
+
+        Spawner_InteractiveButton.RewardSpawned -= OnRewardSpawned;
+        DataZone.OnInDataZone -= OnInDataZone;
+        DataZone.OnOutDataZone -= OnOutDataZone;
+    }
+
+    public void AddExtraReward(float rewardFactor)
+    {
+        UpdateHealth(Math.Min(rewardFactor * _rewardPerStep, -0.001f));
+    }
+
+    public float GetPreviousScore()
+    {
+        return _previousScore;
+    }
+
+    public float GetFreezeDelay()
+    {
+        return _freezeDelay;
+    }
+
+    public void SetFreezeDelay(float v)
+    {
+        _freezeDelay = Mathf.Clamp(v, 0f, v);
+        if (v != 0f && !_isCountdownActive)
+        {
+            Debug.Log(
+                "Starting coroutine UnfreezeCountdown() with wait seconds == " + GetFreezeDelay()
+            );
+            StartCoroutine(UnfreezeCountdown());
+        }
+    }
+
+    public bool IsFrozen()
+    {
+        return _freezeDelay > 0f || _isFrozen;
+    }
+
+    public void FreezeAgent(bool freeze)
+    {
+        _isFrozen = freeze;
+        if (_isFrozen)
+        {
+            _rigidBody.velocity = Vector3.zero;
+            _rigidBody.angularVelocity = Vector3.zero;
+        }
+    }
+
+    private IEnumerator UnfreezeCountdown()
+    {
+        _isCountdownActive = true;
+        yield return new WaitForSeconds(GetFreezeDelay());
+
+        Debug.Log("Unfreezing Agent!");
+        SetFreezeDelay(0f);
+        _isCountdownActive = false;
+    }
+
+    private string GetNotificationState()
+    {
+        if (NotificationManager.Instance == null)
+        {
+            return "None";
+        }
+
+        return NotificationManager.Instance.GetCurrentNotificationState();
+    }
+
+    private (float[] hitFractions, string[] hitTags) CollectRaycastObservations()
+    {
+        RayPerceptionSensorComponent3D rayPerception =
+            GetComponent<RayPerceptionSensorComponent3D>();
+        if (rayPerception == null)
+        {
+            return (new float[0], new string[0]);
+        }
+
+        var rayPerceptionInput = rayPerception.GetRayPerceptionInput();
+        var rayPerceptionOutput = RayPerceptionSensor.Perceive(rayPerceptionInput);
+        float[] hitFractions = rayPerceptionOutput.RayOutputs.Select(r => r.HitFraction).ToArray();
+        string[] hitTags = rayPerceptionOutput.RayOutputs
+            .Select(r => r.HitGameObject?.tag ?? "None")
+            .ToArray();
+
+        return (hitFractions, hitTags);
+    }
+
+    public override void CollectObservations(VectorSensor sensor)
+    {
+        sensor.AddObservation(health);
+        Vector3 localVel = transform.InverseTransformDirection(_rigidBody.velocity);
+        Vector3 localPos = transform.position;
+        bool wasAgentFrozen = IsFrozen();
+        string actionForwardDescription = DescribeActionForward(lastActionForward);
+        string actionRotateDescription = DescribeActionRotate(lastActionRotate);
+        string actionForwardWithDescription = $"{lastActionForward} ({actionForwardDescription})";
+        string actionRotateWithDescription = $"{lastActionRotate} ({actionRotateDescription})";
+        float reward = GetCumulativeReward();
+        string notificationState = GetNotificationState();
+        (float[] raycastObservations, string[] raycastTags) = CollectRaycastObservations();
+        string combinedRaycastData = CombineRaycastData(raycastObservations, raycastTags);
+    }
+
+    public override void OnActionReceived(ActionBuffers action)
+    {
+        lastActionForward = Mathf.FloorToInt(action.DiscreteActions[0]);
+        lastActionRotate = Mathf.FloorToInt(action.DiscreteActions[1]);
+
+        if (!IsFrozen())
+        {
+            MoveAgent(lastActionForward, lastActionRotate);
+        }
+
+        Vector3 localVel = transform.InverseTransformDirection(_rigidBody.velocity);
+        Vector3 localPos = transform.position;
+        bool wasAgentFrozen = IsFrozen();
+        string actionForwardDescription = DescribeActionForward(lastActionForward);
+        string actionRotateDescription = DescribeActionRotate(lastActionRotate);
+        string actionForwardWithDescription = $"{lastActionForward} ({actionForwardDescription})";
+        string actionRotateWithDescription = $"{lastActionRotate} ({actionRotateDescription})";
+        float reward = GetCumulativeReward();
+        string notificationState = GetNotificationState();
+
+        (float[] raycastObservations, string[] raycastTags) = CollectRaycastObservations();
+        string combinedRaycastData = CombineRaycastData(raycastObservations, raycastTags);
+
+        LogToCSV(
+            localVel,
+            localPos,
+            actionForwardWithDescription,
+            actionRotateWithDescription,
+            wasAgentFrozen ? "Yes" : "No",
+            reward,
+            notificationState,
+            customEpisodeCount,
+            dispensedRewardType,
+            wasRewardDispensed,
+            wasSpawnerButtonTriggered,
+            combinedSpawnerInfo,
+            wasAgentInDataZone,
+            playerControls.GetActiveCameraDescription(),
+            combinedRaycastData
+        );
+
+        dispensedRewardType = "None";
+        wasRewardDispensed = false;
+        wasSpawnerButtonTriggered = false;
+        wasAgentInDataZone = "No";
+        combinedSpawnerInfo = "";
+
+        UpdateHealth(_rewardPerStep);
+    }
+
     private void InitialiseCSVProcess()
     {
         /* Base path for the logs to be stored */
@@ -183,7 +351,7 @@ public class TrainingAgent : Agent, IPrefab
         {
             Directory.CreateDirectory(directoryPath);
         }
-        
+
         /* Generate a filename with the YAML file name and a date stamp to prevent overwriting. */
         // TODO: Extract YAML name from side channel message.
         string dateTimeString = DateTime.Now.ToString("dd-MM-yy_HHmm");
@@ -299,166 +467,6 @@ public class TrainingAgent : Agent, IPrefab
                 }
             }
         }).Start();
-    }
-
-    /// <summary>
-    /// OnDisable is called when the training session is stopped form mlagents.
-    /// It closes the CSV file and flushes the log queue at whatever the current size is.
-    /// </summary>
-    protected override void OnDisable()
-    {
-        base.OnDisable();
-        if (writer != null)
-        {
-            FlushLogQueue(); /* Flush any remaining logs in the queue */
-            writer.Close();
-        }
-
-        Spawner_InteractiveButton.RewardSpawned -= OnRewardSpawned;
-        DataZone.OnInDataZone -= OnInDataZone;
-        DataZone.OnOutDataZone -= OnOutDataZone;
-    }
-
-    public float GetPreviousScore()
-    {
-        return _previousScore;
-    }
-
-    public float GetFreezeDelay()
-    {
-        return _freezeDelay;
-    }
-
-    public void SetFreezeDelay(float v)
-    {
-        _freezeDelay = Mathf.Clamp(v, 0f, v);
-        if (v != 0f && !_isCountdownActive)
-        {
-            Debug.Log(
-                "Starting coroutine UnfreezeCountdown() with wait seconds == " + GetFreezeDelay()
-            );
-            StartCoroutine(UnfreezeCountdown());
-        }
-    }
-
-    public bool IsFrozen()
-    {
-        return _freezeDelay > 0f || _isFrozen;
-    }
-
-    public void FreezeAgent(bool freeze)
-    {
-        _isFrozen = freeze;
-        if (_isFrozen)
-        {
-            _rigidBody.velocity = Vector3.zero;
-            _rigidBody.angularVelocity = Vector3.zero;
-        }
-    }
-
-    private IEnumerator UnfreezeCountdown()
-    {
-        _isCountdownActive = true;
-        yield return new WaitForSeconds(GetFreezeDelay());
-
-        Debug.Log("Unfreezing Agent!");
-        SetFreezeDelay(0f);
-        _isCountdownActive = false;
-    }
-
-    private string GetNotificationState()
-    {
-        if (NotificationManager.Instance == null)
-        {
-            return "None";
-        }
-
-        return NotificationManager.Instance.GetCurrentNotificationState();
-    }
-
-    public override void CollectObservations(VectorSensor sensor)
-    {
-        sensor.AddObservation(health);
-        Vector3 localVel = transform.InverseTransformDirection(_rigidBody.velocity);
-        Vector3 localPos = transform.position;
-        bool wasAgentFrozen = IsFrozen();
-        string actionForwardDescription = DescribeActionForward(lastActionForward);
-        string actionRotateDescription = DescribeActionRotate(lastActionRotate);
-        string actionForwardWithDescription = $"{lastActionForward} ({actionForwardDescription})";
-        string actionRotateWithDescription = $"{lastActionRotate} ({actionRotateDescription})";
-        float reward = GetCumulativeReward();
-        string notificationState = GetNotificationState();
-        (float[] raycastObservations, string[] raycastTags) = CollectRaycastObservations();
-        string combinedRaycastData = CombineRaycastData(raycastObservations, raycastTags);
-    }
-
-    public override void OnActionReceived(ActionBuffers action)
-    {
-        lastActionForward = Mathf.FloorToInt(action.DiscreteActions[0]);
-        lastActionRotate = Mathf.FloorToInt(action.DiscreteActions[1]);
-
-        if (!IsFrozen())
-        {
-            MoveAgent(lastActionForward, lastActionRotate);
-        }
-
-        Vector3 localVel = transform.InverseTransformDirection(_rigidBody.velocity);
-        Vector3 localPos = transform.position;
-        bool wasAgentFrozen = IsFrozen();
-        string actionForwardDescription = DescribeActionForward(lastActionForward);
-        string actionRotateDescription = DescribeActionRotate(lastActionRotate);
-        string actionForwardWithDescription = $"{lastActionForward} ({actionForwardDescription})";
-        string actionRotateWithDescription = $"{lastActionRotate} ({actionRotateDescription})";
-        float reward = GetCumulativeReward();
-        string notificationState = GetNotificationState();
-
-        (float[] raycastObservations, string[] raycastTags) = CollectRaycastObservations();
-        string combinedRaycastData = CombineRaycastData(raycastObservations, raycastTags);
-
-        LogToCSV(
-            localVel,
-            localPos,
-            actionForwardWithDescription,
-            actionRotateWithDescription,
-            wasAgentFrozen ? "Yes" : "No",
-            reward,
-            notificationState,
-            customEpisodeCount,
-            dispensedRewardType,
-            wasRewardDispensed,
-            wasSpawnerButtonTriggered,
-            combinedSpawnerInfo,
-            wasAgentInDataZone,
-            playerControls.GetActiveCameraDescription(),
-            combinedRaycastData
-        );
-
-        dispensedRewardType = "None";
-        wasRewardDispensed = false;
-        wasSpawnerButtonTriggered = false;
-        wasAgentInDataZone = "No";
-        combinedSpawnerInfo = "";
-
-        UpdateHealth(_rewardPerStep);
-    }
-
-    private (float[] hitFractions, string[] hitTags) CollectRaycastObservations()
-    {
-        RayPerceptionSensorComponent3D rayPerception =
-            GetComponent<RayPerceptionSensorComponent3D>();
-        if (rayPerception == null)
-        {
-            return (new float[0], new string[0]);
-        }
-
-        var rayPerceptionInput = rayPerception.GetRayPerceptionInput();
-        var rayPerceptionOutput = RayPerceptionSensor.Perceive(rayPerceptionInput);
-        float[] hitFractions = rayPerceptionOutput.RayOutputs.Select(r => r.HitFraction).ToArray();
-        string[] hitTags = rayPerceptionOutput.RayOutputs
-            .Select(r => r.HitGameObject?.tag ?? "None")
-            .ToArray();
-
-        return (hitFractions, hitTags);
     }
 
     private string DescribeActionForward(int actionForward)
@@ -670,11 +678,6 @@ public class TrainingAgent : Agent, IPrefab
         health = _maxHealth;
 
         SetFreezeDelay(GetFreezeDelay());
-    }
-
-    public void AddExtraReward(float rewardFactor)
-    {
-        UpdateHealth(Math.Min(rewardFactor * _rewardPerStep, -0.001f));
     }
 
     private void EpisodeDebugLogs()
