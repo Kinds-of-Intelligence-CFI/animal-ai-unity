@@ -311,8 +311,9 @@ public class TrainingAgent : Agent, IPrefab
             reward,
             notificationState,
             customEpisodeCount,
-            dispensedRewardType,
             wasRewardDispensed,
+            dispensedRewardType,
+            lastCollectedRewardType,
             wasSpawnerButtonTriggered,
             combinedSpawnerInfo,
             wasAgentInDataZone,
@@ -365,7 +366,7 @@ public class TrainingAgent : Agent, IPrefab
             if (!headerWritten)
             {
                 writer.WriteLine(
-                    "Episode,Step,Health,Reward,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,NotificationShown?,CollectedRewardType,DispensedRewardType,WasRewardDispensed?,WasSpawnerButtonTriggered?,CombinedSpawnerInfo,WasAgentInDataZone?,ActiveCamera,CombinedRaycastData"
+                    "Episode,Step,Health,Reward,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,NotificationShown?,WasRewardDispensed?,DispensedRewardType,CollectedRewardType,WasSpawnerButtonTriggered?,CombinedSpawnerInfo,WasAgentInDataZone?,ActiveCamera,CombinedRaycastData"
                 );
                 headerWritten = true;
             }
@@ -389,8 +390,9 @@ public class TrainingAgent : Agent, IPrefab
         float reward,
         string notificationState,
         int customEpisodeCount,
-        string dispensedRewardType,
         bool wasRewardDispensed,
+        string dispensedRewardType,
+        string lastCollectedRewardType,
         bool wasSpawnerButtonTriggered,
         string combinedSpawnerInfo,
         string wasAgentInDataZone,
@@ -414,9 +416,9 @@ public class TrainingAgent : Agent, IPrefab
             actionRotateWithDescription,
             wasAgentFrozen,
             notificationState,
-            lastCollectedRewardType,
-            dispensedRewardType,
             wasRewardDispensed ? "Yes" : "No",
+            dispensedRewardType,
+            lastCollectedRewardType,
             wasSpawnerButtonTriggered ? "Yes" : "No",
             combinedSpawnerInfo.Replace(",", ";"),
             wasAgentInDataZone,
