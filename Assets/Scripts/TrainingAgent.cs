@@ -75,7 +75,7 @@ public class TrainingAgent : Agent, IPrefab
     private string wasAgentInDataZone = "No";
     private bool wasRewardDispensed = false;
     private bool wasSpawnerButtonTriggered = false;
-    private string combinedSpawnerInfo = "";
+    private string combinedSpawnerInfo = "N/A";
 
     private string yamlFileName;
     private AutoResetEvent flushEvent = new AutoResetEvent(false);
@@ -83,14 +83,22 @@ public class TrainingAgent : Agent, IPrefab
 
     public void RecordSpawnerInfo(string spawnerInfo)
     {
-        if (string.IsNullOrEmpty(combinedSpawnerInfo))
+        if (string.IsNullOrEmpty(spawnerInfo))
         {
-            combinedSpawnerInfo = spawnerInfo;
+            combinedSpawnerInfo = "N/A";
         }
         else
         {
-            combinedSpawnerInfo += $"|{spawnerInfo}";
+            if (combinedSpawnerInfo == "N/A")
+            {
+                combinedSpawnerInfo = spawnerInfo;
+            }
+            else
+            {
+                combinedSpawnerInfo += $"|{spawnerInfo}";
+            }
         }
+        Debug.Log($"Recorded Spawner Info: {combinedSpawnerInfo}");
     }
 
     public void OnInDataZone(string zoneLogString)
@@ -334,7 +342,7 @@ public class TrainingAgent : Agent, IPrefab
         wasRewardDispensed = false;
         wasSpawnerButtonTriggered = false;
         wasAgentInDataZone = "No";
-        combinedSpawnerInfo = "";
+        combinedSpawnerInfo = "N/A";
 
         UpdateHealth(_rewardPerStep);
     }
