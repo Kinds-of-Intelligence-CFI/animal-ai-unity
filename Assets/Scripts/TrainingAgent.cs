@@ -179,12 +179,11 @@ public class TrainingAgent : Agent, IPrefab
 
         /* Directory to store the logs under folder "ObservationLogs" */
         string directoryPath = Path.Combine(basePath, "ObservationLogs");
-
         if (!Directory.Exists(directoryPath))
         {
             Directory.CreateDirectory(directoryPath);
         }
-
+        
         /* Generate a filename with the YAML file name and a date stamp to prevent overwriting. */
         // TODO: Extract YAML name from side channel message.
         string dateTimeString = DateTime.Now.ToString("dd-MM-yy_HHmm");
