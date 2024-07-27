@@ -66,7 +66,6 @@ public class TrainingAgent : Agent, IPrefab
     public string csvFilePath = "";
     private StreamWriter writer;
     private bool headerWritten = false;
-    private string yamlFileName;
     private int customEpisodeCount = 0;
     private ConcurrentQueue<string> logQueue = new ConcurrentQueue<string>();
     private const int bufferSize = 101; /* Corresponds to rows in the CSV file to keep in memory before flushing to disk */
@@ -77,6 +76,8 @@ public class TrainingAgent : Agent, IPrefab
     private bool wasRewardDispensed = false;
     private bool wasSpawnerButtonTriggered = false;
     private string combinedSpawnerInfo = "";
+
+    private string yamlFileName;
     private AutoResetEvent flushEvent = new AutoResetEvent(false);
 
     public void RecordSpawnerInfo(string spawnerInfo)
