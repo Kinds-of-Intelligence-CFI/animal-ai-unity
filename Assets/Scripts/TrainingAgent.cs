@@ -79,6 +79,7 @@ public class TrainingAgent : Agent, IPrefab
 
     private string yamlFileName;
     private AutoResetEvent flushEvent = new AutoResetEvent(false);
+    private bool errorOccurred = false;
 
     public void RecordSpawnerInfo(string spawnerInfo)
     {
@@ -150,7 +151,15 @@ public class TrainingAgent : Agent, IPrefab
 
         playerControls = GameObject.FindObjectOfType<PlayerControls>();
 
-        InitialiseCSVProcess();
+        try
+        {
+            InitialiseCSVProcess();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError("Failed to initialize CSV process: " + ex.Message);
+            errorOccurred = true;
+        }
 
         if (!Application.isEditor)
         {
@@ -332,48 +341,56 @@ public class TrainingAgent : Agent, IPrefab
 
     private void InitialiseCSVProcess()
     {
-        /* Base path for the logs to be stored */
-        string basePath;
-
-        if (Application.isEditor)
+        try
         {
-            /* The root directory is the parent of the Assets folder */
-            basePath = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
-        }
-        else
-        {
-            /* Important! For builds, use the parent of the directory where the executable resides */
-            basePath = Path.GetDirectoryName(Application.dataPath);
-        }
+            /* Base path for the logs to be stored */
+            string basePath;
 
-        /* Directory to store the logs under folder "ObservationLogs" */
-        string directoryPath = Path.Combine(basePath, "ObservationLogs");
-        if (!Directory.Exists(directoryPath))
-        {
-            Directory.CreateDirectory(directoryPath);
-        }
-
-        /* Generate a filename with the YAML file name and a date stamp to prevent overwriting. */
-        // TODO: Extract YAML name from side channel message.
-        string dateTimeString = DateTime.Now.ToString("dd-MM-yy_HHmm");
-        string filename = $"Observations_{yamlFileName}_{dateTimeString}.csv";
-        csvFilePath = Path.Combine(directoryPath, filename);
-
-        writer = new StreamWriter(csvFilePath, true);
-
-        if (!File.Exists(csvFilePath) || new FileInfo(csvFilePath).Length == 0)
-        {
-            if (!headerWritten)
+            if (Application.isEditor)
             {
-                writer.WriteLine(
-                    "Episode,Step,Health,Reward,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,NotificationShown?,WasRewardDispensed?,DispensedRewardType,CollectedRewardType,WasSpawnerButtonTriggered?,CombinedSpawnerInfo,WasAgentInDataZone?,ActiveCamera,CombinedRaycastData"
-                );
-                headerWritten = true;
+                /* The root directory is the parent of the Assets folder */
+                basePath = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
             }
             else
             {
-                Debug.LogError("Header/Columns already written to CSV file.");
+                /* Important! For builds, use the parent of the directory where the executable resides */
+                basePath = Path.GetDirectoryName(Application.dataPath);
             }
+
+            /* Directory to store the logs under folder "ObservationLogs" */
+            string directoryPath = Path.Combine(basePath, "ObservationLogs");
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+
+            /* Generate a filename with the YAML file name and a date stamp to prevent overwriting. */
+            // TODO: Extract YAML name from side channel message.
+            string dateTimeString = DateTime.Now.ToString("dd-MM-yy_HHmm");
+            string filename = $"Observations_{yamlFileName}_{dateTimeString}.csv";
+            csvFilePath = Path.Combine(directoryPath, filename);
+
+            writer = new StreamWriter(csvFilePath, true);
+
+            if (!File.Exists(csvFilePath) || new FileInfo(csvFilePath).Length == 0)
+            {
+                if (!headerWritten)
+                {
+                    writer.WriteLine(
+                        "Episode,Step,Health,Reward,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,NotificationShown?,WasRewardDispensed?,DispensedRewardType,CollectedRewardType,WasSpawnerButtonTriggered?,CombinedSpawnerInfo,WasAgentInDataZone?,ActiveCamera,CombinedRaycastData"
+                    );
+                    headerWritten = true;
+                }
+                else
+                {
+                    Debug.LogError("Header/Columns already written to CSV file.");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError("Failed to initialize CSV process: " + ex.Message);
+            errorOccurred = true;
         }
     }
 
@@ -400,6 +417,11 @@ public class TrainingAgent : Agent, IPrefab
         string combinedRaycastData
     )
     {
+        if (errorOccurred)
+        {
+            return;
+        }
+
         string logEntry = string.Format(
             "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21}",
             customEpisodeCount,
@@ -440,14 +462,27 @@ public class TrainingAgent : Agent, IPrefab
     /// </summary>
     private void FlushLogQueue()
     {
-        lock (logQueue)
+        if (errorOccurred)
         {
-            while (logQueue.TryDequeue(out var logEntry))
+            return;
+        }
+
+        try
+        {
+            lock (logQueue)
             {
-                writer.WriteLine(logEntry);
+                while (logQueue.TryDequeue(out var logEntry))
+                {
+                    writer.WriteLine(logEntry);
+                }
+                writer.Flush();
+                Debug.Log("Flushed log queue to CSV file.");
             }
-            writer.Flush();
-            Debug.Log("Flushed log queue to CSV file.");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError("Failed to flush log queue: " + ex.Message);
+            errorOccurred = true;
         }
     }
 
