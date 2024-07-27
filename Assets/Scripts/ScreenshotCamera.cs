@@ -49,7 +49,7 @@ public class ScreenshotCamera : MonoBehaviour
         if (screenshotCam.enabled && !testMode)
         {
             CaptureScreenshot();
-            Activate(false); // Deactivate the camera after capturing to prevent multiple captures.
+            Activate(false); /* Deactivate the camera after capturing to prevent multiple captures */
         }
     }
 
@@ -81,7 +81,6 @@ public class ScreenshotCamera : MonoBehaviour
         string fullPath = Path.Combine(directoryPath, formattedFileName);
 
         File.WriteAllBytes(fullPath, bytes);
-        Debug.Log($"Screenshot saved to {fullPath}");
         fileCounter++;
     }
 }
