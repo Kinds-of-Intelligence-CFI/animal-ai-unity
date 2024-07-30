@@ -439,7 +439,9 @@ public class TrainingAgent : Agent, IPrefab
         string filename = $"Observations_{yamlFileName}_{dateTimeString}.csv";
         csvFilePath = Path.Combine(directoryPath, filename);
 
-        writer = new StreamWriter(csvFilePath, true);
+        writer = new StreamWriter(
+            new FileStream(csvFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)
+        );
 
         if (!File.Exists(csvFilePath) || new FileInfo(csvFilePath).Length == 0)
         {
@@ -532,7 +534,6 @@ public class TrainingAgent : Agent, IPrefab
                     isFlushing = false;
                 }
             }
-            // Ensure any remaining logs are flushed before exiting the thread
             FlushLogQueue();
         });
         flushThread.Start();
@@ -540,14 +541,21 @@ public class TrainingAgent : Agent, IPrefab
 
     private void FlushLogQueue()
     {
-        lock (writer)
+        try
         {
-            while (logQueue.TryDequeue(out var logEntry))
+            lock (logQueue)
             {
-                writer.WriteLine(logEntry);
+                while (logQueue.TryDequeue(out var logEntry))
+                {
+                    writer.WriteLine(logEntry);
+                }
+                writer.Flush();
+                Debug.Log("Flushed log queue to CSV file.");
             }
-            writer.Flush();
-            Debug.Log("Flushed log queue to CSV file.");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError("Failed to flush log queue: " + ex.Message);
         }
     }
 
