@@ -18,7 +18,7 @@ using System.Threading;
 /// </summary>
 
 
-// TODO: Use thread pooling to reduce overhead of creating new threads: 
+// TODO: Use thread pooling to reduce overhead of creating new threads:
 // https://medium.com/@lexitrainerph/c-threading-from-basic-to-advanced-84927e502a38
 
 
@@ -84,6 +84,12 @@ public class TrainingAgent : Agent, IPrefab
 
     private string yamlFileName;
     private AutoResetEvent flushEvent = new AutoResetEvent(false);
+
+    private Thread flushThread;
+    private bool threadRunning = true;
+    private int logBatchSize = 10; // Log every 10 frames
+    private int frameCounter = 0;
+    private int halfLogCounter = 0;
 
     public void RecordSpawnerInfo(string spawnerInfo)
     {
@@ -184,6 +190,14 @@ public class TrainingAgent : Agent, IPrefab
     protected override void OnDisable()
     {
         base.OnDisable();
+        threadRunning = false; // Signal the flush thread to stop
+        flushEvent.Set(); // Ensure the thread is not stuck in WaitOne()
+
+        if (flushThread != null && flushThread.IsAlive)
+        {
+            flushThread.Join(); // Wait for the thread to finish
+        }
+
         if (writer != null)
         {
             FlushLogQueue(); /* Flush any remaining logs in the queue */
@@ -290,6 +304,59 @@ public class TrainingAgent : Agent, IPrefab
         string notificationState = GetNotificationState();
         (float[] raycastObservations, string[] raycastTags) = CollectRaycastObservations();
         string combinedRaycastData = CombineRaycastData(raycastObservations, raycastTags);
+
+        frameCounter++;
+        if (frameCounter >= logBatchSize)
+        {
+            frameCounter = 0;
+
+            if (halfLogCounter == 0)
+            {
+                // Collect first half of the data
+                localVel = transform.InverseTransformDirection(_rigidBody.velocity);
+                localPos = transform.position;
+                wasAgentFrozen = IsFrozen();
+                actionForwardWithDescription =
+                    $"{lastActionForward} ({DescribeActionForward(lastActionForward)})";
+                actionRotateWithDescription =
+                    $"{lastActionRotate} ({DescribeActionRotate(lastActionRotate)})";
+                reward = GetCumulativeReward();
+                notificationState = GetNotificationState();
+                (raycastObservations, raycastTags) = CollectRaycastObservations();
+                combinedRaycastData = CombineRaycastData(raycastObservations, raycastTags);
+            }
+            else
+            {
+                // Log the second half of the data
+                LogToCSV(
+                    localVel,
+                    localPos,
+                    actionForwardWithDescription,
+                    actionRotateWithDescription,
+                    wasAgentFrozen ? "Yes" : "No",
+                    reward,
+                    notificationState,
+                    customEpisodeCount,
+                    wasRewardDispensed,
+                    dispensedRewardType,
+                    lastCollectedRewardType,
+                    wasSpawnerButtonTriggered,
+                    combinedSpawnerInfo,
+                    wasAgentInDataZone,
+                    playerControls.GetActiveCameraDescription(),
+                    combinedRaycastData
+                );
+
+                // Reset these flags after logging
+                dispensedRewardType = "None";
+                wasRewardDispensed = false;
+                wasSpawnerButtonTriggered = false;
+                wasAgentInDataZone = "No";
+                combinedSpawnerInfo = "N/A";
+            }
+
+            halfLogCounter = 1 - halfLogCounter; // Toggle between 0 and 1
+        }
     }
 
     public override void OnActionReceived(ActionBuffers action)
@@ -451,27 +518,11 @@ public class TrainingAgent : Agent, IPrefab
     /// <summary>
     /// Flushes the log queue to the CSV file. This is called in a separate thread to prevent the main thread from being blocked.
     /// </summary>
-    private void FlushLogQueue()
-    {
-        lock (logQueue)
-        {
-            while (logQueue.TryDequeue(out var logEntry))
-            {
-                writer.WriteLine(logEntry);
-            }
-            writer.Flush();
-            Debug.Log("Flushed log queue to CSV file.");
-        }
-    }
-
-    /// <summary>
-    /// Starts a thread that checks if the log queue is full and flushes it to the CSV file if it is.
-    /// </summary>
     private void StartFlushThread()
     {
-        new Thread(() =>
+        flushThread = new Thread(() =>
         {
-            while (true)
+            while (threadRunning)
             {
                 flushEvent.WaitOne();
                 if (logQueue.Count >= bufferSize && !isFlushing)
@@ -481,7 +532,23 @@ public class TrainingAgent : Agent, IPrefab
                     isFlushing = false;
                 }
             }
-        }).Start();
+            // Ensure any remaining logs are flushed before exiting the thread
+            FlushLogQueue();
+        });
+        flushThread.Start();
+    }
+
+    private void FlushLogQueue()
+    {
+        lock (writer)
+        {
+            while (logQueue.TryDequeue(out var logEntry))
+            {
+                writer.WriteLine(logEntry);
+            }
+            writer.Flush();
+            Debug.Log("Flushed log queue to CSV file.");
+        }
     }
 
     private string DescribeActionForward(int actionForward)
