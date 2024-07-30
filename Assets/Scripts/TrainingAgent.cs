@@ -17,6 +17,11 @@ using System.Threading;
 /// Actions are currently discrete. 2 branches of 0,1,2, 0,1,2 for forward and rotate respectively.
 /// </summary>
 
+
+// TODO: Use thread pooling to reduce overhead of creating new threads: 
+// https://medium.com/@lexitrainerph/c-threading-from-basic-to-advanced-84927e502a38
+
+
 public class TrainingAgent : Agent, IPrefab
 {
     [Header("Agent Settings")]
