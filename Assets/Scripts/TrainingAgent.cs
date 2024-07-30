@@ -374,7 +374,7 @@ public class TrainingAgent : Agent, IPrefab
             if (!headerWritten)
             {
                 writer.WriteLine(
-                    "Episode,Step,Health,Reward,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,NotificationShown?,WasRewardDispensed?,DispensedRewardType,CollectedRewardType,WasSpawnerButtonTriggered?,CombinedSpawnerInfo,WasAgentInDataZone?,ActiveCamera,CombinedRaycastData"
+                    "Episode,Step,Health,Reward,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,WasNotificationShown?,WasRewardDispensed?,DispensedRewardType,CollectedRewardType,WasSpawnerButtonTriggered?,CombinedSpawnerInfo,WasAgentInDataZone?,ActiveCamera,CombinedRaycastData"
                 );
                 headerWritten = true;
             }
