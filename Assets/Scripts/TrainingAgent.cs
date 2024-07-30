@@ -81,15 +81,14 @@ public class TrainingAgent : Agent, IPrefab
     private bool wasRewardDispensed = false;
     private bool wasSpawnerButtonTriggered = false;
     private string combinedSpawnerInfo = "N/A";
-
-    private string yamlFileName;
     private AutoResetEvent flushEvent = new AutoResetEvent(false);
-
     private Thread flushThread;
     private bool threadRunning = true;
-    private int logBatchSize = 10; // Log every 10 frames
+    private int logBatchSize = 101; /* Log every 10 frames to CSV file */
     private int frameCounter = 0;
     private int halfLogCounter = 0;
+
+    private string yamlFileName;
 
     public void RecordSpawnerInfo(string spawnerInfo)
     {
