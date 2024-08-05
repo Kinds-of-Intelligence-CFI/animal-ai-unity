@@ -55,7 +55,6 @@ public class PlayerControls : MonoBehaviour
 
     private void Start()
     {
-        Debug.Log("PlayerControls: Start method called.");
         InitializeCanvas();
         LoadCamerasAndAgent();
         LoadConfigurationSettings();
@@ -76,52 +75,26 @@ public class PlayerControls : MonoBehaviour
 
     private void InitializeCanvas()
     {
-        if (effectCanvas == null)
-        {
-            Debug.LogError("Effect Canvas is null.");
-            return;
-        }
         effectCanvas.renderMode = RenderMode.ScreenSpaceCamera;
     }
 
     private void LoadCamerasAndAgent()
     {
         screenshotCam = FindObjectOfType<ScreenshotCamera>();
-        if (screenshotCam == null)
-        {
-            Debug.LogError("ScreenshotCamera not found.");
-        }
-
-        cameras[0] = GameObject.FindGameObjectWithTag("MainCamera")?.GetComponent<Camera>();
+        cameras[0] = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
         cameras[1] = GameObject
             .FindGameObjectWithTag("agent")
-            ?.transform.Find("AgentCamMid")
-            ?.GetComponent<Camera>();
-        cameras[2] = GameObject.FindGameObjectWithTag("camBase")?.GetComponent<Camera>();
-        agent = GameObject.FindGameObjectWithTag("agent")?.GetComponent<TrainingAgent>();
-
-        if (cameras[0] == null || cameras[1] == null || cameras[2] == null)
-        {
-            Debug.LogError("One or more cameras not found.");
-        }
-        if (agent == null)
-        {
-            Debug.LogError("TrainingAgent not found.");
-        }
+            .transform.Find("AgentCamMid")
+            .GetComponent<Camera>();
+        cameras[2] = GameObject.FindGameObjectWithTag("camBase").GetComponent<Camera>();
+        agent = GameObject.FindGameObjectWithTag("agent").GetComponent<TrainingAgent>();
     }
 
     private void LoadConfigurationSettings()
     {
         arenasConfigurations = ArenasConfigurations.Instance;
-        if (arenasConfigurations != null)
-        {
-            canResetEpisode = arenasConfigurations.canResetEpisode;
-            canChangePerspective = arenasConfigurations.canChangePerspective;
-        }
-        else
-        {
-            Debug.LogError("ArenasConfigurations instance not found.");
-        }
+        canResetEpisode = arenasConfigurations?.canResetEpisode ?? true;
+        canChangePerspective = arenasConfigurations?.canChangePerspective ?? true;
     }
 
     private void InitializeCameras()
