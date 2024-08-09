@@ -276,8 +276,11 @@ public class TrainingAgent : Agent, IPrefab
     {
         sensor.AddObservation(health);
         Vector3 localVel = transform.InverseTransformDirection(_rigidBody.velocity);
+        sensor.AddObservation(localVel);
         Vector3 localPos = transform.position;
+        sensor.AddObservation(localPos);
         bool wasAgentFrozen = IsFrozen();
+        
         string actionForwardDescription = DescribeActionForward(lastActionForward);
         string actionRotateDescription = DescribeActionRotate(lastActionRotate);
         string actionForwardWithDescription = $"{lastActionForward} ({actionForwardDescription})";
