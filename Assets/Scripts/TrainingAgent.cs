@@ -77,6 +77,7 @@ public class TrainingAgent : Agent, IPrefab
     private bool wasRewardDispensed = false;
     private bool wasSpawnerButtonTriggered = false;
     private string combinedSpawnerInfo = "N/A";
+    private int _lastLoggedStep = -1;
 
     public void RecordSpawnerInfo(string spawnerInfo)
     {
@@ -465,6 +466,11 @@ public class TrainingAgent : Agent, IPrefab
         string combinedRaycastData
     )
     {
+        /* Check if the current step has already been logged */
+        if (StepCount == _lastLoggedStep)
+        {
+            return;
+        }
         string logEntry = string.Format(
             "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21}",
             customEpisodeCount,
@@ -493,6 +499,8 @@ public class TrainingAgent : Agent, IPrefab
 
         logQueue.Enqueue(logEntry);
         lastCollectedRewardType = "None";
+
+        _lastLoggedStep = StepCount;
 
         if (logQueue.Count >= bufferSize)
         {
@@ -728,6 +736,8 @@ public class TrainingAgent : Agent, IPrefab
 
     public override void OnEpisodeBegin()
     {
+        _lastLoggedStep = -1;
+
         if (!_arena.IsFirstArenaReset)
         {
             writer.WriteLine($"Goals Collected: {numberOfGoalsCollected}");
