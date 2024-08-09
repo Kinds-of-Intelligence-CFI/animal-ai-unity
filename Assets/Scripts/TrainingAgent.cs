@@ -16,12 +16,6 @@ using System.Threading;
 /// The TrainingAgent class is a subclass of the Agent class in the ML-Agents library.
 /// Actions are currently discrete. 2 branches of 0,1,2, 0,1,2 for forward and rotate respectively.
 /// </summary>
-
-
-// TODO: Use thread pooling to reduce overhead of creating new threads:
-// https://medium.com/@lexitrainerph/c-threading-from-basic-to-advanced-84927e502a38
-
-
 public class TrainingAgent : Agent, IPrefab
 {
     [Header("Agent Settings")]
@@ -75,15 +69,14 @@ public class TrainingAgent : Agent, IPrefab
     private ConcurrentQueue<string> logQueue = new ConcurrentQueue<string>();
     private const int bufferSize = 101; /* Corresponds to rows in the CSV file to keep in memory before flushing to disk */
     private bool isFlushing = false;
+    private AutoResetEvent flushEvent = new AutoResetEvent(false);
+    private bool threadRunning = true;
     private string lastCollectedRewardType = "None";
     private string dispensedRewardType = "None";
     private string wasAgentInDataZone = "No";
     private bool wasRewardDispensed = false;
     private bool wasSpawnerButtonTriggered = false;
     private string combinedSpawnerInfo = "N/A";
-    private AutoResetEvent flushEvent = new AutoResetEvent(false);
-    private Thread flushThread;
-    private bool threadRunning = true;
 
     public void RecordSpawnerInfo(string spawnerInfo)
     {
@@ -141,7 +134,7 @@ public class TrainingAgent : Agent, IPrefab
     }
 
     /// <summary>
-    /// Initialize is called when the training session is started from mlagents. It sets up the agent's initial state.
+    /// Initialize is called when the training session is started from ml-agents. It sets up the agent's initial state.
     /// </summary>
     public override void Initialize()
     {
@@ -163,24 +156,20 @@ public class TrainingAgent : Agent, IPrefab
     }
 
     /// <summary>
-    /// OnDisable is called when the training session is stopped form mlagents.
-    /// It closes the CSV file and flushes the log queue at whatever the current size is.
+    /// OnDisable is called when the training session is stopped from ml-agents.
+    /// It closes the CSV file and flushes the log queue (what's left to flush).
     /// </summary>
     protected override void OnDisable()
     {
-        base.OnDisable();
-        threadRunning = false; // Signal the flush thread to stop
-        flushEvent.Set(); // Ensure the thread is not stuck in WaitOne()
-
-        if (flushThread != null && flushThread.IsAlive)
-        {
-            flushThread.Join(); // Wait for the thread to finish
-        }
+        base.OnDisable(); /* Call the base class method */
+        threadRunning = false; /* Signal the flush thread to stop */
+        flushEvent.Set(); /* Ensure the thread is not stuck in WaitOne() */
 
         if (writer != null)
         {
+            writer.WriteLine($"Goals Collected: {numberOfGoalsCollected}");
             FlushLogQueue(); /* Flush any remaining logs in the queue */
-            writer.Close();
+            writer.Close(); /* Close the writer */
         }
 
         Spawner_InteractiveButton.RewardSpawned -= OnRewardSpawned;
@@ -429,7 +418,6 @@ public class TrainingAgent : Agent, IPrefab
         }
 
         /* Generate a filename with the YAML file name and a date stamp to prevent overwriting. */
-        // TODO: Extract YAML name from side channel message.
         string dateTimeString = DateTime.Now.ToString("dd-MM-yy_HHmm");
         string filename = $"Observations_{dateTimeString}.csv";
         csvFilePath = Path.Combine(directoryPath, filename);
@@ -517,7 +505,7 @@ public class TrainingAgent : Agent, IPrefab
     /// </summary>
     private void StartFlushThread()
     {
-        flushThread = new Thread(() =>
+        ThreadPool.QueueUserWorkItem(state =>
         {
             while (threadRunning)
             {
@@ -531,7 +519,6 @@ public class TrainingAgent : Agent, IPrefab
             }
             FlushLogQueue();
         });
-        flushThread.Start();
     }
 
     private void FlushLogQueue()
@@ -690,7 +677,6 @@ public class TrainingAgent : Agent, IPrefab
             return;
         }
 
-        // TODO: Debug current pass mark for arena == 0
         if (andCompleteArena || _nextUpdateCompleteArena)
         {
             _nextUpdateCompleteArena = false;
