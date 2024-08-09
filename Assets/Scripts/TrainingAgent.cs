@@ -88,8 +88,6 @@ public class TrainingAgent : Agent, IPrefab
     private int frameCounter = 0;
     private int halfLogCounter = 0;
 
-    private string yamlFileName;
-
     public void RecordSpawnerInfo(string spawnerInfo)
     {
         if (string.IsNullOrEmpty(spawnerInfo))
@@ -140,11 +138,6 @@ public class TrainingAgent : Agent, IPrefab
         dispensedRewardType = type;
     }
 
-    public void SetYamlFileName(string fileName)
-    {
-        yamlFileName = fileName;
-    }
-
     private string CombineRaycastData(float[] observations, string[] tags)
     {
         return string.Join(";", observations.Zip(tags, (obs, tag) => $"{obs}:{tag}"));
@@ -169,16 +162,6 @@ public class TrainingAgent : Agent, IPrefab
         playerControls = GameObject.FindObjectOfType<PlayerControls>();
 
         InitialiseCSVProcess();
-
-        if (!Application.isEditor)
-        {
-            AAI3EnvironmentManager envManager = FindObjectOfType<AAI3EnvironmentManager>();
-            if (envManager != null)
-            {
-                SetYamlFileName(envManager.GetCurrentYamlFileName());
-            }
-        }
-
         StartFlushThread();
     }
 
@@ -435,7 +418,7 @@ public class TrainingAgent : Agent, IPrefab
         /* Generate a filename with the YAML file name and a date stamp to prevent overwriting. */
         // TODO: Extract YAML name from side channel message.
         string dateTimeString = DateTime.Now.ToString("dd-MM-yy_HHmm");
-        string filename = $"Observations_{yamlFileName}_{dateTimeString}.csv";
+        string filename = $"Observations_{dateTimeString}.csv";
         csvFilePath = Path.Combine(directoryPath, filename);
 
         writer = new StreamWriter(
