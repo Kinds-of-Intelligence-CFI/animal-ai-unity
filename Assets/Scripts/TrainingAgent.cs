@@ -84,9 +84,6 @@ public class TrainingAgent : Agent, IPrefab
     private AutoResetEvent flushEvent = new AutoResetEvent(false);
     private Thread flushThread;
     private bool threadRunning = true;
-    private int logBatchSize = 101; /* Log every 10 frames to CSV file */
-    private int frameCounter = 0;
-    private int halfLogCounter = 0;
 
     public void RecordSpawnerInfo(string spawnerInfo)
     {
