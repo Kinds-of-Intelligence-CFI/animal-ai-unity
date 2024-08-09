@@ -1,0 +1,15 @@
+{
+    "name": "EditMode",
+    "optionalUnityReferences": [
+        "TestAssemblies",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "Scripts",
+        "Unity.ML-Agents",
+        "YamlDotNet",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ]
+}
