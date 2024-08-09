@@ -280,7 +280,7 @@ public class TrainingAgent : Agent, IPrefab
         Vector3 localPos = transform.position;
         sensor.AddObservation(localPos);
         bool wasAgentFrozen = IsFrozen();
-        
+
         string actionForwardDescription = DescribeActionForward(lastActionForward);
         string actionRotateDescription = DescribeActionRotate(lastActionRotate);
         string actionForwardWithDescription = $"{lastActionForward} ({actionForwardDescription})";
@@ -289,59 +289,34 @@ public class TrainingAgent : Agent, IPrefab
         string notificationState = GetNotificationState();
         (float[] raycastObservations, string[] raycastTags) = CollectRaycastObservations();
         string combinedRaycastData = CombineRaycastData(raycastObservations, raycastTags);
+        string playerControlsDescription = GetActiveCameraDescription();
 
-        frameCounter++;
-        if (frameCounter >= logBatchSize)
-        {
-            frameCounter = 0;
+        LogToCSV(
+            localVel,
+            localPos,
+            actionForwardWithDescription,
+            actionRotateWithDescription,
+            wasAgentFrozen ? "Yes" : "No",
+            reward,
+            notificationState,
+            customEpisodeCount,
+            wasRewardDispensed,
+            dispensedRewardType,
+            lastCollectedRewardType,
+            wasSpawnerButtonTriggered,
+            combinedSpawnerInfo,
+            wasAgentInDataZone,
+            playerControlsDescription,
+            combinedRaycastData
+        );
 
-            if (halfLogCounter == 0)
-            {
-                // Collect first half of the data
-                localVel = transform.InverseTransformDirection(_rigidBody.velocity);
-                localPos = transform.position;
-                wasAgentFrozen = IsFrozen();
-                actionForwardWithDescription =
-                    $"{lastActionForward} ({DescribeActionForward(lastActionForward)})";
-                actionRotateWithDescription =
-                    $"{lastActionRotate} ({DescribeActionRotate(lastActionRotate)})";
-                reward = GetCumulativeReward();
-                notificationState = GetNotificationState();
-                (raycastObservations, raycastTags) = CollectRaycastObservations();
-                combinedRaycastData = CombineRaycastData(raycastObservations, raycastTags);
-            }
-            else
-            {
-                // Log the second half of the data
-                LogToCSV(
-                    localVel,
-                    localPos,
-                    actionForwardWithDescription,
-                    actionRotateWithDescription,
-                    wasAgentFrozen ? "Yes" : "No",
-                    reward,
-                    notificationState,
-                    customEpisodeCount,
-                    wasRewardDispensed,
-                    dispensedRewardType,
-                    lastCollectedRewardType,
-                    wasSpawnerButtonTriggered,
-                    combinedSpawnerInfo,
-                    wasAgentInDataZone,
-                    playerControls.GetActiveCameraDescription(),
-                    combinedRaycastData
-                );
+        dispensedRewardType = "None";
+        wasRewardDispensed = false;
+        wasSpawnerButtonTriggered = false;
+        wasAgentInDataZone = "No";
+        combinedSpawnerInfo = "N/A";
 
-                // Reset these flags after logging
-                dispensedRewardType = "None";
-                wasRewardDispensed = false;
-                wasSpawnerButtonTriggered = false;
-                wasAgentInDataZone = "No";
-                combinedSpawnerInfo = "N/A";
-            }
-
-            halfLogCounter = 1 - halfLogCounter; // Toggle between 0 and 1
-        }
+        UpdateHealth(_rewardPerStep);
     }
 
     public override void OnActionReceived(ActionBuffers action)
@@ -366,6 +341,7 @@ public class TrainingAgent : Agent, IPrefab
 
         (float[] raycastObservations, string[] raycastTags) = CollectRaycastObservations();
         string combinedRaycastData = CombineRaycastData(raycastObservations, raycastTags);
+        string playerControlsDescription = GetActiveCameraDescription();
 
         LogToCSV(
             localVel,
@@ -382,7 +358,7 @@ public class TrainingAgent : Agent, IPrefab
             wasSpawnerButtonTriggered,
             combinedSpawnerInfo,
             wasAgentInDataZone,
-            playerControls.GetActiveCameraDescription(),
+            playerControlsDescription,
             combinedRaycastData
         );
 
@@ -393,6 +369,43 @@ public class TrainingAgent : Agent, IPrefab
         combinedSpawnerInfo = "N/A";
 
         UpdateHealth(_rewardPerStep);
+    }
+
+    private string GetActiveCameraDescription()
+    {
+        if (playerControls != null)
+        {
+            return playerControls.GetActiveCameraDescription();
+        }
+        else
+        {
+            /* Fallback to using the main camera or predefined logic if playerControls is not present */
+            Camera activeCamera = Camera.main;
+
+            if (activeCamera != null)
+            {
+                if (activeCamera.CompareTag("MainCamera"))
+                {
+                    return "0 (First-Person)";
+                }
+                else if (activeCamera.CompareTag("AgentCamMid"))
+                {
+                    return "1 (Third-Person)";
+                }
+                else if (activeCamera.CompareTag("camBase"))
+                {
+                    return "2 (Bird's Eye)";
+                }
+                else
+                {
+                    return $"{activeCamera.name} (unknown)";
+                }
+            }
+            else
+            {
+                return "No Active Camera";
+            }
+        }
     }
 
     private void InitialiseCSVProcess()
