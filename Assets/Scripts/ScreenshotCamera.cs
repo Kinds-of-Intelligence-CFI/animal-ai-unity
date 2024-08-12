@@ -2,7 +2,7 @@ using System.IO;
 using UnityEngine;
 
 /// <summary>
-/// Captures screenshots from a camera and saves them to the device's storage.
+/// Captures screenshots from the main camera and saves them to the device's storage.
 /// </summary>
 [RequireComponent(typeof(Camera))]
 public class ScreenshotCamera : MonoBehaviour
@@ -18,6 +18,11 @@ public class ScreenshotCamera : MonoBehaviour
     private void Awake()
     {
         screenshotCam = GetComponent<Camera>();
+        if (screenshotCam == null)
+        {
+            Debug.LogError("Camera component is missing from the GameObject.");
+            return;
+        }
         InitializeRenderTexture();
     }
 
@@ -41,6 +46,11 @@ public class ScreenshotCamera : MonoBehaviour
 
     public void Activate(bool enable = true)
     {
+        if (screenshotCam == null)
+        {
+            Debug.LogError("Screenshot Camera is not assigned.");
+            return;
+        }
         screenshotCam.enabled = enable;
     }
 
@@ -49,12 +59,24 @@ public class ScreenshotCamera : MonoBehaviour
         if (screenshotCam.enabled && !testMode)
         {
             CaptureScreenshot();
-            Activate(false); /* Deactivate the camera after capturing to prevent multiple captures */
+            Activate(false);
         }
     }
 
     private void CaptureScreenshot()
     {
+        if (screenshotCam == null)
+        {
+            Debug.LogError("Screenshot Camera is not assigned.");
+            return;
+        }
+
+        if (screenshotCam.targetTexture == null)
+        {
+            Debug.LogError("No RenderTexture assigned to the Camera.");
+            return;
+        }
+
         screenshotCam.Render();
         RenderTexture.active = screenshotCam.targetTexture;
 
