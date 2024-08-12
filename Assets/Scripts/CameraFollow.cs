@@ -10,12 +10,22 @@ public class CameraFollow : MonoBehaviour
 
     void Start()
     {
+        if (followObj == null)
+        {
+            throw new MissingReferenceException("The followObj is not assigned.");
+        }
+
         transform.position = followObj.transform.position;
         transform.rotation = followObj.transform.rotation;
     }
 
     void Update()
     {
+        if (followObj == null)
+        {
+            throw new MissingReferenceException("The followObj is not assigned.");
+        }
+
         transform.position = followObj.transform.position;
         transform.rotation = followObj.transform.rotation;
     }
