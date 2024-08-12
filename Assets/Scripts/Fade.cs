@@ -29,8 +29,15 @@ public class Fade : MonoBehaviour
 
     public void StartFade()
     {
+        if (_image == null)
+        {
+            Debug.LogWarning("No image assigned to fade.");
+            return;
+        }
+
         StopAllCoroutines();
         _fadeDirection *= -1;
+
         if (_play)
         {
             StartCoroutine(FadeOutEnum());
