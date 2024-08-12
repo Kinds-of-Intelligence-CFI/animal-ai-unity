@@ -302,8 +302,6 @@ public class TrainingAgent : Agent, IPrefab
         wasSpawnerButtonTriggered = false;
         wasAgentInDataZone = "No";
         combinedSpawnerInfo = "N/A";
-
-        UpdateHealth(_rewardPerStep);
     }
 
     public override void OnActionReceived(ActionBuffers action)
