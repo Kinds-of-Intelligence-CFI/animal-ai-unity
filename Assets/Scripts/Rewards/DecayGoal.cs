@@ -24,11 +24,11 @@ public class DecayGoal : BallGoal
 
     private Material _basemat;
     private Material _radialmat;
-    private bool isDecaying = false;
+    public bool isDecaying = false;
     private float decayWidth;
     private float loAlpha = 0.11f;
     private float hiAlpha = 0.35f;
-    private int delayCounter;
+    public int delayCounter;
 
     public override void SetChangeRate(float v)
     {
@@ -54,7 +54,7 @@ public class DecayGoal : BallGoal
         delayCounter = fixedFrameDelay; /* Reset delay counter to new value */
     }
 
-    private void CheckIfNeedToFlip()
+    public void CheckIfNeedToFlip()
     {
         if (flipDecayDirection ? decayRate < 0 : decayRate > 0)
         {
@@ -142,7 +142,7 @@ public class DecayGoal : BallGoal
         isMulti = !shouldEpisodeEnd;
     }
 
-    private bool HasFinalDecayBeenReached()
+    public bool HasFinalDecayBeenReached()
     {
         return flipDecayDirection ? reward >= finalReward : reward <= finalReward;
     }
@@ -152,13 +152,16 @@ public class DecayGoal : BallGoal
         return flipDecayDirection ? reward <= initialReward : reward >= initialReward;
     }
 
-    void UpdateGoal(float rate = -0.001f)
+    public void UpdateGoal(float rate = -0.001f)
     {
+        if (!isDecaying)
+            return;
+
         UpdateValue(rate);
         UpdateColour(GetProportion(reward));
     }
 
-    private void UpdateValue(float rate)
+    public void UpdateValue(float rate)
     {
         reward = Mathf.Clamp(
             reward + rate,
@@ -167,7 +170,7 @@ public class DecayGoal : BallGoal
         );
     }
 
-    private void UpdateColour(float p)
+    public void UpdateColour(float p)
     {
         p = Mathf.Clamp(p, 0, 1);
 
@@ -190,7 +193,7 @@ public class DecayGoal : BallGoal
             : (flipDecayDirection ? 1 : 0);
     }
 
-    void StartDecay(bool reset = false)
+    public void StartDecay(bool reset = false)
     {
         isDecaying = true;
         if (reset)
@@ -199,7 +202,7 @@ public class DecayGoal : BallGoal
         }
     }
 
-    void StopDecay(bool reset = false)
+    public void StopDecay(bool reset = false)
     {
         isDecaying = false;
         if (reset)
