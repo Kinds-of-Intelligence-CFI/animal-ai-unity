@@ -62,7 +62,7 @@ public class AnimalSkinManager : MonoBehaviour
         }
     }
 
-    void SetAnimalSkin(int skinID)
+    public void SetAnimalSkin(int skinID)
     {
         if (skinID >= 0 && skinID < AnimalCount)
         {
