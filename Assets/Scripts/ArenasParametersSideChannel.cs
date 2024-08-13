@@ -8,8 +8,6 @@ using UnityEngine;
 /// </summary>
 public class ArenasParametersSideChannel : SideChannel
 {
-    public string CurrentYamlFileName { get; private set; }
-
     /// <summary>
     /// Initializes a new instance of the ArenasParametersSideChannel class.
     /// </summary>
@@ -23,18 +21,10 @@ public class ArenasParametersSideChannel : SideChannel
     /// </summary>
     protected override void OnMessageReceived(IncomingMessage msg)
     {
-        string fileName = msg.ReadString();
         byte[] yamlData = msg.GetRawBytes();
 
-        Debug.Log($"Received YAML file name: {fileName}");
-        CurrentYamlFileName = fileName;
-
         /* Create the event args including the file name and the YAML data */
-        ArenasParametersEventArgs args = new ArenasParametersEventArgs
-        {
-            arenas_yaml = yamlData,
-            yamlFileName = fileName
-        };
+        ArenasParametersEventArgs args = new ArenasParametersEventArgs { arenas_yaml = yamlData, };
         OnArenasParametersReceived(args);
     }
 

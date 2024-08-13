@@ -149,11 +149,6 @@ public class AAI3EnvironmentManager : MonoBehaviour
         _instantiatedArena._agent.gameObject.SetActive(true);
     }
 
-    public string GetCurrentYamlFileName()
-    {
-        return _arenasParametersSideChannel.CurrentYamlFileName;
-    }
-
     private void InitialiseSideChannel()
     {
         _arenasConfigurations = new ArenasConfigurations();

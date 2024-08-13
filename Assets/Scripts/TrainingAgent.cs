@@ -416,7 +416,7 @@ public class TrainingAgent : Agent, IPrefab
             Directory.CreateDirectory(directoryPath);
         }
 
-        /* Generate a filename with the YAML file name and a date stamp to prevent overwriting. */
+        /* Generate a filename with a date stamp to prevent overwriting */
         string dateTimeString = DateTime.Now.ToString("dd-MM-yy_HHmm");
         string filename = $"Observations_{dateTimeString}.csv";
         csvFilePath = Path.Combine(directoryPath, filename);
