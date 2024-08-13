@@ -27,7 +27,12 @@ public class AnimalSkinManager : MonoBehaviour
     private MeshRenderer meshRenderer;
     private MeshFilter meshFilter;
 
-    void Awake()
+    void Start()
+    {
+        Initialize();
+    }
+
+    public void Initialize()
     {
         meshRenderer = GetComponent<MeshRenderer>();
         meshFilter = GetComponent<MeshFilter>();
