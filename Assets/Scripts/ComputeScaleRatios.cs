@@ -15,9 +15,9 @@ public class ComputeScaleRatios : MonoBehaviour
         /* Initialize ratioSize with scaleReal to handle potential division by zero */
         Vector3 ratioSize = scaleReal;
 
-        /* Ensure we're not dividing by zero */
-        ratioSize.x = sizeReal.x != 0 ? scaleReal.x / sizeReal.x : 0;
-        ratioSize.y = sizeReal.y != 0 ? scaleReal.y / sizeReal.y : 0;
-        ratioSize.z = sizeReal.z != 0 ? scaleReal.z / sizeReal.z : 0;
+        /* Ensuring we're not dividing by zero, and handling cases where size is zero */
+        ratioSize.x = sizeReal.x != 0 ? scaleReal.x / sizeReal.x : float.PositiveInfinity;
+        ratioSize.y = sizeReal.y != 0 ? scaleReal.y / sizeReal.y : float.PositiveInfinity;
+        ratioSize.z = sizeReal.z != 0 ? scaleReal.z / sizeReal.z : float.PositiveInfinity;
     }
 }
