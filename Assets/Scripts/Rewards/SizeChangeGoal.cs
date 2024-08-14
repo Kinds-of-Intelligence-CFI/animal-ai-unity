@@ -36,7 +36,7 @@ public class SizeChangeGoal : BallGoal
         InitializeValues();
     }
 
-    private void InitializeValues()
+    public void InitializeValues()
     {
         delayCounter = fixedFrameDelay;
         initialSize = Mathf.Clamp(initialSize, 0, sizeMax.x);
