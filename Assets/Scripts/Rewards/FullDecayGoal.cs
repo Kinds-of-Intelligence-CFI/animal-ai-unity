@@ -31,9 +31,9 @@ public class FullDecayGoal : BallGoal
     public float decayRate = -0.001f;
     public bool flipDecayDirection = false;
 
-    private Material _mat;
-    private bool isDecaying = false;
-    private float middleDecayProportion;
+    public Material _mat;
+    public bool isDecaying = false;
+    public float middleDecayProportion;
     private float decayWidth;
 
     void Awake()
@@ -83,7 +83,7 @@ public class FullDecayGoal : BallGoal
         StartDecay();
     }
 
-    void StartDecay(bool reset = false)
+    public void StartDecay(bool reset = false)
     {
         isDecaying = true;
         if (reset)
@@ -92,7 +92,7 @@ public class FullDecayGoal : BallGoal
         }
     }
 
-    void StopDecay(bool reset = false)
+    public void StopDecay(bool reset = false)
     {
         isDecaying = false;
         if (reset)
@@ -127,7 +127,7 @@ public class FullDecayGoal : BallGoal
         return useBadEpisodeEndThreshold && reward <= badRewardEndThreshold;
     }
 
-    void FixedUpdate()
+    public void FixedUpdate()
     {
         if (IsGoodGoal() || IsBadGoal())
         {
@@ -220,7 +220,7 @@ public class FullDecayGoal : BallGoal
         }
     }
 
-    float GetProportion(float r)
+    public float GetProportion(float r)
     {
         return (r - Mathf.Min(initialReward, finalReward)) / decayWidth;
     }
