@@ -6,6 +6,7 @@ using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using Unity.MLAgents.SideChannels;
 using Unity.MLAgents.Policies;
+using ArenasParameters;
 
 /// <summary>
 /// Tests for the AAI3EnvironmentManager class.
@@ -40,8 +41,9 @@ public class AAI3EnvironmentManagerTests
         _environmentManager.arena = _trainingArena.gameObject;
         _environmentManager.uiCanvas = _canvas.gameObject;
         _environmentManager.playerControls = new GameObject();
-    }
 
+        _environmentManager._arenasConfigurations = new ArenasConfigurations();
+    }
 
     [Test]
     public void AAI3EnvironmentManager_RetrieveEnvironmentParameters_WorksCorrectly()
@@ -88,5 +90,61 @@ public class AAI3EnvironmentManagerTests
         _environmentManager.ChangeRayCasts(_raySensor, 8, 180);
         Assert.AreEqual(8, _raySensor.RaysPerDirection);
         Assert.AreEqual(180, _raySensor.MaxRayDegrees);
+    }
+
+    [Test]
+    public void AAI3EnvironmentManager_InstantiateArenas_CreatesArenaInstance()
+    {
+        _environmentManager.InstantiateArenas();
+        Assert.IsNotNull(_environmentManager.arena);
+        Assert.IsInstanceOf<TrainingArena>(_environmentManager.arena.GetComponent<TrainingArena>());
+    }
+
+    [Test]
+    public void AAI3EnvironmentManager_LoadYAMLFileInEditor_WarnsIfConfigFileIsEmpty()
+    {
+        _environmentManager.configFile = string.Empty;
+        LogAssert.Expect(LogType.Warning, "Config file path is null or empty.");
+        _environmentManager.LoadYAMLFileInEditor();
+    }
+
+    [Test]
+    public void AAI3EnvironmentManager_LoadYAMLFileInEditor_HandlesMissingFile()
+    {
+        _environmentManager.configFile = "NonExistentFile";
+        LogAssert.Expect(
+            LogType.Warning,
+            "YAML file 'NonExistentFile' could not be found or loaded."
+        );
+        _environmentManager.LoadYAMLFileInEditor();
+    }
+
+    [Test]
+    public void AAI3EnvironmentManager_GetConfiguration_ThrowsExceptionWhenArenaIDNotFound()
+    {
+        Assert.Throws<KeyNotFoundException>(() => _environmentManager.GetConfiguration(999));
+    }
+
+    [Test]
+    public void AAI3EnvironmentManager_GetConfiguration_ReturnsCorrectConfiguration()
+    {
+        var config = new ArenaConfiguration();
+        _environmentManager.AddConfiguration(1, config);
+        var retrievedConfig = _environmentManager.GetConfiguration(1);
+        Assert.AreSame(config, retrievedConfig);
+    }
+
+    [Test]
+    public void AAI3EnvironmentManager_TriggerArenaChangeEvent_InvokesEventCorrectly()
+    {
+        bool eventTriggered = false;
+        AAI3EnvironmentManager.OnArenaChanged += (currentArenaIndex, totalArenas) =>
+            eventTriggered = true;
+
+        _environmentManager.TriggerArenaChangeEvent(0, 1);
+        Assert.IsTrue(eventTriggered);
+
+        AAI3EnvironmentManager.OnArenaChanged -= (currentArenaIndex, totalArenas) =>
+            eventTriggered = true;
     }
 }
