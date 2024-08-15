@@ -10,13 +10,8 @@ using YAMLDefs;
 /// The classes in this file are used to store the parameters for the arenas.
 /// These parameters are read from a YAML file and used to configure the arenas.
 /// </summary>
-
-// TODO: Optimize and refactor this script.
 namespace ArenasParameters
 {
-    /// <summary>
-    /// The ListOfPrefabs class is a simple data container that holds a list of GameObject instances and provides a method to access that list.
-    /// </summary>
     [System.Serializable]
     public class ListOfPrefabs
     {
@@ -28,9 +23,6 @@ namespace ArenasParameters
         }
     }
 
-    /// <summary>
-    /// The list of prefabs that can be passed as items to spawn in the various arenas.
-    /// </summary>
     public class Spawnable
     {
         // ======== REQUIRED PARAMETERS ========
@@ -72,10 +64,6 @@ namespace ArenasParameters
         public List<string> triggerZoneID = null;
         public bool zoneVisibility = true;
 
-        /// <summary>
-        /// The purpose of this constructor is to initialize the Spawnable object with the properties of the provided GameObject.
-        /// The name property of the Spawnable object is set to the name of the GameObject, and the gameObject property of the Spawnable object is set to the GameObject itself.
-        /// </summary>
         public Spawnable(GameObject obj)
         {
             name = obj.name;
@@ -86,9 +74,6 @@ namespace ArenasParameters
             colors = new List<Vector3>();
         }
 
-        /// <summary>
-        /// The purpose of this constructor is to initialize the properties of the Spawnable class with the values from the yamlItem object.
-        /// </summary>
         internal Spawnable(YAMLDefs.Item yamlItem)
         {
             name = yamlItem.name;
@@ -97,8 +82,6 @@ namespace ArenasParameters
             sizes = yamlItem.sizes;
             colors = initVec3sFromRGBs(yamlItem.colors);
             name = AliasMapper.ResolveAlias(yamlItem.name);
-
-            // ======== EXTRA/OPTIONAL PARAMETERS ========
 
             skins = yamlItem.skins;
             frozenAgentDelays = yamlItem.frozenAgentDelays;
@@ -128,9 +111,6 @@ namespace ArenasParameters
             zoneVisibility = yamlItem.zoneVisibility;
         }
 
-        /// <summary>
-        /// The purpose of this method is to initialize a list of Vector3 objects from a list of RGB objects.
-        /// </summary>
         internal List<Vector3> initVec3sFromRGBs(List<YAMLDefs.RGB> yamlList)
         {
             List<Vector3> cList = new List<Vector3>();
@@ -142,9 +122,6 @@ namespace ArenasParameters
         }
     }
 
-    /// <summary>
-    /// The ArenaConfiguration class is used to define the configuration of an arena, such as the time limit, the spawnables, and the lights switch.
-    /// </summary>
     public class ArenaConfiguration
     {
         public int TimeLimit = 0;
@@ -157,9 +134,6 @@ namespace ArenasParameters
 
         public ArenaConfiguration() { }
 
-        /// <summary>
-        /// The purpose of this constructor is to initialize the properties of the ArenaConfiguration class with the values from the yamlArena object.
-        /// </summary>
         public ArenaConfiguration(ListOfPrefabs listPrefabs)
         {
             foreach (GameObject prefab in listPrefabs.allPrefabs)
@@ -170,9 +144,6 @@ namespace ArenasParameters
             toUpdate = true;
         }
 
-        /// <summary>
-        /// The internal constructor initializes several properties of the ArenaConfiguration object.
-        /// </summary>
         internal ArenaConfiguration(YAMLDefs.Arena yamlArena)
         {
             TimeLimit = yamlArena.timeLimit;
@@ -191,9 +162,6 @@ namespace ArenasParameters
             this.mergeNextArena = yamlArena.mergeNextArena;
         }
 
-        /// <summary>
-        /// The purpose of this method is to associate the GameObject instances with the Spawnable objects.
-        /// </summary>
         public void SetGameObject(List<GameObject> listObj)
         {
             foreach (Spawnable spawn in spawnables)
@@ -203,11 +171,12 @@ namespace ArenasParameters
         }
     }
 
-    /// <summary>
-    /// ArenaConfigurations is a dictionary of configurations for each arena.
-    /// </summary>
     public class ArenasConfigurations
     {
+        /*
+           The configurations dictionary is used to store the configurations for each arena.
+           The key is the arena ID and the value is the ArenaConfiguration object.
+         */
         public Dictionary<int, ArenaConfiguration> configurations;
         public int seed;
         public bool randomizeArenas = false;
@@ -231,7 +200,7 @@ namespace ArenasParameters
             }
         }
 
-        internal void Add(int k, YAMLDefs.Arena yamlConfig)
+        public void Add(int k, YAMLDefs.Arena yamlConfig)
         {
             if (!configurations.ContainsKey(k))
             {
