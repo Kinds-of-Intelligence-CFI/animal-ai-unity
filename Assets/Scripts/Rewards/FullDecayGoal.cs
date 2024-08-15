@@ -181,43 +181,28 @@ public class FullDecayGoal : BallGoal
         );
     }
 
-    private void UpdateColour(float p)
+    public void UpdateColour(float p)
     {
-        if (p != Mathf.Clamp(p, 0, 1))
-        {
-            Debug.Log("UpdateColour passed a bad proprtion! Clamping . . .");
-            p = Mathf.Clamp(p, 0, 1);
-        }
+        p = Mathf.Clamp(p, 0f, 1f);
+
+        Color targetColor;
 
         if (useMiddle && p < middleDecayProportion)
         {
-            p = (p / middleDecayProportion);
-            _mat.SetColor(
-                "_EmissionColor",
-                p * neutralColour
-                    + (1 - p) * badColour
-                    + (0.5f - Mathf.Abs(p - 0.5f)) * Color.white * 0.1f
-            );
+            p = p / middleDecayProportion;
+            targetColor = Color.Lerp(badColour, neutralColour, p);
         }
         else if (useMiddle)
         {
-            p = ((p - middleDecayProportion) / (1 - middleDecayProportion));
-            _mat.SetColor(
-                "_EmissionColor",
-                p * goodColour
-                    + (1 - p) * neutralColour
-                    + (0.5f - Mathf.Abs(p - 0.5f)) * Color.white * 0.1f
-            );
+            p = (p - middleDecayProportion) / (1 - middleDecayProportion);
+            targetColor = Color.Lerp(neutralColour, goodColour, p);
         }
         else
         {
-            _mat.SetColor(
-                "_EmissionColor",
-                p * goodColour
-                    + (1 - p) * badColour
-                    + (0.5f - Mathf.Abs(p - 0.5f)) * Color.white * 0.1f
-            );
+            targetColor = Color.Lerp(badColour, goodColour, p);
         }
+
+        _mat.SetColor("_EmissionColor", targetColor);
     }
 
     public float GetProportion(float r)
