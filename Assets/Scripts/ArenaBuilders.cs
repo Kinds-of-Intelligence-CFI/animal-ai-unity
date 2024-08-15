@@ -15,58 +15,29 @@ using ArenasParameters;
 /// User-defined or randomized positions, rotations, and scales are supported
 /// ... with repeated spawn attempts made for random placements until free space is found or the builder moves to the next item.
 /// </summary>
-
-// TODO: Optimize and refactor the this script.
-// TODO: Overhaul object spawn and agent spawn logic for a more unified and central implementation (for all objects, inc. agent)
+/// TODO: Overhaul object spawn and agent spawn logic for a more unified and central implementation (for all objects, inc. agent)
 namespace ArenaBuilders
 {
     public class ArenaBuilder
     {
-        #region Properties and Fields
-
-        // Arena size
         private float _rangeX;
         private float _rangeZ;
-
-        // Getters for the arena size (used for spawning objects within the arena bounds in other scripts)
         public float ArenaWidth => _rangeX;
         public float ArenaDepth => _rangeZ;
-
-        // Arena to which the builder is attached
         private Transform _arena;
-
-        // Holder for all spawned objects
         private GameObject _spawnedObjectsHolder;
-
-        // Max number of attempts to spawn an object or agent
-        private int _maxSpawnAttemptsForPrefabs;
-        private int _maxSpawnAttemptsForAgent;
-
-        // Agent components
+        public int _maxSpawnAttemptsForPrefabs;
+        public int _maxSpawnAttemptsForAgent;
         private GameObject _agent;
         private Collider _agentCollider;
         private Rigidbody _agentRigidbody;
-
-        // Total number of good goals instantiated
         private List<Goal> _goodGoalsMultiSpawned;
-
-        // Total number of objects spawned (for UI)
         private int _totalObjectsSpawned;
+        private AAI3EnvironmentManager _environmentManager;
 
-        // The list of Spawnables the ArenaBuilder will attempt to spawn at each reset
         [HideInInspector]
         public List<Spawnable> Spawnables { get; set; }
 
-        private AAI3EnvironmentManager _environmentManager;
-
-        #endregion
-
-        #region Arena Constructor
-
-        /// <summary>
-        /// Constructor for the ArenaBuilder class.
-        /// It initializes the arena, the spawned objects holder, and the maximum spawn attempts for prefabs and the agent.
-        /// </summary>
         public ArenaBuilder(
             GameObject arenaGameObject,
             GameObject spawnedObjectsHolder,
@@ -91,13 +62,6 @@ namespace ArenaBuilders
             _goodGoalsMultiSpawned = new List<Goal>();
         }
 
-        #endregion
-
-        #region Arena Builder
-
-        /// <summary>
-        /// Builds the arena by instantiating the Spawnable objects within the arena.
-        /// </summary>
         public void Build()
         {
             _totalObjectsSpawned = 0;
@@ -135,13 +99,6 @@ namespace ArenaBuilders
             updateGoodGoalsMulti();
         }
 
-        #endregion
-
-        #region Instantiate and Spawn Objects Methods
-
-        /// <summary>
-        /// Instantiates the Spawnable objects within the arena.
-        /// </summary>
         private void InstantiateSpawnables(GameObject spawnedObjectsHolder)
         {
             Debug.Log("Spawnables has " + Spawnables.Capacity + " entries");
@@ -149,8 +106,6 @@ namespace ArenaBuilders
                 .Where(x => x.gameObject != null && x.gameObject.CompareTag("agent"))
                 .ToList();
 
-            // Instantiate the agent first based on its characteristics, then prevent item spawning at the same location;
-            // ... otherwise, spawn it last to enable more object spawns.
             if (agentSpawnablesFromUser.Any())
             {
                 _agentCollider.enabled = false;
@@ -177,15 +132,11 @@ namespace ArenaBuilders
             }
         }
 
-        // Helper method to check for agent position problems. When arena size can be changed, this method will need to be updated.
         private bool IsProblematicPosition(Vector3 position)
         {
             return position.x == 0 || position.z == 0 || position.x == 40 || position.z == 40;
         }
 
-        /// <summary>
-        /// Spawns the objects within the arena.
-        /// </summary>
         private void SpawnObjects(GameObject spawnedObjectsHolder)
         {
             foreach (Spawnable spawnable in Spawnables)
@@ -200,12 +151,6 @@ namespace ArenaBuilders
             }
         }
 
-        /// <summary>
-        /// InstantiateSpawnable spawns game objects in a game environment.
-        /// It takes two parameters: a Spawnable object and a GameObject that serves as a holder for the spawned objects.
-        /// The method instantiates the game object, sets its layer, position, rotation, and scale, and then spawns the game object.
-        /// The method also sets the color of the game object and assigns a symbol name to the game object's SignBoard component.
-        /// </summary>
         private void InstantiateSpawnable(Spawnable spawnable, GameObject spawnedObjectsHolder)
         {
             // Required parameters
@@ -274,7 +219,6 @@ namespace ArenaBuilders
             // Get the maximum number of elements in the lists
             int n = ns.Max();
 
-            // Spawn the objects
             int k = 0;
             do
             {
@@ -352,10 +296,6 @@ namespace ArenaBuilders
             } while (k < n);
         }
 
-        /// <summary>
-        /// The SpawnGameObject function instantiates a game object with specified properties, sets its position, rotation, and color, assigns it a symbol name if provided,
-        /// ...adjusts properties of its Spawner_InteractiveButton and GoalSpawner components based on optional parameters, and assigns timing parameters to relevant components.
-        /// </summary>
         private void SpawnGameObject(
             Spawnable spawnable,
             GameObject gameObjectInstance,
@@ -453,7 +393,6 @@ namespace ArenaBuilders
                         GS.SetSpawnColor((Vector3)spawnColorValue);
                     }
 
-                    // Now check all floats relating to timing of changes
                     // Each float param has a list of "acceptable types" to which it applies
                     Dictionary<string, List<Type>> paramValidTypeLookup = new Dictionary<
                         string,
@@ -502,25 +441,23 @@ namespace ArenaBuilders
                         {
                             "ripenTime",
                             new List<Type> { typeof(GoalSpawner) }
-                        }, // TreeSpawners only! Ignored o/wise
+                        },
                         {
                             "doorDelay",
                             new List<Type> { typeof(SpawnerStockpiler) }
-                        }, // Dispensers/Containers only!
+                        },
                         {
                             "timeBetweenDoorOpens",
                             new List<Type> { typeof(SpawnerStockpiler) }
-                        }, // Dispensers/Containers only!
+                        },
                     };
                     float v;
                     foreach (string paramKey in paramValidTypeLookup.Keys)
                     {
-                        // Try each valid type that we might be able to assign to
                         if (optionals[paramKey] != null)
                         {
                             foreach (Type U in paramValidTypeLookup[paramKey])
                             {
-                                // Check if gameObjectInstance has got the relevant component
                                 if (gameObjectInstance.TryGetComponent(U, out var component))
                                 {
                                     v = Convert.ToSingle(optionals[paramKey]);
@@ -561,15 +498,6 @@ namespace ArenaBuilders
             }
         }
 
-        #endregion
-
-        #region Spawn Agent
-
-        /// <summary>
-        /// The SpawnAgent function spawns an agent in a game environment.
-        /// It takes a Spawnable object as a parameter and spawns the agent at a specified position and rotation.
-        /// The function also sets the agent's skin and freeze delay.
-        /// </summary>
         private void SpawnAgent(Spawnable agentSpawnableFromUser)
         {
             PositionRotation agentToSpawnPosRot;
@@ -626,15 +554,6 @@ namespace ArenaBuilders
             _agent.GetComponent<TrainingAgent>().SetFreezeDelay(freezeDelay);
         }
 
-        #endregion
-
-        #region Check Position/Rotation and Object Placement Methods
-
-        /// <summary>
-        /// The SamplePositionRotation function samples a position and rotation for a game object to spawn.
-        /// It takes five parameters: a game object instance, the maximum number of spawn attempts, a position, a rotation, and a size.
-        /// The function returns a PositionRotation object that contains the position and rotation of the game object to spawn.
-        /// </summary>
         private PositionRotation SamplePositionRotation(
             GameObject gameObjectInstance,
             int maxSpawnAttempt,
@@ -683,11 +602,6 @@ namespace ArenaBuilders
             return null;
         }
 
-        /// <summary>
-        /// The IsSpotFree function checks if a spot is free for a game object to spawn.
-        /// It takes three parameters: an array of colliders, a boolean value indicating if the object is an agent, and a boolean value indicating if the object is a zone.
-        /// The function returns true if the spot is free; otherwise, it returns false.
-        /// </summary>
         private bool IsSpotFree(Collider[] colliders, bool isAgent, bool isZone = false)
         {
             if (isZone)
@@ -703,11 +617,6 @@ namespace ArenaBuilders
                     || (colliders.All(collider => collider.isTrigger) && !isAgent);
         }
 
-        /// <summary>
-        /// The ObjectOutsideOfBounds function checks if a game object is outside of the arena bounds (walls).
-        /// It takes two parameters: a position and a bounding box.
-        /// The function returns true if the object is outside of the bounds; otherwise, it returns false.
-        /// </summary>
         private bool ObjectOutsideOfBounds(Vector3 position, Vector3 boundingBox)
         {
             return position.x > boundingBox.x
@@ -716,13 +625,6 @@ namespace ArenaBuilders
                 && position.z < _rangeZ - boundingBox.z;
         }
 
-        #endregion
-
-        #region Goal Spawner-Logic Methods
-
-        /// <summary>
-        /// Updates the number of goals in the goodGoalsMultiSpawned list.
-        /// </summary>
         private void updateGoodGoalsMulti()
         {
             int numberOfGoals = _goodGoalsMultiSpawned.Count;
@@ -732,47 +634,28 @@ namespace ArenaBuilders
             }
         }
 
-        /// <summary>
-        /// Adds a goal to the goodGoalsMultiSpawned list.
-        /// </summary>
         public void AddToGoodGoalsMultiSpawned(Goal ggm)
         {
             _goodGoalsMultiSpawned.Add(ggm);
             updateGoodGoalsMulti();
         }
 
-        /// <summary>
-        /// Adds a goal to the goodGoalsMultiSpawned list as a GameObject.
-        /// </summary>
         public void AddToGoodGoalsMultiSpawned(GameObject ggm)
         {
             _goodGoalsMultiSpawned.Add(ggm.GetComponent<Goal>());
             updateGoodGoalsMulti();
         }
 
-        #endregion
-
-        #region Other Methods
-
-        /// <summary>
-        /// Returns the number of elements in a list if not null; otherwise, returns 0.
-        /// </summary>
         private int optionalCount<T>(List<T> paramList)
         {
             return (paramList != null) ? paramList.Count : 0;
         }
 
-        /// <summary>
-        /// Returns the total number of objects spawned.
-        /// </summary>
         public int GetTotalObjectsSpawned()
         {
             return _totalObjectsSpawned;
         }
 
-        /// <summary>
-        /// Assigns a symbol name to a component's SignBoard.
-        /// </summary>
         private void AssignSymbolName(GameObject gameObjectInstance, string sName, Vector3 color)
         {
             SignBoard SP = gameObjectInstance.GetComponent<SignBoard>();
@@ -792,9 +675,6 @@ namespace ArenaBuilders
             }
         }
 
-        /// <summary>
-        /// Assigns a float value to a component's timing parameter.
-        /// </summary>
         private void AssignTimingNumber<T>(string paramName, float value, T component)
         {
             paramName = paramName[0].ToString().ToUpper() + paramName.Substring(1);
@@ -805,7 +685,5 @@ namespace ArenaBuilders
                 SetMethod.Invoke(component, new object[] { value });
             }
         }
-
-        #endregion
     }
 }
