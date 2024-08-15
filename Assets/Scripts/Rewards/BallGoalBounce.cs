@@ -2,6 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// A BallGoal that bounces the ball depending on the forceToApply and maximumVelocity parameters.
+/// </summary>
 public class BallGoalBounce : BallGoal
 {
     [Header("Bounce Settings")]
