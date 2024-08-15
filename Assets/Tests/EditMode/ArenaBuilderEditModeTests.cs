@@ -52,8 +52,6 @@ public class ArenaBuilderEditModeTests
     [Test]
     public void ArenaDepth_ShouldBeInitializedCorrectly()
     {
-        float expectedDepth = 20;
-
         Assert.IsNotNull(_arenaGameObject, "_arenaGameObject is null");
         Assert.IsNotNull(_spawnedObjectsHolder, "_spawnedObjectsHolder is null");
         Assert.IsNotNull(_arenaBuilder, "_arenaBuilder is null");
