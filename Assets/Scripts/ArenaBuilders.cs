@@ -57,6 +57,8 @@ namespace ArenaBuilders
         [HideInInspector]
         public List<Spawnable> Spawnables { get; set; }
 
+        private AAI3EnvironmentManager _environmentManager;
+
         #endregion
 
         #region Arena Constructor
@@ -107,17 +109,26 @@ namespace ArenaBuilders
                 _arena.transform,
                 false
             );
+            if (spawnedObjectsHolder == null || _arena == null)
+            {
+                Debug.LogError("SpawnedObjectsHolder or Arena is not initialized.");
+                return;
+            }
             spawnedObjectsHolder.transform.parent = _arena;
 
             InstantiateSpawnables(spawnedObjectsHolder);
 
             TrainingAgent agentInstance = UnityEngine.Object.FindObjectOfType<TrainingAgent>();
-            if (agentInstance != null && _arena != null)
+            if (agentInstance != null && _environmentManager != null)
             {
-                TrainingArena trainingArena = _arena.GetComponent<TrainingArena>();
-                if (trainingArena != null)
+                var arenasConfigurations = _environmentManager.GetArenasConfigurations();
+                if (arenasConfigurations != null)
                 {
-                    agentInstance.showNotification = ArenasConfigurations.Instance.showNotification;
+                    agentInstance.showNotification = arenasConfigurations.showNotification;
+                }
+                else
+                {
+                    Debug.LogError("ArenasConfigurations is not initialized.");
                 }
             }
 

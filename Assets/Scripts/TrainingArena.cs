@@ -95,6 +95,10 @@ public class TrainingArena : MonoBehaviour
             maxSpawnAttemptsForAgent
         );
         _environmentManager = GameObject.FindObjectOfType<AAI3EnvironmentManager>();
+        if (_environmentManager == null)
+        {
+            Debug.LogError("AAI3EnvironmentManager is not found in the scene.");
+        }
         _agent = FindObjectsOfType<TrainingAgent>(true)[0];
         _agentDecisionInterval = _agent.GetComponentInChildren<DecisionRequester>().DecisionPeriod;
         _fades = blackScreens.GetFades();
@@ -135,7 +139,7 @@ public class TrainingArena : MonoBehaviour
         CleanUpSpawnedObjects();
 
         SetNextArenaID();
-        
+
         ArenaConfiguration newConfiguration = _environmentManager.GetConfiguration(arenaID);
 
         ApplyNewArenaConfiguration(newConfiguration);
@@ -240,8 +244,25 @@ public class TrainingArena : MonoBehaviour
     */
     private void ApplyNewArenaConfiguration(ArenaConfiguration newConfiguration)
     {
+        if (_environmentManager == null)
+        {
+            Debug.LogError("Environment Manager is null in ApplyNewArenaConfiguration.");
+            return;
+        }
+
         _arenaConfiguration = newConfiguration;
-        _agent.showNotification = ArenasConfigurations.Instance.showNotification;
+        var arenasConfigurations = _environmentManager.GetArenasConfigurations();
+        if (arenasConfigurations != null)
+        {
+            _agent.showNotification = arenasConfigurations.showNotification;
+        }
+        else
+        {
+            Debug.LogError(
+                "ArenasConfigurations is not initialized in ApplyNewArenaConfiguration."
+            );
+        }
+
         _arenaConfiguration.SetGameObject(prefabs.GetList());
         _builder.Spawnables = _arenaConfiguration.spawnables;
         _arenaConfiguration.toUpdate = false;

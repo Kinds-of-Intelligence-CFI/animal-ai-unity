@@ -9,23 +9,23 @@ using Unity.MLAgents.SideChannels;
 using Unity.MLAgents.Policies;
 
 /// <summary>
-/// Manages the environment settings and configurations for the AAI project.
+/// Manages the environment settings and configurations, including the arena, player controls, and UI canvas.
 /// </summary>
 public class AAI3EnvironmentManager : MonoBehaviour
 {
     [Header("Arena Settings")]
     [SerializeField]
-    private GameObject arena;
+    public GameObject arena;
 
     [SerializeField]
-    private GameObject uiCanvas;
+    public GameObject uiCanvas;
 
     [SerializeField]
-    private GameObject playerControls;
+    public GameObject playerControls;
 
     [Header("Configuration File")]
     [SerializeField]
-    private string configFile = "";
+    public string configFile = "";
 
     [Header("Resolution Settings")]
     [SerializeField]
@@ -48,15 +48,16 @@ public class AAI3EnvironmentManager : MonoBehaviour
 
     public bool PlayerMode { get; private set; } = true;
 
-    private ArenasConfigurations _arenasConfigurations;
+    public ArenasConfigurations _arenasConfigurations;
     private TrainingArena _instantiatedArena;
     private ArenasParametersSideChannel _arenasParametersSideChannel;
+    public ArenasParametersSideChannel ArenasParametersSideChannel => _arenasParametersSideChannel;
 
     public static event Action<int, int> OnArenaChanged;
 
-    #region Initialisation Methods
     public void Awake()
     {
+        _arenasConfigurations = new ArenasConfigurations();
         InitialiseSideChannel();
 
         Dictionary<string, int> environmentParameters = RetrieveEnvironmentParameters();
@@ -149,23 +150,42 @@ public class AAI3EnvironmentManager : MonoBehaviour
         _instantiatedArena._agent.gameObject.SetActive(true);
     }
 
-    private void InitialiseSideChannel()
+    public void InitialiseSideChannel()
     {
-        _arenasConfigurations = new ArenasConfigurations();
-        _arenasParametersSideChannel = new ArenasParametersSideChannel();
-        _arenasParametersSideChannel.NewArenasParametersReceived +=
-            _arenasConfigurations.UpdateWithConfigurationsReceived;
-        SideChannelManager.RegisterSideChannel(_arenasParametersSideChannel);
+        if (_arenasParametersSideChannel != null)
+        {
+            try
+            {
+                SideChannelManager.UnregisterSideChannel(_arenasParametersSideChannel);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"Failed to unregister existing side channel: {ex.Message}");
+            }
+        }
+
+        try
+        {
+            _arenasParametersSideChannel = new ArenasParametersSideChannel();
+            _arenasParametersSideChannel.NewArenasParametersReceived +=
+                _arenasConfigurations.UpdateWithConfigurationsReceived;
+            SideChannelManager.RegisterSideChannel(_arenasParametersSideChannel);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Failed to initialize or register the side channel: {ex.Message}");
+            throw;
+        }
     }
 
-    private void InstantiateArenas()
+    public void InstantiateArenas()
     {
         GameObject arenaInst = Instantiate(arena, new Vector3(0f, 0f, 0f), Quaternion.identity);
         _instantiatedArena = arenaInst.GetComponent<TrainingArena>();
         _instantiatedArena.arenaID = 0;
     }
 
-    private void LoadYAMLFileInEditor()
+    public void LoadYAMLFileInEditor()
     {
         if (string.IsNullOrWhiteSpace(configFile))
         {
@@ -204,10 +224,6 @@ public class AAI3EnvironmentManager : MonoBehaviour
         }
     }
 
-    #endregion
-
-    #region Public Getter/Setter Methods
-
     public void TriggerArenaChangeEvent(int currentArenaIndex, int totalArenas)
     {
         OnArenaChanged?.Invoke(currentArenaIndex, totalArenas);
@@ -228,10 +244,12 @@ public class AAI3EnvironmentManager : MonoBehaviour
         return _arenasConfigurations.configurations.Count;
     }
 
-    #endregion
+    public ArenasConfigurations GetArenasConfigurations()
+    {
+        return _arenasConfigurations;
+    }
 
-    #region Environment Configuration Methods
-    private void ChangeRayCasts(
+    public void ChangeRayCasts(
         RayPerceptionSensorComponent3D raySensor,
         int no_raycasts,
         int max_degrees
@@ -241,7 +259,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
         raySensor.MaxRayDegrees = max_degrees;
     }
 
-    private void ChangeResolution(
+    public void ChangeResolution(
         CameraSensorComponent cameraSensor,
         int cameraWidth,
         int cameraHeight,
@@ -253,10 +271,13 @@ public class AAI3EnvironmentManager : MonoBehaviour
         cameraSensor.Grayscale = grayscale;
     }
 
-    private Dictionary<string, int> RetrieveEnvironmentParameters()
+    public Dictionary<string, int> RetrieveEnvironmentParameters(string[] args = null)
     {
         Dictionary<string, int> environmentParameters = new Dictionary<string, int>();
-        string[] args = System.Environment.GetCommandLineArgs();
+        if (args == null)
+        {
+            args = System.Environment.GetCommandLineArgs();
+        }
 
         for (int i = 0; i < args.Length; i++)
         {
@@ -303,10 +324,6 @@ public class AAI3EnvironmentManager : MonoBehaviour
         return environmentParameters;
     }
 
-    #endregion
-
-    #region Configuration Management Methods
-
     public ArenaConfiguration GetConfiguration(int arenaID)
     {
         ArenaConfiguration returnConfiguration;
@@ -322,13 +339,9 @@ public class AAI3EnvironmentManager : MonoBehaviour
         _arenasConfigurations.configurations.Add(arenaID, arenaConfiguration);
     }
 
-    #endregion
-
-    #region Other Methods
-
     public void OnDestroy()
     {
-        if (Academy.IsInitialized)
+        if (Academy.IsInitialized && _arenasParametersSideChannel != null)
         {
             SideChannelManager.UnregisterSideChannel(_arenasParametersSideChannel);
         }
@@ -363,16 +376,10 @@ public class AAI3EnvironmentManager : MonoBehaviour
         );
     }
 
-    #endregion
-
-    #region Read Stream
-
     public static byte[] ReadFully(Stream stream)
     {
         using var ms = new MemoryStream();
         stream.CopyTo(ms);
         return ms.ToArray();
     }
-
-    #endregion
 }

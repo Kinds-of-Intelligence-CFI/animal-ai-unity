@@ -210,30 +210,17 @@ namespace ArenasParameters
     {
         public Dictionary<int, ArenaConfiguration> configurations;
         public int seed;
-        public static ArenasConfigurations Instance { get; private set; }
         public bool randomizeArenas = false;
         public bool showNotification { get; set; } = false;
         public bool canResetEpisode { get; set; } = true;
         public bool canChangePerspective { get; set; } = true;
         public int CurrentArenaID { get; set; } = 0;
 
-        /// <summary>
-        /// The purpose of this constructor is to initialize the configurations dictionary.
-        /// </summary>
         public ArenasConfigurations()
         {
-            if (Instance != null)
-            {
-                throw new Exception("Multiple instances of ArenasConfigurations!");
-            }
-            Instance = this;
-
             configurations = new Dictionary<int, ArenaConfiguration>();
         }
 
-        /// <summary>
-        /// This method is used to get the current arena configuration.
-        /// </summary>
         public ArenaConfiguration CurrentArenaConfiguration
         {
             get
@@ -244,9 +231,6 @@ namespace ArenasParameters
             }
         }
 
-        /// <summary>
-        /// This method is used to add a new arena configuration to the configurations dictionary.
-        /// </summary>
         internal void Add(int k, YAMLDefs.Arena yamlConfig)
         {
             if (!configurations.ContainsKey(k))
@@ -264,9 +248,6 @@ namespace ArenasParameters
             yamlConfig.SetCurrentPassMark();
         }
 
-        /// <summary>
-        /// This method is used to add additional arenas to the configurations dictionary.
-        /// </summary>
         public void AddAdditionalArenas(YAMLDefs.ArenaConfig yamlArenaConfig)
         {
             foreach (YAMLDefs.Arena arena in yamlArenaConfig.arenas.Values)
@@ -277,18 +258,12 @@ namespace ArenasParameters
             }
         }
 
-        /// <summary>
-        /// This method is used to update the current configurations with the new ones provided in the yamlArenaConfig object.
-        /// Furthermore, it sets the randomizeArenas, showNotification, canResetEpisode, and canChangePerspective properties of the ArenasConfigurations object.
-        /// Lastly, it ensures the arena IDs are unique and positive; assigns new IDs if required.
-        /// </summary>
         public void UpdateWithYAML(YAMLDefs.ArenaConfig yamlArenaConfig)
         {
             configurations.Clear();
             List<int> existingIds = new List<int>();
             int nextAvailableId = 0;
 
-            // Iterating over arenas in the order they appear in the YAML, top to bottom.
             foreach (KeyValuePair<int, YAMLDefs.Arena> arenaConfiguration in yamlArenaConfig.arenas)
             {
                 int currentID = arenaConfiguration.Key;
@@ -298,8 +273,6 @@ namespace ArenasParameters
                     Debug.LogWarning(
                         $"Issue with arenaID: {currentID}. Assigning a new unique ID: {nextAvailableId}."
                     );
-
-                    // Assign a new unique ID if required.
                     Add(nextAvailableId, arenaConfiguration.Value);
                     existingIds.Add(nextAvailableId);
                 }
@@ -309,7 +282,6 @@ namespace ArenasParameters
                     existingIds.Add(currentID);
                 }
 
-                // Adjust the nextAvailableId for future entries.
                 nextAvailableId = existingIds.Max() + 1;
             }
 
@@ -319,10 +291,6 @@ namespace ArenasParameters
             canChangePerspective = yamlArenaConfig.canChangePerspective;
         }
 
-        /// <summary>
-        /// This method handles an event that is triggered when new arena configurations are received.
-        /// It extracts the YAML data from the event, converts it into an ArenaConfig object, and then updates the current configurations with the new ones.
-        /// </summary>
         public void UpdateWithConfigurationsReceived(
             object sender,
             ArenasParametersEventArgs arenasParametersEvent
@@ -335,9 +303,6 @@ namespace ArenasParameters
             UpdateWithYAML(parsed);
         }
 
-        /// <summary>
-        /// The purpose of this method is to iterate over each entry in the configurations dictionary and set the toUpdate property of each ArenaConfiguration object to false.
-        /// </summary>
         public void SetAllToUpdated()
         {
             foreach (KeyValuePair<int, ArenaConfiguration> configuration in configurations)

@@ -28,6 +28,7 @@ public class PlayerControls : MonoBehaviour
     private ScreenshotCamera screenshotCam;
     private TrainingAgent agent;
     private ArenasConfigurations arenasConfigurations;
+    private AAI3EnvironmentManager environmentManager;
 
     [Header("Score Settings")]
     public float prevScore = 0;
@@ -88,13 +89,21 @@ public class PlayerControls : MonoBehaviour
             .GetComponent<Camera>();
         cameras[2] = GameObject.FindGameObjectWithTag("camBase").GetComponent<Camera>();
         agent = GameObject.FindGameObjectWithTag("agent").GetComponent<TrainingAgent>();
+        environmentManager = FindObjectOfType<AAI3EnvironmentManager>();
     }
 
     private void LoadConfigurationSettings()
     {
-        arenasConfigurations = ArenasConfigurations.Instance;
-        canResetEpisode = arenasConfigurations?.canResetEpisode ?? true;
-        canChangePerspective = arenasConfigurations?.canChangePerspective ?? true;
+        if (environmentManager != null)
+        {
+            arenasConfigurations = environmentManager.GetArenasConfigurations();
+            canResetEpisode = arenasConfigurations?.canResetEpisode ?? true;
+            canChangePerspective = arenasConfigurations?.canChangePerspective ?? true;
+        }
+        else
+        {
+            Debug.LogError("Environment Manager not found. Using default settings.");
+        }
     }
 
     private void InitializeCameras()
