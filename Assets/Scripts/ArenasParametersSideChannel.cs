@@ -16,21 +16,15 @@ public class ArenasParametersSideChannel : SideChannel
         ChannelId = new Guid("9c36c837-cad5-498a-b675-bc19c9370072");
     }
 
-    /// <summary>
-    /// This method is called when a message is received from the Unity.
-    /// </summary>
     protected override void OnMessageReceived(IncomingMessage msg)
     {
         byte[] yamlData = msg.GetRawBytes();
 
-        /* Create the event args including the file name and the YAML data */
+        /* Create the event args and the YAML data */
         ArenasParametersEventArgs args = new ArenasParametersEventArgs { arenas_yaml = yamlData, };
         OnArenasParametersReceived(args);
     }
 
-    /// <summary>
-    /// This method is called when the arenas parameters are received.
-    /// </summary>
     protected virtual void OnArenasParametersReceived(
         ArenasParametersEventArgs arenasParametersEvent
     )
