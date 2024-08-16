@@ -6,7 +6,7 @@ using System.Collections;
 /// <summary>
 /// Tests for the BallGoalBounce class.
 /// </summary>
-public class BallGoalBounceTests : MonoBehaviour
+public class BallGoalBounceTests
 {
     private GameObject _ballGameObject;
     private BallGoalBounce _ballGoalBounce;
@@ -62,9 +62,11 @@ public class BallGoalBounceTests : MonoBehaviour
     [UnityTest]
     public IEnumerator BallGoalBounce_ForceDirectionIsForward()
     {
+        /* Wait for the next fixed update to ensure the force is applied */
+        yield return new WaitForFixedUpdate();
         yield return null;
 
-        // XZ directions only, no need to check Y
+        /* XZ directions only, no need to check Y */
         Vector3 expectedDirectionXZ = new Vector3(
             _ballGameObject.transform.forward.x,
             0,

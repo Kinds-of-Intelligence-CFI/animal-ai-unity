@@ -14,10 +14,18 @@ public class BallGoalBounce : BallGoal
     void Start()
     {
         rBody = GetComponent<Rigidbody>();
+        if (rBody != null)
+        {
+            rBody.AddForce(transform.forward * forceToApply, ForceMode.Impulse);
+        }
+    }
 
-        rBody.AddForce(
-            forceToApply * transform.forward * Time.fixedDeltaTime,
-            ForceMode.VelocityChange
-        );
+    void Update()
+    {
+        /* Cap the velocity to the maximum velocity */
+        if (rBody != null && rBody.velocity.magnitude > maximumVelocity)
+        {
+            rBody.velocity = rBody.velocity.normalized * maximumVelocity;
+        }
     }
 }
