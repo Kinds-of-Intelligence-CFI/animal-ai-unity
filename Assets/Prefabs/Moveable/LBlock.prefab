@@ -12,8 +12,9 @@ GameObject:
   - component: {fileID: 3667777653325770547}
   - component: {fileID: 8227840235879712070}
   - component: {fileID: 7053897899704093071}
-  - component: {fileID: 2477514626128410859}
   - component: {fileID: 883459942026187514}
+  - component: {fileID: 5412319763096046578}
+  - component: {fileID: 1244654332007024094}
   m_Layer: 0
   m_Name: LBlock
   m_TagString: Movable
@@ -102,19 +103,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!65 &2477514626128410859
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1667824677047789405}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1.0000001, z: 10}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &883459942026187514
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -135,3 +123,29 @@ MonoBehaviour:
   sizeAdjustment: 0.999
   textureUVOverride: 0
   typicalOrigin: 1
+--- !u!65 &5412319763096046578
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1667824677047789405}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.96518517, y: 1.0000001, z: 11.000003}
+  m_Center: {x: -0.017407402, y: 0, z: -0.5}
+--- !u!65 &1244654332007024094
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1667824677047789405}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 2.021222, y: 1.0000001, z: 0.9552109}
+  m_Center: {x: 1.4894192, y: 0, z: -5.522398}

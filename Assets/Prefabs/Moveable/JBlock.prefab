@@ -12,8 +12,9 @@ GameObject:
   - component: {fileID: 2906799365264366119}
   - component: {fileID: 6046221030157881141}
   - component: {fileID: 771830132221317487}
-  - component: {fileID: 2929563314707697068}
   - component: {fileID: 4489711801502536768}
+  - component: {fileID: 6191250875533515990}
+  - component: {fileID: 5107927406425999282}
   m_Layer: 0
   m_Name: JBlock
   m_TagString: Movable
@@ -102,19 +103,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &2929563314707697068
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2677753433345384935}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1.0000001, z: 10}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &4489711801502536768
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -135,3 +123,29 @@ MonoBehaviour:
   sizeAdjustment: 0.999
   textureUVOverride: 0
   typicalOrigin: 1
+--- !u!65 &6191250875533515990
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2677753433345384935}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.9913508, y: 1.0648708, z: 11.000003}
+  m_Center: {x: 0.016484648, y: -0.03243506, z: -0.5}
+--- !u!65 &5107927406425999282
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2677753433345384935}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 2.0218654, y: 1.0000005, z: 0.990793}
+  m_Center: {x: -1.4890985, y: 0.00000011920929, z: -5.5046062}
