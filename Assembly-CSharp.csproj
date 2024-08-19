@@ -59,7 +59,7 @@
     <UnityVersion>2021.3.21f1</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Analyzer Include="/Users/vanguard/.vscode/extensions/visualstudiotoolsforunity.vstuc-1.0.2/Analyzers/Microsoft.Unity.Analyzers.dll" />
+    <Analyzer Include="/Users/vanguard/.vscode/extensions/visualstudiotoolsforunity.vstuc-1.0.3/Analyzers/Microsoft.Unity.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/TextMesh Pro/Examples &amp; Extras/Scripts/SkewTextExample.cs" />
