@@ -7,7 +7,7 @@ using UnityEngine;
 [RequireComponent(typeof(TMP_Text))]
 public class BuildVersionControl : MonoBehaviour
 {
-	void Awake()
+	public void Awake()
 	{
 		TMP_Text BuildVersionText = GetComponent<TMP_Text>();
 		if (BuildVersionText != null)
