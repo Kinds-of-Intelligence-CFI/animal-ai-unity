@@ -7,9 +7,8 @@ namespace ArenasParameters
 {
     public class ArenasParametersEventArgs : EventArgs
     {
-        public byte[] arenas_yaml { get; set; }
-        public string yamlFileName { get; set; }
+        public byte[] arenas_yaml { get; set; } /* Byte array that contains the YAML file */
 
-        public ArenasParametersEventArgs() { } /* Empty constructor for ArenasParametersEventArgs */
+        public ArenasParametersEventArgs() { } /* Empty constructor */
     }
 }
