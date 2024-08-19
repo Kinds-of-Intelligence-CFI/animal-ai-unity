@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 
 /// <summary>
-/// This class is used to display the build version on the screen. It's called once and it's used to display the build version on the screen automatically.
+/// This class is used to display the build version on the screen. Automatically retrieves the version data from project settings.
 /// </summary>
 [RequireComponent(typeof(TMP_Text))]
 public class BuildVersionControl : MonoBehaviour
@@ -12,7 +12,7 @@ public class BuildVersionControl : MonoBehaviour
 		TMP_Text BuildVersionText = GetComponent<TMP_Text>();
 		if (BuildVersionText != null)
 		{
-			BuildVersionText.text = "Version: " + Application.version;
+			BuildVersionText.text = "Build: " + Application.version;
 		}
 		else
 		{
