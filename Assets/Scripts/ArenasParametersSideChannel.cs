@@ -1,7 +1,6 @@
 using Unity.MLAgents.SideChannels;
 using System;
 using ArenasParameters;
-using UnityEngine;
 
 /// <summary>
 /// This class is used to communicate the environment configurations to the Unity.
