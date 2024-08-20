@@ -18,7 +18,6 @@ namespace YAMLDefs
             .WithTagMapping("!Item", typeof(YAMLDefs.Item))
             .WithTagMapping("!Vector3", typeof(Vector3))
             .WithTagMapping("!RGB", typeof(YAMLDefs.RGB))
-            //.IgnoreUnmatchedProperties() TODO: research this and it's implications.
             .Build();
     }
 
