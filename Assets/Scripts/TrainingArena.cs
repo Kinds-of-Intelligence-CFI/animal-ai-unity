@@ -80,7 +80,7 @@ public class TrainingArena : MonoBehaviour
 
     private void OnDestroy()
     {
-        Spawner_InteractiveButton.RewardSpawned -= OnRewardSpawned;
+        SpawnerButton.RewardSpawned -= OnRewardSpawned;
     }
 
     /// <summary>
@@ -103,7 +103,7 @@ public class TrainingArena : MonoBehaviour
         _agentDecisionInterval = _agent.GetComponentInChildren<DecisionRequester>().DecisionPeriod;
         _fades = blackScreens.GetFades();
 
-        Spawner_InteractiveButton.RewardSpawned += OnRewardSpawned;
+        SpawnerButton.RewardSpawned += OnRewardSpawned;
     }
 
     /// <summary>

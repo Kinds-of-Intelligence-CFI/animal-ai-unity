@@ -146,7 +146,7 @@ public class TrainingAgent : Agent, IPrefab
         progBar.AssignAgent(this);
         health = _maxHealth;
 
-        Spawner_InteractiveButton.RewardSpawned += OnRewardSpawned;
+        SpawnerButton.RewardSpawned += OnRewardSpawned;
         DataZone.OnInDataZone += OnInDataZone;
         DataZone.OnOutDataZone += OnOutDataZone;
 
@@ -173,7 +173,7 @@ public class TrainingAgent : Agent, IPrefab
             writer.Close(); /* Close the writer */
         }
 
-        Spawner_InteractiveButton.RewardSpawned -= OnRewardSpawned;
+        SpawnerButton.RewardSpawned -= OnRewardSpawned;
         DataZone.OnInDataZone -= OnInDataZone;
         DataZone.OnOutDataZone -= OnOutDataZone;
     }

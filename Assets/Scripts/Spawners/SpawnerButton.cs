@@ -8,9 +8,7 @@ using ArenaBuilders;
 /// Spawns a reward when interacted with. The reward is chosen from a list of rewards with weights and spawn probabilities.
 /// The reward can be spawned at a fixed position or randomly within the arena bounds.
 /// </summary>
-
-// TODO: add checks to ensure that the reward spawn position and parent GO is within the arena bounds.
-public class Spawner_InteractiveButton : MonoBehaviour
+public class SpawnerButton : MonoBehaviour
 {
     public List<string> RewardNames { get; set; }
     public List<float> RewardWeights { get; set; }
@@ -240,7 +238,7 @@ public class Spawner_InteractiveButton : MonoBehaviour
                     Random.Range(0, arenaDepth)
                 );
             }
-            
+
             if (RewardSpawnPos.x == -1)
             {
                 spawnPosition.x = Random.Range(0, arenaBuilder.ArenaWidth);

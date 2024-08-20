@@ -329,7 +329,7 @@ namespace ArenaBuilders
                     }
 
                     var spawnerInteractiveButton =
-                        gameObjectInstance.GetComponentInChildren<Spawner_InteractiveButton>();
+                        gameObjectInstance.GetComponentInChildren<SpawnerButton>();
                     if (spawnerInteractiveButton != null)
                     {
                         if (
