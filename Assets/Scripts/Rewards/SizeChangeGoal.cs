@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -7,69 +6,43 @@ using UnityEngine;
 public class SizeChangeGoal : BallGoal
 {
     [Header("Size Change Params")]
-    public float initialSize = 5;
-    public float finalSize = 1;
-    public float sizeChangeRate;
+    [SerializeField] private float initialSize = 5f;
+    [SerializeField] private float finalSize = 1f;
+    [SerializeField] private float sizeChangeRate;
+    [SerializeField] private InterpolationMethod interpolationMethod;
 
-    public enum InterpolationMethod
-    {
-        Constant,
-        Linear
-    }
+    [Header("Reward Params")][SerializeField] private bool rewardSizeTracking = true;
+    [SerializeField] public float rewardOverride = 0f;
 
-    [Header("Interpolation Method")]
-    public InterpolationMethod interpolationMethod;
-    public bool rewardSizeTracking = true;
-    public float rewardOverride = 0;
-    public int fixedFrameDelay = 150;
+    [Header("Grow / Shrink Timing Params")]
+    [SerializeField] private int fixedFrameDelay = 150;
 
-    [Header("Size Constraints")]
     private bool isShrinking;
     private bool freeToGrow = true;
-    private float sizeProportion = 0;
+    private float sizeProportion = 0f;
     private int delayCounter;
     private bool finishedSizeChange = false;
-    private Collider[] sphereOverlap;
 
-    private void Awake()
-    {
-        InitializeValues();
-    }
+    private const float MinSize = 0f;
+    private const float MaxSize = 8f;
 
-    public void InitializeValues()
-    {
-        delayCounter = fixedFrameDelay;
-        initialSize = Mathf.Clamp(initialSize, 0, sizeMax.x);
-        finalSize = Mathf.Clamp(finalSize, 0, sizeMax.x);
-        isShrinking = (finalSize <= initialSize);
-        sizeMin = Mathf.Min(initialSize, finalSize) * Vector3.one;
-        sizeMax = Mathf.Max(initialSize, finalSize) * Vector3.one;
-        if (isShrinking == (sizeChangeRate >= 0))
-        {
-            sizeChangeRate *= -1;
-        }
-        SetSize(initialSize * Vector3.one);
-    }
+    public enum InterpolationMethod { Constant, Linear }
 
     public override void SetInitialValue(float v)
     {
-        initialSize = v;
-        if (delayCounter > 0)
-            reward = initialSize;
+        initialSize = Mathf.Clamp(v, MinSize, MaxSize);
+        if (delayCounter > 0) reward = initialSize;
     }
 
     public override void SetFinalValue(float v)
     {
-        finalSize = v;
+        finalSize = Mathf.Clamp(v, MinSize, MaxSize);
     }
 
     public override void SetChangeRate(float v)
     {
         sizeChangeRate = v;
-        if (isShrinking == (sizeChangeRate >= 0))
-        {
-            sizeChangeRate *= -1;
-        }
+        CheckIfNeedToFlip();
     }
 
     public override void SetDelay(float v)
@@ -80,77 +53,73 @@ public class SizeChangeGoal : BallGoal
 
     public override void SetSize(Vector3 size)
     {
-        base.SetSize(
-            (size.x < 0 || size.y < 0 || size.z < 0 || delayCounter > 0)
-                ? initialSize * Vector3.one
-                : size
-        );
-        if (!rewardSizeTracking)
-        {
-            reward = rewardOverride;
-        }
+        base.SetSize((size.x < 0 || size.y < 0 || size.z < 0 || delayCounter > 0) ? initialSize * Vector3.one : size);
+        if (!rewardSizeTracking) { reward = rewardOverride; }
+    }
+
+    private void Start()
+    {
+        isShrinking = (finalSize <= initialSize);
+        delayCounter = fixedFrameDelay;
+
+        sizeMin = Mathf.Min(initialSize, finalSize) * Vector3.one;
+        sizeMax = Mathf.Max(initialSize, finalSize) * Vector3.one;
+
+        CheckIfNeedToFlip();
+        SetSize(initialSize * Vector3.one);
     }
 
     private void FixedUpdate()
     {
-        UpdateRayCollisions();
         if (delayCounter > 0)
         {
             delayCounter--;
+            return;
         }
-        else
+
+        if (!finishedSizeChange)
         {
-            if (delayCounter == 1)
+            if (!isShrinking)
             {
-                Debug.Log("delayCounter will now hit zero. Starting size change!");
+                CheckGrowthFreedom();
             }
 
-            if (!finishedSizeChange && freeToGrow)
+            if (freeToGrow)
             {
-                if ((int)interpolationMethod == 0) /* Constant */
-                {
-                    SetSize((_height + sizeChangeRate) * Vector3.one);
-                }
-                else if ((int)interpolationMethod > 0) /* Polynomial */
-                {
-                    PolyInterpolationUpdate();
-                }
-
-                if (isShrinking ? _height <= finalSize : _height >= finalSize)
-                {
-                    SetSize(finalSize * Vector3.one);
-                    finishedSizeChange = true;
-                }
+                UpdateSize();
             }
         }
     }
 
-    private void UpdateRayCollisions()
+    private void CheckGrowthFreedom()
     {
-        if (!isShrinking)
-        {
-            freeToGrow = !Physics.Raycast(
-                transform.position + new Vector3(0, transform.localScale.y / 2, 0),
-                Vector3.up,
-                Mathf.Abs(sizeChangeRate)
-            );
+        freeToGrow = !Physics.Raycast(transform.position + new Vector3(0, transform.localScale.y / 2, 0), Vector3.up, Mathf.Abs(sizeChangeRate));
 
-            sphereOverlap = Physics.OverlapSphere(
-                transform.position,
-                transform.localScale.x / 2 - 0.05f
-            );
-            List<Collider> overlapList = new List<Collider>();
-            foreach (Collider c in sphereOverlap)
-            {
-                if (c.gameObject.CompareTag("arena") || c.gameObject.CompareTag("Immovable"))
-                {
-                    overlapList.Add(c);
-                }
-            }
-            if (overlapList.Count > 0)
+        var sphereOverlap = Physics.OverlapSphere(transform.position, transform.localScale.x / 2 - 0.05f);
+        foreach (var c in sphereOverlap)
+        {
+            if (c.CompareTag("arena") || c.CompareTag("Immovable"))
             {
                 freeToGrow = false;
+                break;
             }
+        }
+    }
+    private void UpdateSize()
+    {
+        if (interpolationMethod == InterpolationMethod.Constant)
+        {
+            SetSize((_height + sizeChangeRate) * Vector3.one);
+        }
+        else
+        {
+            PolyInterpolationUpdate();
+        }
+
+        if (isShrinking ? _height <= finalSize : _height >= finalSize)
+        {
+            SetSize(finalSize * Vector3.one);
+            finishedSizeChange = true;
         }
     }
 
@@ -158,5 +127,11 @@ public class SizeChangeGoal : BallGoal
     {
         sizeProportion += sizeChangeRate;
         SetSize((sizeProportion * finalSize + (1 - sizeProportion) * initialSize) * Vector3.one);
+    }
+
+    private void CheckIfNeedToFlip()
+    {
+        isShrinking = (finalSize <= initialSize);
+        if (isShrinking == (sizeChangeRate >= 0)) { sizeChangeRate *= -1; }
     }
 }
