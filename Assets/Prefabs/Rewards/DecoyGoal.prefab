@@ -137,5 +137,5 @@ MonoBehaviour:
   typicalOrigin: 1
   numberOfGoals: 1
   reward: 0
-  isMulti: 1
+  isMulti: 0
   rewardType: DecoyGoal
