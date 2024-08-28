@@ -138,3 +138,4 @@ MonoBehaviour:
   numberOfGoals: 1
   reward: 0
   isMulti: 1
+  rewardType: DecoyGoalMulti
