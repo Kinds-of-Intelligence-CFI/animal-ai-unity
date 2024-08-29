@@ -26,7 +26,7 @@ public class BallGoalBounceTests
     [UnityTest]
     public IEnumerator BallGoalBounce_ForceIsAppliedOnStart()
     {
-        yield return null;
+        yield return new WaitForFixedUpdate();
 
         Assert.IsTrue(
             _rBody.velocity.magnitude > 0,
