@@ -250,7 +250,7 @@ public class TrainingAgent : Agent, IPrefab
         }
 
         var rayPerceptionInput = rayPerception.GetRayPerceptionInput();
-        var rayPerceptionOutput = RayPerceptionSensor.Perceive(rayPerceptionInput);
+        var rayPerceptionOutput = RayPerceptionSensor.Perceive(rayPerceptionInput, false);
         float[] hitFractions = rayPerceptionOutput.RayOutputs.Select(r => r.HitFraction).ToArray();
         string[] hitTags = rayPerceptionOutput.RayOutputs
             .Select(r => r.HitGameObject?.tag ?? "None")
