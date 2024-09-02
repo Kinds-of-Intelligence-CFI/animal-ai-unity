@@ -130,6 +130,7 @@ namespace ArenasParameters
         public string protoString = "";
         public int randomSeed = 0;
         public bool mergeNextArena = false;
+        public float passMark = 0;
 
         public ArenaConfiguration() { }
 
@@ -146,6 +147,7 @@ namespace ArenasParameters
         internal ArenaConfiguration(YAMLDefs.Arena yamlArena)
         {
             TimeLimit = yamlArena.timeLimit;
+            passMark = yamlArena.passMark;
             spawnables = new List<Spawnable>();
 
             foreach (YAMLDefs.Item item in yamlArena.items)
@@ -213,7 +215,6 @@ namespace ArenasParameters
                 }
             }
             CurrentArenaID = k;
-            yamlConfig.SetCurrentPassMark();
         }
 
         public void AddAdditionalArenas(YAMLDefs.ArenaConfig yamlArenaConfig)
@@ -222,7 +223,6 @@ namespace ArenasParameters
             {
                 int i = configurations.Count;
                 Add(i, arena);
-                arena.SetCurrentPassMark();
             }
         }
 

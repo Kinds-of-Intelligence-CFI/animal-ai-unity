@@ -41,13 +41,6 @@ namespace YAMLDefs
         public int timeLimit { get; set; } = 0;
         public List<Item> items { get; set; } = new List<Item>();
         public float passMark { get; set; } = 0;
-        public static float CurrentPassMark { get; private set; }
-
-        public void SetCurrentPassMark()
-        {
-            CurrentPassMark = passMark;
-        }
-
         public List<int> blackouts { get; set; } = new List<int>();
         public int randomSeed { get; set; } = 0;
         public bool mergeNextArena { get; set; } = false;

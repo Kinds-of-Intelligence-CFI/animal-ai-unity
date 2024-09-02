@@ -687,10 +687,9 @@ public class TrainingAgent : Agent, IPrefab
         {
             _nextUpdateCompleteArena = false;
             float cumulativeReward = GetCumulativeReward();
-            Debug.Log($"Current pass mark: {Arena.CurrentPassMark}");
+            float passMark = _arena.ArenaConfig.passMark;
 
-            bool proceedToNext =
-                Arena.CurrentPassMark == 0 || cumulativeReward >= Arena.CurrentPassMark;
+            bool proceedToNext = passMark == 0 || cumulativeReward >= passMark;
 
             if (proceedToNext)
             {
@@ -734,6 +733,8 @@ public class TrainingAgent : Agent, IPrefab
 
     public override void OnEpisodeBegin()
     {
+        Debug.Log("Episode Begin");
+        Debug.Log("passMark from OnEpisodeBegin: " + _arena.ArenaConfig.passMark);
         _lastLoggedStep = -1;
 
         if (!_arena.IsFirstArenaReset)
@@ -746,7 +747,6 @@ public class TrainingAgent : Agent, IPrefab
         customEpisodeCount++;
 
         writer.Flush();
-        EpisodeDebugLogs();
 
         StopAllCoroutines();
         _previousScore = _currentScore;
@@ -757,14 +757,6 @@ public class TrainingAgent : Agent, IPrefab
         health = _maxHealth;
 
         SetFreezeDelay(GetFreezeDelay());
-    }
-
-    private void EpisodeDebugLogs()
-    {
-        Debug.Log("Episode Begin");
-        Debug.Log($"Value of showNotification: {showNotification}");
-        Debug.Log("Current Pass Mark: " + Arena.CurrentPassMark);
-        Debug.Log("Number of Goals Collected: " + numberOfGoalsCollected);
     }
 
     void OnCollisionEnter(Collision collision)
