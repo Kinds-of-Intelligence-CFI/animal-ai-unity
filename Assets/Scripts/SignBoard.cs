@@ -8,11 +8,11 @@ using UnityEngine;
 public class SignBoard : Prefab
 {
     [Header("SignBoard Properties")]
-    private Material _symbolMat;
+    public Material _symbolMat;
     private MeshRenderer _meshRenderer;
     public string selectedSymbolName;
-    public string[] symbolNames;
-    public Texture[] textures;
+    public string[] symbolNames = new string[0];
+    public Texture[] textures = new Texture[0];
     public Color[] colours;
     private int texIndex;
     public bool useDefaultColourArray;
@@ -118,7 +118,7 @@ public class SignBoard : Prefab
         if (index == -1)
         {
             Debug.Log(
-                "WARNING: a SignBoard has not been given a valid symbol name! Defaulting to empty texture."
+                "WARNING: a SignBoard has not been given a valid symbol name! Defaulting to empty texture..."
             );
         }
         index = (index >= 0 && index < textures.Length) ? index : 0;
@@ -136,7 +136,6 @@ public class SignBoard : Prefab
         index = (index >= 0 && index < symbolNames.Length) ? index : 0;
         return new KeyValuePair<Texture, Color>(textures[index], colours[index]);
     }
-
     public override void SetSize(Vector3 size)
     {
         for (int i = 0; i < 3; ++i)
@@ -147,6 +146,7 @@ public class SignBoard : Prefab
             }
         }
         base.SetSize((size == Vector3.one * -1) ? Vector3.one : size);
+        transform.localScale = size; /* Update the transform scale to match the new size */
     }
 
     bool parseSpecialTextureCode(string texCode, out Texture2D tex)
