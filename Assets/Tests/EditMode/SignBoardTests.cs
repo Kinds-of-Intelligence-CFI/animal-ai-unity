@@ -4,7 +4,6 @@ using UnityEngine;
 /// <summary>
 /// Tests for the SignBoard class in edit mode.
 /// </summary>
-// TODO: need to add a test for checking if all the textures are set to the symbol material
 public class SignBoardTests
 {
     private GameObject _signBoardGameObject;
@@ -58,6 +57,7 @@ public class SignBoardTests
 
         Assert.AreEqual(_signBoard.textures[0], _signBoard._symbolMat.GetTexture("_BaseMap"));
     }
+
     [Test]
     public void TexturesArray_ShouldNotBeEmpty_ByDefault()
     {
@@ -97,6 +97,7 @@ public class SignBoardTests
         Assert.AreEqual(testColor, _signBoard.assignedColourOverride);
         Assert.IsFalse(_signBoard.useDefaultColourArray);
     }
+
     [Test]
     public void SetColourOverride_ShouldApplyCorrectly_WhenGivenVector3()
     {
@@ -115,5 +116,34 @@ public class SignBoardTests
         _signBoard.SetSize(testSize);
 
         Assert.AreEqual(new Vector3(0.5f, 2.5f, 1.5f), _signBoardGameObject.transform.localScale);
+    }
+
+    /* Test cases for each symbol name. Important: update the test cases if more symbols are added to the SignBoard class. */
+    [Test]
+    [TestCase("default")]
+    [TestCase("right-arrow")]
+    [TestCase("left-arrow")]
+    [TestCase("up-arrow")]
+    [TestCase("down-arrow")]
+    [TestCase("u-turn-arrow")]
+    [TestCase("letter-a")]
+    [TestCase("letter-b")]
+    [TestCase("letter-c")]
+    [TestCase("square")]
+    [TestCase("triangle")]
+    [TestCase("circle")]
+    [TestCase("star")]
+    [TestCase("tick")]
+    [TestCase("cross")]
+    public void SetSymbol_ShouldApplySymbolCorrectly(string symbolName)
+    {
+        Texture testTexture = new Texture2D(1, 1);
+        _signBoard.symbolNames = new string[] { symbolName };
+        _signBoard.textures = new Texture[] { testTexture };
+        _signBoard.SetSymbol(symbolName);
+
+        _signBoard.UpdateSignBoard();
+
+        Assert.AreEqual(testTexture, _signBoard._symbolMat.GetTexture("_BaseMap"));
     }
 }
