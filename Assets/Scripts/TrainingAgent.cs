@@ -734,7 +734,6 @@ public class TrainingAgent : Agent, IPrefab
     public override void OnEpisodeBegin()
     {
         Debug.Log("Episode Begin");
-        Debug.Log("passMark from OnEpisodeBegin: " + _arena.ArenaConfig.passMark);
         _lastLoggedStep = -1;
 
         if (!_arena.IsFirstArenaReset)
