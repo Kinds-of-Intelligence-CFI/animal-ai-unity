@@ -1,0 +1,63 @@
+# Testing the SignBoard with different symbols and sizes. There are 15 symbols in total.
+!ArenaConfig
+arenas:
+  0: !Arena
+    passMark: 0
+    timeLimit: 250
+    items:
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 10, y: 0, z: 20}
+      rotations: [90]
+    - !Item
+      name: SignBoard
+      positions:
+      - !Vector3 {x: 11, y: 0, z: 11}
+      - !Vector3 {x: 12, y: 0, z: 12}
+      - !Vector3 {x: 13, y: 0, z: 13}
+      - !Vector3 {x: 14, y: 0, z: 14}
+      - !Vector3 {x: 15, y: 0, z: 15}
+      - !Vector3 {x: 16, y: 0, z: 16}
+      - !Vector3 {x: 17, y: 0, z: 17}
+      - !Vector3 {x: 18, y: 0, z: 18}
+      - !Vector3 {x: 19, y: 0, z: 19}
+      - !Vector3 {x: 20, y: 0, z: 20}
+      - !Vector3 {x: 21, y: 0, z: 21}
+      - !Vector3 {x: 22, y: 0, z: 22}
+      - !Vector3 {x: 23, y: 0, z: 23}
+      - !Vector3 {x: 24, y: 0, z: 24}
+      - !Vector3 {x: 25, y: 0, z: 25}
+      sizes:
+      - !Vector3 {x: 1, y: 1, z: 1}
+      - !Vector3 {x: 1, y: 1, z: 1}
+      - !Vector3 {x: 1, y: 1, z: 1}
+      - !Vector3 {x: 1, y: 1, z: 1}
+      - !Vector3 {x: 1, y: 1, z: 1}
+      - !Vector3 {x: 1, y: 1, z: 1}
+      - !Vector3 {x: 1, y: 1, z: 1}
+      - !Vector3 {x: 1, y: 1, z: 1}
+      - !Vector3 {x: 1, y: 1, z: 1}
+      - !Vector3 {x: 1, y: 1, z: 1}
+      - !Vector3 {x: 1, y: 1, z: 1}
+      - !Vector3 {x: 1, y: 1, z: 1}
+      - !Vector3 {x: 1, y: 1, z: 1}
+      - !Vector3 {x: 1, y: 1, z: 1}
+      - !Vector3 {x: 1, y: 1, z: 1}
+      symbolNames:
+      - "default"
+      - "right-arrow"
+      - "left-arrow"
+      - "up-arrow"
+      - "down-arrow"
+      - "u-turn-arrow"
+      - "letter-a"
+      - "letter-b"
+      - "letter-c"
+      - "square"
+      - "triangle"
+      - "circle"
+      - "star"
+      - "tick"
+      - "cross"
+
