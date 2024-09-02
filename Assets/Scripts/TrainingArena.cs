@@ -143,7 +143,6 @@ public class TrainingArena : MonoBehaviour
         ArenaConfiguration newConfiguration = _environmentManager.GetConfiguration(arenaID);
 
         ApplyNewArenaConfiguration(newConfiguration);
-        Debug.Log($"Setting passMark to: {newConfiguration.passMark}");
 
         CleanupRewards();
 
@@ -157,7 +156,6 @@ public class TrainingArena : MonoBehaviour
             throw new InvalidOperationException("LoadNextArena called before first reset");
         }
         Debug.Log($"Loading next arena. Previous: {arenaID}, next: {arenaID + 1}");
-        Debug.Log($"Initialized Arena with passMark: {_arenaConfiguration.passMark}");
 
         CleanUpSpawnedObjects();
 
@@ -207,7 +205,7 @@ public class TrainingArena : MonoBehaviour
             }
             else
             {
-                // If the next arena is merged, sequentially search for the next unmerged one
+                /* If the next arena is merged, sequentially search for the next unmerged one */
                 ArenaConfiguration preceedingArena = _arenaConfiguration;
                 arenaID = (arenaID + 1) % totalArenas;
                 while (preceedingArena.mergeNextArena)
@@ -254,11 +252,8 @@ public class TrainingArena : MonoBehaviour
 
         _arenaConfiguration = newConfiguration;
         Debug.Log($"Setting passMark to: {newConfiguration.passMark}");
-        // Ensure passMark is set correctly
-        _arenaConfiguration.passMark = newConfiguration.passMark;
 
-        // Check passMark before proceeding
-        Debug.Log($"Post assignment, passMark is: {_arenaConfiguration.passMark}");
+        _arenaConfiguration.passMark = newConfiguration.passMark;
 
         var arenasConfigurations = _environmentManager.GetArenasConfigurations();
         if (arenasConfigurations != null)
@@ -282,8 +277,7 @@ public class TrainingArena : MonoBehaviour
         {
             Random.InitState(_arenaConfiguration.randomSeed);
         }
-
-        // Additional Debug to ensure passMark is correct before continuing
+        
         Debug.Log($"Final passMark in ApplyNewArenaConfiguration: {_arenaConfiguration.passMark}");
     }
 
