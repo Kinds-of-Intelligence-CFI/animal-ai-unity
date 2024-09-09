@@ -138,6 +138,6 @@ MonoBehaviour:
   numberOfGoals: 1
   reward: 1
   isMulti: 0
-  rewardType: GoodGoalMulti
+  rewardType: GoodGoalBounce
   maximumVelocity: 10
   forceToApply: 500
