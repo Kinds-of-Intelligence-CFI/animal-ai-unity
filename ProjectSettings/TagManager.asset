@@ -35,6 +35,7 @@ TagManager:
   - DecayGoal
   - GrowGoal
   - ShrinkGoal
+  - badGoalMulti
   layers:
   - Default
   - TransparentFX
