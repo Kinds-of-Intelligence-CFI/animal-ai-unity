@@ -9,6 +9,7 @@ public class PlayerControls : MonoBehaviour
 {
     [Header("Camera Settings")]
     private Camera[] cameras = new Camera[3];
+    public Camera[] Cameras => cameras;
     public int cameraID => activeCameraIndex;
     private int activeCameraIndex = 0;
     private bool camerasInitialized = false;
@@ -157,8 +158,12 @@ public class PlayerControls : MonoBehaviour
                 + $"Current Reward: {agent.GetCumulativeReward():0.000}";
         }
     }
+    public void UpdateScoreTextWrapper()
+    {
+        UpdateScoreText();
+    }
 
-    private void CycleCamera()
+    public void CycleCamera()
     {
         cameras[activeCameraIndex].enabled = false;
         activeCameraIndex = (activeCameraIndex + 1) % cameras.Length;
