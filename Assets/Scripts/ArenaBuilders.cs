@@ -32,6 +32,7 @@ namespace ArenaBuilders
         private Collider _agentCollider;
         private Rigidbody _agentRigidbody;
         private List<Goal> _goodGoalsMultiSpawned;
+        private List<Goal> _badGoalsMultiSpawned;
         private int _totalObjectsSpawned;
         private AAI3EnvironmentManager _environmentManager;
 
@@ -60,6 +61,7 @@ namespace ArenaBuilders
             _maxSpawnAttemptsForAgent = maxSpawnAttemptsForAgent;
             Spawnables = new List<Spawnable>();
             _goodGoalsMultiSpawned = new List<Goal>();
+            _badGoalsMultiSpawned = new List<Goal>();
         }
 
         public void Build()
@@ -97,6 +99,7 @@ namespace ArenaBuilders
             }
 
             updateGoodGoalsMulti();
+            updateBadGoalsMulti();
         }
 
         private void InstantiateSpawnables(GameObject spawnedObjectsHolder)
@@ -317,6 +320,10 @@ namespace ArenaBuilders
                 )
                 {
                     _goodGoalsMultiSpawned.Add(gameObjectInstance.GetComponent<Goal>());
+                }
+                if (gameObjectInstance.CompareTag("badGoalMulti"))
+                {
+                    _badGoalsMultiSpawned.Add(gameObjectInstance.GetComponent<Goal>());
                 }
                 if (optionals != null)
                 {
@@ -632,6 +639,27 @@ namespace ArenaBuilders
             {
                 goodGoalMulti.numberOfGoals = numberOfGoals;
             }
+        }
+
+        private void updateBadGoalsMulti()
+        {
+            int numberOfGoals = _badGoalsMultiSpawned.Count;
+            foreach (Goal badGoalMulti in _badGoalsMultiSpawned)
+            {
+                badGoalMulti.numberOfGoals = numberOfGoals;
+            }
+        }
+
+        private void AddToBadGoalsMultiSpawned(Goal bgm)
+        {
+            _badGoalsMultiSpawned.Add(bgm);
+            updateBadGoalsMulti();
+        }
+
+        private void AddToBadGoalsMultiSpawned(GameObject bgm)
+        {
+            _badGoalsMultiSpawned.Add(bgm.GetComponent<Goal>());
+            updateBadGoalsMulti();
         }
 
         public void AddToGoodGoalsMultiSpawned(Goal ggm)
