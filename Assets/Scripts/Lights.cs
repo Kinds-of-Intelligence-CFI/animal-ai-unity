@@ -91,7 +91,7 @@ namespace Lights
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error initialzisn lightswitch: {ex.Message}");
+                Console.WriteLine($"Error initialising lightSwitch: {ex.Message}");
                 throw;
             }
         }
