@@ -58,42 +58,35 @@ namespace Lights
 
         public LightsSwitch(int episodeLength, List<int> blackouts)
         {
-            try
+            if (episodeLength < 0)
             {
-                if (episodeLength < 0)
-                {
-                    throw new ArgumentException("Episode length (timeLimit) cannot be negative.");
-                }
+                throw new ArgumentException("Episode length (timeLimit) cannot be negative.", nameof(episodeLength));
+            }
 
-                _episodeLength = episodeLength;
-                _blackouts = blackouts ?? throw new ArgumentNullException(nameof(blackouts));
+            _episodeLength = episodeLength;
+            _blackouts = blackouts ?? throw new ArgumentNullException(nameof(blackouts));
 
-                if (_blackouts.Count > 1)
+            if (_blackouts.Count > 1)
+            {
+                for (int i = 1; i < _blackouts.Count; i++)
                 {
-                    for (int i = 1; i < _blackouts.Count; i++)
+                    if (_blackouts[i] <= _blackouts[i - 1])
                     {
-                        if (_blackouts[i] <= _blackouts[i - 1])
-                        {
-                            throw new ArgumentException("Invalid blackout sequence: values must be in strictly increasing order.");
-                        }
+                        throw new ArgumentException("Invalid blackout sequence: values must be in strictly increasing order.", nameof(blackouts));
                     }
                 }
+            }
 
-                if (_blackouts.Count > 0 && _blackouts[0] < 0)
-                {
-                    _blackoutsEnum = new InfiniteEnumerator(-_blackouts[0]);
-                }
-                else
-                {
-                    _blackoutsEnum = _blackouts.GetEnumerator();
-                }
-                Reset();
-            }
-            catch (Exception ex)
+            if (_blackouts.Count > 0 && _blackouts[0] < 0)
             {
-                Console.WriteLine($"Error initialising lightSwitch: {ex.Message}");
-                throw;
+                _blackoutsEnum = new InfiniteEnumerator(-_blackouts[0]);
             }
+            else
+            {
+                _blackoutsEnum = _blackouts.GetEnumerator();
+            }
+
+            Reset();
         }
 
         public void Reset()
