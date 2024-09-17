@@ -95,16 +95,28 @@ public class LightsSwitchTests
     [Test]
     public void LightsSwitch_HandleInfiniteBlackoutsWithNegativeNumber()
     {
-        var lightsSwitch = new LightsSwitch(100, new List<int> { -20 });
-        Assert.IsTrue(lightsSwitch.LightStatus(0, 1));
-        Assert.IsTrue(lightsSwitch.LightStatus(19, 1));
-        Assert.IsFalse(lightsSwitch.LightStatus(20, 1));
-        Assert.IsFalse(lightsSwitch.LightStatus(39, 1));
-        Assert.IsTrue(lightsSwitch.LightStatus(40, 1));
-        Assert.IsTrue(lightsSwitch.LightStatus(59, 1));
-        Assert.IsFalse(lightsSwitch.LightStatus(60, 1));
-        Assert.IsFalse(lightsSwitch.LightStatus(79, 1));
-        Assert.IsTrue(lightsSwitch.LightStatus(80, 1));
-    }
+        /* 
+         * The blackout list contains a single negative number, which means that the blackout will go repeat infinitely on the blackoutInterval frame.
+         * The light should be OFF at step 0, ON at step 1, OFF at step 2, and so on.
+         */
+        const int episodeLength = 100;
+        const int blackoutInterval = 20;
+        const int agentDecisionInterval = 1;
 
+        var blackoutList = new List<int> { -blackoutInterval };
+        var lightsSwitch = new LightsSwitch(episodeLength, blackoutList);
+
+        /* Initial light status checks, then follows with the blackout sequences */
+        Assert.IsTrue(lightsSwitch.LightStatus(0, agentDecisionInterval), "Light should be ON at step 0");
+        Assert.IsTrue(lightsSwitch.LightStatus(19, agentDecisionInterval), "Light should be ON before blackout at step 19");
+
+        Assert.IsFalse(lightsSwitch.LightStatus(20, agentDecisionInterval), "Light should be OFF during blackout at step 20");
+        Assert.IsFalse(lightsSwitch.LightStatus(39, agentDecisionInterval), "Light should be OFF during blackout at step 39");
+
+        Assert.IsTrue(lightsSwitch.LightStatus(40, agentDecisionInterval), "Light should be ON after blackout at step 40");
+        Assert.IsTrue(lightsSwitch.LightStatus(59, agentDecisionInterval), "Light should be ON before next blackout at step 59");
+
+        Assert.IsFalse(lightsSwitch.LightStatus(60, agentDecisionInterval), "Light should be OFF during blackout at step 60");
+        Assert.IsFalse(lightsSwitch.LightStatus(79, agentDecisionInterval), "Light should be OFF during blackout at step 79");
+    }
 }
