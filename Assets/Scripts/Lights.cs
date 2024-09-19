@@ -77,9 +77,21 @@ namespace Lights
                 }
             }
 
-            if (_blackouts.Count > 0 && _blackouts[0] < 0)
+            if (_blackouts.Count > 0)
             {
-                _blackoutsEnum = new InfiniteEnumerator(-_blackouts[0]);
+                if (_blackouts[_blackouts.Count - 1] > _episodeLength)
+                {
+                    throw new ArgumentException("Blackout time cannot exceed the episode length (timeLimit).", nameof(blackouts));
+                }
+
+                if (_blackouts[0] < 0)
+                {
+                    _blackoutsEnum = new InfiniteEnumerator(-_blackouts[0]);
+                }
+                else
+                {
+                    _blackoutsEnum = _blackouts.GetEnumerator();
+                }
             }
             else
             {
