@@ -211,6 +211,7 @@ MonoBehaviour:
   childObjectToMove: {fileID: 2667445423738929804}
   moveOffset: {x: 0.09, y: 0, z: 0}
   rewardSpawnPoint: {fileID: 5820607059387166607}
+  spawnerID: 0
 --- !u!1 &2667445423738929804
 GameObject:
   m_ObjectHideFlags: 0
@@ -476,6 +477,7 @@ MonoBehaviour:
   sizeMin: {x: 80, y: 80, z: 80}
   sizeMax: {x: 80, y: 80, z: 80}
   canRandomizeColor: 0
+  allowColorCustomization: 0
   ratioSize: {x: 0.5, y: 0.5, z: 0.5}
   sizeAdjustment: 0.999
   textureUVOverride: 0
