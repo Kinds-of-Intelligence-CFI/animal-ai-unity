@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8839437840819701191}
   m_Layer: 0
   m_Name: Ramp
-  m_TagString: Ramp
+  m_TagString: Immovable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -51,7 +51,7 @@ MonoBehaviour:
   sizeMax: {x: 40, y: 10, z: 40}
   canRandomizeColor: 1
   ratioSize: {x: 0.5, y: 0.5, z: 0.5}
-  sizeAdjustement: 0.999
+  sizeAdjustment: 0.999
   textureUVOverride: 1
   typicalOrigin: 1
 --- !u!54 &8839437840819701191
