@@ -5,6 +5,7 @@ using ArenasParameters;
 /// <summary>
 /// Tests for the ArenasParametersEventArgs class.
 /// </summary>
+[TestFixture]
 public class ArenasParametersEventArgsTests
 {
     [Test]
