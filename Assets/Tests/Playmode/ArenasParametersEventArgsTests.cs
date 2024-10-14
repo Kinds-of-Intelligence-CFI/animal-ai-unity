@@ -2,7 +2,9 @@ using System;
 using NUnit.Framework;
 using ArenasParameters;
 
-[TestFixture]
+/// <summary>
+/// Tests for the ArenasParametersEventArgs class.
+/// </summary>
 public class ArenasParametersEventArgsTests
 {
     [Test]
