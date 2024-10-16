@@ -23,7 +23,7 @@ public class Goal : Prefab
             return;
         }
 
-        /* Create a new material to apply color changes. This is unique for each instance */
+        /* Create a new material to apply color changes. This is unique for each instance so every instance has its own material */
         Material originalMaterial = renderer.material;
         renderer.material = new Material(originalMaterial);
 
