@@ -1,6 +1,9 @@
 using UnityEngine;
 using NUnit.Framework;
 
+/// <summary>
+/// Tests for the Goal class in edit mode.
+/// </summary>
 public class GoalTests
 {
     private class TestGoal : Goal
@@ -38,6 +41,39 @@ public class GoalTests
     {
         var gameObject = new GameObject();
         return gameObject.AddComponent<TestGoal>();
+    }
+
+    [Test]
+    public void ApplyColorToRenderer_ModifiesExistingMaterial()
+    {
+        var testGoal = CreateTestGoal();
+        var renderer = new GameObject().AddComponent<MeshRenderer>();
+        var originalMaterial = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        renderer.sharedMaterial = originalMaterial;
+        var color = Color.green;
+
+        testGoal.TestApplyColorToRenderer(renderer, color, true);
+
+        Assert.AreEqual(originalMaterial, renderer.sharedMaterial);
+        Assert.AreEqual(color, renderer.sharedMaterial.GetColor("_BaseColor"));
+        Assert.AreEqual(color, renderer.sharedMaterial.GetColor("_EmissionColor"));
+        Assert.IsTrue(renderer.sharedMaterial.IsKeywordEnabled("_EMISSION"));
+    }
+
+    [Test]
+    public void ApplyColorToRenderer_AppliesColorToExistingMaterial()
+    {
+        var testGoal = CreateTestGoal();
+        var renderer = new GameObject().AddComponent<MeshRenderer>();
+        var originalMaterial = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        renderer.sharedMaterial = originalMaterial;
+        var color = Color.green;
+
+        testGoal.TestApplyColorToRenderer(renderer, color, true);
+
+        Assert.AreEqual(color, renderer.sharedMaterial.GetColor("_BaseColor"));
+        Assert.AreEqual(color, renderer.sharedMaterial.GetColor("_EmissionColor"));
+        Assert.IsTrue(renderer.sharedMaterial.IsKeywordEnabled("_EMISSION"));
     }
 
     [Test]
