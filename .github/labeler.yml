@@ -1,0 +1,17 @@
+# Label for changes in Unity assets or scripts
+assets:
+  - 'Assets/**'
+
+# Label for changes in documentation files
+docs:
+  - '**/*.md'
+  - 'Documentation/**'
+
+# Label for changes related to CI/CD workflows
+ci-cd:
+  - '.github/workflows/**'
+
+# Label for changes in YAML configuration files
+config:
+  - '**/*.yaml'
+  - '**/*.yml'
