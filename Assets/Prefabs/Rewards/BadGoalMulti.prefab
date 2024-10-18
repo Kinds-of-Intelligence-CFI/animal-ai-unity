@@ -137,6 +137,6 @@ MonoBehaviour:
   textureUVOverride: 0
   typicalOrigin: 1
   numberOfGoals: 1
-  reward: -1
+  reward: -0.003
   isMulti: 1
   rewardType: BadGoalMulti
