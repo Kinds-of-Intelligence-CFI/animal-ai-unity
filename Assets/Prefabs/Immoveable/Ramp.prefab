@@ -50,6 +50,7 @@ MonoBehaviour:
   sizeMin: {x: 0.5, y: 0.1, z: 0.5}
   sizeMax: {x: 40, y: 10, z: 40}
   canRandomizeColor: 1
+  allowColorCustomization: 0
   ratioSize: {x: 0.5, y: 0.5, z: 0.5}
   sizeAdjustment: 0.999
   textureUVOverride: 1
