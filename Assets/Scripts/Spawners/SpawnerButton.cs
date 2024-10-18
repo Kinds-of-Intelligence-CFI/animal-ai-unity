@@ -7,6 +7,9 @@ using ArenaBuilders;
 /// <summary>
 /// Spawns a reward when interacted with. The reward is chosen from a list of rewards with weights and spawn probabilities.
 /// The reward can be spawned at a fixed position or randomly within the arena bounds.
+/// 
+/// TODO: Refactor the code to use the ArenaBuilder class to get the arena bounds.
+/// TODO: Set default values for RewardSpawnPos.
 /// </summary>
 public class SpawnerButton : MonoBehaviour
 {

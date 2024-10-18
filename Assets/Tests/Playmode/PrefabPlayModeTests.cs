@@ -27,6 +27,9 @@ public class PrefabPlayModeTests
         _prefab.rotationRange = new Vector2(0, 360);
         _prefab.canRandomizeColor = true;
         _prefab.sizeAdjustment = 0.999f;
+
+        /* Color customization for testing */
+        _prefab.allowColorCustomization = true;
     }
 
     [UnityTest]
@@ -35,8 +38,10 @@ public class PrefabPlayModeTests
         Vector3 testColor = new Vector3(255, 0, 0);
         _prefab.SetColor(testColor);
 
+        /* Getting the color from the renderer's material */
         Color appliedColor = _prefabObject.GetComponent<Renderer>().material.color;
 
+        /* Here, simply asserting that the color is between 0 and 1, as the color is normalized */
         Assert.AreEqual(new Color(1f, 0f, 0f, 1f), appliedColor);
         yield return null;
     }

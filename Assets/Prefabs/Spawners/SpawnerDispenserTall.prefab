@@ -299,8 +299,9 @@ MonoBehaviour:
   sizeMin: {x: 1, y: 1, z: 1}
   sizeMax: {x: 1, y: 1, z: 1}
   canRandomizeColor: 0
+  allowColorCustomization: 1
   ratioSize: {x: 1, y: 1, z: 1}
-  sizeAdjustement: 0.999
+  sizeAdjustment: 0.999
   textureUVOverride: 0
   typicalOrigin: 0
   spawnObjects:
@@ -315,13 +316,13 @@ MonoBehaviour:
   timeBetweenSpawns: 0.5
   delaySeconds: 0
   spawnCount: 10
-  colourOverride: {r: 0, g: 0.7882353, b: 1, a: 1}
   objSpawnSeed: 0
   spawnSizeSeed: 1
-  triggerActivated: 0
-  stockpiling: 1
+  spawnerID: 0
+  spawnerPosition: {x: 0, y: 0, z: 0}
+  isStockpiling: 1
   doorOpenDelay: 0
-  infiniteDoorOpens: 1
+  isDoorOpenInfinite: 1
   timeUntilDoorOpens: 2.5
   timeUntilDoorCloses: 1.5
   minDoorOpenTime: 1.4

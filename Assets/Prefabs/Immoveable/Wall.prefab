@@ -131,7 +131,8 @@ MonoBehaviour:
   sizeMin: {x: 0.1, y: 0.1, z: 0.1}
   sizeMax: {x: 40, y: 10, z: 40}
   canRandomizeColor: 1
+  allowColorCustomization: 0
   ratioSize: {x: 1, y: 1, z: 1}
-  sizeAdjustement: 0.999
+  sizeAdjustment: 0.999
   textureUVOverride: 1
   typicalOrigin: 1

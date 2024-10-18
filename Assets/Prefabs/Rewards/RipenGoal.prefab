@@ -133,6 +133,7 @@ MonoBehaviour:
   sizeMin: {x: 0, y: 0, z: 0}
   sizeMax: {x: 0, y: 0, z: 0}
   canRandomizeColor: 1
+  allowColorCustomization: 0
   ratioSize: {x: 1, y: 1, z: 1}
   sizeAdjustment: 0.999
   textureUVOverride: 0
@@ -148,3 +149,5 @@ MonoBehaviour:
   finalColour: {r: 0.913099, g: 0.72305536, b: 0.13843165, a: 1}
   flipDecayDirection: 0
   fixedFrameDelay: 150
+  isDecaying: 0
+  delayCounter: 0

@@ -1,11 +1,12 @@
 using NUnit.Framework;
 using UnityEngine;
 using ArenaBuilders;
-using System;
 using ArenasParameters;
+using System.Reflection;
+using System.Collections.Generic;
 
 /// <summary>
-/// Tests for the ArenaBuilder class. Contains half of the tests for the ArenaBuilder class.
+/// Tests for the ArenaBuilder class. Contains non-runtime tests for the ArenaBuilder class.
 /// </summary>
 public class ArenaBuilderEditModeTests
 {
@@ -47,6 +48,34 @@ public class ArenaBuilderEditModeTests
         Debug.Log($"_spawnedObjectsHolder: {_spawnedObjectsHolder}");
         Debug.Log($"_arenaBuilder: {_arenaBuilder}");
         Debug.Log($"Spawnables count: {_arenaBuilder.Spawnables.Count}");
+    }
+
+    [Test]
+    public void GoodGoalsMultiSpawned_ShouldBeInitializedAsEmptyList()
+    {
+        var goodGoalsField = typeof(ArenaBuilder).GetField("_goodGoalsMultiSpawned", BindingFlags.NonPublic | BindingFlags.Instance);
+        var goodGoals = (List<Goal>)goodGoalsField.GetValue(_arenaBuilder);
+        Assert.IsEmpty(goodGoals);
+    }
+
+    [Test]
+    public void AddToGoodGoalsMultiSpawned_ShouldIncreaseGoalCount()
+    {
+        var goalObject = new GameObject("GoodGoal");
+        var goal = goalObject.AddComponent<Goal>();
+        _arenaBuilder.AddToGoodGoalsMultiSpawned(goal);
+
+        var goodGoalsField = typeof(ArenaBuilder).GetField("_goodGoalsMultiSpawned", BindingFlags.NonPublic | BindingFlags.Instance);
+        var goodGoals = (List<Goal>)goodGoalsField.GetValue(_arenaBuilder);
+        Assert.AreEqual(1, goodGoals.Count);
+    }
+
+    [Test]
+    public void BadGoalsMultiSpawned_ShouldBeInitializedAsEmptyList()
+    {
+        var badGoalsField = typeof(ArenaBuilder).GetField("_badGoalsMultiSpawned", BindingFlags.NonPublic | BindingFlags.Instance);
+        var badGoals = (List<Goal>)badGoalsField.GetValue(_arenaBuilder);
+        Assert.IsEmpty(badGoals);
     }
 
     [Test]

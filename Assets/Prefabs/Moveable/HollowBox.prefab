@@ -128,14 +128,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbc092bd4fa17904f9060b81e01c11d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rotationRange: {x: 0, y: 0}
-  sizeMin: {x: 1, y: 1, z: 1}
-  sizeMax: {x: 1, y: 1, z: 1}
+  rotationRange: {x: 0, y: 360}
+  sizeMin: {x: 0.5, y: 0.5, z: 0.5}
+  sizeMax: {x: 5, y: 5, z: 5}
   canRandomizeColor: 0
+  allowColorCustomization: 1
   ratioSize: {x: 0.5, y: 0.5, z: 0.5}
   sizeAdjustment: 0.999
   textureUVOverride: 0
-  typicalOrigin: 0
+  typicalOrigin: 1
 --- !u!1001 &5974215295510198779
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -205,7 +206,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: ede1661b93811684fae562a05cea2d83, type: 2}
     - target: {fileID: 919132149155446097, guid: 4fdda9a8bfa39a742b0ff29e019c77bb, type: 3}
       propertyPath: m_Name
-      value: cube4
+      value: HollowBlock
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4fdda9a8bfa39a742b0ff29e019c77bb, type: 3}
