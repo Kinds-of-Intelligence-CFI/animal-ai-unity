@@ -11,7 +11,6 @@ arenas:
       positions:
       - !Vector3 {x: 2, y: 1, z: 2}   # The position of the item. This is a Vector3 object with x, y, and z coordinates. Leave values for random spawning.
       rotations: [0] # The rotations of the items. It can be in any angle but default is 0 degrees.
-      frozenAgentDelays: [1] # The time in seconds the agent will be frozen at the start of the arena. This is useful for delayed start scenarios.
 
 # IMMOVABLE OBJECTS (Note: RAMP is immovable but has a special tag of "ramp" for the agent to detect).
 
@@ -112,7 +111,7 @@ arenas:
     - !Item
       name: SignBoard
       positions:
-      - !Vector3 {x: 39, y: 18, z: 27}
+      - !Vector3 {x: 39, y: 0, z: 27}
       rotations: [0]
       sizes:
       - !Vector3 {x: 1, y: 1, z: 1}
@@ -126,7 +125,7 @@ arenas:
     - !Item
       name: SpawnerButton # Interactive button that spawns rewards when triggered by the agent.
       positions:
-      - !Vector3 {x: 32, y: 31, z: 30}
+      - !Vector3 {x: 32, y: 0, z: 30}
       rotations: [0]
       sizes:
       - !Vector3 {x: 1, y: 1, z: 1}
@@ -141,7 +140,7 @@ arenas:
     - !Item
       name: SpawnerDispenserTall
       positions:
-      - !Vector3 {x: 10, y: 39, z: 38}
+      - !Vector3 {x: 10, y: 0, z: 38}
       rotations: [0]
       sizes:
       - !Vector3 {x: 1, y: 1, z: 1}
@@ -156,7 +155,7 @@ arenas:
     - !Item
       name: SpawnerContainerShort
       positions:
-      - !Vector3 {x: 16, y: 28, z: 30}
+      - !Vector3 {x: 16, y: 0, z: 30}
       rotations: [0]
       sizes:
       - !Vector3 {x: 1, y: 1, z: 1}
@@ -171,7 +170,7 @@ arenas:
     - !Item
       name: SpawnerTree
       positions:
-      - !Vector3 {x: 1, y: 15, z: 2}
+      - !Vector3 {x: 3, y: 0, z: 10}
       rotations: [0]
       sizes:
       - !Vector3 {x: 1, y: 1, z: 1}
@@ -272,14 +271,14 @@ arenas:
     - !Item
       name: HotZone
       positions:
-      - !Vector3 {x: 1, y: 18, z: 36}
+      - !Vector3 {x: 1, y: 0, z: 36}
       sizes:
       - !Vector3 {x: 1, y: 1, z: 1}
 
     - !Item
       name: DeathZone
       positions:
-      - !Vector3 {x: 14, y: 34, z: 18}
+      - !Vector3 {x: 14, y: 0, z: 18}
       sizes:
       - !Vector3 {x: 1, y: 1, z: 1}
 
