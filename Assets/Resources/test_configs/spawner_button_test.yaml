@@ -19,8 +19,8 @@ arenas:
       positions:
       - !Vector3 {x: 20, y: 0, z: 25}
       rotations: [0]
-      moveDurations: [0.1]
-      resetDurations: [1.0]
+      moveDurations: [0.1] # the duration for the button to move to the target position 
+      resetDurations: [1.0] # the duration for the button to reset to the original position
       rewardNames: ["GoodGoal", "BadGoal", "GoodGoalMulti"] # the list of rewards that can be spawned
       rewardWeights: [100, 0, 0] # the weights of each reward in the rewards list
       spawnProbability: 1.0 # the probability of spawning the reward 
