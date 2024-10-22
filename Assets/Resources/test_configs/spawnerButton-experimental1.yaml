@@ -1,0 +1,203 @@
+# Bespoke experimental arena configuration for Lucy Cheke (1).
+arenas:
+  0: !Arena
+    passMark: 0
+    timeLimit: 250
+    items:
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 20, y: 0, z: 15}
+      rotations: [0]
+
+    - !Item
+      name: Wall
+      positions:
+      - !Vector3 {x: 7, y: 1.20, z: 22.5}
+      rotations: [0]
+      sizes:
+      - !Vector3 {x: 13.3, y: 2.5, z: 3}
+      colors:
+      - !RGB {r: 255, g: 0, b: 255}
+
+    - !Item
+      name: Wall
+      positions:
+      - !Vector3 {x: 32.5, y: 1.20, z: 22.5}
+      rotations: [0]
+      sizes:
+      - !Vector3 {x: 14, y: 2.5, z: 3}
+      colors:
+      - !RGB {r: 255, g: 0, b: 255}
+  
+    - !Item
+      name: Wall
+      positions:
+      - !Vector3 {x: 16, y: 1.20, z: 22.5}
+      rotations: [0]
+      sizes:
+      - !Vector3 {x: 2.2, y: 2.5, z: 3}
+      colors:
+      - !RGB {r: 255, g: 0, b: 255}
+
+    - !Item
+      name: Wall
+      positions:
+      - !Vector3 {x: 19.5, y: 1, z: 22.5}
+      rotations: [0]
+      sizes:
+      - !Vector3 {x: 2.2, y: 2.5, z: 3}
+      colors:
+      - !RGB {r: 255, g: 0, b: 255}
+
+    - !Item
+      name: Wall
+      positions:
+      - !Vector3 {x: 23, y: 1, z: 22.5}
+      rotations: [0]
+      sizes:
+      - !Vector3 {x: 2.1, y: 2.5, z: 3}
+      colors:
+      - !RGB {r: 255, g: 0, b: 255}
+
+    - !Item
+      name: SignBoard
+      positions:
+      - !Vector3 {x: 14.3, y: 2.5, z: 20.9}
+      sizes:
+      - !Vector3 {x: 1, y: 1, z: 1}
+      rotations: [270]
+      symbolNames:
+      - "default"
+
+    - !Item
+      name: SignBoard
+      positions:
+      - !Vector3 {x: 17.8, y: 2.5, z: 20.9}
+      sizes:
+      - !Vector3 {x: 1, y: 1, z: 1}
+      rotations: [270]
+      symbolNames:
+      - "left-arrow"
+
+    - !Item
+      name: SignBoard
+      positions:
+      - !Vector3 {x: 21.3, y: 2.5, z: 20.9}
+      sizes:
+      - !Vector3 {x: 1, y: 1, z: 1}
+      rotations: [270]
+      symbolNames:
+      - "right-arrow"
+  
+    - !Item
+      name: SignBoard
+      positions:
+      - !Vector3 {x: 24.75, y: 2.5, z: 20.9}
+      sizes:
+      - !Vector3 {x: 1, y: 1, z: 1}
+      rotations: [270]
+      symbolNames:
+      - "circle"
+
+    - !Item
+      name: SpawnerButton
+      positions:
+      - !Vector3 {x: 14.5, y: 0, z: 21}
+      rotations: [90]
+      moveDurations: [0.1] # the duration for the button to move to the target position 
+      resetDurations: [1.0] # the duration for the button to reset to the original position
+      rewardNames: ["GoodGoal", "BadGoal", "GoodGoalMulti"] # the list of rewards that can be spawned
+      rewardWeights: [100, 0, 0] # the weights of each reward in the rewards list
+      spawnProbability: 1.0 # the probability of spawning the reward 
+      maxRewardCounts: [10, -1, -1] # the maximum number of times each reward can be spawned. -1 means no limit.
+      rewardSpawnPos: !Vector3 {x: 20, y: 0, z: 7.6} # the position where the reward will be spawned
+
+    - !Item
+      name: SpawnerButton
+      positions:
+      - !Vector3 {x: 18, y: 0, z: 21}
+      rotations: [90]
+      moveDurations: [0.1] # the duration for the button to move to the target position 
+      resetDurations: [1.0] # the duration for the button to reset to the original position
+      rewardNames: ["GoodGoal", "BadGoal", "GoodGoalMulti"] # the list of rewards that can be spawned
+      rewardWeights: [100, 0, 0] # the weights of each reward in the rewards list
+      spawnProbability: 1.0 # the probability of spawning the reward 
+      maxRewardCounts: [10, -1, -1] # the maximum number of times each reward can be spawned. -1 means no limit.
+      rewardSpawnPos: !Vector3 {x: 20, y: 0, z: 7.6} # the position where the reward will be spawned
+
+    - !Item
+      name: SpawnerButton
+      positions:
+      - !Vector3 {x: 21.5, y: 0, z: 21}
+      rotations: [90]
+      moveDurations: [0.1] # the duration for the button to move to the target position 
+      resetDurations: [1.0] # the duration for the button to reset to the original position
+      rewardNames: ["GoodGoal", "BadGoal", "GoodGoalMulti"] # the list of rewards that can be spawned
+      rewardWeights: [100, 0, 0] # the weights of each reward in the rewards list
+      spawnProbability: 1.0 # the probability of spawning the reward 
+      maxRewardCounts: [10, -1, -1] # the maximum number of times each reward can be spawned. -1 means no limit.
+      rewardSpawnPos: !Vector3 {x: 20, y: 0, z: 7.6} # the position where the reward will be spawned
+
+    - !Item
+      name: SpawnerButton
+      positions:
+      - !Vector3 {x: 25, y: 0, z: 21}
+      rotations: [90]
+      moveDurations: [0.1] # the duration for the button to move to the target position 
+      resetDurations: [1.0] # the duration for the button to reset to the original position
+      rewardNames: ["GoodGoal", "BadGoal", "GoodGoalMulti"] # the list of rewards that can be spawned
+      rewardWeights: [100, 0, 0] # the weights of each reward in the rewards list
+      spawnProbability: 1.0 # the probability of spawning the reward 
+      maxRewardCounts: [10, -1, -1] # the maximum number of times each reward can be spawned. -1 means no limit.
+      rewardSpawnPos: !Vector3 {x: 20, y: 0, z: 7.6} # the position where the reward will be spawned
+
+    - !Item
+      name: Wall
+      positions:
+      - !Vector3 {x: 9.3, y: 0, z: 7.6}
+      rotations: [0]
+      sizes:
+      - !Vector3 {x: 18, y: 2.5, z: 3}
+      colors:
+      - !RGB {r: 255, g: 0, b: 255}
+
+    - !Item
+      name: Wall
+      positions:
+      - !Vector3 {x: 30.9, y: 0, z: 7.6}
+      rotations: [0]
+      sizes:
+      - !Vector3 {x: 18, y: 2.5, z: 3}
+      colors:
+      - !RGB {r: 255, g: 0, b: 255}
+
+    - !Item
+      name: Wall
+      positions:
+      - !Vector3 {x: 7.5, y: 0, z: 15.03}
+      rotations: [90]
+      sizes:
+      - !Vector3 {x: 11.5, y: 2.5, z: 3}
+      colors:
+      - !RGB {r: 255, g: 0, b: 255}
+
+    - !Item
+      name: Wall
+      positions:
+      - !Vector3 {x: 32.5, y: 0, z: 15.03}
+      rotations: [90]
+      sizes:
+      - !Vector3 {x: 11.5, y: 2.5, z: 3}
+      colors:
+      - !RGB {r: 255, g: 0, b: 255}
+
+    - !Item
+      name: Wall
+      positions:
+      - !Vector3 {x: 20, y: 0, z: 4.53}
+      rotations: [0]
+      sizes:
+      - !Vector3 {x: 4.45, y: 2.5, z: 3}
+      colors:
+      - !RGB {r: 255, g: 0, b: 255}

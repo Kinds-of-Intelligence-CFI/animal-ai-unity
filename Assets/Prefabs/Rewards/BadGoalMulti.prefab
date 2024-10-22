@@ -131,11 +131,12 @@ MonoBehaviour:
   sizeMin: {x: 0.5, y: 0.5, z: 0.5}
   sizeMax: {x: 5, y: 5, z: 5}
   canRandomizeColor: 0
+  allowColorCustomization: 1
   ratioSize: {x: 1, y: 1, z: 1}
   sizeAdjustment: 0.999
   textureUVOverride: 0
   typicalOrigin: 1
   numberOfGoals: 1
-  reward: -1
+  reward: -0.003
   isMulti: 1
   rewardType: BadGoalMulti

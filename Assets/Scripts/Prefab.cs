@@ -16,6 +16,10 @@ public class Prefab : MonoBehaviour, IPrefab
     public Vector3 sizeMin;
     public Vector3 sizeMax;
     public bool canRandomizeColor = true;
+
+    [Header("Color Customization")]
+    public bool allowColorCustomization = false;
+
     public Vector3 ratioSize;
     public float sizeAdjustment = 0.999f;
 
@@ -27,24 +31,60 @@ public class Prefab : MonoBehaviour, IPrefab
 
     public virtual void SetColor(Vector3 color)
     {
-        if (canRandomizeColor)
+        if (!allowColorCustomization)
         {
-            Color newColor = new Color();
-            newColor.a = 1f;
-            newColor.r = color.x >= 0 ? color.x / 255f : Random.Range(0f, 1f);
-            newColor.g = color.y >= 0 ? color.y / 255f : Random.Range(0f, 1f);
-            newColor.b = color.z >= 0 ? color.z / 255f : Random.Range(0f, 1f);
+            return;
+        }
 
-            if (GetComponent<Renderer>() != null)
+        bool colorSpecified = color.x >= 0 && color.y >= 0 && color.z >= 0;
+
+        if (!colorSpecified && !canRandomizeColor)
+        {
+            return;
+        }
+
+        Renderer renderer = GetComponent<Renderer>();
+        if (renderer == null) return;
+
+        Color newColor;
+
+        if (colorSpecified)
+        {
+            /* Apply specified color from YAML config (RGB from 0 to 255) */
+            newColor = new Color(color.x / 255f, color.y / 255f, color.z / 255f, 1f);
+        }
+        else
+        {
+            newColor = new Color(
+                Random.Range(0f, 1f),
+                Random.Range(0f, 1f),
+                Random.Range(0f, 1f),
+                1f
+            );
+        }
+
+        ApplyColorToRenderer(renderer, newColor, colorSpecified);
+
+        /* Special case: handle child object color of HollowBox if needed (e.g. for HollowBlock) */
+        Transform childTransform = transform.Find("HollowBlock");
+        if (childTransform != null)
+        {
+            Renderer childRenderer = childTransform.GetComponent<Renderer>();
+            if (childRenderer != null)
             {
-                GetComponent<Renderer>().material.color = newColor;
+                ApplyColorToRenderer(childRenderer, newColor, colorSpecified);
             }
-            foreach (Renderer r in GetComponentsInChildren<Renderer>())
+        }
+    }
+
+    protected virtual void ApplyColorToRenderer(Renderer renderer, Color color, bool colorSpecified)
+    {
+        if (colorSpecified || canRandomizeColor)
+        {
+            if (renderer.material.color != color)
             {
-                if (
-                    r.material.GetFloat("_Surface") != 1 /* meaning 'Transparent' */
-                )
-                    r.material.color = newColor;
+                renderer.material = new Material(renderer.material);
+                renderer.material.color = color;
             }
         }
     }
