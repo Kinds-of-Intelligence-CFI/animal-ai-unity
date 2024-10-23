@@ -75,7 +75,7 @@ public class TrainingArena : MonoBehaviour
 
     void FixedUpdate()
     {
-        UpdateLigthStatus();
+        UpdateLightStatus();
     }
 
     private void OnDestroy()
@@ -293,7 +293,7 @@ public class TrainingArena : MonoBehaviour
         spawnedRewards.Clear();
     }
 
-    public void UpdateLigthStatus()
+    public void UpdateLightStatus()
     {
         int stepCount = _agent.StepCount;
         bool newLight = _arenaConfiguration.lightsSwitch.LightStatus(
