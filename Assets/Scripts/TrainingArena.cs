@@ -206,11 +206,11 @@ public class TrainingArena : MonoBehaviour
             else
             {
                 /* If the next arena is merged, sequentially search for the next unmerged one */
-                ArenaConfiguration preceedingArena = _arenaConfiguration;
+                ArenaConfiguration precedingArena = _arenaConfiguration;
                 arenaID = (arenaID + 1) % totalArenas;
-                while (preceedingArena.mergeNextArena)
+                while (precedingArena.mergeNextArena)
                 {
-                    preceedingArena = _environmentManager.GetConfiguration(arenaID);
+                    precedingArena = _environmentManager.GetConfiguration(arenaID);
                     arenaID = (arenaID + 1) % totalArenas;
                 }
             }
