@@ -251,8 +251,6 @@ public class TrainingArena : MonoBehaviour
         }
 
         _arenaConfiguration = newConfiguration;
-        Debug.Log($"Setting passMark to: {newConfiguration.passMark}");
-
         _arenaConfiguration.passMark = newConfiguration.passMark;
 
         var arenasConfigurations = _environmentManager.GetArenasConfigurations();
@@ -277,8 +275,8 @@ public class TrainingArena : MonoBehaviour
         {
             Random.InitState(_arenaConfiguration.randomSeed);
         }
-        
-        Debug.Log($"Final passMark in ApplyNewArenaConfiguration: {_arenaConfiguration.passMark}");
+
+        Debug.Log($"Final passMark value: {_arenaConfiguration.passMark}");
     }
 
     private void NotifyArenaChange()
