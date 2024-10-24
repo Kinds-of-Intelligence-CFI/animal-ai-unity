@@ -29,7 +29,7 @@ public class BallGoalBounceTests
         yield return new WaitForFixedUpdate();
 
         Assert.IsTrue(
-            _rBody.velocity.magnitude > 0,
+            _rBody.linearVelocity.magnitude > 0,
             "Rigidbody should have velocity after force is applied."
         );
     }
@@ -40,7 +40,7 @@ public class BallGoalBounceTests
         yield return new WaitForSeconds(0.1f);
 
         Assert.LessOrEqual(
-            _rBody.velocity.magnitude,
+            _rBody.linearVelocity.magnitude,
             _ballGoalBounce.maximumVelocity,
             "Rigidbody velocity should not exceed the maximum velocity."
         );
@@ -72,7 +72,7 @@ public class BallGoalBounceTests
             0,
             _ballGameObject.transform.forward.z
         ).normalized;
-        Vector3 actualDirectionXZ = new Vector3(_rBody.velocity.x, 0, _rBody.velocity.z).normalized;
+        Vector3 actualDirectionXZ = new Vector3(_rBody.linearVelocity.x, 0, _rBody.linearVelocity.z).normalized;
 
         Assert.AreEqual(
             expectedDirectionXZ,
