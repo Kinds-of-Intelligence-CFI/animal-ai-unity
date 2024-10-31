@@ -552,7 +552,7 @@ namespace ArenaBuilders
             );
 
             _agentRigidbody.angularVelocity = Vector3.zero;
-            _agentRigidbody.velocity = Vector3.zero;
+            _agentRigidbody.linearVelocity = Vector3.zero;
             _agent.transform.localPosition = agentToSpawnPosRot.Position;
             _agent.transform.rotation = Quaternion.Euler(agentToSpawnPosRot.Rotation);
 

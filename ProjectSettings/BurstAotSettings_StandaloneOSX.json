@@ -1,20 +1,17 @@
 {
   "MonoBehaviour": {
-    "Version": 3,
-<<<<<<< HEAD
+    "Version": 4,
     "EnableBurstCompilation": false,
     "EnableOptimisations": false,
-=======
-    "EnableBurstCompilation": true,
-    "EnableOptimisations": true,
->>>>>>> d14791cedce38ea0eed15d31ce13b51bf14fa7bc
     "EnableSafetyChecks": false,
     "EnableDebugInAllBuilds": false,
-    "UsePlatformSDKLinker": false,
+    "DebugDataKind": 0,
+    "EnableArmv9SecurityFeatures": false,
     "CpuMinTargetX32": 0,
     "CpuMaxTargetX32": 0,
     "CpuMinTargetX64": 0,
     "CpuMaxTargetX64": 0,
-    "CpuTargetsX64": 72
+    "CpuTargetsX64": 72,
+    "OptimizeFor": 0
   }
 }

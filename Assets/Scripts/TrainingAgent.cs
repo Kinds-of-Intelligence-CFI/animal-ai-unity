@@ -215,7 +215,7 @@ public class TrainingAgent : Agent, IPrefab
         _isFrozen = freeze;
         if (_isFrozen)
         {
-            _rigidBody.velocity = Vector3.zero;
+            _rigidBody.linearVelocity = Vector3.zero;
             _rigidBody.angularVelocity = Vector3.zero;
         }
     }
@@ -250,7 +250,7 @@ public class TrainingAgent : Agent, IPrefab
         }
 
         var rayPerceptionInput = rayPerception.GetRayPerceptionInput();
-        var rayPerceptionOutput = RayPerceptionSensor.Perceive(rayPerceptionInput);
+        var rayPerceptionOutput = RayPerceptionSensor.Perceive(rayPerceptionInput, false);
         float[] hitFractions = rayPerceptionOutput.RayOutputs.Select(r => r.HitFraction).ToArray();
         string[] hitTags = rayPerceptionOutput.RayOutputs
             .Select(r => r.HitGameObject?.tag ?? "None")
@@ -262,7 +262,7 @@ public class TrainingAgent : Agent, IPrefab
     public override void CollectObservations(VectorSensor sensor)
     {
         sensor.AddObservation(health);
-        Vector3 localVel = transform.InverseTransformDirection(_rigidBody.velocity);
+        Vector3 localVel = transform.InverseTransformDirection(_rigidBody.linearVelocity);
         sensor.AddObservation(localVel);
         Vector3 localPos = transform.position;
         sensor.AddObservation(localPos);
@@ -314,7 +314,7 @@ public class TrainingAgent : Agent, IPrefab
             MoveAgent(lastActionForward, lastActionRotate);
         }
 
-        Vector3 localVel = transform.InverseTransformDirection(_rigidBody.velocity);
+        Vector3 localVel = transform.InverseTransformDirection(_rigidBody.linearVelocity);
         Vector3 localPos = transform.position;
         bool wasAgentFrozen = IsFrozen();
         string actionForwardDescription = DescribeActionForward(lastActionForward);
@@ -574,7 +574,7 @@ public class TrainingAgent : Agent, IPrefab
         if (IsFrozen())
         {
             /* If the agent is frozen, stop all movement and rotation */
-            _rigidBody.velocity = Vector3.zero;
+            _rigidBody.linearVelocity = Vector3.zero;
             _rigidBody.angularVelocity = Vector3.zero;
             return;
         }
@@ -594,8 +594,8 @@ public class TrainingAgent : Agent, IPrefab
                     directionToGo = transform.forward * -1f;
                     break;
                 case 0: /* Slow down faster than drag with no input */
-                    quickStop = _rigidBody.velocity * quickStopRatio;
-                    _rigidBody.velocity = quickStop;
+                    quickStop = _rigidBody.linearVelocity * quickStopRatio;
+                    _rigidBody.linearVelocity = quickStop;
                     break;
             }
         }
