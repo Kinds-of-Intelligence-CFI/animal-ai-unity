@@ -7,6 +7,7 @@ using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using Unity.MLAgents.SideChannels;
 using Unity.MLAgents.Policies;
+using ArenaBuilders;
 
 /// <summary>
 /// Manages the environment settings and configurations, including the arena, player controls, and UI canvas.
@@ -52,13 +53,25 @@ public class AAI3EnvironmentManager : MonoBehaviour
     private TrainingArena _instantiatedArena;
     private ArenasParametersSideChannel _arenasParametersSideChannel;
     public ArenasParametersSideChannel ArenasParametersSideChannel => _arenasParametersSideChannel;
-
     public static event Action<int, int> OnArenaChanged;
+
+    [Header("Prefabs for Default Configuration")]
+    [SerializeField]
+    private ListOfPrefabs prefabs;
+
+    private ArenaBuilder _builder;
 
     public void Awake()
     {
         _arenasConfigurations = new ArenasConfigurations();
         InitialiseSideChannel();
+
+        _builder = new ArenaBuilder(
+            arena,
+            null,
+            50,
+            100
+        );
 
         Dictionary<string, int> environmentParameters = RetrieveEnvironmentParameters();
         int paramValue;
@@ -97,7 +110,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
         }
 
         resolution = Math.Max(minimumResolution, Math.Min(maximumResolution, resolution));
-        TrainingArena arena = FindObjectOfType<TrainingArena>();
+        TrainingArena foundArena = FindObjectOfType<TrainingArena>();
 
         InstantiateArenas();
 
@@ -239,6 +252,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
         return _arenasConfigurations.CurrentArenaID;
     }
 
+
     public int GetTotalArenas()
     {
         return _arenasConfigurations.configurations.Count;
@@ -326,12 +340,69 @@ public class AAI3EnvironmentManager : MonoBehaviour
 
     public ArenaConfiguration GetConfiguration(int arenaID)
     {
-        ArenaConfiguration returnConfiguration;
-        if (!_arenasConfigurations.configurations.TryGetValue(arenaID, out returnConfiguration))
+        if (!_arenasConfigurations.configurations.ContainsKey(arenaID))
         {
-            throw new KeyNotFoundException($"Tried to load arena {arenaID} but it did not exist");
+            Debug.LogWarning($"Arena ID {arenaID} not found. Generating a default configuration dynamically.");
+
+            ArenaConfiguration defaultConfig = new ArenaConfiguration
+            {
+                TimeLimit = 250,
+                passMark = 50,
+                randomSeed = UnityEngine.Random.Range(1, 1000),
+                mergeNextArena = false
+            };
+
+            if (prefabs != null && prefabs.allPrefabs != null && prefabs.allPrefabs.Count > 0)
+            {
+                HashSet<Vector3> usedPositions = new HashSet<Vector3>();
+
+                foreach (GameObject prefab in prefabs.allPrefabs)
+                {
+                    if (prefab != null)
+                    {
+                        Vector3 position;
+                        int maxAttempts = 100;
+                        int attempt = 0;
+
+                        do
+                        {
+                            position = new Vector3(
+                                UnityEngine.Random.Range(0f, _builder.ArenaWidth),
+                                0,
+                                UnityEngine.Random.Range(0f, _builder.ArenaDepth)
+                            );
+                            attempt++;
+                        } while (usedPositions.Contains(position) && attempt < maxAttempts);
+
+                        if (attempt >= maxAttempts)
+                        {
+                            Debug.LogWarning("Max attempts reached for unique position generation.");
+                            continue;
+                        }
+
+                        usedPositions.Add(position);
+
+                        Spawnable spawnable = new Spawnable(prefab)
+                        {
+                            positions = new List<Vector3> { position },
+                            rotations = new List<float> { UnityEngine.Random.Range(0f, 360f) },
+                            sizes = new List<Vector3> { new Vector3(1f, 1f, 1f) }
+                        };
+
+                        defaultConfig.spawnables.Add(spawnable);
+                    }
+                }
+            }
+            else
+            {
+                Debug.LogWarning("No prefabs available in ListOfPrefabs to generate default arena items.");
+            }
+
+            _arenasConfigurations.configurations[arenaID] = defaultConfig;
+            return defaultConfig;
         }
-        return returnConfiguration;
+
+        return _arenasConfigurations.configurations[arenaID];
     }
 
     public void AddConfiguration(int arenaID, ArenaConfiguration arenaConfiguration)

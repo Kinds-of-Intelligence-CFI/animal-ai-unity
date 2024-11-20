@@ -1000,7 +1000,32 @@ MonoBehaviour:
   arena: {fileID: 1540725604319108, guid: cb05c844a0de0cd4880c39b9a1aedeef, type: 3}
   uiCanvas: {fileID: 1822920678}
   playerControls: {fileID: 1065671190}
-  configFile: test_configs/decoy-file-test
+  configFile: 
+  prefabs:
+    allPrefabs:
+    - {fileID: 1815161577820678, guid: 13bfe2062d9da44c3ad50af269aee8e4, type: 3}
+    - {fileID: 1257552320740340, guid: d94254d7ea5635c46858e5fc59d05dce, type: 3}
+    - {fileID: 7041498159436349378, guid: 00c912a41dbd87a4ba31cad3fe3ec871, type: 3}
+    - {fileID: 1590974018198160, guid: 5da12025d550b024ebb68cb882a47760, type: 3}
+    - {fileID: 8198268042785363230, guid: ffd2cd7ca87da284da43c2c4c32125a0, type: 3}
+    - {fileID: 8591433599567253167, guid: ae4aa75ba68666d438128632dad7bf83, type: 3}
+    - {fileID: 1434092799595714, guid: bc82df06a7f1723429cc8045ad9f6903, type: 3}
+    - {fileID: 100000, guid: 69778c1c7c6ab0347873489680055f3b, type: 3}
+    - {fileID: 3105226629790840520, guid: f98e4e70443f6744e989e7879513b47c, type: 3}
+    - {fileID: 2677753433345384935, guid: c66daefb742ffd04e966184d9d067ff6, type: 3}
+    - {fileID: 1667824677047789405, guid: 0ae8158faf8e8284da1f2eae3fad2ee5, type: 3}
+    - {fileID: 100000, guid: be4293003497e0d4e8de465a5ae0a4c6, type: 3}
+    - {fileID: 6620029679494263603, guid: fd0b550c82e81464bb10f9684b3abf7c, type: 3}
+    - {fileID: 1323439192758780, guid: 20ee7ff63eb4c1442b21e7e98c580314, type: 3}
+    - {fileID: 1311020654520240, guid: f3d2126090ed23744bf83d0faf1f3280, type: 3}
+    - {fileID: 1815161577820678, guid: efdf89976edbdaa42aee9b9c7013c916, type: 3}
+    - {fileID: 7041498159436349378, guid: 193b60b183270e64e8450003a296c3e7, type: 3}
+    - {fileID: 1815161577820678, guid: 125fabec8c22e0240a1a15856c0ba250, type: 3}
+    - {fileID: 1815161577820678, guid: 00ac9feb8de9fc043b8d1ac23824d86b, type: 3}
+    - {fileID: 7150004164178407081, guid: b19f8e36bd5ca73489a251d8daa9acea, type: 3}
+    - {fileID: 6131923203371649459, guid: ce5a25432c06c184e848968dfac329dc, type: 3}
+    - {fileID: 6131923203371649459, guid: 2647b94027143164f8f1f4851d148d1f, type: 3}
+    - {fileID: 6131923203371649459, guid: a82f888801d22644f94d9c3f2aa98b71, type: 3}
 --- !u!1 &660795385
 GameObject:
   m_ObjectHideFlags: 0

@@ -173,11 +173,6 @@ public class AAI3EnvironmentManagerTests
         _environmentManager.LoadYAMLFileInEditor();
     }
 
-    [Test]
-    public void AAI3EnvironmentManager_GetConfiguration_ThrowsExceptionWhenArenaIDNotFound()
-    {
-        Assert.Throws<KeyNotFoundException>(() => _environmentManager.GetConfiguration(999));
-    }
 
     [Test]
     public void AAI3EnvironmentManager_GetConfiguration_ReturnsCorrectConfiguration()

@@ -192,6 +192,13 @@ public class TrainingArena : MonoBehaviour
         int totalArenas = _environmentManager.GetTotalArenas();
         bool randomizeArenas = _environmentManager.GetRandomizeArenasStatus();
 
+        if (totalArenas == 0)
+        {
+            Debug.LogWarning("Total arenas count is zero. Defaulting to arena ID 0 (default configuration). ");
+            arenaID = 0;
+            return;
+        }
+
         if (isFirstArenaReset)
         {
             isFirstArenaReset = false;
@@ -248,6 +255,11 @@ public class TrainingArena : MonoBehaviour
         {
             Debug.LogError("Environment Manager is null in ApplyNewArenaConfiguration.");
             return;
+        }
+        if (newConfiguration.TimeLimit == 0)
+        {
+            Debug.LogWarning("Time limit is zero. Setting to default value using randomSeed logic.");
+            newConfiguration.TimeLimit = Random.Range(1, 500);
         }
 
         _arenaConfiguration = newConfiguration;
