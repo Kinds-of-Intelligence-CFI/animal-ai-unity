@@ -1000,7 +1000,7 @@ MonoBehaviour:
   arena: {fileID: 1540725604319108, guid: cb05c844a0de0cd4880c39b9a1aedeef, type: 3}
   uiCanvas: {fileID: 1822920678}
   playerControls: {fileID: 1065671190}
-  configFile: 
+  configFile: test_configs/decoy-file-test
   prefabs:
     allPrefabs:
     - {fileID: 1815161577820678, guid: 13bfe2062d9da44c3ad50af269aee8e4, type: 3}
