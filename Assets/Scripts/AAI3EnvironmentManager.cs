@@ -8,6 +8,9 @@ using Unity.MLAgents.Sensors;
 using Unity.MLAgents.SideChannels;
 using Unity.MLAgents.Policies;
 using ArenaBuilders;
+using UnityEngine.Networking;
+using YAMLDefs;
+using System.Collections;
 
 /// <summary>
 /// Manages the environment settings and configurations, including the arena, player controls, and UI canvas.
@@ -15,37 +18,20 @@ using ArenaBuilders;
 public class AAI3EnvironmentManager : MonoBehaviour
 {
     [Header("Arena Settings")]
-    [SerializeField]
-    public GameObject arena;
-
-    [SerializeField]
-    public GameObject uiCanvas;
-
-    [SerializeField]
-    public GameObject playerControls;
+    [SerializeField] public GameObject arena;
+    [SerializeField] public GameObject uiCanvas;
+    [SerializeField] public GameObject playerControls;
 
     [Header("Configuration File")]
-    [SerializeField]
-    public string configFile = "";
+    [SerializeField] public string configFile = "";
 
     [Header("Resolution Settings")]
-    [SerializeField]
-    private const int maximumResolution = 512;
-
-    [SerializeField]
-    private const int minimumResolution = 4;
-
-    [SerializeField]
-    private const int defaultResolution = 84;
-
-    [SerializeField]
-    private const int defaultRaysPerSide = 2;
-
-    [SerializeField]
-    private const int defaultRayMaxDegrees = 60;
-
-    [SerializeField]
-    private const int defaultDecisionPeriod = 3;
+    [SerializeField] private const int maximumResolution = 512;
+    [SerializeField] private const int minimumResolution = 4;
+    [SerializeField] private const int defaultResolution = 84;
+    [SerializeField] private const int defaultRaysPerSide = 2;
+    [SerializeField] private const int defaultRayMaxDegrees = 60;
+    [SerializeField] private const int defaultDecisionPeriod = 3;
 
     public bool PlayerMode { get; private set; } = true;
 
@@ -56,45 +42,32 @@ public class AAI3EnvironmentManager : MonoBehaviour
     public static event Action<int, int> OnArenaChanged;
 
     [Header("Prefabs for Default Configuration")]
-    [SerializeField]
-    private ListOfPrefabs prefabs;
+    [SerializeField] private ListOfPrefabs prefabs;
 
     private ArenaBuilder _builder;
+
+    // Add the YAML file names you want to load from streaming assets at runtime:
+    [SerializeField] private List<string> yamlFileNames = new List<string> { };
+
+    private YAMLReader yamlReader;
 
     public void Awake()
     {
         _arenasConfigurations = new ArenasConfigurations();
         InitialiseSideChannel();
 
-        _builder = new ArenaBuilder(
-            arena,
-            null,
-            50,
-            100
-        );
+        _builder = new ArenaBuilder(arena, null, 50, 100);
 
         Dictionary<string, int> environmentParameters = RetrieveEnvironmentParameters();
         int paramValue;
-        bool playerMode =
-            (environmentParameters.TryGetValue("playerMode", out paramValue) ? paramValue : 1) > 0;
-        bool useCamera =
-            (environmentParameters.TryGetValue("useCamera", out paramValue) ? paramValue : 0) > 0;
-        int resolution = environmentParameters.TryGetValue("resolution", out paramValue)
-            ? paramValue
-            : defaultResolution;
-        bool grayscale =
-            (environmentParameters.TryGetValue("grayscale", out paramValue) ? paramValue : 0) > 0;
-        bool useRayCasts =
-            (environmentParameters.TryGetValue("useRayCasts", out paramValue) ? paramValue : 0) > 0;
-        int raysPerSide = environmentParameters.TryGetValue("raysPerSide", out paramValue)
-            ? paramValue
-            : defaultRaysPerSide;
-        int rayMaxDegrees = environmentParameters.TryGetValue("rayMaxDegrees", out paramValue)
-            ? paramValue
-            : defaultRayMaxDegrees;
-        int decisionPeriod = environmentParameters.TryGetValue("decisionPeriod", out paramValue)
-            ? paramValue
-            : defaultDecisionPeriod;
+        bool playerMode = (environmentParameters.TryGetValue("playerMode", out paramValue) ? paramValue : 1) > 0;
+        bool useCamera = (environmentParameters.TryGetValue("useCamera", out paramValue) ? paramValue : 0) > 0;
+        int resolution = environmentParameters.TryGetValue("resolution", out paramValue) ? paramValue : defaultResolution;
+        bool grayscale = (environmentParameters.TryGetValue("grayscale", out paramValue) ? paramValue : 0) > 0;
+        bool useRayCasts = (environmentParameters.TryGetValue("useRayCasts", out paramValue) ? paramValue : 0) > 0;
+        int raysPerSide = environmentParameters.TryGetValue("raysPerSide", out paramValue) ? paramValue : defaultRaysPerSide;
+        int rayMaxDegrees = environmentParameters.TryGetValue("rayMaxDegrees", out paramValue) ? paramValue : defaultRayMaxDegrees;
+        int decisionPeriod = environmentParameters.TryGetValue("decisionPeriod", out paramValue) ? paramValue : defaultDecisionPeriod;
 
         if (Application.isEditor)
         {
@@ -106,7 +79,13 @@ public class AAI3EnvironmentManager : MonoBehaviour
             useRayCasts = true;
             raysPerSide = 2;
 
+            // Editor mode: load using the original Resources.Load logic
             LoadYAMLFileInEditor();
+        }
+        else
+        {
+            // Non-editor mode: load YAML from StreamingAssets
+            // We'll do this in Start(), since we want to use coroutines if needed.
         }
 
         resolution = Math.Max(minimumResolution, Math.Min(maximumResolution, resolution));
@@ -147,20 +126,22 @@ public class AAI3EnvironmentManager : MonoBehaviour
             }
             if (playerMode)
             {
-                a.GetComponentInChildren<BehaviorParameters>().BehaviorType =
-                    BehaviorType.HeuristicOnly;
+                a.GetComponentInChildren<BehaviorParameters>().BehaviorType = BehaviorType.HeuristicOnly;
             }
         }
-        PrintDebugInfo(
-            playerMode,
-            useCamera,
-            resolution,
-            grayscale,
-            useRayCasts,
-            raysPerSide,
-            rayMaxDegrees
-        );
+
+        PrintDebugInfo(playerMode, useCamera, resolution, grayscale, useRayCasts, raysPerSide, rayMaxDegrees);
         _instantiatedArena._agent.gameObject.SetActive(true);
+    }
+
+    void Start()
+    {
+        // If not in editor, load YAML files from StreamingAssets for runtime configuration.
+        if (!Application.isEditor)
+        {
+            yamlReader = new YAMLDefs.YAMLReader();
+            StartCoroutine(LoadAllYamlFilesFromStreamingAssets());
+        }
     }
 
     public void InitialiseSideChannel()
@@ -180,8 +161,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
         try
         {
             _arenasParametersSideChannel = new ArenasParametersSideChannel();
-            _arenasParametersSideChannel.NewArenasParametersReceived +=
-                _arenasConfigurations.UpdateWithConfigurationsReceived;
+            _arenasParametersSideChannel.NewArenasParametersReceived += _arenasConfigurations.UpdateWithConfigurationsReceived;
             SideChannelManager.RegisterSideChannel(_arenasParametersSideChannel);
         }
         catch (Exception ex)
@@ -198,6 +178,93 @@ public class AAI3EnvironmentManager : MonoBehaviour
         _instantiatedArena.arenaID = 0;
     }
 
+    // Directly integrate YAML from StreamingAssets folder. Seems to be the best approach.
+    private IEnumerator LoadAllYamlFilesFromStreamingAssets()
+    {
+        List<ArenaConfig> loadedConfigs = new List<ArenaConfig>();
+        string basePath = Application.streamingAssetsPath + "/Yamls/";
+
+        foreach (var fileName in yamlFileNames)
+        {
+            string filePath = basePath + fileName;
+            string yamlContent = null;
+
+#if UNITY_WEBGL
+            // WebGL: use UnityWebRequest to load files from StreamingAssets folder. 
+            UnityWebRequest www = UnityWebRequest.Get(filePath);
+            yield return www.SendWebRequest();
+            if (www.result == UnityWebRequest.Result.Success)
+            {
+                yamlContent = www.downloadHandler.text;
+            }
+            else
+            {
+                Debug.LogError($"Failed to load {fileName}: {www.error}");
+            }
+#else
+            // Non-WebGL: read directly from file system, so nothing changes here.
+            if (System.IO.File.Exists(filePath))
+            {
+                yamlContent = System.IO.File.ReadAllText(filePath);
+            }
+            else
+            {
+                Debug.LogError("YAML file not found at " + filePath);
+            }
+#endif
+
+            if (!string.IsNullOrEmpty(yamlContent))
+            {
+                ArenaConfig config = yamlReader.deserializer.Deserialize<ArenaConfig>(yamlContent);
+                if (config != null)
+                {
+                    loadedConfigs.Add(config);
+                    Debug.Log($"Loaded {fileName} successfully from StreamingAssets.");
+                }
+                else
+                {
+                    Debug.LogWarning($"Parsed YAML is null for {fileName}");
+                }
+            }
+        }
+
+        ArenaConfig finalConfig = MergeArenaConfigs(loadedConfigs);
+        ApplyConfigToEnvironment(finalConfig);
+
+        yield break;
+    }
+
+    private ArenaConfig MergeArenaConfigs(List<ArenaConfig> configs)
+    {
+        if (configs.Count == 0)
+            return null;
+
+        var finalConfig = configs[0];
+        for (int i = 1; i < configs.Count; i++)
+        {
+            foreach (var kvp in configs[i].arenas)
+            {
+                finalConfig.arenas[kvp.Key] = kvp.Value;
+            }
+        }
+        return finalConfig;
+    }
+
+    // Apply the final YAML config to the environment using _arenasConfigurations.UpdateWithYAML
+    private void ApplyConfigToEnvironment(ArenaConfig config)
+    {
+        if (config == null)
+        {
+            Debug.LogWarning("No configuration found in YAML files.");
+            return;
+        }
+
+        // Directly integrate with your arena configuration system
+        _arenasConfigurations.UpdateWithYAML(config);
+
+        Debug.Log("YAML configuration applied from StreamingAssets!");
+    }
+
     public void LoadYAMLFileInEditor()
     {
         if (string.IsNullOrWhiteSpace(configFile))
@@ -212,9 +279,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
             if (configYAML != null)
             {
                 var YAMLReader = new YAMLDefs.YAMLReader();
-                var parsed = YAMLReader.deserializer.Deserialize<YAMLDefs.ArenaConfig>(
-                    configYAML.text
-                );
+                var parsed = YAMLReader.deserializer.Deserialize<YAMLDefs.ArenaConfig>(configYAML.text);
                 if (parsed != null)
                 {
                     _arenasConfigurations.UpdateWithYAML(parsed);
@@ -226,14 +291,12 @@ public class AAI3EnvironmentManager : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning($"YAML file '{configFile}' could not be found or loaded.");
+                Debug.LogWarning($"YAML file '{configFile}' could not be found or loaded via Resources.");
             }
         }
         catch (Exception ex)
         {
-            Debug.LogError(
-                $"An error occurred while loading or processing the YAML file: {ex.Message}"
-            );
+            Debug.LogError($"An error occurred while loading or processing the YAML file in editor: {ex.Message}");
         }
     }
 
@@ -252,7 +315,6 @@ public class AAI3EnvironmentManager : MonoBehaviour
         return _arenasConfigurations.CurrentArenaID;
     }
 
-
     public int GetTotalArenas()
     {
         return _arenasConfigurations.configurations.Count;
@@ -263,22 +325,13 @@ public class AAI3EnvironmentManager : MonoBehaviour
         return _arenasConfigurations;
     }
 
-    public void ChangeRayCasts(
-        RayPerceptionSensorComponent3D raySensor,
-        int no_raycasts,
-        int max_degrees
-    )
+    public void ChangeRayCasts(RayPerceptionSensorComponent3D raySensor, int no_raycasts, int max_degrees)
     {
         raySensor.RaysPerDirection = no_raycasts;
         raySensor.MaxRayDegrees = max_degrees;
     }
 
-    public void ChangeResolution(
-        CameraSensorComponent cameraSensor,
-        int cameraWidth,
-        int cameraHeight,
-        bool grayscale
-    )
+    public void ChangeResolution(CameraSensorComponent cameraSensor, int cameraWidth, int cameraHeight, bool grayscale)
     {
         cameraSensor.Width = cameraWidth;
         cameraSensor.Height = cameraHeight;
@@ -418,32 +471,17 @@ public class AAI3EnvironmentManager : MonoBehaviour
         }
     }
 
-    private void PrintDebugInfo(
-        bool playerMode,
-        bool useCamera,
-        int resolution,
-        bool grayscale,
-        bool useRayCasts,
-        int raysPerSide,
-        int rayMaxDegrees
-    )
+    private void PrintDebugInfo(bool playerMode, bool useCamera, int resolution, bool grayscale, bool useRayCasts, int raysPerSide, int rayMaxDegrees)
     {
         Debug.Log(
             "Environment loaded with options:"
-                + "\n  PlayerMode: "
-                + playerMode
-                + "\n  useCamera: "
-                + useCamera
-                + "\n  Resolution: "
-                + resolution
-                + "\n  grayscale: "
-                + grayscale
-                + "\n  useRayCasts: "
-                + useRayCasts
-                + "\n  raysPerSide: "
-                + raysPerSide
-                + "\n  rayMaxDegrees: "
-                + rayMaxDegrees
+            + "\n  PlayerMode: " + playerMode
+            + "\n  useCamera: " + useCamera
+            + "\n  Resolution: " + resolution
+            + "\n  grayscale: " + grayscale
+            + "\n  useRayCasts: " + useRayCasts
+            + "\n  raysPerSide: " + raysPerSide
+            + "\n  rayMaxDegrees: " + rayMaxDegrees
         );
     }
 
