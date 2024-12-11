@@ -1,0 +1,33 @@
+# Testing file for ongoing development.
+!ArenaConfig
+arenas:
+  0: !Arena
+    passMark: 0
+    timeLimit: 100
+    items:
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 10, y: 0, z: 20}
+      rotations: [90]
+    - !Item
+      name: GoodGoal
+      positions:
+      - !Vector3 {x: 25, y: 0, z: 25}
+      sizes:
+      - !Vector3 {x: 5, y: 5, z: 5}
+  1: !Arena
+    passMark: 0
+    timeLimit: 100
+    items:
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 10, y: 0, z: 20}
+      rotations: [90]
+    - !Item
+      name: BadGoal
+      positions:
+      - !Vector3 {x: 25, y: 0, z: 25}
+      sizes:
+      - !Vector3 {x: 5, y: 5, z: 5}
