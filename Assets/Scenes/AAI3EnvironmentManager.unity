@@ -1027,7 +1027,7 @@ MonoBehaviour:
     - {fileID: 6131923203371649459, guid: 2647b94027143164f8f1f4851d148d1f, type: 3}
     - {fileID: 6131923203371649459, guid: a82f888801d22644f94d9c3f2aa98b71, type: 3}
   yamlFileNames:
-  - decoy-file-test.yaml
+  - default-configuration-webgl.yaml
 --- !u!1 &660795385
 GameObject:
   m_ObjectHideFlags: 0
