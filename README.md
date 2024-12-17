@@ -8,7 +8,27 @@ Developed originally using `Unity 2020.3.9f1` and `ML-Agents 2.1.0-exp.1`.
 
 Currently using `Unity 6000.0.23f1` and `ML-Agents 3.0.0`.
 
+## WebGL Build
+WEBGL build has limitations and is INCOMPLETE. 
+- WebGL build is not fully functional.
+- WebGL build is not fully tested.
+- WebGL build is not fully integrated with the main branch.
+- WebGL build is not fully optimized.
+- WebGL build is not fully documented.
+- Some features may not work as intended or even work at all due to the limitations of WebGL (such as serialisation).
+- Some code was written specifically for WebGL build and may be breaking or not working as intended. This was done to quickly create a WebGL build for demonstration purposes and is not recommended for production (i.e. AAI3EnvironmentManager.cs and ArenaParameters.cs were modified for WebGL build but hastely and probably not the best approach).
+
+- TODO: 
+  - Add WebGL build ref to animal-ai repo.
+  - Implement testing for WebGL build.
+  - Merge WebGL build with main branch or create a new repo for WebGL build.
+  - Optimize WebGL build.
+  - Document WebGL build.
+  - Fix code written specifically for WebGL build.
+
 ## Version History
+- WebGL v1.0.0
+  - Initial release of WebGL version.
 - v5.0.0
   - Upgraded Unity Game Engine to `Unity 6000.0.23f1`.
   - Updated ML-Agents to `3.0.0` (transitioned to non-experimental version).
