@@ -11,7 +11,6 @@ using ArenaBuilders;
 using UnityEngine.Networking;
 using YAMLDefs;
 using System.Collections;
-using System.Linq;
 
 /// <summary>
 /// Manages the environment settings and configurations, including the arena, player controls, and UI canvas.
@@ -46,8 +45,11 @@ public class AAI3EnvironmentManager : MonoBehaviour
     [SerializeField] private ListOfPrefabs prefabs;
 
     private ArenaBuilder _builder;
+
+    [Header("YAML Files to Load (Ordered)")]
     // Add the YAML file names you want to load from streaming assets at runtime:
     [SerializeField] private List<string> yamlFileNames = new List<string> { };
+
     private YAMLReader yamlReader;
 
     public void Awake()
@@ -71,6 +73,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
 
         if (Application.isEditor)
         {
+            // If not in editor, load YAML files from StreamingAssets for runtime configuration.
             Debug.Log("Using Unity Editor Default Configuration");
             playerMode = true;
             useCamera = true;
@@ -127,7 +130,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
         if (!Application.isEditor)
         {
             yamlReader = new YAMLReader();
-            StartCoroutine(LoadAllYamlFilesFromStreamingAssets());
+            StartCoroutine(LoadArenasFromYAMLFiles());
         }
     }
 
@@ -165,15 +168,18 @@ public class AAI3EnvironmentManager : MonoBehaviour
         _instantiatedArena.arenaID = 0;
     }
 
-    // Directly integrate YAML from StreamingAssets folder. Seems to be the best approach.
-    private IEnumerator LoadAllYamlFilesFromStreamingAssets()
+    /// <summary>
+    /// Loads arenas from each YAML file in order, appending arenas to _arenasConfigurations incrementally.
+    /// No merging step. Each YAML file's arenas are appended with new sequential IDs.
+    /// </summary>
+    private IEnumerator LoadArenasFromYAMLFiles()
     {
-        List<ArenaConfig> loadedConfigs = new List<ArenaConfig>();
         string basePath = Application.streamingAssetsPath + "/Yamls/";
+        int nextArenaId = 0;
 
         foreach (var fileName in yamlFileNames)
         {
-            string filePath = basePath + fileName;
+            string filePath = Path.Combine(basePath, fileName);
             string yamlContent = null;
 
 #if UNITY_WEBGL
@@ -186,6 +192,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
             else
             {
                 Debug.LogError($"Failed to load {fileName}: {www.error}");
+                continue; // move on to next file
             }
 #else
             if (File.Exists(filePath))
@@ -194,75 +201,47 @@ public class AAI3EnvironmentManager : MonoBehaviour
             }
             else
             {
-                Debug.LogError("YAML file not found at " + filePath);
+                Debug.LogError($"YAML file not found at {filePath}");
+                continue; // move on to next file
             }
 #endif
+
             if (!string.IsNullOrEmpty(yamlContent))
             {
                 ArenaConfig config = yamlReader.deserializer.Deserialize<ArenaConfig>(yamlContent);
-                if (config != null)
+                if (config != null && config.arenas != null && config.arenas.Count > 0)
                 {
-                    loadedConfigs.Add(config);
-                    Debug.Log($"Loaded {fileName} successfully from StreamingAssets.");
+                    // Append arenas to configurations, renumbering IDs from nextArenaId upward.
+                    foreach (var kvp in config.arenas)
+                    {
+                        _arenasConfigurations.configurations[nextArenaId] = new ArenaConfiguration(kvp.Value);
+                        nextArenaId++;
+                    }
+
+                    // Update global flags if needed (just take last file's flags or combine logically)
+                    _arenasConfigurations.randomizeArenas |= config.randomizeArenas;
+                    _arenasConfigurations.showNotification |= config.showNotification;
+                    _arenasConfigurations.canResetEpisode &= config.canResetEpisode;
+                    _arenasConfigurations.canChangePerspective &= config.canChangePerspective;
+
+                    Debug.Log($"Loaded {config.arenas.Count} arenas from {fileName}, total arenas now: {_arenasConfigurations.configurations.Count}");
                 }
                 else
                 {
-                    Debug.LogWarning($"Parsed YAML is null for {fileName}");
+                    Debug.LogWarning($"No arenas found or parsed as null in {fileName}");
                 }
             }
         }
 
-        ArenaConfig finalConfig = MergeArenaConfigs(loadedConfigs);
-        ApplyConfigToEnvironment(finalConfig);
-        yield break;
-    }
-
-    private ArenaConfig MergeArenaConfigs(List<ArenaConfig> configs)
-    {
-        if (configs.Count == 0)
-            return null;
-
-        // Just merge them by appending. Already fixed ID approach in UpdateWithYAML
-        ArenaConfig merged = new ArenaConfig
+        if (_arenasConfigurations.configurations.Count == 0)
         {
-            arenas = new Dictionary<int, YAMLDefs.Arena>(),
-            randomizeArenas = configs.Any(c => c.randomizeArenas),
-            showNotification = configs.Any(c => c.showNotification),
-            canResetEpisode = configs.All(c => c.canResetEpisode),
-            canChangePerspective = configs.All(c => c.canChangePerspective)
-        };
-
-        int nextId = 0;
-        foreach (var c in configs)
-        {
-            foreach (var kvp in c.arenas)
-            {
-                merged.arenas[nextId] = kvp.Value;
-                nextId++;
-            }
-        }
-        return merged;
-    }
-
-    private void ApplyConfigToEnvironment(ArenaConfig config)
-    {
-        if (config == null)
-        {
-            Debug.LogError("No YAML configuration found! No fallback random generation.");
-            return;
-        }
-
-        _arenasConfigurations.UpdateWithYAML(config);
-
-        int arenaCount = _arenasConfigurations.configurations.Count;
-        if (arenaCount == 0)
-        {
-            Debug.LogError("No arenas loaded after YAML processing. No fallback created.");
+            Debug.LogError("No arenas loaded from any YAML files!");
         }
         else
         {
-            Debug.Log($"YAML configuration applied. Total arenas loaded: {arenaCount}");
+            Debug.Log($"All YAML files processed. Total arenas loaded: {_arenasConfigurations.configurations.Count}");
         }
+        yield break;
     }
 
     public void LoadYAMLFileInEditor()
@@ -280,24 +259,34 @@ public class AAI3EnvironmentManager : MonoBehaviour
             {
                 var YAMLReader = new YAMLReader();
                 var parsed = YAMLReader.deserializer.Deserialize<ArenaConfig>(configYAML.text);
-                if (parsed != null)
+                if (parsed != null && parsed.arenas != null && parsed.arenas.Count > 0)
                 {
-                    _arenasConfigurations.UpdateWithYAML(parsed);
-                    Debug.Log($"Editor mode: Loaded {parsed.arenas.Count} arenas from {configFile}");
+                    int nextArenaId = 0;
+                    foreach (var kvp in parsed.arenas)
+                    {
+                        _arenasConfigurations.configurations[nextArenaId] = new ArenaConfiguration(kvp.Value);
+                        nextArenaId++;
+                    }
+                    _arenasConfigurations.randomizeArenas = parsed.randomizeArenas;
+                    _arenasConfigurations.showNotification = parsed.showNotification;
+                    _arenasConfigurations.canResetEpisode = parsed.canResetEpisode;
+                    _arenasConfigurations.canChangePerspective = parsed.canChangePerspective;
+
+                    Debug.Log($"Editor mode: Loaded {_arenasConfigurations.configurations.Count} arenas from {configFile}");
                 }
                 else
                 {
-                    Debug.LogWarning("Deserialized YAML content is null.");
+                    Debug.LogWarning("Deserialized YAML is empty or null for arenas.");
                 }
             }
             else
             {
-                Debug.LogWarning($"YAML file '{configFile}' could not be found in Resources.");
+                Debug.LogWarning($"YAML file '{configFile}' not found in Resources.");
             }
         }
         catch (Exception ex)
         {
-            Debug.LogError($"Error loading processing YAML in editor: {ex.Message}");
+            Debug.LogError($"Error loading YAML in editor: {ex.Message}");
         }
     }
 
@@ -397,7 +386,6 @@ public class AAI3EnvironmentManager : MonoBehaviour
         if (!_arenasConfigurations.configurations.ContainsKey(arenaID))
         {
             Debug.LogError($"Arena ID {arenaID} not found in configurations!");
-            // No fallback here, just return null or throw to catch logic errors elsewhere
             throw new KeyNotFoundException($"Arena ID {arenaID} not found.");
         }
 
@@ -406,7 +394,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
 
     public void AddConfiguration(int arenaID, ArenaConfiguration arenaConfiguration)
     {
-        _arenasConfigurations.configurations.Add(arenaID, arenaConfiguration);
+        _arenasConfigurations.configurations[arenaID] = arenaConfiguration;
     }
 
     public void OnDestroy()
