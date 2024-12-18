@@ -19,7 +19,7 @@ arenas:
       - !Vector3 { x: 2, y: 2, z: 2 }
   1: !Arena
     passMark: 1
-    t: 500
+    timeLimit: 250
     items:
     - !Item
       name: Agent
@@ -34,7 +34,7 @@ arenas:
       - !Vector3 { x: 2, y: 2, z: 2 }
   2: !Arena
     passMark: 1
-    t: 500
+    timeLimit: 250
     items:
     - !Item
       name: Agent
@@ -49,7 +49,7 @@ arenas:
       - !Vector3 { x: 2, y: 2, z: 2 }
   -3: !Arena
     passMark: 1
-    t: 500
+    timeLimit: 250
     items:
     - !Item
       name: Agent

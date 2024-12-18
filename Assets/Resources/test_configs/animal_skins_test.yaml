@@ -1,6 +1,6 @@
 # Testing all the animal skins to make sure they are all working correctly.
-arenas:
 !ArenaConfig
+arenas:
   0: !Arena
     passMark: 0
     timeLimit: 250
@@ -13,7 +13,7 @@ arenas:
       skins: ["panda"]
   1: !Arena
     passMark: 0
-    t: 250
+    timeLimit: 250
     items:
     - !Item
       name: Agent
@@ -23,7 +23,7 @@ arenas:
       skins: ["pig"]
   2: !Arena
     passMark: 0
-    t: 250
+    timeLimit: 250
     items:
     - !Item
       name: Agent
