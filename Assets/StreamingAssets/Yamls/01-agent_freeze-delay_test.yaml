@@ -19,7 +19,7 @@ arenas:
       - !RGB {r: 80, g: 0, b: 60}
   1: !Arena
     passMark: 0
-    t: 1000
+    timeLimit: 250
     items:
     - !Item
       name: Agent
