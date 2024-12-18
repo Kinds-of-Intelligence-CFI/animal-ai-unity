@@ -10,13 +10,6 @@ arenas:
       positions:
       - !Vector3 {x: 10, y: 0, z: 20}
       rotations: [90]
-    - !Item
-      name: SpawnerDispenser
-      positions:
-      - !Vector3 {x: 25, y: 0, z: 25}
-      initialValues: [0.7, 2]
-      colors:
-      - !RGB {r: 80, g: 0, b: 60}
   1: !Arena
     passMark: 0
     timeLimit: 250
@@ -26,3 +19,10 @@ arenas:
       positions:
       - !Vector3 {x: 20, y: 0, z: 1}
       rotations: [0]
+    - !Item
+      name: SpawnerDispenser
+      positions:
+      - !Vector3 {x: 25, y: 0, z: 25}
+      initialValues: [0.7, 2]
+      colors:
+      - !RGB {r: 100, g: 0, b: 0}
