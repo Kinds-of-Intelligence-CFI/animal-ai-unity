@@ -73,7 +73,6 @@ arenas:
       - !Vector3 {x: 1, y: 1, z: 1}
       colors:
       - !RGB {r: 255, g: 0, b: 255}
-
     - !Item
       name: CylinderTunnelTransparent
       positions:
@@ -83,7 +82,6 @@ arenas:
       - !Vector3 {x: 1, y: 1, z: 1}
       colors:
       - !RGB {r: 255, g: 0, b: 255}
-
     - !Item
       name: Ramp
       positions:
@@ -93,7 +91,6 @@ arenas:
       - !Vector3 {x: 1, y: 1, z: 1}
       colors:
       - !RGB {r: 255, g: 0, b: 255}
-      
     - !Item
       name: Wall
       positions:
@@ -103,7 +100,6 @@ arenas:
       - !Vector3 {x: 1, y: 1, z: 1}
       colors:
       - !RGB {r: 255, g: 0, b: 255}
-
     - !Item
       name: WallTransparent
       positions:
@@ -129,7 +125,6 @@ arenas:
       rotations: [0]
       sizes:
       - !Vector3 {x: 1, y: 1, z: 1}
-
     - !Item
       name: LightBlock
       positions:
@@ -137,7 +132,6 @@ arenas:
       rotations: [0]
       sizes:
       - !Vector3 {x: 1, y: 1, z: 1}
-
     - !Item
       name: JBlock
       positions:
@@ -145,7 +139,6 @@ arenas:
       rotations: [0]
       sizes:
       - !Vector3 {x: 1, y: 1, z: 1}
-
     - !Item
       name: LBlock
       positions:
@@ -153,7 +146,6 @@ arenas:
       rotations: [0]
       sizes:
       - !Vector3 {x: 1, y: 1, z: 1}
-
     - !Item
       name: UBlock
       positions:
@@ -198,7 +190,6 @@ arenas:
       timesBetweenSpawns: [0.0]
       doorDelays: [0.0]
       spawnCounts: [10]
-
     - !Item
       name: SpawnerContainerShort
       positions:
@@ -213,7 +204,6 @@ arenas:
       timesBetweenSpawns: [0.5]
       doorDelays: [1.0]
       spawnCounts: [1]
-
     - !Item
       name: SpawnerTree
       positions:
@@ -241,14 +231,12 @@ arenas:
       - !Vector3 {x: 15, y: 1, z: 25}
       sizes:
       - !Vector3 {x: 1, y: 1, z: 1}
-
     - !Item
       name: DeathZone
       positions:
       - !Vector3 {x: 14, y: 0, z: 18}
       sizes:
       - !Vector3 {x: 1, y: 1, z: 1}
-
     - !Item
       name: DataZone
       positions:
