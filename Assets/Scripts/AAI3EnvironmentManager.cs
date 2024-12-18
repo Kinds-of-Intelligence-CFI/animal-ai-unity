@@ -11,6 +11,7 @@ using ArenaBuilders;
 using UnityEngine.Networking;
 using YAMLDefs;
 using System.Collections;
+using System.Linq;
 
 /// <summary>
 /// Manages the environment settings and configurations, including the arena, player controls, and UI canvas.
@@ -45,10 +46,8 @@ public class AAI3EnvironmentManager : MonoBehaviour
     [SerializeField] private ListOfPrefabs prefabs;
 
     private ArenaBuilder _builder;
-
     // Add the YAML file names you want to load from streaming assets at runtime:
     [SerializeField] private List<string> yamlFileNames = new List<string> { };
-
     private YAMLReader yamlReader;
 
     public void Awake()
@@ -58,8 +57,9 @@ public class AAI3EnvironmentManager : MonoBehaviour
 
         _builder = new ArenaBuilder(arena, null, 50, 100);
 
-        Dictionary<string, int> environmentParameters = RetrieveEnvironmentParameters();
+        var environmentParameters = RetrieveEnvironmentParameters(); // Changed from dictionary to var to avoid explicit type
         int paramValue;
+
         bool playerMode = (environmentParameters.TryGetValue("playerMode", out paramValue) ? paramValue : 1) > 0;
         bool useCamera = (environmentParameters.TryGetValue("useCamera", out paramValue) ? paramValue : 0) > 0;
         int resolution = environmentParameters.TryGetValue("resolution", out paramValue) ? paramValue : defaultResolution;
@@ -82,13 +82,9 @@ public class AAI3EnvironmentManager : MonoBehaviour
             // Editor mode: load using the original Resources.Load logic
             LoadYAMLFileInEditor();
         }
-        else
-        {
-            // Non-editor mode: load YAML from StreamingAssets
-            // We'll do this in Start(), since we want to use coroutines if needed.
-        }
 
         resolution = Math.Max(minimumResolution, Math.Min(maximumResolution, resolution));
+
         TrainingArena foundArena = FindObjectOfType<TrainingArena>();
 
         InstantiateArenas();
@@ -105,11 +101,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
             }
             else
             {
-                ChangeRayCasts(
-                    a.GetComponentInChildren<RayPerceptionSensorComponent3D>(),
-                    raysPerSide,
-                    rayMaxDegrees
-                );
+                ChangeRayCasts(a.GetComponentInChildren<RayPerceptionSensorComponent3D>(), raysPerSide, rayMaxDegrees);
             }
             if (!useCamera)
             {
@@ -117,12 +109,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
             }
             else
             {
-                ChangeResolution(
-                    a.GetComponentInChildren<CameraSensorComponent>(),
-                    resolution,
-                    resolution,
-                    grayscale
-                );
+                ChangeResolution(a.GetComponentInChildren<CameraSensorComponent>(), resolution, resolution, grayscale);
             }
             if (playerMode)
             {
@@ -139,7 +126,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
         // If not in editor, load YAML files from StreamingAssets for runtime configuration.
         if (!Application.isEditor)
         {
-            yamlReader = new YAMLDefs.YAMLReader();
+            yamlReader = new YAMLReader();
             StartCoroutine(LoadAllYamlFilesFromStreamingAssets());
         }
     }
@@ -190,7 +177,6 @@ public class AAI3EnvironmentManager : MonoBehaviour
             string yamlContent = null;
 
 #if UNITY_WEBGL
-            // WebGL: use UnityWebRequest to load files from StreamingAssets folder. 
             UnityWebRequest www = UnityWebRequest.Get(filePath);
             yield return www.SendWebRequest();
             if (www.result == UnityWebRequest.Result.Success)
@@ -202,17 +188,15 @@ public class AAI3EnvironmentManager : MonoBehaviour
                 Debug.LogError($"Failed to load {fileName}: {www.error}");
             }
 #else
-            // Non-WebGL: read directly from file system, so nothing changes here.
-            if (System.IO.File.Exists(filePath))
+            if (File.Exists(filePath))
             {
-                yamlContent = System.IO.File.ReadAllText(filePath);
+                yamlContent = File.ReadAllText(filePath);
             }
             else
             {
                 Debug.LogError("YAML file not found at " + filePath);
             }
 #endif
-
             if (!string.IsNullOrEmpty(yamlContent))
             {
                 ArenaConfig config = yamlReader.deserializer.Deserialize<ArenaConfig>(yamlContent);
@@ -230,7 +214,6 @@ public class AAI3EnvironmentManager : MonoBehaviour
 
         ArenaConfig finalConfig = MergeArenaConfigs(loadedConfigs);
         ApplyConfigToEnvironment(finalConfig);
-
         yield break;
     }
 
@@ -239,30 +222,47 @@ public class AAI3EnvironmentManager : MonoBehaviour
         if (configs.Count == 0)
             return null;
 
-        var finalConfig = configs[0];
-        for (int i = 1; i < configs.Count; i++)
+        // Just merge them by appending. Already fixed ID approach in UpdateWithYAML
+        ArenaConfig merged = new ArenaConfig
         {
-            foreach (var kvp in configs[i].arenas)
+            arenas = new Dictionary<int, YAMLDefs.Arena>(),
+            randomizeArenas = configs.Any(c => c.randomizeArenas),
+            showNotification = configs.Any(c => c.showNotification),
+            canResetEpisode = configs.All(c => c.canResetEpisode),
+            canChangePerspective = configs.All(c => c.canChangePerspective)
+        };
+
+        int nextId = 0;
+        foreach (var c in configs)
+        {
+            foreach (var kvp in c.arenas)
             {
-                finalConfig.arenas[kvp.Key] = kvp.Value;
+                merged.arenas[nextId] = kvp.Value;
+                nextId++;
             }
         }
-        return finalConfig;
+        return merged;
     }
 
-    // Apply the final YAML config to the environment using _arenasConfigurations.UpdateWithYAML
     private void ApplyConfigToEnvironment(ArenaConfig config)
     {
         if (config == null)
         {
-            Debug.LogWarning("No configuration found in YAML files.");
+            Debug.LogError("No YAML configuration found! No fallback random generation.");
             return;
         }
 
-        // Directly integrate with your arena configuration system
         _arenasConfigurations.UpdateWithYAML(config);
 
-        Debug.Log("YAML configuration applied from StreamingAssets!");
+        int arenaCount = _arenasConfigurations.configurations.Count;
+        if (arenaCount == 0)
+        {
+            Debug.LogError("No arenas loaded after YAML processing. No fallback created.");
+        }
+        else
+        {
+            Debug.Log($"YAML configuration applied. Total arenas loaded: {arenaCount}");
+        }
     }
 
     public void LoadYAMLFileInEditor()
@@ -278,11 +278,12 @@ public class AAI3EnvironmentManager : MonoBehaviour
             var configYAML = Resources.Load<TextAsset>(configFile);
             if (configYAML != null)
             {
-                var YAMLReader = new YAMLDefs.YAMLReader();
-                var parsed = YAMLReader.deserializer.Deserialize<YAMLDefs.ArenaConfig>(configYAML.text);
+                var YAMLReader = new YAMLReader();
+                var parsed = YAMLReader.deserializer.Deserialize<ArenaConfig>(configYAML.text);
                 if (parsed != null)
                 {
                     _arenasConfigurations.UpdateWithYAML(parsed);
+                    Debug.Log($"Editor mode: Loaded {parsed.arenas.Count} arenas from {configFile}");
                 }
                 else
                 {
@@ -291,12 +292,12 @@ public class AAI3EnvironmentManager : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning($"YAML file '{configFile}' could not be found or loaded via Resources.");
+                Debug.LogWarning($"YAML file '{configFile}' could not be found in Resources.");
             }
         }
         catch (Exception ex)
         {
-            Debug.LogError($"An error occurred while loading or processing the YAML file in editor: {ex.Message}");
+            Debug.LogError($"Error loading processing YAML in editor: {ex.Message}");
         }
     }
 
@@ -395,64 +396,9 @@ public class AAI3EnvironmentManager : MonoBehaviour
     {
         if (!_arenasConfigurations.configurations.ContainsKey(arenaID))
         {
-            Debug.LogWarning($"Arena ID {arenaID} not found. Generating a default configuration dynamically.");
-
-            ArenaConfiguration defaultConfig = new ArenaConfiguration
-            {
-                TimeLimit = 250,
-                passMark = 50,
-                randomSeed = UnityEngine.Random.Range(1, 1000),
-                mergeNextArena = false
-            };
-
-            if (prefabs != null && prefabs.allPrefabs != null && prefabs.allPrefabs.Count > 0)
-            {
-                HashSet<Vector3> usedPositions = new HashSet<Vector3>();
-
-                foreach (GameObject prefab in prefabs.allPrefabs)
-                {
-                    if (prefab != null)
-                    {
-                        Vector3 position;
-                        int maxAttempts = 100;
-                        int attempt = 0;
-
-                        do
-                        {
-                            position = new Vector3(
-                                UnityEngine.Random.Range(0f, _builder.ArenaWidth),
-                                0,
-                                UnityEngine.Random.Range(0f, _builder.ArenaDepth)
-                            );
-                            attempt++;
-                        } while (usedPositions.Contains(position) && attempt < maxAttempts);
-
-                        if (attempt >= maxAttempts)
-                        {
-                            Debug.LogWarning("Max attempts reached for unique position generation.");
-                            continue;
-                        }
-
-                        usedPositions.Add(position);
-
-                        Spawnable spawnable = new Spawnable(prefab)
-                        {
-                            positions = new List<Vector3> { position },
-                            rotations = new List<float> { UnityEngine.Random.Range(0f, 360f) },
-                            sizes = new List<Vector3> { new Vector3(1f, 1f, 1f) }
-                        };
-
-                        defaultConfig.spawnables.Add(spawnable);
-                    }
-                }
-            }
-            else
-            {
-                Debug.LogWarning("No prefabs available in ListOfPrefabs to generate default arena items.");
-            }
-
-            _arenasConfigurations.configurations[arenaID] = defaultConfig;
-            return defaultConfig;
+            Debug.LogError($"Arena ID {arenaID} not found in configurations!");
+            // No fallback here, just return null or throw to catch logic errors elsewhere
+            throw new KeyNotFoundException($"Arena ID {arenaID} not found.");
         }
 
         return _arenasConfigurations.configurations[arenaID];

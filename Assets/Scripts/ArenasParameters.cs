@@ -228,29 +228,16 @@ namespace ArenasParameters
 
         public void UpdateWithYAML(YAMLDefs.ArenaConfig yamlArenaConfig)
         {
+            // Clear existing configurations before updating
             configurations.Clear();
-            List<int> existingIds = new List<int>();
-            int nextAvailableId = 0;
 
-            foreach (KeyValuePair<int, YAMLDefs.Arena> arenaConfiguration in yamlArenaConfig.arenas)
+            // Gather all arenas from the YAML config into a list, ignoring the given keys
+            List<YAMLDefs.Arena> arenasList = new List<YAMLDefs.Arena>(yamlArenaConfig.arenas.Values);
+
+            // Assign new IDs starting from 0 in the order they appear, which simplifies the logic
+            for (int i = 0; i < arenasList.Count; i++)
             {
-                int currentID = arenaConfiguration.Key;
-
-                if (existingIds.Contains(currentID) || currentID < 0)
-                {
-                    Debug.LogWarning(
-                        $"Issue with arenaID: {currentID}. Assigning a new unique ID: {nextAvailableId}."
-                    );
-                    Add(nextAvailableId, arenaConfiguration.Value);
-                    existingIds.Add(nextAvailableId);
-                }
-                else
-                {
-                    Add(currentID, arenaConfiguration.Value);
-                    existingIds.Add(currentID);
-                }
-
-                nextAvailableId = existingIds.Max() + 1;
+                Add(i, arenasList[i]);
             }
 
             randomizeArenas = yamlArenaConfig.randomizeArenas;
