@@ -5,6 +5,8 @@ using System.Text;
 using System.Linq;
 using YAMLDefs;
 
+// TODO: Cleanup this script and make it more readable.
+
 /// <summary>
 /// The classes in this file are used to store the parameters for the arenas.
 /// These parameters are read from a YAML file and used to configure the arenas.

@@ -134,6 +134,7 @@ public class TrainingArena : MonoBehaviour
     /// </summary>
     public void ResetArena()
     {
+        // If there are no arenas available, delay the reset until arenas are available
         if (_environmentManager.GetTotalArenas() == 0)
         {
             Debug.LogWarning("No arenas available at ResetArena time. Delaying reset...");

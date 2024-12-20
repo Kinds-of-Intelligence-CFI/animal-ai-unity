@@ -12,6 +12,11 @@ using UnityEngine.Networking;
 using YAMLDefs;
 using System.Collections;
 
+// TODO: Implement the following:
+// 1. Implement testing for the YAML files in WebGL builds. Also create new unit tests specifically for this feature (WEBGL).
+// 2. Implement the logic for the canChangePerspective flag in the YAML files. This flag should be used to enable or disable the ability to change the perspective of the camera in the training environment.
+// 3. Clean up the code and remove any unnecessary comments or debug logs, whilst ensuring that the code is well-documented.
+
 /// <summary>
 /// Manages the environment settings and configurations, including the arena, player controls, and UI canvas.
 /// </summary>
@@ -47,7 +52,8 @@ public class AAI3EnvironmentManager : MonoBehaviour
     private ArenaBuilder _builder;
 
     [Header("YAML Files to Load (Ordered)")]
-    // Add the YAML file names you want to load from streaming assets at runtime:
+    // Add the YAML file names you want to load from streaming assets at runtime in the inspector. 
+    // This script is attached to the EnvironmentManager GameObject in the scene.
     [SerializeField] private List<string> yamlFileNames = new List<string> { };
 
     private YAMLReader yamlReader;
@@ -129,6 +135,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
         // If not in editor, load YAML files from StreamingAssets for runtime configuration.
         if (!Application.isEditor)
         {
+            // Load YAML files from StreamingAssets for runtime configuration.
             yamlReader = new YAMLReader();
             StartCoroutine(LoadArenasFromYAMLFiles());
         }
@@ -169,19 +176,27 @@ public class AAI3EnvironmentManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Loads arenas from each YAML file in order, appending arenas to _arenasConfigurations incrementally.
-    /// No merging step. Each YAML file's arenas are appended with new sequential IDs.
+    /// Load arenas from YAML files in the StreamingAssets folder. 
+    /// Platform Restrictions: WebGL builds run within a web browser environment, which enforces strict security measures. 
+    /// One significant restriction is the inaccessibility of the local file system. Unlike desktop builds, WebGL cannot perform direct file I/O operations using System.IO methods like File.ReadAllText.
+    /// This method uses UnityWebRequest to load YAML files in WebGL builds and File.ReadAllText in desktop builds.
     /// </summary>
     private IEnumerator LoadArenasFromYAMLFiles()
     {
         string basePath = Application.streamingAssetsPath + "/Yamls/";
         int nextArenaId = 0;
 
+        // Go through each YAML file in the list and load the arenas in the order they are placed (i.e. element 0 is loaded first, then element 1, and so on).
+        // The file names needs to match the ones in the StreamingAssets folder.
         foreach (var fileName in yamlFileNames)
         {
             string filePath = Path.Combine(basePath, fileName);
             string yamlContent = null;
-
+            ///
+            /// UnityWebRequest: Since direct file access is unavailable, UnityWebRequest is employed to fetch YAML files over HTTP(S). This method aligns with the web’s client-server model, allowing the application to request resources hosted on a server or embedded within the application’s build (e.g., in the StreamingAssets folder).
+            /// Asynchronous Handling: The yield return www.SendWebRequest(); line ensures that the request is sent asynchronously, preventing the application from freezing while waiting for the response. 
+            /// Error Handling: If the request fails, an error is logged, and the script proceeds to the next file without halting the entire loading process.
+            ///
 #if UNITY_WEBGL
             UnityWebRequest www = UnityWebRequest.Get(filePath);
             yield return www.SendWebRequest();
@@ -192,7 +207,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
             else
             {
                 Debug.LogError($"Failed to load {fileName}: {www.error}");
-                continue; // move on to next file
+                continue; // move on to next file if failed
             }
 #else
             if (File.Exists(filePath))
@@ -202,7 +217,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
             else
             {
                 Debug.LogError($"YAML file not found at {filePath}");
-                continue; // move on to next file
+                continue;
             }
 #endif
 
@@ -219,6 +234,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
                     }
 
                     // Update global flags if needed (just take last file's flags or combine logically)
+                    // TODO: THe below needs to be tested with multiple files with different flags. canChangePerspective is not working and so it should be debugged.
                     _arenasConfigurations.randomizeArenas |= config.randomizeArenas;
                     _arenasConfigurations.showNotification |= config.showNotification;
                     _arenasConfigurations.canResetEpisode &= config.canResetEpisode;
