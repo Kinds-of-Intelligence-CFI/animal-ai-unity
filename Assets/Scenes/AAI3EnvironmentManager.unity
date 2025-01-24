@@ -1029,7 +1029,7 @@ MonoBehaviour:
     - {fileID: 1311020654520240, guid: 12a5238f730f02b4989f289e8f49a745, type: 3}
     - {fileID: 5245736643659623491, guid: a47b4428fce96c34783fbd3a7ff7d387, type: 3}
   yamlFileNames:
-  - default-configuration-webgl.yaml
+  - test_rewards.yaml
 --- !u!1 &660795385
 GameObject:
   m_ObjectHideFlags: 0

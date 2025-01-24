@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.MLAgents;
@@ -134,12 +135,30 @@ public class TrainingArena : MonoBehaviour
     /// </summary>
     public void ResetArena()
     {
-        // If there are no arenas available, delay the reset until arenas are available
+        // Start the wait-and-retry logic if no arenas are available
+        StartCoroutine(WaitAndRetryReset());
+    }
+
+    private IEnumerator WaitAndRetryReset()
+    {
+        const int maxRetries = 4; // Maximum number of retries
+        const float retryInterval = 1f; // Interval in seconds between retries
+        int attempt = 0;
+
+        while (_environmentManager.GetTotalArenas() == 0 && attempt < maxRetries)
+        {
+            Debug.LogWarning($"No arenas available. Retry attempt {attempt + 1}/{maxRetries}...");
+            attempt++;
+            yield return new WaitForSeconds(retryInterval); // Wait before retrying
+        }
+
         if (_environmentManager.GetTotalArenas() == 0)
         {
-            Debug.LogWarning("No arenas available at ResetArena time. Delaying reset...");
-            return; // Delay reset until arenas are available
+            Debug.LogError("Failed to reset arena after maximum retries.");
+            yield break; // Exit if no arenas are available after retries
         }
+
+        // Proceed with the reset logic after arenas become available
         Debug.Log("Resetting Arena");
 
         CleanUpSpawnedObjects();

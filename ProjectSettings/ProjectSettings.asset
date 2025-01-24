@@ -688,11 +688,11 @@ PlayerSettings:
   m_MobileRenderingPath: 1
   metroPackageName: TemplateLightweight
   metroPackageVersion: 1.0.0.0
-  metroCertificatePath: 
+  metroCertificatePath: Assets/WSATestCertificate.pfx
   metroCertificatePassword: 
-  metroCertificateSubject: 
-  metroCertificateIssuer: 
-  metroCertificateNotAfter: daf06edb8a9952ca
+  metroCertificateSubject: CFI
+  metroCertificateIssuer: CFI
+  metroCertificateNotAfter: 8050b7bd3b87dc01
   metroApplicationDescription: Template_Lightweight
   wsaImages: {}
   metroTileShortName: Animal-AI
@@ -775,6 +775,6 @@ PlayerSettings:
   hmiLoadingImage: {fileID: 0}
   platformRequiresReadableAssets: 0
   virtualTexturingSupportEnabled: 0
-  insecureHttpOption: 0
+  insecureHttpOption: 2
   androidVulkanDenyFilterList: []
   androidVulkanAllowFilterList: []
