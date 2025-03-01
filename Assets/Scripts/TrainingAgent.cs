@@ -8,9 +8,6 @@ using Unity.MLAgents.Actuators;
 using PrefabInterface;
 using Unity.MLAgents.Sensors;
 using YAMLDefs;
-using System.IO;
-using System.Collections.Concurrent;
-using System.Threading;
 
 /// <summary>
 /// The TrainingAgent class is a subclass of the Agent class in the ML-Agents library.
@@ -58,45 +55,18 @@ public class TrainingAgent : Agent, IPrefab
     private TrainingArena _arena;
     private bool _isCountdownActive = false;
 
+    private CSVWriter _csvWriter = new CSVWriter();
+
     [Header("External References")]
     public PlayerControls playerControls;
 
     [Header("CSV Logging")]
-    public string csvFilePath = "";
-    private StreamWriter writer;
-    private bool headerWritten = false;
-    private int customEpisodeCount = 0;
-    private ConcurrentQueue<string> logQueue = new ConcurrentQueue<string>();
-    private const int bufferSize = 101; /* Corresponds to rows in the CSV file to keep in memory before flushing to disk */
-    private bool isFlushing = false;
-    private AutoResetEvent flushEvent = new AutoResetEvent(false);
-    private bool threadRunning = true;
-    private string lastCollectedRewardType = "None";
-    private string dispensedRewardType = "None";
-    private string wasAgentInDataZone = "No";
-    private bool wasRewardDispensed = false;
-    private bool wasSpawnerButtonTriggered = false;
-    private string combinedSpawnerInfo = "N/A";
-    private int _lastLoggedStep = -1;
+    // TODO: Refactor this so that it's tracked by the data zone
+    private string wasAgentInDataZone = "No"; // TODO: Does this work if the agent spawns in the datazone?
 
     public void RecordSpawnerInfo(string spawnerInfo)
     {
-        if (string.IsNullOrEmpty(spawnerInfo))
-        {
-            combinedSpawnerInfo = "N/A";
-        }
-        else
-        {
-            if (combinedSpawnerInfo == "N/A")
-            {
-                combinedSpawnerInfo = spawnerInfo;
-            }
-            else
-            {
-                combinedSpawnerInfo += $"|{spawnerInfo}";
-            }
-        }
-        Debug.Log($"Recorded Spawner Info: {combinedSpawnerInfo}");
+        _csvWriter.RecordSpawnerInfo(spawnerInfo);
     }
 
     public void OnInDataZone(string zoneLogString)
@@ -109,24 +79,19 @@ public class TrainingAgent : Agent, IPrefab
         wasAgentInDataZone = "Agent left DataZone: " + zoneLogString;
     }
 
-    private void OnRewardSpawned(GameObject reward)
-    {
-        wasSpawnerButtonTriggered = true;
-    }
-
     public void RecordDispensedReward()
     {
-        wasRewardDispensed = true;
+        _csvWriter.RecordDispensedReward();
     }
 
     public void RecordRewardType(string type)
     {
-        lastCollectedRewardType = type;
+        _csvWriter.RecordRewardType(type);
     }
 
     public void RecordDispensedRewardType(string type)
     {
-        dispensedRewardType = type;
+        _csvWriter.RecordDispensedRewardType(type);
     }
 
     private string CombineRaycastData(float[] observations, string[] tags)
@@ -146,14 +111,13 @@ public class TrainingAgent : Agent, IPrefab
         progBar.AssignAgent(this);
         health = _maxHealth;
 
-        SpawnerButton.RewardSpawned += OnRewardSpawned;
+        SpawnerButton.RewardSpawned += _csvWriter.OnRewardSpawned;
         DataZone.OnInDataZone += OnInDataZone;
         DataZone.OnOutDataZone += OnOutDataZone;
 
         playerControls = GameObject.FindObjectOfType<PlayerControls>();
 
-        InitialiseCSVProcess();
-        StartFlushThread();
+        _csvWriter.InitialiseCSVProcess();
     }
 
     /// <summary>
@@ -163,17 +127,11 @@ public class TrainingAgent : Agent, IPrefab
     protected override void OnDisable()
     {
         base.OnDisable(); /* Call the base class method */
-        threadRunning = false; /* Signal the flush thread to stop */
-        flushEvent.Set(); /* Ensure the thread is not stuck in WaitOne() */
 
-        if (writer != null)
-        {
-            writer.WriteLine($"Goals Collected: {numberOfGoalsCollected}");
-            FlushLogQueue(); /* Flush any remaining logs in the queue */
-            writer.Close(); /* Close the writer */
-        }
+        _csvWriter.ReportGoalsCollected(numberOfGoalsCollected);
+        _csvWriter.Shutdown(true);
 
-        SpawnerButton.RewardSpawned -= OnRewardSpawned;
+        SpawnerButton.RewardSpawned -= _csvWriter.OnRewardSpawned;
         DataZone.OnInDataZone -= OnInDataZone;
         DataZone.OnOutDataZone -= OnOutDataZone;
     }
@@ -278,7 +236,7 @@ public class TrainingAgent : Agent, IPrefab
         string combinedRaycastData = CombineRaycastData(raycastObservations, raycastTags);
         string playerControlsDescription = GetActiveCameraDescription();
 
-        LogToCSV(
+        _csvWriter.LogToCSV(
             localVel,
             localPos,
             actionForwardWithDescription,
@@ -286,22 +244,14 @@ public class TrainingAgent : Agent, IPrefab
             wasAgentFrozen ? "Yes" : "No",
             reward,
             notificationState,
-            customEpisodeCount,
-            wasRewardDispensed,
-            dispensedRewardType,
-            lastCollectedRewardType,
-            wasSpawnerButtonTriggered,
-            combinedSpawnerInfo,
             wasAgentInDataZone,
             playerControlsDescription,
-            combinedRaycastData
+            combinedRaycastData,
+            StepCount,
+            health
         );
 
-        dispensedRewardType = "None";
-        wasRewardDispensed = false;
-        wasSpawnerButtonTriggered = false;
         wasAgentInDataZone = "No";
-        combinedSpawnerInfo = "N/A";
     }
 
     public override void OnActionReceived(ActionBuffers action)
@@ -328,7 +278,7 @@ public class TrainingAgent : Agent, IPrefab
         string combinedRaycastData = CombineRaycastData(raycastObservations, raycastTags);
         string playerControlsDescription = GetActiveCameraDescription();
 
-        LogToCSV(
+        _csvWriter.LogToCSV(
             localVel,
             localPos,
             actionForwardWithDescription,
@@ -336,22 +286,14 @@ public class TrainingAgent : Agent, IPrefab
             wasAgentFrozen ? "Yes" : "No",
             reward,
             notificationState,
-            customEpisodeCount,
-            wasRewardDispensed,
-            dispensedRewardType,
-            lastCollectedRewardType,
-            wasSpawnerButtonTriggered,
-            combinedSpawnerInfo,
             wasAgentInDataZone,
             playerControlsDescription,
-            combinedRaycastData
+            combinedRaycastData,
+            StepCount,
+            health
         );
 
-        dispensedRewardType = "None";
-        wasRewardDispensed = false;
-        wasSpawnerButtonTriggered = false;
         wasAgentInDataZone = "No";
-        combinedSpawnerInfo = "N/A";
 
         UpdateHealth(_rewardPerStep);
     }
@@ -390,160 +332,6 @@ public class TrainingAgent : Agent, IPrefab
             {
                 return "No Active Camera";
             }
-        }
-    }
-
-    private void InitialiseCSVProcess()
-    {
-        /* Base path for the logs to be stored */
-        string basePath;
-
-        if (Application.isEditor)
-        {
-            /* The root directory is the parent of the Assets folder */
-            basePath = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
-        }
-        else
-        {
-            /* Important! For builds, use the parent of the directory where the executable resides */
-            basePath = Path.GetDirectoryName(Application.dataPath);
-        }
-
-        /* Directory to store the logs under folder "ObservationLogs" */
-        string directoryPath = Path.Combine(basePath, "ObservationLogs");
-        if (!Directory.Exists(directoryPath))
-        {
-            Directory.CreateDirectory(directoryPath);
-        }
-
-        /* Generate a filename with a date stamp to prevent overwriting */
-        string dateTimeString = DateTime.Now.ToString("dd-MM-yy_HHmm");
-        string filename = $"Observations_{dateTimeString}.csv";
-        csvFilePath = Path.Combine(directoryPath, filename);
-
-        writer = new StreamWriter(
-            new FileStream(csvFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)
-        );
-
-        if (!File.Exists(csvFilePath) || new FileInfo(csvFilePath).Length == 0)
-        {
-            if (!headerWritten)
-            {
-                writer.WriteLine(
-                    "Episode,Step,Health,Reward,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,WasNotificationShown?,WasRewardDispensed?,DispensedRewardType,CollectedRewardType,WasSpawnerButtonTriggered?,CombinedSpawnerInfo,WasAgentInDataZone?,ActiveCamera,CombinedRaycastData"
-                );
-                headerWritten = true;
-            }
-            else
-            {
-                Debug.LogError("Header/Columns already written to CSV file.");
-            }
-        }
-    }
-
-    /// <summary>
-    /// Logs the agent's state to a CSV file. This is called every step.
-    /// The data is stored in a queue and flushed to the file in a separate thread.
-    /// </summary>
-    private void LogToCSV(
-        Vector3 velocity,
-        Vector3 position,
-        string actionForwardWithDescription,
-        string actionRotateWithDescription,
-        string wasAgentFrozen,
-        float reward,
-        string notificationState,
-        int customEpisodeCount,
-        bool wasRewardDispensed,
-        string dispensedRewardType,
-        string lastCollectedRewardType,
-        bool wasSpawnerButtonTriggered,
-        string combinedSpawnerInfo,
-        string wasAgentInDataZone,
-        string activeCameraDescription,
-        string combinedRaycastData
-    )
-    {
-        /* Check if the current step has already been logged */
-        if (StepCount == _lastLoggedStep)
-        {
-            return;
-        }
-        string logEntry = string.Format(
-            "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21}",
-            customEpisodeCount,
-            StepCount,
-            health,
-            reward,
-            velocity.x,
-            velocity.y,
-            velocity.z,
-            position.x,
-            position.y,
-            position.z,
-            actionForwardWithDescription,
-            actionRotateWithDescription,
-            wasAgentFrozen,
-            notificationState,
-            wasRewardDispensed ? "Yes" : "No",
-            dispensedRewardType,
-            lastCollectedRewardType,
-            wasSpawnerButtonTriggered ? "Yes" : "No",
-            combinedSpawnerInfo.Replace(",", ";"),
-            wasAgentInDataZone,
-            activeCameraDescription,
-            combinedRaycastData
-        );
-
-        logQueue.Enqueue(logEntry);
-        lastCollectedRewardType = "None";
-
-        _lastLoggedStep = StepCount;
-
-        if (logQueue.Count >= bufferSize)
-        {
-            flushEvent.Set();
-        }
-    }
-
-    /// <summary>
-    /// Flushes the log queue to the CSV file. This is called in a separate thread to prevent the main thread from being blocked.
-    /// </summary>
-    private void StartFlushThread()
-    {
-        ThreadPool.QueueUserWorkItem(state =>
-        {
-            while (threadRunning)
-            {
-                flushEvent.WaitOne();
-                if (logQueue.Count >= bufferSize && !isFlushing)
-                {
-                    isFlushing = true;
-                    FlushLogQueue();
-                    isFlushing = false;
-                }
-            }
-            FlushLogQueue();
-        });
-    }
-
-    private void FlushLogQueue()
-    {
-        try
-        {
-            lock (logQueue)
-            {
-                while (logQueue.TryDequeue(out var logEntry))
-                {
-                    writer.WriteLine(logEntry);
-                }
-                writer.Flush();
-                Debug.Log("Flushed log queue to CSV file.");
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError("Failed to flush log queue: " + ex.Message);
         }
     }
 
@@ -728,24 +516,21 @@ public class TrainingAgent : Agent, IPrefab
         NotificationManager.Instance.HideNotification();
 
         EndEpisode();
-        FlushLogQueue();
+        _csvWriter.FlushLogQueue();
     }
 
     public override void OnEpisodeBegin()
     {
         Debug.Log("Episode Begin");
-        _lastLoggedStep = -1;
+        _csvWriter.EpisodeBegin();
 
         if (!_arena.IsFirstArenaReset)
         {
-            writer.WriteLine($"Goals Collected: {numberOfGoalsCollected}");
-            writer.Flush();
+            Debug.Log("OnEpisodeBegin Reporting goals collected");
+            _csvWriter.ReportGoalsCollected(numberOfGoalsCollected, true);
         }
 
         numberOfGoalsCollected = 0;
-        customEpisodeCount++;
-
-        writer.Flush();
 
         StopAllCoroutines();
         _previousScore = _currentScore;
