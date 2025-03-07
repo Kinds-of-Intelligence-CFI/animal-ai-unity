@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -10,6 +11,7 @@ public class CSVWriterTests
     private GameObject testGameObject;
     private CSVWriter csvWriter;
     private string csvFilePath;
+    private List<string> errorLogs;
 
     [SetUp]
     public void Setup()
@@ -24,6 +26,10 @@ public class CSVWriterTests
         // Use reflection to grab the private csvFilePath field.
         FieldInfo filePathField = typeof(CSVWriter).GetField("csvFilePath", BindingFlags.NonPublic | BindingFlags.Instance);
         csvFilePath = filePathField.GetValue(csvWriter) as string;
+
+        // Register event to collect error logs
+        errorLogs = new List<string>();
+        Application.logMessageReceived += HandleLog;
     }
 
     [TearDown]
@@ -40,6 +46,17 @@ public class CSVWriterTests
 
         // Destroy the test GameObject.
         UnityEngine.Object.DestroyImmediate(testGameObject);
+
+        Application.logMessageReceived -= HandleLog;
+    }
+
+    private void HandleLog(string logString, string stackTrace, LogType type)
+    {
+        // Capture only error and exception logs
+        if (type == LogType.Error || type == LogType.Exception)
+        {
+            errorLogs.Add(logString);
+        }
     }
 
     [Test]
@@ -154,5 +171,14 @@ public class CSVWriterTests
         // Assert: The expected combined string should join the entries with a '|' and replace commas.
         string expectedCombined = "Info1|Info2,withComma";
         Assert.AreEqual(expectedCombined, combinedSpawnerInfo);
+    }
+
+    [Test]
+    public void Test_ShuttingDownDoesNotLogError()
+    {
+        csvWriter.Shutdown();
+
+        // Assert: Ensure no Debug.LogError (or exceptions) were captured.
+        Assert.IsEmpty(errorLogs, "Unexpected error logs were emitted: " + string.Join(", ", errorLogs));
     }
 }

@@ -33,6 +33,7 @@ public class CSVWriter : MonoBehaviour
     private bool wasSpawnerButtonTriggered = false;
     private string combinedSpawnerInfo = "N/A";
     private int lastLoggedStep = -1;
+    private Thread flushThread;
 
     /// <summary>
     /// Logs the agent's state to a CSV file. This is called every step.
@@ -145,6 +146,12 @@ public class CSVWriter : MonoBehaviour
         if (!onlyCloseWriter) {
             threadRunning = false; /* Signal the flush thread to stop */
             flushEvent.Set(); /* Ensure the thread is not stuck in WaitOne() */
+            if (flushThread != null && flushThread.IsAlive)
+            {
+                flushThread.Join();        // Wait for the flush thread to exit.
+            } else {
+                Debug.LogWarning("Shutdown not able to find flushthread to wait for");
+            }
         }
         writer.Close(); /* Close the writer */
     }
@@ -203,7 +210,7 @@ public class CSVWriter : MonoBehaviour
     /// </summary>
     private void StartFlushThread()
     {
-        ThreadPool.QueueUserWorkItem(state =>
+        flushThread = new Thread(() =>
         {
             while (threadRunning)
             {
@@ -217,6 +224,9 @@ public class CSVWriter : MonoBehaviour
             }
             FlushLogQueue();
         });
+        // Mark the thread as background so if we have a runtime error it won't stop the application from closing
+        flushThread.IsBackground = true;
+        flushThread.Start();
     }
 
     public void FlushLogQueue() /* TODO: Ensure all calls to this are guarded by the flushEvent?*/
