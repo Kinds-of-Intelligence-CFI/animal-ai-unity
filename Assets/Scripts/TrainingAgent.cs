@@ -234,7 +234,7 @@ public class TrainingAgent : Agent, IPrefab
         string notificationState = GetNotificationState();
         (float[] raycastObservations, string[] raycastTags) = CollectRaycastObservations();
         string combinedRaycastData = CombineRaycastData(raycastObservations, raycastTags);
-        string playerControlsDescription = GetActiveCameraDescription();
+        string activeCameraDescription = GetActiveCameraDescription();
 
         _csvWriter.LogToCSV(
             localVel,
@@ -245,7 +245,7 @@ public class TrainingAgent : Agent, IPrefab
             reward,
             notificationState,
             wasAgentInDataZone,
-            playerControlsDescription,
+            activeCameraDescription,
             combinedRaycastData,
             StepCount,
             health
@@ -526,7 +526,6 @@ public class TrainingAgent : Agent, IPrefab
 
         if (!_arena.IsFirstArenaReset)
         {
-            Debug.Log("OnEpisodeBegin Reporting goals collected");
             _csvWriter.ReportGoalsCollected(numberOfGoalsCollected, true);
         }
 

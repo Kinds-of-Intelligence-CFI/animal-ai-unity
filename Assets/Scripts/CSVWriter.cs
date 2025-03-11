@@ -48,7 +48,6 @@ public class CSVWriter : MonoBehaviour
         float reward,
         string notificationState,
         string wasAgentInDataZone,
-        // TODO: Looks like there might be a bug here; this is called with "playerControlsDescription"
         string activeCameraDescription,
         string combinedRaycastData,
         int stepCount,
