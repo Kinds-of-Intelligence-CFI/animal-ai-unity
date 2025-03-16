@@ -87,10 +87,7 @@ public class CSVWriter : MonoBehaviour
         );
 
         logQueue.Enqueue(logEntry);
-        // TODO the original solution included a bug where this was not reset: reproduced to ensure the fidelity of the refactor
-        // Details: lastCollectedRewardType on https://github.com/Kinds-of-Intelligence-CFI/animal-ai-unity/blob/main/Assets/Scripts/TrainingAgent.cs#L499
-        // refers to the parameter of LogToCSV, and not the property of TrainingAgent, so once the property is trainingagent is set, it is never unset
-        // lastCollectedRewardType = "None";
+        lastCollectedRewardType = "None";
         dispensedRewardType = "None";
         wasRewardDispensed = false;
         wasSpawnerButtonTriggered = false;
@@ -110,6 +107,7 @@ public class CSVWriter : MonoBehaviour
         episodeCount++;
     }
 
+    // TODO: Potential bug that if this is called twice before the CSV is written to we lose a reward type
     public void RecordRewardType(string type)
     {
         lastCollectedRewardType = type;

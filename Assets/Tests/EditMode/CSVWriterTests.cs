@@ -13,6 +13,20 @@ public class CSVWriterTests
     private string csvFilePath;
     private List<string> errorLogs;
 
+    // Parameters for the log entry.
+    private Vector3 velocity = new Vector3(1, 2, 3);
+    private Vector3 position = new Vector3(4, 5, 6);
+    private string actionForward = "forward";
+    private string actionRotate = "rotate";
+    private string wasAgentFrozen = "false";
+    private float reward = 0.5f;
+    private string notificationState = "none";
+    private string wasAgentInDataZone = "No";
+    private string activeCameraDescription = "mainCamera";
+    private string combinedRaycastData = "rayData";
+    private int stepCount = 1;
+    private float health = 100f;
+
     [SetUp]
     public void Setup()
     {
@@ -62,20 +76,6 @@ public class CSVWriterTests
     [Test]
     public void Test_LogToCSV_WritesLogEntry()
     {
-        // Arrange: Define parameters for the log entry.
-        Vector3 velocity = new Vector3(1, 2, 3);
-        Vector3 position = new Vector3(4, 5, 6);
-        string actionForward = "forward";
-        string actionRotate = "rotate";
-        string wasAgentFrozen = "false";
-        float reward = 0.5f;
-        string notificationState = "none";
-        string wasAgentInDataZone = "No";
-        string activeCameraDescription = "mainCamera";
-        string combinedRaycastData = "rayData";
-        int stepCount = 1;
-        float health = 100f;
-
         csvWriter.EpisodeBegin();
 
         // Record reward types so that they show up in the log entry.
@@ -122,6 +122,79 @@ public class CSVWriterTests
         // combinedSpawnerInfo ("N/A"), wasAgentInDataZone, activeCameraDescription, combinedRaycastData
         string expectedLogEntry = "1,1,100,0.5,1,2,3,4,5,6,forward,rotate,false,none,Yes,DispensedTestReward,TestReward,No,N/A,No,mainCamera,rayData";
         Assert.AreEqual(expectedLogEntry, lines[1]);
+    }
+
+        [Test]
+    public void Test_LogToCSV_ResetsCSVWriterState()
+    {
+        // All of the below bits should be reset after a call to LogToCSV
+        // lastCollectedRewardType
+        // dispensedRewardType
+        // wasRewardDispensed
+        // wasSpawnerButtonTriggered
+        // combinedSpawnerInfo
+
+        csvWriter.EpisodeBegin();
+
+        // Record reward types so that they show up in the log entry.
+        csvWriter.RecordRewardType("TestReward");
+        csvWriter.RecordDispensedRewardType("DispensedTestReward");
+        csvWriter.RecordDispensedReward();
+        csvWriter.RecordSpawnerInfo("TestSpawner");
+        csvWriter.OnRewardSpawned(testGameObject);
+
+        // Act: Log a CSV entry.
+        csvWriter.LogToCSV(
+            velocity,
+            position,
+            actionForward,
+            actionRotate,
+            wasAgentFrozen,
+            reward,
+            notificationState,
+            wasAgentInDataZone,
+            activeCameraDescription,
+            combinedRaycastData,
+            stepCount,
+            health);
+
+        csvWriter.LogToCSV(
+            velocity,
+            position,
+            actionForward,
+            actionRotate,
+            wasAgentFrozen,
+            reward,
+            notificationState,
+            wasAgentInDataZone,
+            activeCameraDescription,
+            combinedRaycastData,
+            stepCount+1,
+            health);
+
+        // Manually flush and shut down to ensure the file is written.
+        csvWriter.FlushLogQueue();
+        csvWriter.Shutdown();
+
+        // Assert: Check that the CSV file exists.
+        Assert.IsTrue(File.Exists(csvFilePath), "CSV file was not created.");
+
+        // Read all lines from the CSV file.
+        string[] lines = File.ReadAllLines(csvFilePath);
+        Assert.IsTrue(lines.Length == 3, "CSV file does not contain expected number of lines.");
+
+        // Verify the log entry.
+        // Note: The CSV entry is constructed with these fields in order:
+        // stepCount, health, reward, velocity.x, velocity.y, velocity.z, position.x, position.y, position.z,
+        // actionForward, actionRotate, wasAgentFrozen, notificationState,
+        // wasRewardDispensed ("Yes" because RecordDispensedReward() was called),
+        // dispensedRewardType, lastCollectedRewardType, wasSpawnerButtonTriggered ("No" by default),
+        // combinedSpawnerInfo ("N/A"), wasAgentInDataZone, activeCameraDescription, combinedRaycastData
+        string expectedLogEntry_1 = "1,1,100,0.5,1,2,3,4,5,6,forward,rotate,false,none,Yes,DispensedTestReward,TestReward,Yes,TestSpawner,No,mainCamera,rayData";
+        Assert.AreEqual(expectedLogEntry_1, lines[1]);
+        // Verify that expected loglines have been reset after one step
+        string expectedLogEntry_2 = "1,2,100,0.5,1,2,3,4,5,6,forward,rotate,false,none,No,None,None,No,N/A,No,mainCamera,rayData";
+        Assert.AreEqual(expectedLogEntry_2, lines[2]);
     }
 
     [Test]
