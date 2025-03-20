@@ -198,6 +198,56 @@ public class CSVWriterTests
     }
 
     [Test]
+    public void Test_GoalsCollectedLines_ComeAtTheEndOfEpisodes()
+    {
+        csvWriter.EpisodeBegin();
+
+        // Act: Log a CSV entry.
+        csvWriter.LogToCSV(
+            velocity,
+            position,
+            actionForward,
+            actionRotate,
+            wasAgentFrozen,
+            reward,
+            notificationState,
+            wasAgentInDataZone,
+            activeCameraDescription,
+            combinedRaycastData,
+            stepCount,
+            health);
+
+        csvWriter.ReportGoalsCollected(5);
+
+        // Manually flush and shut down to ensure the file is written.
+        csvWriter.Shutdown();
+
+        // Assert: Check that the CSV file exists.
+        Assert.IsTrue(File.Exists(csvFilePath), "CSV file was not created.");
+
+        // Read all lines from the CSV file.
+        string[] lines = File.ReadAllLines(csvFilePath);
+        Assert.IsTrue(lines.Length == 3, "CSV file does not contain both header and log entry.");
+
+        // Verify the header line.
+        string expectedHeader = "Episode,Step,Health,Reward,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,WasNotificationShown?,WasRewardDispensed?,DispensedRewardType,CollectedRewardType,WasSpawnerButtonTriggered?,CombinedSpawnerInfo,WasAgentInDataZone?,ActiveCamera,CombinedRaycastData";
+        Assert.AreEqual(expectedHeader, lines[0]);
+
+        // Verify the log entry.
+        // Note: The CSV entry is constructed with these fields in order:
+        // stepCount, health, reward, velocity.x, velocity.y, velocity.z, position.x, position.y, position.z,
+        // actionForward, actionRotate, wasAgentFrozen, notificationState,
+        // wasRewardDispensed ("Yes" because RecordDispensedReward() was called),
+        // dispensedRewardType, lastCollectedRewardType, wasSpawnerButtonTriggered ("No" by default),
+        // combinedSpawnerInfo ("N/A"), wasAgentInDataZone, activeCameraDescription, combinedRaycastData
+        string expectedLogEntry = "1,1,100,0.5,1,2,3,4,5,6,forward,rotate,false,none,No,None,None,No,N/A,No,mainCamera,rayData";
+        Assert.AreEqual(expectedLogEntry, lines[1]);
+
+        string expectedGoalsCollectedLine = "Goals Collected: 5";
+        Assert.AreEqual(expectedGoalsCollectedLine, lines[2]);
+    }
+
+    [Test]
     public void Test_LogToCSV_DuplicateStep_Prevention()
     {
         // Arrange: Create a log entry with a specific step count.
