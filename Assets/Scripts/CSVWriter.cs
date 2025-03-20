@@ -128,12 +128,9 @@ public class CSVWriter : MonoBehaviour
         wasSpawnerButtonTriggered = true;
     }
 
-    public void ReportGoalsCollected(int numberOfGoalsCollected, bool unprotectedFlush = false){
+    public void ReportGoalsCollected(int numberOfGoalsCollected){
         logQueue.Enqueue($"Goals Collected: {numberOfGoalsCollected}");
-        // TODO: unprotectedFlush is included to ensure the fidelity of the refactor, should be removed
-        if (!unprotectedFlush) {
-            FlushLogQueue();
-        }
+        FlushLogQueue();
     }
 
     public void Shutdown(bool onlyCloseWriter = false){

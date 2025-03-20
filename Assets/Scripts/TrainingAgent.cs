@@ -526,7 +526,7 @@ public class TrainingAgent : Agent, IPrefab
 
         if (!_arena.IsFirstArenaReset)
         {
-            _csvWriter.ReportGoalsCollected(numberOfGoalsCollected, true);
+            _csvWriter.ReportGoalsCollected(numberOfGoalsCollected);
         }
 
         numberOfGoalsCollected = 0;
