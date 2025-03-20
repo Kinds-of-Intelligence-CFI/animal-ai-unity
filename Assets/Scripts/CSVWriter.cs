@@ -131,9 +131,7 @@ public class CSVWriter : MonoBehaviour
     public void ReportGoalsCollected(int numberOfGoalsCollected, bool unprotectedFlush = false){
         writer.WriteLine($"Goals Collected: {numberOfGoalsCollected}");
         // TODO: unprotectedFlush is included to ensure the fidelity of the refactor, should be removed
-        if (unprotectedFlush) {
-            writer.Flush();
-        } else {
+        if (!unprotectedFlush) {
             FlushLogQueue();
         }
     }
@@ -236,7 +234,6 @@ public class CSVWriter : MonoBehaviour
                 {
                     writer.WriteLine(logEntry);
                 }
-                writer.Flush();
                 Debug.Log("Flushed log queue to CSV file.");
             }
         }
