@@ -14,6 +14,15 @@ using System.Threading;
 
 /// <summary>
 /// This class is responsible for managing writing details of the episode to the .csv file
+/// 
+/// TODO: Managing the concurrency of flushing logs involves:
+/// - A StreamWriter
+/// - A ConcurrentQueue
+/// - A boolean for if a flush is taking place
+/// - An AutoResetEvent flushEvent for controlling when the flush occurs
+/// - A boolean for controlling if the thread is running
+/// Lots of interacting parts means I'm not very confident there aren't edge cases we've not spotted
+//  Is it possible to simplify the flow here?
 /// </summary>
 public class CSVWriter : MonoBehaviour
 {
@@ -218,7 +227,7 @@ public class CSVWriter : MonoBehaviour
         flushThread.Start();
     }
 
-    public void FlushLogQueue() /* TODO: Ensure all calls to this are guarded by the flushEvent?*/
+    public void FlushLogQueue()
     {
         try
         {
