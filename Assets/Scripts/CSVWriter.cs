@@ -133,17 +133,14 @@ public class CSVWriter : MonoBehaviour
         FlushLogQueue();
     }
 
-    public void Shutdown(bool onlyCloseWriter = false){
-        // TODO: onlyCloseWriter is included to ensure the fidelity of the refactor, should be removed
-        if (!onlyCloseWriter) {
-            threadRunning = false; /* Signal the flush thread to stop */
-            flushEvent.Set(); /* Ensure the thread is not stuck in WaitOne() */
-            if (flushThread != null && flushThread.IsAlive)
-            {
-                flushThread.Join();        // Wait for the flush thread to exit.
-            } else {
-                Debug.LogWarning("Shutdown not able to find flushthread to wait for");
-            }
+    public void Shutdown(){
+        threadRunning = false; /* Signal the flush thread to stop */
+        flushEvent.Set(); /* Ensure the thread is not stuck in WaitOne() */
+        if (flushThread != null && flushThread.IsAlive)
+        {
+            flushThread.Join();        // Wait for the flush thread to exit.
+        } else {
+            Debug.LogWarning("Shutdown not able to find flushthread to wait for");
         }
         writer.Close(); /* Close the writer */
     }

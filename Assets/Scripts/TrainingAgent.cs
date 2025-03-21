@@ -129,7 +129,7 @@ public class TrainingAgent : Agent, IPrefab
         base.OnDisable(); /* Call the base class method */
 
         _csvWriter.ReportGoalsCollected(numberOfGoalsCollected);
-        _csvWriter.Shutdown(true);
+        _csvWriter.Shutdown();
 
         SpawnerButton.RewardSpawned -= _csvWriter.OnRewardSpawned;
         DataZone.OnInDataZone -= OnInDataZone;
