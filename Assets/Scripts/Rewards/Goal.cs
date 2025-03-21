@@ -85,21 +85,14 @@ public class Goal : Prefab
             if (agent != null)
             {
                 agent.RecordRewardType(rewardType);
-                if (!isMulti)
+                if (!isMulti || agent.numberOfGoalsCollected >= numberOfGoals)
                 {
-                    agent.UpdateHealth(reward, true);
+                    agent.UpdateHealth(reward, andCompleteArena: true);
                 }
                 else
                 {
                     agent.numberOfGoalsCollected++;
-                    if (agent.numberOfGoalsCollected >= numberOfGoals)
-                    {
-                        agent.UpdateHealth(reward, true);
-                    }
-                    else
-                    {
-                        agent.UpdateHealth(reward);
-                    }
+                    agent.UpdateHealth(reward);
                     gameObject.SetActive(false);
                     Object.Destroy(gameObject);
                 }
