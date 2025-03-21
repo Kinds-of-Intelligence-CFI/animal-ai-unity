@@ -243,7 +243,7 @@ public class CSVWriterTests
         string expectedLogEntry = "1,1,100,0.5,1,2,3,4,5,6,forward,rotate,false,none,No,None,None,No,N/A,No,mainCamera,rayData";
         Assert.AreEqual(expectedLogEntry, lines[1]);
 
-        string expectedGoalsCollectedLine = "Goals Collected: 5";
+        string expectedGoalsCollectedLine = "Positive Goals Collected: 5";
         Assert.AreEqual(expectedGoalsCollectedLine, lines[2]);
     }
 

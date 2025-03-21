@@ -85,13 +85,18 @@ public class Goal : Prefab
             if (agent != null)
             {
                 agent.RecordRewardType(rewardType);
+                // Reward < 10 is to handle the special case of HotZone
+                // Which uses reward (10) as the rewardFactor argument to AddExtraReward in TrainingAgent
+                // TODO: Use a separate property in HotZone to remove this
+                if (reward > 0 && reward < 10) {
+                    agent.numberOfGoalsCollected++;
+                }
                 if (!isMulti || agent.numberOfGoalsCollected >= numberOfGoals)
                 {
                     agent.UpdateHealth(reward, andCompleteArena: true);
                 }
                 else
                 {
-                    agent.numberOfGoalsCollected++;
                     agent.UpdateHealth(reward);
                     gameObject.SetActive(false);
                     Object.Destroy(gameObject);

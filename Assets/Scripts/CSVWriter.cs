@@ -138,7 +138,7 @@ public class CSVWriter : MonoBehaviour
     }
 
     public void ReportGoalsCollected(int numberOfGoalsCollected){
-        logQueue.Enqueue($"Goals Collected: {numberOfGoalsCollected}");
+        logQueue.Enqueue($"Positive Goals Collected: {numberOfGoalsCollected}");
         FlushLogQueue();
     }
 

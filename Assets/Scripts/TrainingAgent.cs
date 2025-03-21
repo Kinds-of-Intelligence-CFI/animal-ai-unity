@@ -529,8 +529,6 @@ public class TrainingAgent : Agent, IPrefab
             _csvWriter.ReportGoalsCollected(numberOfGoalsCollected);
         }
 
-        numberOfGoalsCollected = 0;
-
         StopAllCoroutines();
         _previousScore = _currentScore;
         numberOfGoalsCollected = 0;
