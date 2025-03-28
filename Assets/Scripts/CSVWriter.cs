@@ -178,7 +178,7 @@ public class CSVWriter : MonoBehaviour
         }
 
         /* Generate a filename with a date stamp to prevent overwriting */
-        string dateTimeString = DateTime.Now.ToString("dd-MM-yy_HHmm");
+        string dateTimeString = DateTime.Now.ToString("dd-MM-yy_HHmmss");
         string filename = $"Observations_{dateTimeString}.csv";
         csvFilePath = Path.Combine(directoryPath, filename);
 
