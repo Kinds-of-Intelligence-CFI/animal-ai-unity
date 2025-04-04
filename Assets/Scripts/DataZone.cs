@@ -12,7 +12,7 @@ public class DataZone : Prefab
 
     // TODO: Fix the race condition on LastDataZoneMessage
     // (If multiple DataZones try to write to this simultaneously one will get overwritten)
-    private static string LastDataZoneMessage = "No";
+    private static string? LastDataZoneMessage = null;
 
     private void Start()
     {
@@ -53,8 +53,8 @@ public class DataZone : Prefab
 
     public static string ConsumeDataZoneMessage()
     {
-        string message = LastDataZoneMessage;
-        LastDataZoneMessage = "No";
+        string? message = LastDataZoneMessage;
+        LastDataZoneMessage = null;
         return message;
     }
 }

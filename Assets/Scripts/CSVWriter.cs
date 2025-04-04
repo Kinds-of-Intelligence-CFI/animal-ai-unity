@@ -56,7 +56,7 @@ public class CSVWriter : MonoBehaviour
         string wasAgentFrozen,
         float reward,
         string notificationState,
-        string dataZoneMessage,
+        string? dataZoneMessage,
         string activeCameraDescription,
         string combinedRaycastData,
         int stepCount,
@@ -90,7 +90,7 @@ public class CSVWriter : MonoBehaviour
             lastCollectedRewardType,
             wasSpawnerButtonTriggered ? "Yes" : "No",
             combinedSpawnerInfo.Replace(",", ";"),
-            dataZoneMessage,
+            dataZoneMessage ?? "No",
             activeCameraDescription,
             combinedRaycastData
         );
