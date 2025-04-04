@@ -6,12 +6,13 @@ using UnityEngine;
 /// </summary>
 public class DataZone : Prefab
 {
-    public delegate void DataZoneHandler(string TriggerZoneID);
-    public static event DataZoneHandler OnInDataZone;
-    public static event DataZoneHandler OnOutDataZone;
     public string TriggerZoneID { get; set; }
     public bool ZoneVisibility { get; set; } = true;
     public bool isAgentInZone { get; set; } = false;
+
+    // TODO: Fix the race condition on LastDataZoneMessage
+    // (If multiple DataZones try to write to this simultaneously one will get overwritten)
+    private static string LastDataZoneMessage = "No";
 
     private void Start()
     {
@@ -37,7 +38,7 @@ public class DataZone : Prefab
         if (other.CompareTag("agent") && !isAgentInZone)
         {
             isAgentInZone = true;
-            OnInDataZone?.Invoke(TriggerZoneID);
+            LastDataZoneMessage = "Agent was in DataZone: " + TriggerZoneID;
         }
     }
 
@@ -46,7 +47,14 @@ public class DataZone : Prefab
         if (other.CompareTag("agent"))
         {
             isAgentInZone = false;
-            OnOutDataZone?.Invoke(TriggerZoneID);
+            LastDataZoneMessage = "Agent left DataZone: " + TriggerZoneID;
         }
+    }
+
+    public static string ConsumeDataZoneMessage()
+    {
+        string message = LastDataZoneMessage;
+        LastDataZoneMessage = "No";
+        return message;
     }
 }

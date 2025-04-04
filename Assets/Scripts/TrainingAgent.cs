@@ -60,23 +60,9 @@ public class TrainingAgent : Agent, IPrefab
     [Header("External References")]
     public PlayerControls playerControls;
 
-    [Header("CSV Logging")]
-    // TODO: Refactor this so that it's tracked by the data zone
-    private string dataZoneMessage = "No";
-
     public void RecordSpawnerInfo(string spawnerInfo)
     {
         _csvWriter.RecordSpawnerInfo(spawnerInfo);
-    }
-
-    public void OnInDataZone(string zoneLogString)
-    {
-        dataZoneMessage = "Agent was in DataZone: " + zoneLogString;
-    }
-
-    public void OnOutDataZone(string zoneLogString)
-    {
-        dataZoneMessage = "Agent left DataZone: " + zoneLogString;
     }
 
     public void RecordDispensedReward()
@@ -112,8 +98,6 @@ public class TrainingAgent : Agent, IPrefab
         health = _maxHealth;
 
         SpawnerButton.RewardSpawned += _csvWriter.OnRewardSpawned;
-        DataZone.OnInDataZone += OnInDataZone;
-        DataZone.OnOutDataZone += OnOutDataZone;
 
         playerControls = GameObject.FindObjectOfType<PlayerControls>();
 
@@ -132,8 +116,6 @@ public class TrainingAgent : Agent, IPrefab
         _csvWriter.Shutdown();
 
         SpawnerButton.RewardSpawned -= _csvWriter.OnRewardSpawned;
-        DataZone.OnInDataZone -= OnInDataZone;
-        DataZone.OnOutDataZone -= OnOutDataZone;
     }
 
     public void AddExtraReward(float rewardFactor)
@@ -235,6 +217,7 @@ public class TrainingAgent : Agent, IPrefab
         (float[] raycastObservations, string[] raycastTags) = CollectRaycastObservations();
         string combinedRaycastData = CombineRaycastData(raycastObservations, raycastTags);
         string activeCameraDescription = GetActiveCameraDescription();
+        string dataZoneMessage = DataZone.ConsumeDataZoneMessage();
 
         _csvWriter.LogToCSV(
             localVel,
@@ -250,8 +233,6 @@ public class TrainingAgent : Agent, IPrefab
             StepCount,
             health
         );
-
-        dataZoneMessage = "No";
     }
 
     public override void OnActionReceived(ActionBuffers action)
@@ -273,10 +254,10 @@ public class TrainingAgent : Agent, IPrefab
         string actionRotateWithDescription = $"{lastActionRotate} ({actionRotateDescription})";
         float reward = GetCumulativeReward();
         string notificationState = GetNotificationState();
-
         (float[] raycastObservations, string[] raycastTags) = CollectRaycastObservations();
         string combinedRaycastData = CombineRaycastData(raycastObservations, raycastTags);
         string playerControlsDescription = GetActiveCameraDescription();
+        string dataZoneMessage = DataZone.ConsumeDataZoneMessage();
 
         _csvWriter.LogToCSV(
             localVel,
@@ -292,8 +273,6 @@ public class TrainingAgent : Agent, IPrefab
             StepCount,
             health
         );
-
-        dataZoneMessage = "No";
 
         UpdateHealth(_rewardPerStep);
     }
