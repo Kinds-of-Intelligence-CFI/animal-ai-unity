@@ -21,7 +21,7 @@ public class CSVWriterTests
     private string wasAgentFrozen = "false";
     private float reward = 0.5f;
     private string notificationState = "none";
-    private string dataZoneMessage = "No";
+    private string? dataZoneMessage = null;
     private string activeCameraDescription = "mainCamera";
     private string combinedRaycastData = "rayData";
     private int stepCount = 1;
@@ -120,7 +120,7 @@ public class CSVWriterTests
         // wasRewardDispensed ("Yes" because RecordDispensedReward() was called),
         // dispensedRewardType, lastCollectedRewardType, wasSpawnerButtonTriggered ("No" by default),
         // combinedSpawnerInfo ("N/A"), dataZoneMessage, activeCameraDescription, combinedRaycastData
-        string expectedLogEntry = "1,1,100,0.5,1,2,3,4,5,6,forward,rotate,false,none,Yes,DispensedTestReward,TestReward,No,N/A,No,mainCamera,rayData";
+        string expectedLogEntry = "1,1,100,0.5,1,2,3,4,5,6,forward,rotate,false,none,Yes,DispensedTestReward,TestReward,No,N/A,None,mainCamera,rayData";
         Assert.AreEqual(expectedLogEntry, lines[1]);
     }
 
@@ -190,10 +190,10 @@ public class CSVWriterTests
         // wasRewardDispensed ("Yes" because RecordDispensedReward() was called),
         // dispensedRewardType, lastCollectedRewardType, wasSpawnerButtonTriggered ("No" by default),
         // combinedSpawnerInfo ("N/A"), dataZoneMessage, activeCameraDescription, combinedRaycastData
-        string expectedLogEntry_1 = "1,1,100,0.5,1,2,3,4,5,6,forward,rotate,false,none,Yes,DispensedTestReward,TestReward,Yes,TestSpawner,No,mainCamera,rayData";
+        string expectedLogEntry_1 = "1,1,100,0.5,1,2,3,4,5,6,forward,rotate,false,none,Yes,DispensedTestReward,TestReward,Yes,TestSpawner,None,mainCamera,rayData";
         Assert.AreEqual(expectedLogEntry_1, lines[1]);
         // Verify that expected loglines have been reset after one step
-        string expectedLogEntry_2 = "1,2,100,0.5,1,2,3,4,5,6,forward,rotate,false,none,No,None,None,No,N/A,No,mainCamera,rayData";
+        string expectedLogEntry_2 = "1,2,100,0.5,1,2,3,4,5,6,forward,rotate,false,none,No,None,None,No,N/A,None,mainCamera,rayData";
         Assert.AreEqual(expectedLogEntry_2, lines[2]);
     }
 
@@ -240,7 +240,7 @@ public class CSVWriterTests
         // wasRewardDispensed ("Yes" because RecordDispensedReward() was called),
         // dispensedRewardType, lastCollectedRewardType, wasSpawnerButtonTriggered ("No" by default),
         // combinedSpawnerInfo ("N/A"), dataZoneMessage, activeCameraDescription, combinedRaycastData
-        string expectedLogEntry = "1,1,100,0.5,1,2,3,4,5,6,forward,rotate,false,none,No,None,None,No,N/A,No,mainCamera,rayData";
+        string expectedLogEntry = "1,1,100,0.5,1,2,3,4,5,6,forward,rotate,false,none,No,None,None,No,N/A,None,mainCamera,rayData";
         Assert.AreEqual(expectedLogEntry, lines[1]);
 
         string expectedGoalsCollectedLine = "Positive Goals Collected: 5";
@@ -258,7 +258,7 @@ public class CSVWriterTests
         string wasAgentFrozen = "false";
         float reward = 0.0f;
         string notificationState = "none";
-        string dataZoneMessage = "No";
+        string? dataZoneMessage = null;
         string activeCameraDescription = "cam";
         string combinedRaycastData = "ray";
         int stepCount = 5;

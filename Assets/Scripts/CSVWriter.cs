@@ -90,7 +90,7 @@ public class CSVWriter : MonoBehaviour
             lastCollectedRewardType,
             wasSpawnerButtonTriggered ? "Yes" : "No",
             combinedSpawnerInfo.Replace(",", ";"),
-            dataZoneMessage ?? "No",
+            dataZoneMessage ?? "None",
             activeCameraDescription,
             combinedRaycastData
         );
