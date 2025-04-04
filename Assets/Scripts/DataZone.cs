@@ -38,7 +38,11 @@ public class DataZone : Prefab
         if (other.CompareTag("agent") && !isAgentInZone)
         {
             isAgentInZone = true;
-            LastDataZoneMessage = "Agent was in DataZone: " + TriggerZoneID;
+            if (LastDataZoneMessage == null) {
+                LastDataZoneMessage = "Agent was in DataZone: " + TriggerZoneID;
+            } else {
+                LastDataZoneMessage += " | " + TriggerZoneID;
+            }
         }
     }
 
@@ -47,7 +51,11 @@ public class DataZone : Prefab
         if (other.CompareTag("agent"))
         {
             isAgentInZone = false;
-            LastDataZoneMessage = "Agent left DataZone: " + TriggerZoneID;
+            if (LastDataZoneMessage == null) {
+                LastDataZoneMessage = "Agent left DataZone: " + TriggerZoneID;
+            } else {
+                LastDataZoneMessage += " | " + TriggerZoneID;
+            }
         }
     }
 
