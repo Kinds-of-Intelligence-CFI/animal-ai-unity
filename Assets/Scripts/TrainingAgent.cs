@@ -62,7 +62,7 @@ public class TrainingAgent : Agent, IPrefab
 
     [Header("CSV Logging")]
     // TODO: Refactor this so that it's tracked by the data zone
-    private string wasAgentInDataZone = "No"; // TODO: Does this work if the agent spawns in the datazone?
+    private string dataZoneMessage = "No";
 
     public void RecordSpawnerInfo(string spawnerInfo)
     {
@@ -71,12 +71,12 @@ public class TrainingAgent : Agent, IPrefab
 
     public void OnInDataZone(string zoneLogString)
     {
-        wasAgentInDataZone = "Agent was in DataZone: " + zoneLogString;
+        dataZoneMessage = "Agent was in DataZone: " + zoneLogString;
     }
 
     public void OnOutDataZone(string zoneLogString)
     {
-        wasAgentInDataZone = "Agent left DataZone: " + zoneLogString;
+        dataZoneMessage = "Agent left DataZone: " + zoneLogString;
     }
 
     public void RecordDispensedReward()
@@ -244,14 +244,14 @@ public class TrainingAgent : Agent, IPrefab
             wasAgentFrozen ? "Yes" : "No",
             reward,
             notificationState,
-            wasAgentInDataZone,
+            dataZoneMessage,
             activeCameraDescription,
             combinedRaycastData,
             StepCount,
             health
         );
 
-        wasAgentInDataZone = "No";
+        dataZoneMessage = "No";
     }
 
     public override void OnActionReceived(ActionBuffers action)
@@ -286,14 +286,14 @@ public class TrainingAgent : Agent, IPrefab
             wasAgentFrozen ? "Yes" : "No",
             reward,
             notificationState,
-            wasAgentInDataZone,
+            dataZoneMessage,
             playerControlsDescription,
             combinedRaycastData,
             StepCount,
             health
         );
 
-        wasAgentInDataZone = "No";
+        dataZoneMessage = "No";
 
         UpdateHealth(_rewardPerStep);
     }
