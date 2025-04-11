@@ -28,18 +28,6 @@ public class DataZoneTests
         Assert.DoesNotThrow(() => InvokePrivateMethod(dataZone, "Start"));
     }
 
-    [Test]
-    public void Start_CallsSetVisibility()
-    {
-        GameObject gameObject = new GameObject();
-        DataZone dataZone = gameObject.AddComponent<DataZone>();
-        dataZone.ZoneVisibility = true;
-
-        InvokePrivateMethod(dataZone, "Start");
-
-        Assert.IsTrue(gameObject.activeSelf);
-    }
-
     private void InvokePrivateMethod(object obj, string methodName)
     {
         MethodInfo method = obj.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);

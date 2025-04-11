@@ -7,16 +7,14 @@ using UnityEngine;
 public class DataZone : Prefab
 {
     public string TriggerZoneID { get; set; }
-    public bool ZoneVisibility { get; set; } = true;
     public bool isAgentInZone { get; set; } = false;
 
-    // TODO: Fix the race condition on LastDataZoneMessage
-    // (If multiple DataZones try to write to this simultaneously one will get overwritten)
+    // Note: There is a race condition on this variable
+    // (If multiple DataZones try to write to this simultaneously one will come first in the message arbitrarily)
     private static string? LastDataZoneMessage = null;
 
     private void Start()
     {
-        SetVisibility(ZoneVisibility);
         var collider = GetComponent<Collider>();
         if (collider != null)
         {
