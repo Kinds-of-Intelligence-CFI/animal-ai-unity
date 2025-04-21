@@ -39,10 +39,52 @@ namespace YAMLDefs
     public class Arena
     {
         [YamlMember(Alias = "t")]
-        public int timeLimit { get; set; } = 0;
+        public int? _tBacking { get; set; }
+
+        [YamlMember(Alias = "timeLimit")]
+        public int? _timeLimitBacking { get; set; }
+
+        [YamlIgnore]
+        public int timeLimit
+        {
+            get
+            {
+                // prefer the new name, then the old, then 0
+                return _timeLimitBacking
+                    ?? _tBacking
+                    ?? 0;
+            }
+            set
+            {
+                // keep them both in sync if you ever assign in code
+                _timeLimitBacking = value;
+                _tBacking          = value;
+            }
+        }
         public List<Item> items { get; set; } = new List<Item>();
         [YamlMember(Alias = "pass_mark")]
-        public float passMark { get; set; } = 0;
+        public float? pass_markBacking { get; set; }
+
+        [YamlMember(Alias = "passMark")]
+        public float? _passMarkBacking { get; set; }
+
+        [YamlIgnore]
+        public float passMark
+        {
+            get
+            {
+                // prefer the new name, then the old, then 0
+                return _passMarkBacking
+                    ?? pass_markBacking
+                    ?? 0;
+            }
+            set
+            {
+                // keep them both in sync if you ever assign in code
+                _passMarkBacking = value;
+                pass_markBacking          = value;
+            }
+        }
         public List<int> blackouts { get; set; } = new List<int>();
         public int randomSeed { get; set; } = 0;
         public bool mergeNextArena { get; set; } = false;
