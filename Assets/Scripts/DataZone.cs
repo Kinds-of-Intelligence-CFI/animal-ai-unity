@@ -11,6 +11,7 @@ public class DataZone : Prefab
 
     // Note: There is a race condition on this variable
     // (If multiple DataZones try to write to this simultaneously one will come first in the message arbitrarily)
+    // TODO: Currently concurrent entries/exits are gracefully handled, but simultaneously entering one and exiting another is not
     private static string? LastDataZoneMessage = null;
 
     private void Start()
