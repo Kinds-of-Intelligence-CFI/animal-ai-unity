@@ -38,8 +38,10 @@ namespace YAMLDefs
     /// </summary>
     public class Arena
     {
+        [YamlMember(Alias = "t")]
         public int timeLimit { get; set; } = 0;
         public List<Item> items { get; set; } = new List<Item>();
+        [YamlMember(Alias = "pass_mark")]
         public float passMark { get; set; } = 0;
         public List<int> blackouts { get; set; } = new List<int>();
         public int randomSeed { get; set; } = 0;

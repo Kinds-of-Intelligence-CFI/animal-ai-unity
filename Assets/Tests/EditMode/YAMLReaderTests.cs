@@ -287,4 +287,26 @@ public class YAMLReaderTests
         Assert.AreEqual(new Vector3(20, 0, 20), goalItem1.positions[0]);
         Assert.AreEqual(new Vector3(5, 5, 5), goalItem1.sizes[0]);
     }
+
+    [Test]
+    public void passMarkAndTimeLimit_AreBackwardsCompatible()
+    {
+        string yaml =
+            @"
+        !ArenaConfig
+        arenas:
+          0: !Arena
+            pass_mark: 0.5
+            t: 120";
+
+        ArenaConfig arenaConfig = yamlReader.deserializer.Deserialize<ArenaConfig>(yaml);
+
+        Assert.NotNull(arenaConfig);
+        Assert.AreEqual(1, arenaConfig.arenas.Count, "There should be 1 arena in the config.");
+
+        Arena arena = arenaConfig.arenas[0];
+        Assert.AreEqual(0.5f, arena.passMark, "Pass mark should be 0.5.");
+        Assert.AreEqual(120, arena.timeLimit, "Time limit should be 120.");
+        Assert.AreEqual(0, arena.items.Count, "There should be no items in this arena.");
+    }
 }
