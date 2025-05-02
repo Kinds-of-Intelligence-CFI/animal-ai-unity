@@ -43,9 +43,6 @@ public class Prefab : MonoBehaviour, IPrefab
             return;
         }
 
-        Renderer renderer = GetComponent<Renderer>();
-        if (renderer == null) return;
-
         Color newColor;
 
         if (colorSpecified)
@@ -63,17 +60,16 @@ public class Prefab : MonoBehaviour, IPrefab
             );
         }
 
-        ApplyColorToRenderer(renderer, newColor, colorSpecified);
-
-        /* Special case: handle child object color of HollowBox if needed (e.g. for HollowBlock) */
-        Transform childTransform = transform.Find("HollowBlock");
-        if (childTransform != null)
+        if (GetComponent<Renderer>() != null)
         {
-            Renderer childRenderer = childTransform.GetComponent<Renderer>();
-            if (childRenderer != null)
-            {
-                ApplyColorToRenderer(childRenderer, newColor, colorSpecified);
-            }
+            ApplyColorToRenderer(GetComponent<Renderer>(), newColor, colorSpecified);
+        }
+        foreach (Renderer r in GetComponentsInChildren<Renderer>())
+        {
+            if (
+                r.material.GetFloat("_Surface") != 1 /* meaning 'Transparent' */
+            )
+                ApplyColorToRenderer(r, newColor, colorSpecified);
         }
     }
 
