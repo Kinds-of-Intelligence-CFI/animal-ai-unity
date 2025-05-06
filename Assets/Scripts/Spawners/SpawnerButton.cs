@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using ArenaBuilders;
+using PrefabInterface;
 
 /// <summary>
 /// Spawns a reward when interacted with. The reward is chosen from a list of rewards with weights and spawn probabilities.
@@ -18,6 +19,7 @@ public class SpawnerButton : MonoBehaviour
     public List<GameObject> Rewards { get; set; }
     public Vector3 RewardSpawnPos { get; set; }
     public List<int> MaxRewardCounts { get; set; }
+    public Vector3 SpawnedRewardSize { get; set; }
     public int ButtonPressCount { get; private set; }
     public GameObject LastSpawnedReward { get; private set; }
     public float SpawnProbability { get; set; } = 1f;
@@ -76,6 +78,13 @@ public class SpawnerButton : MonoBehaviour
                     return reward;
                 })
                 .ToList();
+        }
+        if (SpawnedRewardSize != Vector3.zero)
+        {
+            foreach (GameObject reward in Rewards)
+            {
+                reward.GetComponent<IPrefab>().SetSize(SpawnedRewardSize);
+            }
         }
 
         rewardWeights = RewardWeights;

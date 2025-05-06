@@ -130,6 +130,7 @@ namespace YAMLDefs
         public List<float> rewardWeights { get; set; } = new List<float>();
         public Vector3 rewardSpawnPos { get; set; } = new Vector3(0, 0, 0);
         public List<int> maxRewardCounts { get; set; } = new List<int>();
+        public Vector3 spawnedRewardSize { get; set; } = new Vector3(0, 0, 0);
 
         // DataZone
         public List<string> triggerZoneID { get; set; } = new List<string>();

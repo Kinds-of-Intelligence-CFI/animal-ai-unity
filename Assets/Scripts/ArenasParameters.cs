@@ -57,6 +57,7 @@ namespace ArenasParameters
         public List<float> RewardWeights { get; private set; }
         public Vector3 rewardSpawnPos { get; private set; }
         public List<int> maxRewardCounts { get; private set; }
+        public Vector3 spawnedRewardSize { get; private set; }
         public Dictionary<int, int> originalToNewIDMapping = new Dictionary<int, int>();
 
         // Trigger/DataZone
@@ -105,6 +106,7 @@ namespace ArenasParameters
             RewardWeights = yamlItem.rewardWeights;
             rewardSpawnPos = yamlItem.rewardSpawnPos;
             maxRewardCounts = yamlItem.maxRewardCounts;
+            spawnedRewardSize = yamlItem.spawnedRewardSize;
 
             triggerZoneID = yamlItem.triggerZoneID;
             zoneVisibility = yamlItem.zoneVisibility;

@@ -280,6 +280,7 @@ namespace ArenaBuilders
                     { "rewardWeights", spawnable.RewardWeights },
                     { "rewardSpawnPos", rewardSpawnPos },
                     { "maxRewardCounts", spawnable.maxRewardCounts },
+                    { "spawnedRewardSize", spawnable.spawnedRewardSize },
                     { "triggerZoneID", spawnable.triggerZoneID },
                     { "zoneVisibility", spawnable.zoneVisibility }
                 };
@@ -387,6 +388,13 @@ namespace ArenaBuilders
                         )
                         {
                             spawnerInteractiveButton.MaxRewardCounts = maxRewardCounts;
+                        }
+                        if (
+                            optionals.TryGetValue("spawnedRewardSize", out var spawnedRewardSizeValue)
+                            && spawnedRewardSizeValue is Vector3 spawnedRewardSize
+                        )
+                        {
+                            spawnerInteractiveButton.SpawnedRewardSize = spawnedRewardSize;
                         }
                     }
 
