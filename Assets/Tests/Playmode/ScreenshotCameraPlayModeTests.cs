@@ -59,7 +59,7 @@ public class ScreenshotCameraPlayModeTests
     public IEnumerator ScreenshotCamera_CaptureScreenshot_CreatesFile()
     {
         screenshotCamera.Activate(true);
-        yield return new WaitForEndOfFrame();
+        yield return null;
 
         screenshotCamera.Activate(false);
 
