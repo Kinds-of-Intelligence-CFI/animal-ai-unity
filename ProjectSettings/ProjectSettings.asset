@@ -140,7 +140,7 @@ PlayerSettings:
   loadStoreDebugModeEnabled: 0
   visionOSBundleVersion: 1.0
   tvOSBundleVersion: 1.0
-  bundleVersion: 4.2.0
+  bundleVersion: 4.2.3
   preloadedAssets:
   - {fileID: 0}
   - {fileID: 0}
@@ -165,7 +165,7 @@ PlayerSettings:
   androidMaxAspectRatio: 2.1
   androidMinAspectRatio: 1
   applicationIdentifier:
-    Standalone: com.CFI.AnimalAI
+    Standalone: com.CFI.Animal-AI
   buildNumber:
     Standalone: 0
     VisionOS: 0
