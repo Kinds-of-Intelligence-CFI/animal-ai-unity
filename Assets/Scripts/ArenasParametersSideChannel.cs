@@ -1,5 +1,8 @@
 using Unity.MLAgents.SideChannels;
 using System;
+using System.IO;
+using System.Text;
+using UnityEngine;
 using ArenasParameters;
 
 /// <summary>
@@ -17,11 +20,43 @@ public class ArenasParametersSideChannel : SideChannel
 
     protected override void OnMessageReceived(IncomingMessage msg)
     {
-        byte[] yamlData = msg.GetRawBytes();
+        string filePath = Encoding.UTF8.GetString(msg.GetRawBytes());
 
-        /* Create the event args and the YAML data */
-        ArenasParametersEventArgs args = new ArenasParametersEventArgs { arenas_yaml = yamlData, };
-        OnArenasParametersReceived(args);
+        byte[] yamlData = ReadArenaConfigFile(filePath);
+        if (yamlData != null)
+        {
+            /* Create the event args and the YAML data */
+            ArenasParametersEventArgs args = new ArenasParametersEventArgs { arenas_yaml = yamlData, };
+            OnArenasParametersReceived(args);
+        }
+    }
+
+    private byte[] ReadArenaConfigFile(string filePath)
+    {
+        try
+        {
+
+            if (!File.Exists(filePath))
+            {
+                Debug.LogError($"Arena config file not found: {filePath}");
+                return null;
+            }
+
+            byte[] fileContent = File.ReadAllBytes(filePath);
+            if (fileContent == null || fileContent.Length == 0)
+            {
+                Debug.LogError($"Arena config file is empty: {filePath}");
+                return null;
+            }
+
+            Debug.Log($"Successfully loaded arena config from: {filePath}");
+            return fileContent;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Error reading arena config file '{filePath}': {ex.Message}");
+            return null;
+        }
     }
 
     protected virtual void OnArenasParametersReceived(
