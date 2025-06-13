@@ -1,5 +1,8 @@
 using Unity.MLAgents.SideChannels;
 using System;
+using System.IO;
+using System.Text;
+using UnityEngine;
 using ArenasParameters;
 
 /// <summary>
@@ -17,11 +20,54 @@ public class ArenasParametersSideChannel : SideChannel
 
     protected override void OnMessageReceived(IncomingMessage msg)
     {
-        byte[] yamlData = msg.GetRawBytes();
+        byte[] rawData = msg.GetRawBytes();
+        string potentialFilePath = Encoding.UTF8.GetString(rawData);
 
-        /* Create the event args and the YAML data */
-        ArenasParametersEventArgs args = new ArenasParametersEventArgs { arenas_yaml = yamlData, };
-        OnArenasParametersReceived(args);
+        // Check if the received string is a valid file path
+        if (!string.IsNullOrEmpty(potentialFilePath) && File.Exists(potentialFilePath))
+        {
+            // New behavior: read arena config from file
+            byte[] yamlData = ReadArenaConfigFile(potentialFilePath);
+            if (yamlData != null)
+            {
+                ArenasParametersEventArgs args = new ArenasParametersEventArgs { arenas_yaml = yamlData, };
+                OnArenasParametersReceived(args);
+            }
+        }
+        else
+        {
+            // Original behavior: treat raw data as arena content directly
+            ArenasParametersEventArgs args = new ArenasParametersEventArgs { arenas_yaml = rawData, };
+            OnArenasParametersReceived(args);
+        }
+    }
+
+    private byte[] ReadArenaConfigFile(string filePath)
+    {
+        try
+        {
+
+            if (!File.Exists(filePath))
+            {
+                Debug.LogError($"Arena config file not found: {filePath}");
+                return null;
+            }
+
+            byte[] fileContent = File.ReadAllBytes(filePath);
+            if (fileContent == null || fileContent.Length == 0)
+            {
+                Debug.LogError($"Arena config file is empty: {filePath}");
+                return null;
+            }
+
+            Debug.Log($"Successfully loaded arena config from: {filePath}");
+            return fileContent;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Error reading arena config file '{filePath}': {ex.Message}");
+            return null;
+        }
     }
 
     protected virtual void OnArenasParametersReceived(
