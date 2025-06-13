@@ -20,13 +20,24 @@ public class ArenasParametersSideChannel : SideChannel
 
     protected override void OnMessageReceived(IncomingMessage msg)
     {
-        string filePath = Encoding.UTF8.GetString(msg.GetRawBytes());
+        byte[] rawData = msg.GetRawBytes();
+        string potentialFilePath = Encoding.UTF8.GetString(rawData);
 
-        byte[] yamlData = ReadArenaConfigFile(filePath);
-        if (yamlData != null)
+        // Check if the received string is a valid file path
+        if (!string.IsNullOrEmpty(potentialFilePath) && File.Exists(potentialFilePath))
         {
-            /* Create the event args and the YAML data */
-            ArenasParametersEventArgs args = new ArenasParametersEventArgs { arenas_yaml = yamlData, };
+            // New behavior: read arena config from file
+            byte[] yamlData = ReadArenaConfigFile(potentialFilePath);
+            if (yamlData != null)
+            {
+                ArenasParametersEventArgs args = new ArenasParametersEventArgs { arenas_yaml = yamlData, };
+                OnArenasParametersReceived(args);
+            }
+        }
+        else
+        {
+            // Original behavior: treat raw data as arena content directly
+            ArenasParametersEventArgs args = new ArenasParametersEventArgs { arenas_yaml = rawData, };
             OnArenasParametersReceived(args);
         }
     }
