@@ -42,9 +42,6 @@ public class SpawnerButton : MonoBehaviour
     [SerializeField]
     private Vector3 moveOffset;
 
-    [SerializeField]
-    private Transform rewardSpawnPoint;
-
     private static int spawnerCounter = 0;
     public int spawnerID;
     private Vector3 initialPosition;
@@ -232,7 +229,7 @@ public class SpawnerButton : MonoBehaviour
 
         if (Random.value <= SpawnProbability)
         {
-            Vector3 spawnPosition = rewardSpawnPoint.position;
+            Vector3 spawnPosition;
 
             if (RewardSpawnPos != Vector3.zero)
             {
