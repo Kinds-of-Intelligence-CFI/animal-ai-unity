@@ -26,7 +26,7 @@ public class ArenasParametersSideChannel : SideChannel
         // Check if the received string is a valid file path
         if (!string.IsNullOrEmpty(potentialFilePath) && File.Exists(potentialFilePath))
         {
-            // New behavior: read arena config from file
+            // read arena config from file
             byte[] yamlData = ReadArenaConfigFile(potentialFilePath);
             if (yamlData != null)
             {
@@ -36,7 +36,7 @@ public class ArenasParametersSideChannel : SideChannel
         }
         else
         {
-            // Original behavior: treat raw data as arena content directly
+            // treat raw data as arena content directly
             ArenasParametersEventArgs args = new ArenasParametersEventArgs { arenas_yaml = rawData, };
             OnArenasParametersReceived(args);
         }
