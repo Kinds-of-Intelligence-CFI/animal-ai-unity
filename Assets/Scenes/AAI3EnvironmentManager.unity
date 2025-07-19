@@ -1000,7 +1000,7 @@ MonoBehaviour:
   arena: {fileID: 1540725604319108, guid: cb05c844a0de0cd4880c39b9a1aedeef, type: 3}
   uiCanvas: {fileID: 1822920678}
   playerControls: {fileID: 1065671190}
-  configFile: test_configs/decoy-file-test
+  configFile: test_configs/empty-arena
 --- !u!1 &660795385
 GameObject:
   m_ObjectHideFlags: 0

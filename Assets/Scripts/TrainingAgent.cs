@@ -7,7 +7,7 @@ using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using PrefabInterface;
 using Unity.MLAgents.Sensors;
-using YAMLDefs;
+using Operations;
 
 /// <summary>
 /// The TrainingAgent class is a subclass of the Agent class in the ML-Agents library.
@@ -97,7 +97,7 @@ public class TrainingAgent : Agent, IPrefab
         progBar.AssignAgent(this);
         health = _maxHealth;
 
-        SpawnerButton.RewardSpawned += _csvWriter.OnRewardSpawned;
+        SpawnReward.RewardSpawned += _csvWriter.OnRewardSpawned;
 
         playerControls = GameObject.FindObjectOfType<PlayerControls>();
 
@@ -115,7 +115,7 @@ public class TrainingAgent : Agent, IPrefab
         _csvWriter.ReportGoalsCollected(numberOfGoalsCollected);
         _csvWriter.Shutdown();
 
-        SpawnerButton.RewardSpawned -= _csvWriter.OnRewardSpawned;
+        SpawnReward.RewardSpawned -= _csvWriter.OnRewardSpawned;
     }
 
     public void AddExtraReward(float rewardFactor)

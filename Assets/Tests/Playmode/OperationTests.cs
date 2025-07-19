@@ -41,7 +41,7 @@ public class OperationTests
         GameObject spawnedReward = goodGoals[0];
 
         Assert.IsNotNull(spawnedReward, "Spawned reward should not be null");
-        Assert.IsTrue(Vector3.Distance(spawnedReward.transform.position, expectedRewardPosition) < 0.5f, 
+        Assert.IsTrue(Vector3.Distance(spawnedReward.transform.position, expectedRewardPosition) < 0.5f,
                      "Reward should spawn at expected position behind agent");
 
         yield return MoveAgentBackward();
@@ -106,12 +106,14 @@ public class OperationTests
 
         // Initialize with dummy details since we're not attached to a specific object
         AttachedObjectDetails details = new AttachedObjectDetails("test", Vector3.zero);
-        spawnOperation.Initialize(details);
         spawnOperation.rewardNames = new System.Collections.Generic.List<string> { "GoodGoal" };
         spawnOperation.rewardSpawnPos = expectedRewardPosition;
-        if (max_spawns != null) {
+        spawnOperation.rewardWeights = new System.Collections.Generic.List<float> { 1 };
+        if (max_spawns != null)
+        {
             spawnOperation.MaxRewardCounts = new System.Collections.Generic.List<int> { max_spawns.Value };
         }
+        spawnOperation.Initialize(details);
         return spawnOperation;
     }
 

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using ArenaBuilders;
+using PrefabInterface;
 
 /// <summary>
 /// Operations are environment changes (such as spawning a goal) that can be attached to interactive items
@@ -38,10 +39,12 @@ namespace Operations
         public delegate void OnRewardSpawned(GameObject reward);
         public static event OnRewardSpawned RewardSpawned;
         private ArenaBuilder arenaBuilder; // Needed to statically access ArenaWidth and ArenaDepth
-        private float SpawnProbability { get; set; } = 1f;
+        public float SpawnProbability { get; set; } = 1f;
+        public List<float> rewardWeights { get; set; }
         public List<string> rewardNames { get; set; } = new List<string>();
         public Vector3 rewardSpawnPos { get; set; } = new Vector3(0, 0, 0);
         public List<int> MaxRewardCounts { get; set; }
+        public Vector3 SpawnedRewardSize { get; set; }
         public Dictionary<GameObject, int> RewardSpawnCounts { get; private set; } =
         new Dictionary<GameObject, int>();
 
@@ -50,7 +53,8 @@ namespace Operations
             attachedObjectDetails = details;
         }
 
-        public override void execute() {
+        public override void execute()
+        {
             List<GameObject> Rewards_ = rewardNames
                 .Select(name =>
                 {
@@ -62,15 +66,21 @@ namespace Operations
                     return reward;
                 })
                 .ToList();
-
-            SpawnRewardOperation(Rewards_, new List<float> { 100 }, SpawnProbability, rewardSpawnPos);
+            if (SpawnedRewardSize != Vector3.zero)
+            {
+                foreach (GameObject reward in Rewards_)
+                {
+                    reward.GetComponent<IPrefab>().SetSize(SpawnedRewardSize);
+                }
+            }
+            SpawnRewardOperation(Rewards_, rewardWeights, SpawnProbability, rewardSpawnPos);
         }
 
         private GameObject ChooseReward(List<GameObject> Rewards_, List<float> rewardWeights_)
         {
             if (Rewards_ == null || rewardWeights_ == null || Rewards_.Count != rewardWeights_.Count)
             {
-                Debug.LogError("Invalid rewards or reward weights setup.");
+                Debug.LogError($"Invalid rewards or reward weights setup. Rewards: {(Rewards_ == null ? "null" : string.Join(", ", Rewards_.Select(r => r != null ? r.name : "null")))}; RewardWeights: {(rewardWeights_ == null ? "null" : string.Join(", ", rewardWeights_ ?? new List<float>()))}");
                 return null;
             }
 
@@ -96,7 +106,8 @@ namespace Operations
             List<float> rewardWeights_,
             float SpawnProbability_,
             Vector3 RewardSpawnPos_
-        ){
+        )
+        {
             GameObject rewardToSpawn = ChooseReward(Rewards_, rewardWeights_);
 
             if (rewardToSpawn == null)

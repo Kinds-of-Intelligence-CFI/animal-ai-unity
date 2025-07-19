@@ -8,6 +8,7 @@ using ArenasParameters;
 using Holders;
 using Random = UnityEngine.Random;
 using System.Linq;
+using Operations;
 
 /// <summary>
 /// This class is responsible for managing the training arena.
@@ -80,7 +81,7 @@ public class TrainingArena : MonoBehaviour
 
     private void OnDestroy()
     {
-        SpawnerButton.RewardSpawned -= OnRewardSpawned;
+        SpawnReward.RewardSpawned -= OnRewardSpawned;
     }
 
     /// <summary>
@@ -103,7 +104,7 @@ public class TrainingArena : MonoBehaviour
         _agentDecisionInterval = _agent.GetComponentInChildren<DecisionRequester>().DecisionPeriod;
         _fades = blackScreens.GetFades();
 
-        SpawnerButton.RewardSpawned += OnRewardSpawned;
+        SpawnReward.RewardSpawned += OnRewardSpawned;
     }
 
     /// <summary>
