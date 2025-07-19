@@ -614,6 +614,10 @@ namespace ArenaBuilders
             {
                 return new PositionRotation(positionOut, rotationOut);
             }
+            else
+            {
+                Debug.LogError($"Failed to find PositionRotation for object: {gameObjectInstance.name} (InstanceID: {gameObjectInstance.GetInstanceID()})");
+            }
             return null;
         }
 
