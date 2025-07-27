@@ -62,7 +62,6 @@ public class SpawnerButton : MonoBehaviour
                 SpawnReward spawnOperation = gameObject.AddComponent<SpawnReward>();
                 AttachedObjectDetails details = new AttachedObjectDetails(spawnerID.ToString(), transform.position);
                 spawnOperation.Initialize(details);
-                spawnOperation.SpawnProbability = SpawnProbability;
                 spawnOperation.rewardName = RewardNames[i];
                 spawnOperation.rewardSpawnPos = RewardSpawnPos;
                 if (MaxRewardCounts != null && MaxRewardCounts.Count > 0)
@@ -72,6 +71,16 @@ public class SpawnerButton : MonoBehaviour
                 spawnOperation.SpawnedRewardSize = SpawnedRewardSize;
                 parentOperation.operations.Add(spawnOperation);
                 parentOperation.operationWeights.Add(RewardWeights[i]);
+            }
+            if (SpawnProbability != 1)
+            {
+                OperationFromList newParentOperation = gameObject.AddComponent<OperationFromList>();
+                newParentOperation.operations.Add(parentOperation);
+                newParentOperation.operationWeights.Add(SpawnProbability);
+                NoneOperation noneOperation = gameObject.AddComponent<NoneOperation>();
+                newParentOperation.operations.Add(noneOperation);
+                newParentOperation.operationWeights.Add(1 - SpawnProbability);
+                parentOperation = newParentOperation;
             }
             Operations.Add(parentOperation);
         }

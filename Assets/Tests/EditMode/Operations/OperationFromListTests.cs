@@ -50,6 +50,13 @@ public class OperationFromListTests
         return operation;
     }
 
+    private NoneOperation CreateNoneOperation()
+    {
+        var gameObject = new GameObject();
+        var operation = gameObject.AddComponent<NoneOperation>();
+        return operation;
+    }
+
     [Test]
     public void Execute_WithEqualWeights_DistributesExecutionsEvenly()
     {
@@ -186,6 +193,31 @@ public class OperationFromListTests
             $"Weight 1 operation executed {operation3.executionCount} times, expected around {expectedOperation3Count}");
         Assert.AreEqual(iterations, operation1.executionCount + operation2.executionCount + operation3.executionCount,
             "Total executions should equal the number of iterations");
+    }
+
+    [Test]
+    public void Execute_WithANoneAction_MeansTestOpIsOnlyCalledHalfTheTime()
+    {
+        const int iterations = 1000;
+        const float tolerance = 0.15f; // Allow 15% deviation from expected distribution
+
+        var operationFromList = CreateOperationFromList();
+        var operation1 = CreateTestOperation("Operation1");
+        var operation2 = CreateNoneOperation();
+
+        operationFromList.operations = new List<Operation> { operation1, operation2 };
+        operationFromList.operationWeights = new List<float> { 1.0f, 1.0f };
+
+        for (int i = 0; i < iterations; i++)
+        {
+            operationFromList.execute();
+        }
+
+        float expectedCount = iterations / 2.0f;
+        float allowedDeviation = expectedCount * tolerance;
+
+        Assert.That(operation1.executionCount, Is.InRange(expectedCount - allowedDeviation, expectedCount + allowedDeviation),
+            $"Operation1 executed {operation1.executionCount} times, expected around {expectedCount}");
     }
 
     [Test]

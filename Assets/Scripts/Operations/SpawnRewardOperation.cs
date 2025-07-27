@@ -12,7 +12,6 @@ namespace Operations
         public delegate void OnRewardSpawned(GameObject reward);
         public static event OnRewardSpawned RewardSpawned;
         private ArenaBuilder arenaBuilder; // Needed to statically access ArenaWidth and ArenaDepth
-        public float SpawnProbability { get; set; } = 1f;
         public string rewardName { get; set; }
         public Vector3 rewardSpawnPos { get; set; } = new Vector3(0, 0, 0);
         public int? MaxRewardCount { get; set; }
@@ -35,12 +34,11 @@ namespace Operations
             {
                 reward.GetComponent<IPrefab>().SetSize(SpawnedRewardSize);
             }
-            SpawnRewardOperation(reward, SpawnProbability, rewardSpawnPos);
+            SpawnRewardOperation(reward, rewardSpawnPos);
         }
 
         private void SpawnRewardOperation(
             GameObject reward,
-            float SpawnProbability_,
             Vector3 RewardSpawnPos_
         )
         {
@@ -54,68 +52,65 @@ namespace Operations
                 return;
             }
 
-            if (Random.value <= SpawnProbability_)
+            Vector3 spawnPosition;
+
+            if (RewardSpawnPos_ != Vector3.zero)
             {
-                Vector3 spawnPosition;
-
-                if (RewardSpawnPos_ != Vector3.zero)
-                {
-                    spawnPosition = RewardSpawnPos_;
-                }
-                else /* Randomize spawn position within the arena bounds */
-                {
-                    float arenaWidth = arenaBuilder.ArenaWidth;
-                    float arenaDepth = arenaBuilder.ArenaDepth;
-
-                    /* Randomly generate a spawn position within the bounds of the arena, as defined by Arenabuilders.cs. */
-                    spawnPosition = new Vector3(
-                        Random.Range(0, arenaWidth),
-                        0,
-                        Random.Range(0, arenaDepth)
-                    );
-                }
-
-                if (RewardSpawnPos_.x == -1)
-                {
-                    spawnPosition.x = Random.Range(0, arenaBuilder.ArenaWidth);
-                }
-
-                if (RewardSpawnPos_.y == -1)
-                {
-                    spawnPosition.y = Random.Range(0, 50);
-                }
-                else
-                {
-                    spawnPosition.y = RewardSpawnPos_.y;
-                }
-
-                if (RewardSpawnPos_.z == -1)
-                {
-                    spawnPosition.z = Random.Range(0, arenaBuilder.ArenaDepth);
-                }
-
-                GameObject LastSpawnedReward = Instantiate(reward, spawnPosition, Quaternion.identity);
-
-                TrainingAgent agent = FindObjectOfType<TrainingAgent>();
-                if (agent != null)
-                {
-                    Vector3 spawnerPos = attachedObjectDetails.location;
-                    string rewardType =
-                        LastSpawnedReward != null ? LastSpawnedReward.name.Replace("(Clone)", "") : "None";
-                    string spawnerInfo =
-                        $"SpawnerButtonID:{attachedObjectDetails.ID}, Position:{spawnerPos.x},{spawnerPos.y},{spawnerPos.z}, RewardType:{rewardType}";
-                    Debug.Log($"Logging SpawnerButton Info: {spawnerInfo}");
-                    agent.RecordSpawnerInfo(spawnerInfo);
-                }
-                else
-                {
-                    Debug.LogError("Training Agent not found in the scene.");
-                }
-
-                RewardSpawnCount += 1;
-
-                RewardSpawned?.Invoke(LastSpawnedReward);
+                spawnPosition = RewardSpawnPos_;
             }
+            else /* Randomize spawn position within the arena bounds */
+            {
+                float arenaWidth = arenaBuilder.ArenaWidth;
+                float arenaDepth = arenaBuilder.ArenaDepth;
+
+                /* Randomly generate a spawn position within the bounds of the arena, as defined by Arenabuilders.cs. */
+                spawnPosition = new Vector3(
+                    Random.Range(0, arenaWidth),
+                    0,
+                    Random.Range(0, arenaDepth)
+                );
+            }
+
+            if (RewardSpawnPos_.x == -1)
+            {
+                spawnPosition.x = Random.Range(0, arenaBuilder.ArenaWidth);
+            }
+
+            if (RewardSpawnPos_.y == -1)
+            {
+                spawnPosition.y = Random.Range(0, 50);
+            }
+            else
+            {
+                spawnPosition.y = RewardSpawnPos_.y;
+            }
+
+            if (RewardSpawnPos_.z == -1)
+            {
+                spawnPosition.z = Random.Range(0, arenaBuilder.ArenaDepth);
+            }
+
+            GameObject LastSpawnedReward = Instantiate(reward, spawnPosition, Quaternion.identity);
+
+            TrainingAgent agent = FindObjectOfType<TrainingAgent>();
+            if (agent != null)
+            {
+                Vector3 spawnerPos = attachedObjectDetails.location;
+                string rewardType =
+                    LastSpawnedReward != null ? LastSpawnedReward.name.Replace("(Clone)", "") : "None";
+                string spawnerInfo =
+                    $"SpawnerButtonID:{attachedObjectDetails.ID}, Position:{spawnerPos.x},{spawnerPos.y},{spawnerPos.z}, RewardType:{rewardType}";
+                Debug.Log($"Logging SpawnerButton Info: {spawnerInfo}");
+                agent.RecordSpawnerInfo(spawnerInfo);
+            }
+            else
+            {
+                Debug.LogError("Training Agent not found in the scene.");
+            }
+
+            RewardSpawnCount += 1;
+
+            RewardSpawned?.Invoke(LastSpawnedReward);
         }
     }
 }
