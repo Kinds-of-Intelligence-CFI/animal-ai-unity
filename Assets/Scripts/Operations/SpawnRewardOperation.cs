@@ -4,36 +4,11 @@ using System.Linq;
 using ArenaBuilders;
 using PrefabInterface;
 
-/// <summary>
-/// Operations are environment changes (such as spawning a goal) that can be attached to interactive items
-/// </summary>
 namespace Operations
 {
     /// <summary>
-    /// Structure containing details about the object this operation is attached to
-    /// </summary>
-    public struct AttachedObjectDetails
-    {
-        public string ID;
-        public Vector3 location;
-
-        public AttachedObjectDetails(string id, Vector3 loc)
-        {
-            ID = id;
-            location = loc;
-        }
-    }
-
-    /// <summary>
-    /// Parent class for all operations
-    public abstract class Operation : MonoBehaviour
-    {
-        public AttachedObjectDetails attachedObjectDetails { get; protected set; }
-        public abstract void execute();
-    }
-
-    /// <summary>
     /// Spawn a reward at a given location
+    /// </summary>
     public class SpawnReward : Operation
     {
         public delegate void OnRewardSpawned(GameObject reward);
@@ -46,7 +21,7 @@ namespace Operations
         public List<int> MaxRewardCounts { get; set; }
         public Vector3 SpawnedRewardSize { get; set; }
         public Dictionary<GameObject, int> RewardSpawnCounts { get; private set; } =
-        new Dictionary<GameObject, int>();
+            new Dictionary<GameObject, int>();
 
         public void Initialize(AttachedObjectDetails details)
         {

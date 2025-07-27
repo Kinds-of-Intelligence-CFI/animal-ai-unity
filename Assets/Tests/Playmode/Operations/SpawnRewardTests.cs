@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 using Operations;
 using Unity.MLAgents.Actuators;
 
-public class OperationTests
+public class SpawnRewardTests
 {
     private TrainingAgent agent;
     private Vector3 initialAgentPosition;
@@ -142,4 +142,7 @@ public class OperationTests
 
         agent.OnActionReceived(actionBuffers);
     }
+
+    // Different kinds of items are spawned
+    // OnRewardSpawned is only called when the item is a reward
 }
