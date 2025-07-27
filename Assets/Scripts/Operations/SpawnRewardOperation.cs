@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 using ArenaBuilders;
 using PrefabInterface;
 
@@ -15,13 +13,11 @@ namespace Operations
         public static event OnRewardSpawned RewardSpawned;
         private ArenaBuilder arenaBuilder; // Needed to statically access ArenaWidth and ArenaDepth
         public float SpawnProbability { get; set; } = 1f;
-        public List<float> rewardWeights { get; set; }
-        public List<string> rewardNames { get; set; } = new List<string>();
+        public string rewardName { get; set; }
         public Vector3 rewardSpawnPos { get; set; } = new Vector3(0, 0, 0);
-        public List<int> MaxRewardCounts { get; set; }
+        public int? MaxRewardCount { get; set; }
         public Vector3 SpawnedRewardSize { get; set; }
-        public Dictionary<GameObject, int> RewardSpawnCounts { get; private set; } =
-            new Dictionary<GameObject, int>();
+        public int RewardSpawnCount { get; private set; } = 0;
 
         public void Initialize(AttachedObjectDetails details)
         {
@@ -30,99 +26,37 @@ namespace Operations
 
         public override void execute()
         {
-            List<GameObject> Rewards_ = rewardNames
-                .Select(name =>
-                {
-                    GameObject reward = Resources.Load<GameObject>(name);
-                    if (reward == null)
-                    {
-                        Debug.LogError($"Failed to load reward: {name}");
-                    }
-                    return reward;
-                })
-                .ToList();
+            GameObject reward = Resources.Load<GameObject>(rewardName);
+            if (reward == null)
+            {
+                Debug.LogError($"Failed to load reward: {rewardName}");
+            }
             if (SpawnedRewardSize != Vector3.zero)
             {
-                foreach (GameObject reward in Rewards_)
-                {
-                    reward.GetComponent<IPrefab>().SetSize(SpawnedRewardSize);
-                }
+                reward.GetComponent<IPrefab>().SetSize(SpawnedRewardSize);
             }
-            SpawnRewardOperation(Rewards_, rewardWeights, SpawnProbability, rewardSpawnPos);
-        }
-
-        private GameObject ChooseReward(List<GameObject> Rewards_, List<float> rewardWeights_)
-        {
-            if (Rewards_ == null || rewardWeights_ == null || Rewards_.Count != rewardWeights_.Count)
-            {
-                Debug.LogError($"Invalid rewards or reward weights setup. Rewards: {(Rewards_ == null ? "null" : string.Join(", ", Rewards_.Select(r => r != null ? r.name : "null")))}; RewardWeights: {(rewardWeights_ == null ? "null" : string.Join(", ", rewardWeights_ ?? new List<float>()))}");
-                return null;
-            }
-
-            float totalWeight = rewardWeights_.Sum();
-            float randomNumber = Random.Range(0, totalWeight - float.Epsilon);
-            float cumulativeWeight = 0;
-
-            for (int i = 0; i < Rewards_.Count; i++)
-            {
-                cumulativeWeight += rewardWeights_[i];
-                if (randomNumber <= cumulativeWeight)
-                {
-                    return Rewards_[i];
-                }
-            }
-
-            /* If no reward is selected within the loop (which should not happen), return the last reward */
-            return Rewards_[Rewards_.Count - 1];
+            SpawnRewardOperation(reward, SpawnProbability, rewardSpawnPos);
         }
 
         private void SpawnRewardOperation(
-            List<GameObject> Rewards_,
-            List<float> rewardWeights_,
+            GameObject reward,
             float SpawnProbability_,
             Vector3 RewardSpawnPos_
         )
         {
-            GameObject rewardToSpawn = ChooseReward(Rewards_, rewardWeights_);
-
-            if (rewardToSpawn == null)
-            {
-                Debug.LogError("Failed to choose a reward to spawn.");
-                return;
-            }
-
-            int rewardIndex = Rewards_.IndexOf(rewardToSpawn);
-            if (rewardIndex == -1)
-            {
-                Debug.LogError("Chosen reward is not in the Rewards list.");
-                return;
-            }
-
             if (
-                MaxRewardCounts != null
-                && rewardIndex < MaxRewardCounts.Count
-                && MaxRewardCounts[rewardIndex] != -1
+                MaxRewardCount != null
+                && MaxRewardCount != -1
+                && RewardSpawnCount >= MaxRewardCount
             )
             {
-                if (
-                    RewardSpawnCounts.TryGetValue(rewardToSpawn, out var count)
-                    && count >= MaxRewardCounts[rewardIndex]
-                )
-                {
-                    Debug.Log("Max reward count reached for reward: " + rewardToSpawn.name);
-                    return;
-                }
-            }
-
-            if (Rewards_ == null || Rewards_.Count == 0)
-            {
-                Debug.LogError("No rewards are set to be spawned.");
+                Debug.Log("Max reward count reached for reward: " + reward.name);
                 return;
             }
 
             if (Random.value <= SpawnProbability_)
             {
-                Vector3 spawnPosition; // = rewardSpawnPoint_.position;
+                Vector3 spawnPosition;
 
                 if (RewardSpawnPos_ != Vector3.zero)
                 {
@@ -160,7 +94,7 @@ namespace Operations
                     spawnPosition.z = Random.Range(0, arenaBuilder.ArenaDepth);
                 }
 
-                GameObject LastSpawnedReward = Instantiate(rewardToSpawn, spawnPosition, Quaternion.identity);
+                GameObject LastSpawnedReward = Instantiate(reward, spawnPosition, Quaternion.identity);
 
                 TrainingAgent agent = FindObjectOfType<TrainingAgent>();
                 if (agent != null)
@@ -178,14 +112,7 @@ namespace Operations
                     Debug.LogError("Training Agent not found in the scene.");
                 }
 
-                if (RewardSpawnCounts.TryGetValue(rewardToSpawn, out var count))
-                {
-                    RewardSpawnCounts[rewardToSpawn] = count + 1;
-                }
-                else
-                {
-                    RewardSpawnCounts[rewardToSpawn] = 1;
-                }
+                RewardSpawnCount += 1;
 
                 RewardSpawned?.Invoke(LastSpawnedReward);
             }

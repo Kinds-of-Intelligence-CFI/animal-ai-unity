@@ -106,12 +106,11 @@ public class SpawnRewardTests
 
         // Initialize with dummy details since we're not attached to a specific object
         AttachedObjectDetails details = new AttachedObjectDetails("test", Vector3.zero);
-        spawnOperation.rewardNames = new System.Collections.Generic.List<string> { "GoodGoal" };
+        spawnOperation.rewardName = "GoodGoal";
         spawnOperation.rewardSpawnPos = expectedRewardPosition;
-        spawnOperation.rewardWeights = new System.Collections.Generic.List<float> { 1 };
         if (max_spawns != null)
         {
-            spawnOperation.MaxRewardCounts = new System.Collections.Generic.List<int> { max_spawns.Value };
+            spawnOperation.MaxRewardCount = max_spawns.Value;
         }
         spawnOperation.Initialize(details);
         return spawnOperation;
@@ -143,6 +142,7 @@ public class SpawnRewardTests
         agent.OnActionReceived(actionBuffers);
     }
 
+    // TODO: For switch to SpawnObject instead of SpawnGoal
     // Different kinds of items are spawned
     // OnRewardSpawned is only called when the item is a reward
 }

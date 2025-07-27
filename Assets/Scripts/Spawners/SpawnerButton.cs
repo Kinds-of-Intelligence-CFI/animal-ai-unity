@@ -56,19 +56,24 @@ public class SpawnerButton : MonoBehaviour
         // Map legacy syntax to an operation
         if (RewardNames != null && RewardNames.Count > 0)
         {
-            SpawnReward newOperation = gameObject.AddComponent<SpawnReward>();
-            AttachedObjectDetails details = new AttachedObjectDetails(spawnerID.ToString(), transform.position);
-            newOperation.Initialize(details);
-            newOperation.SpawnProbability = SpawnProbability;
-            newOperation.rewardNames = RewardNames;
-            newOperation.rewardWeights = RewardWeights;
-            newOperation.rewardSpawnPos = RewardSpawnPos;
-            if (MaxRewardCounts != null && MaxRewardCounts.Count > 0)
+            OperationFromList parentOperation = gameObject.AddComponent<OperationFromList>();
+            for (int i = 0; i < RewardNames.Count; i++)
             {
-                newOperation.MaxRewardCounts = MaxRewardCounts;
+                SpawnReward spawnOperation = gameObject.AddComponent<SpawnReward>();
+                AttachedObjectDetails details = new AttachedObjectDetails(spawnerID.ToString(), transform.position);
+                spawnOperation.Initialize(details);
+                spawnOperation.SpawnProbability = SpawnProbability;
+                spawnOperation.rewardName = RewardNames[i];
+                spawnOperation.rewardSpawnPos = RewardSpawnPos;
+                if (MaxRewardCounts != null && MaxRewardCounts.Count > 0)
+                {
+                    spawnOperation.MaxRewardCount = MaxRewardCounts[i];
+                }
+                spawnOperation.SpawnedRewardSize = SpawnedRewardSize;
+                parentOperation.operations.Add(spawnOperation);
+                parentOperation.operationWeights.Add(RewardWeights[i]);
             }
-            newOperation.SpawnedRewardSize = SpawnedRewardSize;
-            Operations.Add(newOperation);
+            Operations.Add(parentOperation);
         }
 
     }

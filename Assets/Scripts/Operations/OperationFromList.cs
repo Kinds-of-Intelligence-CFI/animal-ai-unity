@@ -9,7 +9,7 @@ namespace Operations
     /// </summary>
     public class OperationFromList : Operation
     {
-        public List<float> operationWeights { get; set; }
+        public List<float> operationWeights { get; set; } = new List<float>();
         public List<Operation> operations { get; set; } = new List<Operation>();
 
         public void Initialize(AttachedObjectDetails details)
