@@ -56,31 +56,6 @@ public class SpawnRewardTests
         Assert.IsTrue(goodGoals_next_ep.Length == 0, "Reward should be despawned at the end of the episode, got " + goodGoals_next_ep.Length);
     }
 
-    [UnityTest]
-    public IEnumerator TestShouldNotSpawnRewardIfMaxSpawnsReached()
-    {
-        yield return null;
-
-        initialiseTestAgent();
-
-        // Check arena is empty initially
-        GameObject[] goodGoals_initial = GameObject.FindGameObjectsWithTag("goodGoal");
-        Assert.IsTrue(goodGoals_initial.Length == 0, "Exactly zero GoodGoals should be present initially, got " + goodGoals_initial.Length);
-
-        SpawnReward operation = GetSpawnGoalOperation(1);
-        operation.execute();
-
-        // Find the spawned GoodGoal object
-        GameObject[] goodGoals = GameObject.FindGameObjectsWithTag("goodGoal");
-        Assert.IsTrue(goodGoals.Length == 1, "Exactly one GoodGoal should be spawned, got " + goodGoals.Length);
-
-        operation.execute();
-
-        // Find the spawned GoodGoal object
-        GameObject[] goodGoals_second_invocation = GameObject.FindGameObjectsWithTag("goodGoal");
-        Assert.IsTrue(goodGoals_second_invocation.Length == 1, "Exactly one GoodGoal should be spawned, got " + goodGoals_second_invocation.Length);
-    }
-
     private void initialiseTestAgent()
     {
         agent = GameObject.FindObjectOfType<TrainingAgent>();
@@ -98,7 +73,7 @@ public class SpawnRewardTests
         agentRigidBody.angularVelocity = Vector3.zero;
     }
 
-    private SpawnReward GetSpawnGoalOperation(int? max_spawns = null)
+    private SpawnReward GetSpawnGoalOperation()
     {
         // Create a temporary GameObject to host the SpawnReward operation
         GameObject tempOperationHost = new GameObject("TempOperationHost");
@@ -108,10 +83,6 @@ public class SpawnRewardTests
         AttachedObjectDetails details = new AttachedObjectDetails("test", Vector3.zero);
         spawnOperation.rewardName = "GoodGoal";
         spawnOperation.rewardSpawnPos = expectedRewardPosition;
-        if (max_spawns != null)
-        {
-            spawnOperation.MaxRewardCount = max_spawns.Value;
-        }
         spawnOperation.Initialize(details);
         return spawnOperation;
     }

@@ -14,9 +14,7 @@ namespace Operations
         private ArenaBuilder arenaBuilder; // Needed to statically access ArenaWidth and ArenaDepth
         public string rewardName { get; set; }
         public Vector3 rewardSpawnPos { get; set; } = new Vector3(0, 0, 0);
-        public int? MaxRewardCount { get; set; }
         public Vector3 SpawnedRewardSize { get; set; }
-        public int RewardSpawnCount { get; private set; } = 0;
 
         public void Initialize(AttachedObjectDetails details)
         {
@@ -42,16 +40,6 @@ namespace Operations
             Vector3 RewardSpawnPos_
         )
         {
-            if (
-                MaxRewardCount != null
-                && MaxRewardCount != -1
-                && RewardSpawnCount >= MaxRewardCount
-            )
-            {
-                Debug.Log("Max reward count reached for reward: " + reward.name);
-                return;
-            }
-
             Vector3 spawnPosition;
 
             if (RewardSpawnPos_ != Vector3.zero)
@@ -107,8 +95,6 @@ namespace Operations
             {
                 Debug.LogError("Training Agent not found in the scene.");
             }
-
-            RewardSpawnCount += 1;
 
             RewardSpawned?.Invoke(LastSpawnedReward);
         }

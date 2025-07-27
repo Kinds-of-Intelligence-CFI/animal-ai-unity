@@ -64,12 +64,16 @@ public class SpawnerButton : MonoBehaviour
                 spawnOperation.Initialize(details);
                 spawnOperation.rewardName = RewardNames[i];
                 spawnOperation.rewardSpawnPos = RewardSpawnPos;
+                spawnOperation.SpawnedRewardSize = SpawnedRewardSize;
+                Operation operationToAttach = spawnOperation;
                 if (MaxRewardCounts != null && MaxRewardCounts.Count > 0)
                 {
-                    spawnOperation.MaxRewardCount = MaxRewardCounts[i];
+                    LimitedInvocationsOperation limitedInvocationsOperation = gameObject.AddComponent<LimitedInvocationsOperation>();
+                    limitedInvocationsOperation.maxInvocations = MaxRewardCounts[i];
+                    limitedInvocationsOperation.operation = spawnOperation;
+                    operationToAttach = limitedInvocationsOperation;
                 }
-                spawnOperation.SpawnedRewardSize = SpawnedRewardSize;
-                parentOperation.operations.Add(spawnOperation);
+                parentOperation.operations.Add(operationToAttach);
                 parentOperation.operationWeights.Add(RewardWeights[i]);
             }
             if (SpawnProbability != 1)
