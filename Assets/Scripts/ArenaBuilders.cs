@@ -75,6 +75,7 @@ namespace ArenaBuilders
                 _arena.transform,
                 false
             );
+            spawnedObjectsHolder.name = "SpawnedObjectsHolder_Instance";
             if (spawnedObjectsHolder == null || _arena == null)
             {
                 Debug.LogError("SpawnedObjectsHolder or Arena is not initialized.");
@@ -154,8 +155,14 @@ namespace ArenaBuilders
             }
         }
 
-        private void InstantiateSpawnable(Spawnable spawnable, GameObject spawnedObjectsHolder)
+        public GameObject InstantiateSpawnable(
+            Spawnable spawnable,
+            GameObject spawnedObjectsHolder,
+            // TODO: Instead of spawning at the corner, by default skip overlapping objects and give a useful error message
+            bool skipOverlappingObjects = false
+        )
         {
+            // Returns the last object spawned
             // Required parameters
             List<Vector3> positions = spawnable.positions;
             List<float> rotations = spawnable.rotations;
@@ -222,10 +229,11 @@ namespace ArenaBuilders
             // Get the maximum number of elements in the lists
             int n = ns.Max();
 
+            GameObject gameObjectInstance = null;
             int k = 0;
             do
             {
-                GameObject gameObjectInstance = GameObject.Instantiate(
+                gameObjectInstance = GameObject.Instantiate(
                     spawnable.gameObject,
                     spawnedObjectsHolder.transform,
                     false
@@ -293,11 +301,16 @@ namespace ArenaBuilders
                     rotation,
                     size
                 );
-
-                SpawnGameObject(spawnable, gameObjectInstance, spawnPosRot, color, optionals);
-                _totalObjectsSpawned++;
+                if (spawnPosRot != null || !skipOverlappingObjects) {
+                    SpawnGameObject(spawnable, gameObjectInstance, spawnPosRot, color, optionals);
+                    _totalObjectsSpawned++;
+                } else {
+                    // Remove the gameObject as we couldn't find a space for it
+                    GameObject.Destroy(gameObjectInstance);
+                }
                 k++;
             } while (k < n);
+            return gameObjectInstance;
         }
 
         private void SpawnGameObject(

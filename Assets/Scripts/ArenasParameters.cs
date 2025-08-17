@@ -74,7 +74,7 @@ namespace ArenasParameters
             colors = new List<Vector3>();
         }
 
-        internal Spawnable(YAMLDefs.Item yamlItem)
+        public Spawnable(YAMLDefs.Item yamlItem)
         {
             name = yamlItem.name;
             positions = yamlItem.positions;

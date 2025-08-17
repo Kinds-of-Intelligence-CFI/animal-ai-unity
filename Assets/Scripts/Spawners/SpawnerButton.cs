@@ -1,8 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using ArenaBuilders;
 using Operations;
+using ArenasParameters;
 
 /// <summary>
 /// Spawns a reward when interacted with. The reward is chosen from a list of rewards with weights and spawn probabilities.
@@ -53,40 +53,9 @@ public class SpawnerButton : MonoBehaviour
     {
         spawnerID = ++spawnerCounter;
 
-        // Map legacy syntax to an operation
         if (RewardNames != null && RewardNames.Count > 0)
         {
-            OperationFromList parentOperation = gameObject.AddComponent<OperationFromList>();
-            for (int i = 0; i < RewardNames.Count; i++)
-            {
-                SpawnReward spawnOperation = gameObject.AddComponent<SpawnReward>();
-                AttachedObjectDetails details = new AttachedObjectDetails(spawnerID.ToString(), transform.position);
-                spawnOperation.Initialize(details);
-                spawnOperation.rewardName = RewardNames[i];
-                spawnOperation.rewardSpawnPos = RewardSpawnPos;
-                spawnOperation.SpawnedRewardSize = SpawnedRewardSize;
-                Operation operationToAttach = spawnOperation;
-                if (MaxRewardCounts != null && MaxRewardCounts.Count > 0)
-                {
-                    LimitedInvocationsOperation limitedInvocationsOperation = gameObject.AddComponent<LimitedInvocationsOperation>();
-                    limitedInvocationsOperation.maxInvocations = MaxRewardCounts[i];
-                    limitedInvocationsOperation.operation = spawnOperation;
-                    operationToAttach = limitedInvocationsOperation;
-                }
-                parentOperation.operations.Add(operationToAttach);
-                parentOperation.operationWeights.Add(RewardWeights[i]);
-            }
-            if (SpawnProbability != 1)
-            {
-                OperationFromList newParentOperation = gameObject.AddComponent<OperationFromList>();
-                newParentOperation.operations.Add(parentOperation);
-                newParentOperation.operationWeights.Add(SpawnProbability);
-                NoneOperation noneOperation = gameObject.AddComponent<NoneOperation>();
-                newParentOperation.operations.Add(noneOperation);
-                newParentOperation.operationWeights.Add(1 - SpawnProbability);
-                parentOperation = newParentOperation;
-            }
-            Operations.Add(parentOperation);
+            Operations.Add(GetSpawnOperationForLegacySyntax());
         }
 
     }
@@ -141,5 +110,63 @@ public class SpawnerButton : MonoBehaviour
         }
 
         IsMoving = false;
+    }
+
+    private Operation GetSpawnOperationForLegacySyntax()
+    {
+        OperationFromList parentOperation = gameObject.AddComponent<OperationFromList>();
+        for (int i = 0; i < RewardNames.Count; i++)
+        {
+            SpawnObject spawnOperation = gameObject.AddComponent<SpawnObject>();
+            AttachedObjectDetails details = new AttachedObjectDetails(spawnerID.ToString(), transform.position);
+            spawnOperation.Initialize(details);
+            Vector3 spawnPosition;
+            if (RewardSpawnPos != Vector3.zero)
+            {
+                spawnPosition = RewardSpawnPos;
+            }
+            else
+            {
+                // Specifies the spawn location should be randomised
+                spawnPosition = new Vector3(-1,-1,-1);
+            }
+
+            // Attach a GoodGoal to the spawn operation
+            GameObject goodGoalPrefab = Resources.Load<GameObject>(RewardNames[i]);
+            Spawnable spawnable;
+            if (goodGoalPrefab != null)
+            {
+                spawnable = new Spawnable(goodGoalPrefab);
+                spawnOperation.spawnable = spawnable;
+                spawnable.positions = new List<Vector3> { spawnPosition };
+                spawnable.sizes = new List<Vector3> { SpawnedRewardSize };
+            }
+            else
+            {
+                Debug.LogError("Failed to load GoodGoal prefab from Resources");
+            }
+
+            Operation operationToAttach = spawnOperation;
+            if (MaxRewardCounts != null && MaxRewardCounts.Count > 0)
+            {
+                LimitedInvocationsOperation limitedInvocationsOperation = gameObject.AddComponent<LimitedInvocationsOperation>();
+                limitedInvocationsOperation.maxInvocations = MaxRewardCounts[i];
+                limitedInvocationsOperation.operation = spawnOperation;
+                operationToAttach = limitedInvocationsOperation;
+            }
+            parentOperation.operations.Add(operationToAttach);
+            parentOperation.operationWeights.Add(RewardWeights[i]);
+        }
+        if (SpawnProbability != 1)
+        {
+            OperationFromList newParentOperation = gameObject.AddComponent<OperationFromList>();
+            newParentOperation.operations.Add(parentOperation);
+            newParentOperation.operationWeights.Add(SpawnProbability);
+            NoneOperation noneOperation = gameObject.AddComponent<NoneOperation>();
+            newParentOperation.operations.Add(noneOperation);
+            newParentOperation.operationWeights.Add(1 - SpawnProbability);
+            parentOperation = newParentOperation;
+        }
+        return parentOperation;
     }
 }
