@@ -7,6 +7,7 @@ using UnityEngineExtensions;
 using Holders;
 using PrefabInterface;
 using ArenasParameters;
+using Operations;
 
 /// <summary>
 /// An ArenaBuilder linked to an arena instantiates a list of Spawnable items within the arena each reset.
@@ -75,7 +76,6 @@ namespace ArenaBuilders
                 _arena.transform,
                 false
             );
-            spawnedObjectsHolder.name = "SpawnedObjectsHolder_Instance";
             if (spawnedObjectsHolder == null || _arena == null)
             {
                 Debug.LogError("SpawnedObjectsHolder or Arena is not initialized.");
@@ -290,7 +290,8 @@ namespace ArenaBuilders
                     { "maxRewardCounts", spawnable.maxRewardCounts },
                     { "spawnedRewardSize", spawnable.spawnedRewardSize },
                     { "triggerZoneID", spawnable.triggerZoneID },
-                    { "zoneVisibility", spawnable.zoneVisibility }
+                    { "zoneVisibility", spawnable.zoneVisibility },
+                    { "operations", spawnable.operations }
                 };
 
                 // Determines a suitable position and rotation for the object to spawn
@@ -408,6 +409,13 @@ namespace ArenaBuilders
                         )
                         {
                             spawnerInteractiveButton.SpawnedRewardSize = spawnedRewardSize;
+                        }
+                        if (
+                            optionals.TryGetValue("operations", out var operations_value)
+                            && operations_value is List<Operations.Operation> operations
+                        )
+                        {
+                            spawnerInteractiveButton.Operations = operations;
                         }
                     }
 

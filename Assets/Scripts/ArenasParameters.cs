@@ -4,6 +4,7 @@ using Lights;
 using System.Text;
 using System.Linq;
 using YAMLDefs;
+using Operations;
 
 /// <summary>
 /// The classes in this file are used to store the parameters for the arenas.
@@ -64,6 +65,9 @@ namespace ArenasParameters
         public List<string> triggerZoneID = null;
         public bool zoneVisibility = true;
 
+        // Generic
+        public List<Operations.Operation> operations { get; private set; }
+
         public Spawnable(GameObject obj)
         {
             name = obj.name;
@@ -110,6 +114,8 @@ namespace ArenasParameters
 
             triggerZoneID = yamlItem.triggerZoneID;
             zoneVisibility = yamlItem.zoneVisibility;
+
+            operations = yamlItem.operations;
         }
 
         internal List<Vector3> initVec3sFromRGBs(List<YAMLDefs.RGB> yamlList)

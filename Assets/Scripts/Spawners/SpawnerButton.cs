@@ -96,18 +96,18 @@ public class SpawnerButton : MonoBehaviour
         }
         childObjectToMove.transform.position = targetPosition;
 
+        for (int i = 0; i < Operations.Count; i++)
+        {
+            Debug.Log($"Performing SpawnerButton operation {i}: {Operations[i]}");
+            Operations[i].execute();
+        }
+
         startTime = Time.time;
         while (MoveToTarget(targetPosition, originalPosition, startTime, ResetDuration))
         {
             yield return null;
         }
         childObjectToMove.transform.position = originalPosition;
-
-        for (int i = 0; i < Operations.Count; i++)
-        {
-            Debug.Log($"Performing SpawnerButton operation {i}: {Operations[i]}");
-            Operations[i].execute();
-        }
 
         IsMoving = false;
     }
@@ -131,20 +131,14 @@ public class SpawnerButton : MonoBehaviour
                 spawnPosition = new Vector3(-1,-1,-1);
             }
 
-            // Attach a GoodGoal to the spawn operation
-            GameObject goodGoalPrefab = Resources.Load<GameObject>(RewardNames[i]);
-            Spawnable spawnable;
-            if (goodGoalPrefab != null)
+            // Create a YAMLDefs.Item to attach to the operation
+            YAMLDefs.Item item = new YAMLDefs.Item
             {
-                spawnable = new Spawnable(goodGoalPrefab);
-                spawnOperation.spawnable = spawnable;
-                spawnable.positions = new List<Vector3> { spawnPosition };
-                spawnable.sizes = new List<Vector3> { SpawnedRewardSize };
-            }
-            else
-            {
-                Debug.LogError("Failed to load GoodGoal prefab from Resources");
-            }
+                name = RewardNames[i],
+                positions = new List<Vector3> { spawnPosition },
+                sizes = new List<Vector3> { SpawnedRewardSize },
+            };
+            spawnOperation.spawnable = item;
 
             Operation operationToAttach = spawnOperation;
             if (MaxRewardCounts != null && MaxRewardCounts.Count > 0)

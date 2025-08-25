@@ -179,6 +179,21 @@ public class TrainingArena : MonoBehaviour
         NotifyArenaChange();
     }
 
+    public GameObject AddNewItemToArena(YAMLDefs.Item spawnable)
+    {
+        GameObject holderInstance = GameObject.FindGameObjectWithTag("spawnedObjects");
+        if (holderInstance == null)
+        {
+            Debug.LogError("Can't find the spawned objects holder instance in scene");
+            return null;
+        }
+
+        Spawnable spawnableToUse = new Spawnable(spawnable);
+        spawnableToUse.gameObject = prefabs.GetList().Find(x => x.name == spawnable.name);
+
+        return _builder.InstantiateSpawnable(spawnableToUse, holderInstance, true);
+    }
+
     private void CleanUpSpawnedObjects()
     {
         foreach (GameObject holder in transform.FindChildrenWithTag("spawnedObjects"))

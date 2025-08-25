@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using YamlDotNet.Serialization;
+using Operations;
 
 /// <summary>
 /// YAMLDefs namespace contains classes that are used to deserialize YAML files. These classes are used to define the structure of the YAML files.
@@ -18,6 +19,7 @@ namespace YAMLDefs
             .WithTagMapping("!Item", typeof(YAMLDefs.Item))
             .WithTagMapping("!Vector3", typeof(Vector3))
             .WithTagMapping("!RGB", typeof(YAMLDefs.RGB))
+            .WithTagMapping("!spawnObject", typeof(Operations.SpawnObject))
             .Build();
     }
 
@@ -130,11 +132,14 @@ namespace YAMLDefs
         public List<float> rewardWeights { get; set; } = new List<float>();
         public Vector3 rewardSpawnPos { get; set; } = new Vector3(0, 0, 0);
         public List<int> maxRewardCounts { get; set; } = new List<int>();
-        public Vector3 spawnedRewardSize { get; set; } = new Vector3(0, 0, 0);
+        public Vector3 spawnedRewardSize { get; set; } = new Vector3(1, 1, 1);
 
         // DataZone
         public List<string> triggerZoneID { get; set; } = new List<string>();
         public bool zoneVisibility { get; set; } = true;
+
+        // Generic for interactive objects
+        public List<Operations.Operation> operations { get; set; } = new List<Operations.Operation>();
     }
 
     /// <summary>

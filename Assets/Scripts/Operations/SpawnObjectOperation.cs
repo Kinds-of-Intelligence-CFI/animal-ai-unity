@@ -1,6 +1,4 @@
 using UnityEngine;
-using ArenaBuilders;
-using ArenasParameters;
 
 namespace Operations
 {
@@ -11,7 +9,7 @@ namespace Operations
     {
         public delegate void OnRewardSpawned(GameObject reward);
         public static event OnRewardSpawned RewardSpawned;
-        public Spawnable spawnable;
+        public YAMLDefs.Item spawnable;
 
         public void Initialize(AttachedObjectDetails details)
         {
@@ -21,29 +19,8 @@ namespace Operations
         public override void execute()
         {
             TrainingArena trainingArena = FindObjectOfType<TrainingArena>();
-            ArenaBuilder builder = null;
-            if (trainingArena != null)
-            {
-                builder = trainingArena.Builder;
-            }
-            if (builder == null)
-            {
-                Debug.Log("Can't find the builder");
-            }
-            GameObject existingHolder = GameObject.Find("SpawnedObjectsHolder_Instance");
-            if (existingHolder == null)
-            {
-                Debug.LogError("Can't find the holder");
-                return;
-            }
 
-            if (spawnable == null)
-            {
-                Debug.LogError("SpawnObject: Spawnable is not initialized.");
-                return;
-            }
-
-            GameObject SpawnedObject = builder.InstantiateSpawnable(spawnable, existingHolder, true);
+            GameObject SpawnedObject = trainingArena.AddNewItemToArena(spawnable);
 
             // TODO: Is there a better place for this object-specific behaviour?
             if (SpawnedObject != null && SpawnedObject.name.Contains("Goal"))

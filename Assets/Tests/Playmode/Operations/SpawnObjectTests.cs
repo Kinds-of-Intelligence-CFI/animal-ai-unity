@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +7,6 @@ using UnityEngine.TestTools;
 using UnityEngine.SceneManagement;
 using Operations;
 using Unity.MLAgents.Actuators;
-using ArenasParameters;
 
 public class SpawnObjectTests
 {
@@ -27,8 +25,6 @@ public class SpawnObjectTests
     public IEnumerator TestSpawnReward()
     {
         yield return TestSpawnObject(
-            AddGoodGoalToSpawnOperation,
-            () => GameObject.FindGameObjectsWithTag("goodGoal"),
             "GoodGoal",
             true
         );
@@ -38,16 +34,12 @@ public class SpawnObjectTests
     public IEnumerator TestSpawnWall()
     {
         yield return TestSpawnObject(
-            AddWallToSpawnOperation,
-            () => FindGameObjectsByName("Wall"),
             "Wall",
             false
         );
     }
 
     private IEnumerator TestSpawnObject(
-        System.Action<SpawnObject> addObjectToSpawnOperation,
-        System.Func<GameObject[]> findObjectsMethod,
         string objectTypeName,
         bool testEpisodeCompletion)
     {
@@ -56,14 +48,14 @@ public class SpawnObjectTests
         initialiseTestAgent();
 
         // Check arena is empty initially
-        GameObject[] objects_initial = findObjectsMethod();
+        GameObject[] objects_initial = FindGameObjectsByName(objectTypeName);
         Assert.IsTrue(objects_initial.Length == 0, $"Exactly zero {objectTypeName}s should be present initially, got " + objects_initial.Length);
 
-        SpawnObject operation = GetSpawnObjectOperation(addObjectToSpawnOperation);
+        SpawnObject operation = GetSpawnObjectOperation(objectTypeName);//addObjectToSpawnOperation);
         operation.execute();
 
         // Find the spawned object
-        GameObject[] objects = findObjectsMethod();
+        GameObject[] objects = FindGameObjectsByName(objectTypeName);
         Assert.IsTrue(objects.Length == 1, $"Exactly one {objectTypeName} should be spawned, got " + objects.Length);
 
         // Find the spawned object
@@ -84,7 +76,7 @@ public class SpawnObjectTests
             yield return new WaitForSeconds(0.5f);
 
             // Check that reward is despawned at the end of the episode
-            GameObject[] objects_next_ep = findObjectsMethod();
+            GameObject[] objects_next_ep = FindGameObjectsByName(objectTypeName);
             Assert.IsTrue(objects_next_ep.Length == 0, $"{objectTypeName} should be despawned at the end of the episode, got " + objects_next_ep.Length);
         }
     }
@@ -106,7 +98,7 @@ public class SpawnObjectTests
         agentRigidBody.angularVelocity = Vector3.zero;
     }
 
-    private SpawnObject GetSpawnObjectOperation(Action<SpawnObject> addObjectToSpawnOperation)
+    private SpawnObject GetSpawnObjectOperation(string objectTypeName)//Action<SpawnObject> addObjectToSpawnOperation)
     {
         // Create a temporary GameObject to host the SpawnReward operation
         GameObject tempOperationHost = new GameObject("TempOperationHost");
@@ -116,62 +108,17 @@ public class SpawnObjectTests
         AttachedObjectDetails details = new AttachedObjectDetails("test", Vector3.zero);
         
         // Use the provided function to add objects to the spawn operation
-        addObjectToSpawnOperation(spawnOperation);
+        // addObjectToSpawnOperation(spawnOperation);
+        YAMLDefs.Item item = new YAMLDefs.Item
+        {
+            name = objectTypeName,
+            positions = new List<Vector3> { new Vector3(20, 0, 15) },
+            sizes = new List<Vector3> { new Vector3(1, 1, 1) },
+        };
+        spawnOperation.spawnable = item;
         
         spawnOperation.Initialize(details);
         return spawnOperation;
-    }
-
-    private void AddGoodGoalToSpawnOperation(SpawnObject spawnOperation)
-    {
-        // Attach a GoodGoal to the spawn operation
-        GameObject goodGoalPrefab = Resources.Load<GameObject>("GoodGoal");
-        Spawnable spawnable;
-        if (goodGoalPrefab != null)
-        {
-            spawnable = new Spawnable(goodGoalPrefab);
-            spawnOperation.spawnable = spawnable;
-            spawnable.positions = new List<Vector3> { new Vector3(20, 0, 15) };
-            spawnable.sizes = new List<Vector3> { new Vector3(1, 1, 1) };
-        }
-        else
-        {
-            Debug.LogError("Failed to load GoodGoal prefab from Resources");
-        }
-    }
-
-    private void AddWallToSpawnOperation(SpawnObject spawnOperation)
-    {
-        string wallYaml = @"
-        !ArenaConfig
-        arenas:
-          0: !Arena
-            items:
-            - !Item
-              name: Wall
-              positions:
-              - !Vector3 {x: 20, y: 0, z: 15}
-              rotations: [0]
-              sizes:
-              - !Vector3 {x: 1, y: 1, z: 1}
-              colors:
-              - !RGB {r: 153, g: 153, b: 153}";
-
-        YAMLDefs.YAMLReader yamlReader = new YAMLDefs.YAMLReader();
-        YAMLDefs.ArenaConfig arenaConfig = yamlReader.deserializer.Deserialize<YAMLDefs.ArenaConfig>(wallYaml);
-        YAMLDefs.Item wallItem = arenaConfig.arenas[0].items[0];
-
-        Spawnable spawnable = new Spawnable(wallItem);
-        
-        // Create a simple test wall GameObject
-        GameObject wallGameObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        wallGameObject.name = "Wall";
-        
-        // Add necessary components for the spawning system
-        wallGameObject.AddComponent<Prefab>();
-        
-        spawnable.gameObject = wallGameObject;
-        spawnOperation.spawnable = spawnable;
     }
 
     private IEnumerator MoveAgentBackward()
@@ -202,7 +149,7 @@ public class SpawnObjectTests
 
     private GameObject[] FindGameObjectsByName(string name)
     {
-        GameObject spawnedObjectsHolder = GameObject.Find("SpawnedObjectsHolder_Instance");
+        GameObject spawnedObjectsHolder = GameObject.FindGameObjectWithTag("spawnedObjects");
         if (spawnedObjectsHolder == null)
         {
             return new GameObject[0]; // Return empty array if no spawned objects holder exists
@@ -212,8 +159,4 @@ public class SpawnObjectTests
         return System.Array.FindAll(allChildren, t => t.name.Contains(name) && t != spawnedObjectsHolder.transform)
                .Select(t => t.gameObject).ToArray();
     }
-
-    // TODO: For switch to SpawnObject instead of SpawnGoal
-    // Different kinds of items are spawned
-    // OnRewardSpawned is only called when the item is a reward
 }
