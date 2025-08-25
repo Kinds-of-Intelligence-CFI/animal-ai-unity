@@ -73,7 +73,7 @@ public class LimitedInvocationsOperationTests
     public void TearDown()
     {
         // Clean up any GameObjects created during tests
-        var gameObjects = Object.FindObjectsOfType<GameObject>();
+        var gameObjects = Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         foreach (var go in gameObjects)
         {
             if (go.name.Contains("(Clone)") || go.GetComponent<TestOperation>() != null || go.GetComponent<OperationFromList>() != null)

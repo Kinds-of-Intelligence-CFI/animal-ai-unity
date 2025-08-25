@@ -28,7 +28,7 @@ public class NotificationManager : MonoBehaviour
     void Start()
     {
         LoadFrames();
-        trainingAgent = FindObjectOfType<TrainingAgent>();
+        trainingAgent = FindAnyObjectByType<TrainingAgent>();
         HideNotification();
     }
 

@@ -79,7 +79,7 @@ public class PlayerControls : MonoBehaviour
 
     private void LoadCamerasAndAgent()
     {
-        screenshotCam = FindObjectOfType<ScreenshotCamera>();
+        screenshotCam = FindAnyObjectByType<ScreenshotCamera>();
         cameras[0] = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
         cameras[1] = GameObject
             .FindGameObjectWithTag("agent")
@@ -87,7 +87,7 @@ public class PlayerControls : MonoBehaviour
             .GetComponent<Camera>();
         cameras[2] = GameObject.FindGameObjectWithTag("camBase").GetComponent<Camera>();
         agent = GameObject.FindGameObjectWithTag("agent").GetComponent<TrainingAgent>();
-        environmentManager = FindObjectOfType<AAI3EnvironmentManager>();
+        environmentManager = FindAnyObjectByType<AAI3EnvironmentManager>();
     }
 
     private void LoadConfigurationSettings()

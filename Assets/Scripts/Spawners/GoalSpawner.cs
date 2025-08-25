@@ -125,7 +125,7 @@ public class GoalSpawner : Prefab
         if (variableSize)
             SetVariableSize(newGoal);
 
-        TrainingAgent agent = FindObjectOfType<TrainingAgent>();
+        TrainingAgent agent = FindAnyObjectByType<TrainingAgent>();
         if (agent != null)
         {
             string combinedSpawnerInfo =

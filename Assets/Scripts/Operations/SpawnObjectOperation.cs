@@ -18,14 +18,14 @@ namespace Operations
 
         public override void execute()
         {
-            TrainingArena trainingArena = FindObjectOfType<TrainingArena>();
+            TrainingArena trainingArena = FindAnyObjectByType<TrainingArena>();
 
             GameObject SpawnedObject = trainingArena.AddNewItemToArena(spawnable);
 
             // TODO: Is there a better place for this object-specific behaviour?
             if (SpawnedObject != null && SpawnedObject.name.Contains("Goal"))
             {
-                TrainingAgent agent = FindObjectOfType<TrainingAgent>();
+                TrainingAgent agent = FindAnyObjectByType<TrainingAgent>();
                 if (agent != null)
                 {
                     Vector3 spawnerPos = attachedObjectDetails.location;

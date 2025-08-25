@@ -83,7 +83,7 @@ public class SpawnObjectTests
 
     private void initialiseTestAgent()
     {
-        agent = GameObject.FindObjectOfType<TrainingAgent>();
+        agent = GameObject.FindAnyObjectByType<TrainingAgent>();
         Assert.IsNotNull(agent, "TrainingAgent should be found in the scene");
 
         agentRigidBody = agent.GetComponent<Rigidbody>();

@@ -97,14 +97,15 @@ public class AAI3EnvironmentManager : MonoBehaviour
         }
 
         resolution = Math.Max(minimumResolution, Math.Min(maximumResolution, resolution));
-        TrainingArena arena = FindObjectOfType<TrainingArena>();
+        TrainingArena arena = FindAnyObjectByType<TrainingArena>();
 
         InstantiateArenas();
 
         playerControls.SetActive(playerMode);
         uiCanvas.GetComponent<Canvas>().enabled = playerMode;
 
-        foreach (Agent a in FindObjectsOfType<Agent>(true))
+        // UnityEngine.Object.FindObjectsOfType<Agent>(bool includeInactive)
+        foreach (Agent a in FindObjectsByType<Agent>(FindObjectsInactive.Include, FindObjectsSortMode.None))
         {
             a.GetComponentInChildren<DecisionRequester>().DecisionPeriod = decisionPeriod;
             if (!useRayCasts)

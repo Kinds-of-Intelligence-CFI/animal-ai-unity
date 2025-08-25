@@ -95,12 +95,12 @@ public class TrainingArena : MonoBehaviour
             maxSpawnAttemptsForPrefabs,
             maxSpawnAttemptsForAgent
         );
-        _environmentManager = GameObject.FindObjectOfType<AAI3EnvironmentManager>();
+        _environmentManager = GameObject.FindAnyObjectByType<AAI3EnvironmentManager>();
         if (_environmentManager == null)
         {
             Debug.LogError("AAI3EnvironmentManager is not found in the scene.");
         }
-        _agent = FindObjectsOfType<TrainingAgent>(true)[0];
+        _agent = FindObjectsByType<TrainingAgent>(FindObjectsInactive.Include, FindObjectsSortMode.None)[0];
         _agentDecisionInterval = _agent.GetComponentInChildren<DecisionRequester>().DecisionPeriod;
         _fades = blackScreens.GetFades();
 

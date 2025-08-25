@@ -15,7 +15,7 @@ public class Fade : MonoBehaviour
 
     void Awake()
     {
-        var envManager = FindObjectOfType<AAI3EnvironmentManager>();
+        var envManager = FindAnyObjectByType<AAI3EnvironmentManager>();
         _play = envManager ? envManager.PlayerMode : false;
         _image = GetComponentInChildren<Image>();
         ResetFade();

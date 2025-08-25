@@ -99,7 +99,7 @@ public class TrainingAgent : Agent, IPrefab
 
         SpawnObject.RewardSpawned += _csvWriter.OnRewardSpawned;
 
-        playerControls = GameObject.FindObjectOfType<PlayerControls>();
+        playerControls = GameObject.FindAnyObjectByType<PlayerControls>();
 
         _csvWriter.InitialiseCSVProcess();
     }

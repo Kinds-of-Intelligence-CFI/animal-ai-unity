@@ -85,7 +85,7 @@ namespace ArenaBuilders
 
             InstantiateSpawnables(spawnedObjectsHolder);
 
-            TrainingAgent agentInstance = UnityEngine.Object.FindObjectOfType<TrainingAgent>();
+            TrainingAgent agentInstance = UnityEngine.Object.FindAnyObjectByType<TrainingAgent>();
             if (agentInstance != null && _environmentManager != null)
             {
                 var arenasConfigurations = _environmentManager.GetArenasConfigurations();

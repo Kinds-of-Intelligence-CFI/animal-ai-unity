@@ -26,8 +26,8 @@ public class PlayerControlsTests
     {
         yield return null;
 
-        playerControls = GameObject.FindObjectOfType<PlayerControls>();
-        agent = GameObject.FindObjectOfType<TrainingAgent>();
+        playerControls = GameObject.FindAnyObjectByType<PlayerControls>();
+        agent = GameObject.FindAnyObjectByType<TrainingAgent>();
         cameras[0] = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
         cameras[1] = GameObject
             .FindGameObjectWithTag("agent")
@@ -48,7 +48,7 @@ public class PlayerControlsTests
     {
         yield return null;
 
-        playerControls = GameObject.FindObjectOfType<PlayerControls>();
+        playerControls = GameObject.FindAnyObjectByType<PlayerControls>();
 
         int initialCameraID = playerControls.cameraID;
 
@@ -66,7 +66,7 @@ public class PlayerControlsTests
     public IEnumerator TestGetActiveCameraDescription()
     {
         yield return null;
-        playerControls = GameObject.FindObjectOfType<PlayerControls>();
+        playerControls = GameObject.FindAnyObjectByType<PlayerControls>();
 
         for (int i = 0; i < playerControls.Cameras.Length; i++)
         {
