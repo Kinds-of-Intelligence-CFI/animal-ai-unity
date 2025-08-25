@@ -21,7 +21,7 @@ public class CSVWriterTests
     private string wasAgentFrozen = "false";
     private float reward = 0.5f;
     private string notificationState = "none";
-    private string? dataZoneMessage = null;
+    private string dataZoneMessage = null;
     private string activeCameraDescription = "mainCamera";
     private string combinedRaycastData = "rayData";
     private int stepCount = 1;
@@ -258,7 +258,7 @@ public class CSVWriterTests
         string wasAgentFrozen = "false";
         float reward = 0.0f;
         string notificationState = "none";
-        string? dataZoneMessage = null;
+        string dataZoneMessage = null;
         string activeCameraDescription = "cam";
         string combinedRaycastData = "ray";
         int stepCount = 5;

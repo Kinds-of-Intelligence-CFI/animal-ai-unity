@@ -217,7 +217,7 @@ public class TrainingAgent : Agent, IPrefab
         (float[] raycastObservations, string[] raycastTags) = CollectRaycastObservations();
         string combinedRaycastData = CombineRaycastData(raycastObservations, raycastTags);
         string activeCameraDescription = GetActiveCameraDescription();
-        string? dataZoneMessage = DataZone.ConsumeDataZoneMessage();
+        string dataZoneMessage = DataZone.ConsumeDataZoneMessage();
 
         _csvWriter.LogToCSV(
             localVel,
@@ -257,7 +257,7 @@ public class TrainingAgent : Agent, IPrefab
         (float[] raycastObservations, string[] raycastTags) = CollectRaycastObservations();
         string combinedRaycastData = CombineRaycastData(raycastObservations, raycastTags);
         string playerControlsDescription = GetActiveCameraDescription();
-        string? dataZoneMessage = DataZone.ConsumeDataZoneMessage();
+        string dataZoneMessage = DataZone.ConsumeDataZoneMessage();
 
         _csvWriter.LogToCSV(
             localVel,

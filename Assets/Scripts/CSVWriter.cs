@@ -56,7 +56,7 @@ public class CSVWriter : MonoBehaviour
         string wasAgentFrozen,
         float reward,
         string notificationState,
-        string? dataZoneMessage,
+        string dataZoneMessage,
         string activeCameraDescription,
         string combinedRaycastData,
         int stepCount,
