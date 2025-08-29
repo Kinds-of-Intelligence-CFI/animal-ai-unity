@@ -21,7 +21,39 @@ arenas:
       rotations: [90]
       operations:
       - !spawnObject
-        spawnable: !Item
-          name: GoodGoal
-          positions:
-          - !Vector3 {x: 20, y: 0, z: 25}
+          spawnable: !Item
+            name: GoodGoal
+            sizes:
+            - !Vector3 {x: 1, y: 1, z: 1}
+            positions:
+            - !Vector3 {x: 15, y: 1, z: 25}
+      # -- Examples of how to use other Operations
+      # - !operationFromList
+      #   operationWeights:
+      #   - 10
+      #   - 1
+      #   operations:
+      #   - !spawnObject
+      #     spawnable: !Item
+      #       name: GoodGoal
+      #       sizes:
+      #       - !Vector3 {x: 1, y: 1, z: 1}
+      #       positions:
+      #       - !Vector3 {x: 15, y: 10, z: 25}
+      #   - !spawnObject
+      #     spawnable: !Item
+      #       name: GoodGoal
+      #       sizes:
+      #       - !Vector3 {x: 1, y: 1, z: 1}
+      #       positions:
+      #       - !Vector3 {x: 25, y: 10, z: 25}
+
+      # - !noneOperation {}
+
+      # - !limitedInvocationsOperation
+      #   maxInvocations: 3
+      #   operation: !spawnObject
+      #     spawnable: !Item
+      #       name: GoodGoal
+      #       sizes:
+      #       - !Vector3 {x: 1, y: 1, z: 1}

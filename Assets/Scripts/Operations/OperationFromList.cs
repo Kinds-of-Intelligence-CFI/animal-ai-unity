@@ -25,6 +25,9 @@ namespace Operations
 
         private Operation ChooseOperation()
         {
+            if (operationWeights.Count == 0)
+                return operations[Random.Range(0, operations.Count)];
+
             float totalWeight = operationWeights.Sum();
             float randomNumber = Random.Range(0, totalWeight - float.Epsilon);
             float cumulativeWeight = 0;

@@ -20,6 +20,9 @@ namespace YAMLDefs
             .WithTagMapping("!Vector3", typeof(Vector3))
             .WithTagMapping("!RGB", typeof(YAMLDefs.RGB))
             .WithTagMapping("!spawnObject", typeof(Operations.SpawnObject))
+            .WithTagMapping("!limitedInvocationsOperation", typeof(Operations.LimitedInvocationsOperation))
+            .WithTagMapping("!noneOperation", typeof(Operations.NoneOperation))
+            .WithTagMapping("!operationFromList", typeof(Operations.OperationFromList))
             .Build();
     }
 
