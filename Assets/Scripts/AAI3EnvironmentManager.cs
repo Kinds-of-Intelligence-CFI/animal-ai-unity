@@ -219,9 +219,15 @@ public class AAI3EnvironmentManager : MonoBehaviour
         }
         catch (Exception ex)
         {
-            Debug.LogError(
-                $"An error occurred while loading or processing the YAML file: {ex.Message}"
-            );
+            Debug.LogError($"Fatal error while loading or processing the YAML file: {ex.Message}");
+
+            #if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+            #else
+            Application.Quit(1);
+            #endif
+
+            throw;
         }
     }
 
