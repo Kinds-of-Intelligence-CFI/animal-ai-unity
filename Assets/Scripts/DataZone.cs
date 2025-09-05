@@ -1,4 +1,6 @@
 using UnityEngine;
+using System.Collections.Generic;
+using Operations;
 
 /// <summary>
 /// A zone that triggers an event when an agent enters it.
@@ -8,6 +10,7 @@ public class DataZone : Prefab
 {
     public string TriggerZoneID { get; set; }
     public bool isAgentInZone { get; set; } = false;
+    public List<Operation> Operations { get; set; } = new List<Operation>();
 
     // Note: There is a race condition on this variable
     // (If multiple DataZones try to write to this simultaneously one will come first in the message arbitrarily)
@@ -41,6 +44,10 @@ public class DataZone : Prefab
                 LastDataZoneMessage = "Agent was in DataZone: " + TriggerZoneID;
             } else {
                 LastDataZoneMessage += " | " + TriggerZoneID;
+            }
+            for (int i = 0; i < Operations.Count; i++)
+            {
+                Operations[i].execute();
             }
         }
     }

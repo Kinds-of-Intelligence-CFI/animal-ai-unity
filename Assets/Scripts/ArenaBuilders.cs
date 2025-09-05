@@ -523,6 +523,11 @@ namespace ArenaBuilders
                             {
                                 dataZone.SetVisibility(zoneVisibility);
                             }
+                            if (optionals.TryGetValue("operations", out var operationsValue)
+                                && operationsValue is List<Operations.Operation> operations)
+                            {
+                                dataZone.Operations = operations;
+                            }
                         }
                     }
                 }
