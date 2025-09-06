@@ -11,10 +11,6 @@ namespace Operations
         public static event OnRewardSpawned RewardSpawned;
         public YAMLDefs.Item spawnable;
 
-        public void Initialize(AttachedObjectDetails details)
-        {
-            attachedObjectDetails = details;
-        }
 
         public override void execute()
         {
@@ -25,6 +21,9 @@ namespace Operations
             // TODO: Is there a better place for this object-specific behaviour?
             if (SpawnedObject != null && SpawnedObject.name.Contains("Goal"))
             {
+                if (string.IsNullOrEmpty(attachedObjectDetails.ID)) {
+                    Debug.LogWarning("Spawn Object Operation attached object details not initialised: spawn details will not be logged in the CSV");
+                }
                 TrainingAgent agent = FindAnyObjectByType<TrainingAgent>();
                 if (agent != null)
                 {

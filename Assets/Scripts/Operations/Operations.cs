@@ -25,7 +25,7 @@ namespace Operations
     /// </summary>
     public abstract class Operation : MonoBehaviour
     {
-        public AttachedObjectDetails attachedObjectDetails { get; protected set; }
+        public virtual AttachedObjectDetails attachedObjectDetails { get; set; }
         public abstract void execute();
     }
 }

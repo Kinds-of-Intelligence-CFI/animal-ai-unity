@@ -13,12 +13,17 @@ namespace Operations
         public float maxInvocations { get; set; }
         public Operation operation { get; set; }
 
-        private int invocations = 0;
-
-        public void Initialize(AttachedObjectDetails details)
+        public override AttachedObjectDetails attachedObjectDetails
         {
-            attachedObjectDetails = details;
+            get => base.attachedObjectDetails;
+            set
+            {
+                base.attachedObjectDetails = value;
+                operation.attachedObjectDetails = value;
+            }
         }
+
+        private int invocations = 0;
 
         public override void execute()
         {

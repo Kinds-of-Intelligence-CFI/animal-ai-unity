@@ -24,6 +24,14 @@ public class DataZone : Prefab
         {
             collider.isTrigger = true;
         }
+        foreach (var operation in Operations)
+        {
+            operation.attachedObjectDetails = new AttachedObjectDetails
+            {
+                ID = TriggerZoneID,
+                location = transform.position
+            };
+        }
     }
 
     public void SetVisibility(bool visibility)

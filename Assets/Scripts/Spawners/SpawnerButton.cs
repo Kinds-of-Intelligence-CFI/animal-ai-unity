@@ -58,6 +58,15 @@ public class SpawnerButton : MonoBehaviour
             Operations.Add(GetSpawnOperationForLegacySyntax());
         }
 
+        foreach (var operation in Operations)
+        {
+            operation.attachedObjectDetails = new AttachedObjectDetails
+            {
+                ID = spawnerID.ToString(),
+                location = transform.position
+            };
+        }
+
     }
 
     private void OnTriggerEnter(Collider other)
@@ -118,8 +127,6 @@ public class SpawnerButton : MonoBehaviour
         for (int i = 0; i < RewardNames.Count; i++)
         {
             SpawnObject spawnOperation = gameObject.AddComponent<SpawnObject>();
-            AttachedObjectDetails details = new AttachedObjectDetails(spawnerID.ToString(), transform.position);
-            spawnOperation.Initialize(details);
             Vector3 spawnPosition;
             if (RewardSpawnPos != Vector3.zero)
             {

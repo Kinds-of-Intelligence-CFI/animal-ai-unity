@@ -12,9 +12,20 @@ namespace Operations
         public List<float> operationWeights { get; set; } = new List<float>();
         public List<Operation> operations { get; set; } = new List<Operation>();
 
-        public void Initialize(AttachedObjectDetails details)
+        public override AttachedObjectDetails attachedObjectDetails
         {
-            attachedObjectDetails = details;
+            get => base.attachedObjectDetails;
+            set
+            {
+                base.attachedObjectDetails = value;
+                if (operations != null)
+                {
+                    foreach (var op in operations)
+                    {
+                        op.attachedObjectDetails = value;
+                    }
+                }
+            }
         }
 
         public override void execute()

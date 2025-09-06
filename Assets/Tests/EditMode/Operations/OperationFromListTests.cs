@@ -38,7 +38,7 @@ public class OperationFromListTests
         var gameObject = new GameObject();
         var operationFromList = gameObject.AddComponent<OperationFromList>();
         var details = new AttachedObjectDetails("test_object", Vector3.zero);
-        operationFromList.Initialize(details);
+        operationFromList.attachedObjectDetails = details;
         return operationFromList;
     }
 
@@ -226,7 +226,7 @@ public class OperationFromListTests
         var operationFromList = CreateOperationFromList();
         var expectedDetails = new AttachedObjectDetails("test_id", new Vector3(1, 2, 3));
 
-        operationFromList.Initialize(expectedDetails);
+        operationFromList.attachedObjectDetails = expectedDetails;
 
         Assert.AreEqual(expectedDetails.ID, operationFromList.attachedObjectDetails.ID);
         Assert.AreEqual(expectedDetails.location, operationFromList.attachedObjectDetails.location);
