@@ -66,7 +66,7 @@ public class CSVWriter : MonoBehaviour
         /* Check if the current step has already been logged */
         if (stepCount == lastLoggedStep)
         {
-            Debug.Log("Skipping duplicated log step");
+            // Occurs often when collectObservation and OnActionReceived are called in the same step
             return;
         }
         string logEntry = string.Format(
@@ -237,7 +237,6 @@ public class CSVWriter : MonoBehaviour
                 {
                     writer.WriteLine(logEntry);
                 }
-                Debug.Log("Flushed log queue to CSV file.");
             }
         }
         catch (Exception ex)
