@@ -107,7 +107,6 @@ public class SpawnerButton : MonoBehaviour
 
         for (int i = 0; i < Operations.Count; i++)
         {
-            Debug.Log($"Performing SpawnerButton operation {i}: {Operations[i]}");
             Operations[i].execute();
         }
 
