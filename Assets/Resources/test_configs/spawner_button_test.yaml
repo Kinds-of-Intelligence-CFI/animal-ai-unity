@@ -57,3 +57,6 @@ arenas:
       #       name: GoodGoal
       #       sizes:
       #       - !Vector3 {x: 1, y: 1, z: 1}
+
+      # - !endEpisode
+      #   reward: 3

@@ -1,4 +1,6 @@
 using UnityEngine;
+using System;
+using System.Collections.Generic;
 
 /// <summary>
 /// Operations are environment changes (such as spawning a goal) that can be attached to interactive items
@@ -27,5 +29,23 @@ namespace Operations
     {
         public virtual AttachedObjectDetails attachedObjectDetails { get; set; }
         public abstract void execute();
+    }
+
+    /// <summary>
+    /// Registry for operation mappings
+    /// </summary>
+    public static class OperationRegistry
+    {
+        /// <summary>
+        /// Tag mappings used for YAML Deserialization
+        /// </summary>
+        public static readonly Dictionary<string, Type> OperationTagMappings = new Dictionary<string, Type>
+        {
+            {"!endEpisode", typeof(EndEpisode)},
+            {"!spawnObject", typeof(SpawnObject)},
+            {"!operationFromList", typeof(OperationFromList)},
+            {"!limitedInvocationsOperation", typeof(LimitedInvocationsOperation)},
+            {"!noneOperation", typeof(NoneOperation)}
+        };
     }
 }

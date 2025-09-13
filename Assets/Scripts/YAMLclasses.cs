@@ -13,17 +13,25 @@ namespace YAMLDefs
     /// </summary>
     public class YAMLReader
     {
-        public YamlDotNet.Serialization.IDeserializer deserializer = new DeserializerBuilder()
-            .WithTagMapping("!ArenaConfig", typeof(YAMLDefs.ArenaConfig))
-            .WithTagMapping("!Arena", typeof(YAMLDefs.Arena))
-            .WithTagMapping("!Item", typeof(YAMLDefs.Item))
-            .WithTagMapping("!Vector3", typeof(Vector3))
-            .WithTagMapping("!RGB", typeof(YAMLDefs.RGB))
-            .WithTagMapping("!spawnObject", typeof(Operations.SpawnObject))
-            .WithTagMapping("!limitedInvocationsOperation", typeof(Operations.LimitedInvocationsOperation))
-            .WithTagMapping("!noneOperation", typeof(Operations.NoneOperation))
-            .WithTagMapping("!operationFromList", typeof(Operations.OperationFromList))
-            .Build();
+        public YamlDotNet.Serialization.IDeserializer deserializer;
+
+        public YAMLReader()
+        {
+            var builder = new DeserializerBuilder()
+                .WithTagMapping("!ArenaConfig", typeof(YAMLDefs.ArenaConfig))
+                .WithTagMapping("!Arena", typeof(YAMLDefs.Arena))
+                .WithTagMapping("!Item", typeof(YAMLDefs.Item))
+                .WithTagMapping("!Vector3", typeof(Vector3))
+                .WithTagMapping("!RGB", typeof(YAMLDefs.RGB));
+
+            // Add all operation tag mappings from the registry
+            foreach (var mapping in Operations.OperationRegistry.OperationTagMappings)
+            {
+                builder = builder.WithTagMapping(mapping.Key, mapping.Value);
+            }
+
+            deserializer = builder.Build();
+        }
     }
 
     /// <summary>
