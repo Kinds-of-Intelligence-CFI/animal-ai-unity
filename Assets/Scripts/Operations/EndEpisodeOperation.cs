@@ -7,13 +7,12 @@ namespace Operations
     /// </summary>
     public class EndEpisode : Operation
     {
-        public float reward = 1;
+        public float reward = 0;
         private string rewardType = "End Episode Operation";
 
 
         public override void execute()
         {
-            Debug.Log("EndEpisode call");
             TrainingAgent agent = FindAnyObjectByType<TrainingAgent>();
             if (agent != null)
             {

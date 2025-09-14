@@ -8,7 +8,7 @@ using Operations;
 /// <summary>
 /// Playmode tests for the EndEpisode operation class.
 /// </summary>
-public class EndEpisodeOperationPlaymodeTests
+public class EndEpisodeTests
 {
     [SetUp]
     public void Setup()
