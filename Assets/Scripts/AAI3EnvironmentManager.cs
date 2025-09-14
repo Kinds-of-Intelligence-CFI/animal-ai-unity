@@ -104,7 +104,6 @@ public class AAI3EnvironmentManager : MonoBehaviour
         playerControls.SetActive(playerMode);
         uiCanvas.GetComponent<Canvas>().enabled = playerMode;
 
-        // UnityEngine.Object.FindObjectsOfType<Agent>(bool includeInactive)
         foreach (Agent a in FindObjectsByType<Agent>(FindObjectsInactive.Include, FindObjectsSortMode.None))
         {
             a.GetComponentInChildren<DecisionRequester>().DecisionPeriod = decisionPeriod;

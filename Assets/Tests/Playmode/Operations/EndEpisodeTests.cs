@@ -57,7 +57,7 @@ public class EndEpisodeTests
     public void TearDown()
     {
         // Clean up any test GameObjects
-        var testObjects = GameObject.FindObjectsOfType<GameObject>();
+        var testObjects = Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         foreach (var go in testObjects)
         {
             if (go.name.Contains("TestEndEpisodeOperation"))

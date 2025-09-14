@@ -45,7 +45,8 @@ namespace Operations
             {"!spawnObject", typeof(SpawnObject)},
             {"!operationFromList", typeof(OperationFromList)},
             {"!limitedInvocationsOperation", typeof(LimitedInvocationsOperation)},
-            {"!noneOperation", typeof(NoneOperation)}
+            {"!noneOperation", typeof(NoneOperation)},
+            {"!grantReward", typeof(GrantReward)},
         };
     }
 }

@@ -60,3 +60,6 @@ arenas:
 
       # - !endEpisode
       #   reward: 3
+
+      # - !grantReward
+      #   reward: 3
