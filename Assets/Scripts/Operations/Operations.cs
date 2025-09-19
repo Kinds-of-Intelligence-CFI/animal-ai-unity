@@ -52,6 +52,7 @@ namespace Operations
         {
             {"!endEpisode", typeof(EndEpisode)},
             {"!spawnObject", typeof(SpawnObject)},
+            {"!despawnObject", typeof(DespawnObject)},
             {"!operationFromList", typeof(OperationFromList)},
             {"!limitedInvocationsOperation", typeof(LimitedInvocationsOperation)},
             {"!noneOperation", typeof(NoneOperation)},
