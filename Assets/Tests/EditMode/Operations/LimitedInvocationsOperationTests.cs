@@ -39,7 +39,7 @@ public class LimitedInvocationsOperationTests
         limitedInvocationsOperation.operation = op;
         limitedInvocationsOperation.maxInvocations = invocations;
         var details = new AttachedObjectDetails("test_object", Vector3.zero);
-        limitedInvocationsOperation.attachedObjectDetails = details;
+        limitedInvocationsOperation.initialise(details);
         return limitedInvocationsOperation;
     }
 

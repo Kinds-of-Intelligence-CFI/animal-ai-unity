@@ -117,7 +117,7 @@ public class SpawnObjectTests
         };
         spawnOperation.spawnable = item;
         
-        spawnOperation.attachedObjectDetails = details;
+        spawnOperation.initialise(details);
         return spawnOperation;
     }
 

@@ -26,11 +26,13 @@ public class DataZone : Prefab
         }
         foreach (var operation in Operations)
         {
-            operation.attachedObjectDetails = new AttachedObjectDetails
-            {
-                ID = TriggerZoneID,
-                location = transform.position
-            };
+            operation.initialise(
+                new AttachedObjectDetails
+                {
+                    ID = TriggerZoneID,
+                    location = transform.position
+                }
+            );
         }
     }
 

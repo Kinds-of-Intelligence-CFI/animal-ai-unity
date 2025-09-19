@@ -60,11 +60,13 @@ public class SpawnerButton : MonoBehaviour
 
         foreach (var operation in Operations)
         {
-            operation.attachedObjectDetails = new AttachedObjectDetails
-            {
-                ID = spawnerID.ToString(),
-                location = transform.position
-            };
+            operation.initialise(
+                new AttachedObjectDetails
+                {
+                    ID = spawnerID.ToString(),
+                    location = transform.position
+                }
+            );
         }
 
     }
