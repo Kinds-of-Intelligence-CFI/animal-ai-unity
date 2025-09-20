@@ -46,7 +46,8 @@ public class TrainingAgent : Agent, IPrefab
     public float timeLimit = 0f;
     private float _nextUpdateHealth = 0f;
     private float _freezeDelay = 0f;
-    private bool _isFrozen = false;
+    private bool _isMovementFrozen = false;
+    private bool _isHealthFrozen = false;
 
     private bool _nextUpdateCompleteArena = false;
 
@@ -145,15 +146,25 @@ public class TrainingAgent : Agent, IPrefab
         }
     }
 
-    public bool IsFrozen()
+    private bool IsHealthFrozen()
     {
-        return _freezeDelay > 0f || _isFrozen;
+        return _freezeDelay > 0f || _isHealthFrozen;
     }
 
-    public void FreezeAgent(bool freeze)
+    private bool IsMovementFrozen()
     {
-        _isFrozen = freeze;
-        if (_isFrozen)
+        return _freezeDelay > 0f || _isMovementFrozen;
+    }
+
+    public void FreezeAgent(bool freeze, bool updateMovementFreeze = true, bool updateHealthFreeze = true)
+    {
+        if (updateMovementFreeze) {
+            _isMovementFrozen = freeze;
+        }
+        if (updateHealthFreeze) {
+            _isHealthFrozen = freeze;
+        }
+        if (freeze)
         {
             _rigidBody.linearVelocity = Vector3.zero;
             _rigidBody.angularVelocity = Vector3.zero;
@@ -206,7 +217,7 @@ public class TrainingAgent : Agent, IPrefab
         sensor.AddObservation(localVel);
         Vector3 localPos = transform.position;
         sensor.AddObservation(localPos);
-        bool wasAgentFrozen = IsFrozen();
+        bool wasAgentFrozen = IsMovementFrozen();
 
         string actionForwardDescription = DescribeActionForward(lastActionForward);
         string actionRotateDescription = DescribeActionRotate(lastActionRotate);
@@ -240,14 +251,14 @@ public class TrainingAgent : Agent, IPrefab
         lastActionForward = Mathf.FloorToInt(action.DiscreteActions[0]);
         lastActionRotate = Mathf.FloorToInt(action.DiscreteActions[1]);
 
-        if (!IsFrozen())
+        if (!IsMovementFrozen())
         {
             MoveAgent(lastActionForward, lastActionRotate);
         }
 
         Vector3 localVel = transform.InverseTransformDirection(_rigidBody.linearVelocity);
         Vector3 localPos = transform.position;
-        bool wasAgentFrozen = IsFrozen();
+        bool wasAgentFrozen = IsMovementFrozen();
         string actionForwardDescription = DescribeActionForward(lastActionForward);
         string actionRotateDescription = DescribeActionRotate(lastActionRotate);
         string actionForwardWithDescription = $"{lastActionForward} ({actionForwardDescription})";
@@ -338,7 +349,7 @@ public class TrainingAgent : Agent, IPrefab
 
     private void MoveAgent(int actionForward, int actionRotate)
     {
-        if (IsFrozen())
+        if (IsMovementFrozen())
         {
             /* If the agent is frozen, stop all movement and rotation */
             _rigidBody.linearVelocity = Vector3.zero;
@@ -423,7 +434,7 @@ public class TrainingAgent : Agent, IPrefab
 
     public void UpdateHealth(float updateAmount, bool andCompleteArena = false)
     {
-        if (!IsFrozen())
+        if (!IsHealthFrozen())
         {
             health += 100 * updateAmount;
             health += 100 * _nextUpdateHealth;

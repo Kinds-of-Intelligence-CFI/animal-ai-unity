@@ -57,6 +57,7 @@ namespace Operations
             {"!limitedInvocationsOperation", typeof(LimitedInvocationsOperation)},
             {"!noneOperation", typeof(NoneOperation)},
             {"!grantReward", typeof(GrantReward)},
+            {"!freezeAgent", typeof(FreezeAgent)},
         };
     }
 }
