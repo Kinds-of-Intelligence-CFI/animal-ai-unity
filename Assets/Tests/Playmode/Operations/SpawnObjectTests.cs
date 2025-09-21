@@ -105,7 +105,11 @@ public class SpawnObjectTests
         SpawnObject spawnOperation = tempOperationHost.AddComponent<SpawnObject>();
 
         // Initialize with dummy details since we're not attached to a specific object
-        AttachedObjectDetails details = new AttachedObjectDetails("test", Vector3.zero);
+        AttachedObjectDetails details = new AttachedObjectDetails{
+            obj = spawnOperation,
+            ID = "test",
+            location = Vector3.zero
+        };
         
         // Use the provided function to add objects to the spawn operation
         // addObjectToSpawnOperation(spawnOperation);

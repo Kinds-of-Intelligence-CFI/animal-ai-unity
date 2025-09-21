@@ -29,6 +29,7 @@ public class DataZone : Prefab
             operation.initialise(
                 new AttachedObjectDetails
                 {
+                    obj = this,
                     ID = TriggerZoneID,
                     location = transform.position
                 }

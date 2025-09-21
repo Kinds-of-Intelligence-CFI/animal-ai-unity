@@ -12,14 +12,9 @@ namespace Operations
     /// </summary>
     public struct AttachedObjectDetails
     {
+        public MonoBehaviour obj;
         public string ID;
         public Vector3 location;
-
-        public AttachedObjectDetails(string id, Vector3 loc)
-        {
-            ID = id;
-            location = loc;
-        }
     }
 
     /// <summary>

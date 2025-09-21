@@ -37,7 +37,11 @@ public class OperationFromListTests
     {
         var gameObject = new GameObject();
         var operationFromList = gameObject.AddComponent<OperationFromList>();
-        var details = new AttachedObjectDetails("test_object", Vector3.zero);
+        var details = new AttachedObjectDetails{
+            obj = operationFromList,
+            ID = "test_object",
+            location = Vector3.zero
+        };
         operationFromList.initialise(details);
         return operationFromList;
     }
@@ -224,7 +228,11 @@ public class OperationFromListTests
     public void Initialize_SetsAttachedObjectDetails()
     {
         var operationFromList = CreateOperationFromList();
-        var expectedDetails = new AttachedObjectDetails("test_id", new Vector3(1, 2, 3));
+        var expectedDetails = new AttachedObjectDetails{
+            obj = operationFromList,
+            ID = "test_id",
+            location = new Vector3(1, 2, 3)
+        };
 
         operationFromList.initialise(expectedDetails);
 

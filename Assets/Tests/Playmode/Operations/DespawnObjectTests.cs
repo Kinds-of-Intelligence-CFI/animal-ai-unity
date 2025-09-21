@@ -92,7 +92,11 @@ public class DespawnObjectTests
         DespawnObject despawnOperation = tempOperationHost.AddComponent<DespawnObject>();
 
         // Initialize with dummy details since we're not attached to a specific object
-        AttachedObjectDetails details = new AttachedObjectDetails("test", Vector3.zero);
+        AttachedObjectDetails details = new AttachedObjectDetails{
+            obj = despawnOperation,
+            ID = "test",
+            location = Vector3.zero
+        };
 
         // Use the provided function to add objects to the spawn operation
         YAMLDefs.Item item = new YAMLDefs.Item

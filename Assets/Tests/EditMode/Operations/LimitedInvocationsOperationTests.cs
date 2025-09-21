@@ -38,7 +38,11 @@ public class LimitedInvocationsOperationTests
         var limitedInvocationsOperation = gameObject.AddComponent<LimitedInvocationsOperation>();
         limitedInvocationsOperation.operation = op;
         limitedInvocationsOperation.maxInvocations = invocations;
-        var details = new AttachedObjectDetails("test_object", Vector3.zero);
+        var details = new AttachedObjectDetails{
+            obj = limitedInvocationsOperation,
+            ID = "test_object",
+            location = Vector3.zero
+        };
         limitedInvocationsOperation.initialise(details);
         return limitedInvocationsOperation;
     }

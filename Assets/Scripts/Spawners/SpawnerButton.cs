@@ -63,6 +63,7 @@ public class SpawnerButton : MonoBehaviour
             operation.initialise(
                 new AttachedObjectDetails
                 {
+                    obj = this,
                     ID = spawnerID.ToString(),
                     location = transform.position
                 }
