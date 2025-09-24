@@ -8,6 +8,7 @@ using Unity.MLAgents.Actuators;
 using PrefabInterface;
 using Unity.MLAgents.Sensors;
 using Operations;
+using UnityEngine.Events;
 
 /// <summary>
 /// The TrainingAgent class is a subclass of the Agent class in the ML-Agents library.
@@ -15,6 +16,8 @@ using Operations;
 /// </summary>
 public class TrainingAgent : Agent, IPrefab
 {
+    public static UnityEvent OnEpisodeEnd = new UnityEvent();
+
     [Header("Agent Settings")]
     public float speed = 25f;
     public float quickStopRatio = 0.9f;
@@ -499,6 +502,7 @@ public class TrainingAgent : Agent, IPrefab
         if (!showNotification)
         {
             EndEpisode();
+            OnEpisodeEnd.Invoke();
             yield break;
         }
         yield return new WaitForSeconds(2.5f);
@@ -506,6 +510,7 @@ public class TrainingAgent : Agent, IPrefab
         NotificationManager.Instance.HideNotification();
 
         EndEpisode();
+        OnEpisodeEnd.Invoke();
         _csvWriter.FlushLogQueue();
     }
 

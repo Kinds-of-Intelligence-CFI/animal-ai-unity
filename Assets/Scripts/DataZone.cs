@@ -73,6 +73,10 @@ public class DataZone : Prefab
             } else {
                 LastDataZoneMessage += " | " + TriggerZoneID;
             }
+            for (int i = 0; i < Operations.Count; i++)
+            {
+                Operations[i].completeExecution();
+            }
         }
     }
 

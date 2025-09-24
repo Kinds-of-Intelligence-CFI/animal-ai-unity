@@ -33,6 +33,7 @@ namespace Operations
             _attachedObjectDetails = attachedObjectDetails;
         }
         public abstract void execute();
+        public virtual void completeExecution() {}
     }
 
     /// <summary>
@@ -52,6 +53,7 @@ namespace Operations
             {"!limitedInvocationsOperation", typeof(LimitedInvocationsOperation)},
             {"!noneOperation", typeof(NoneOperation)},
             {"!grantReward", typeof(GrantReward)},
+            {"!grantContinuousReward", typeof(GrantContinuousReward)},
             {"!freezeAgent", typeof(FreezeAgent)},
         };
     }
