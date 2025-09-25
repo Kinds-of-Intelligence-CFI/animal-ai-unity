@@ -128,7 +128,8 @@ public class SpawnerButton : MonoBehaviour
         OperationFromList parentOperation = gameObject.AddComponent<OperationFromList>();
         for (int i = 0; i < RewardNames.Count; i++)
         {
-            SpawnObject spawnOperation = gameObject.AddComponent<SpawnObject>();
+            ToggleObject spawnOperation = gameObject.AddComponent<ToggleObject>();
+            spawnOperation.spawnAndForget = true;
             Vector3 spawnPosition;
             if (RewardSpawnPos != Vector3.zero)
             {

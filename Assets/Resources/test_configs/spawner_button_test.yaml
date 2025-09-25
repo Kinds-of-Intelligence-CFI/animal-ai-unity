@@ -20,7 +20,9 @@ arenas:
       - !Vector3 {x: 20, y: 0, z: 25}
       rotations: [90]
       operations:
-      - !spawnObject
+      - !toggleObject
+          objectInitiallyPresent: true
+          spawnAndForget: false
           spawnable: !Item
             name: GoodGoal
             sizes:

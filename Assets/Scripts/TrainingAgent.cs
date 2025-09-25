@@ -101,7 +101,7 @@ public class TrainingAgent : Agent, IPrefab
         progBar.AssignAgent(this);
         health = _maxHealth;
 
-        SpawnObject.RewardSpawned += _csvWriter.OnRewardSpawned;
+        ToggleObject.RewardSpawned += _csvWriter.OnRewardSpawned;
 
         playerControls = GameObject.FindAnyObjectByType<PlayerControls>();
 
@@ -119,7 +119,7 @@ public class TrainingAgent : Agent, IPrefab
         _csvWriter.ReportGoalsCollected(numberOfGoalsCollected);
         _csvWriter.Shutdown();
 
-        SpawnObject.RewardSpawned -= _csvWriter.OnRewardSpawned;
+        ToggleObject.RewardSpawned -= _csvWriter.OnRewardSpawned;
     }
 
     public void AddExtraReward(float rewardFactor)

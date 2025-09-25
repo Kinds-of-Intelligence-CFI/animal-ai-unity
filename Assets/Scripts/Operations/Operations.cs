@@ -47,8 +47,7 @@ namespace Operations
         public static readonly Dictionary<string, Type> OperationTagMappings = new Dictionary<string, Type>
         {
             {"!endEpisode", typeof(EndEpisode)},
-            {"!spawnObject", typeof(SpawnObject)},
-            {"!despawnObject", typeof(DespawnObject)},
+            {"!toggleObject", typeof(ToggleObject)},
             {"!operationFromList", typeof(OperationFromList)},
             {"!limitedInvocationsOperation", typeof(LimitedInvocationsOperation)},
             {"!noneOperation", typeof(NoneOperation)},
