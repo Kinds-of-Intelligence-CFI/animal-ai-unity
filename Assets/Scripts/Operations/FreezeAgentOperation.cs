@@ -8,11 +8,11 @@ namespace Operations
     /// </summary>
     public class FreezeAgent : Operation
     {
-        public float freezeDuration;
+        public int freezeSteps;
 
         public override void execute()
         {
-            Debug.Log("Freezing agent for " + freezeDuration + " seconds");
+            Debug.Log("Freezing agent for " + freezeSteps + " FixedUpdate steps");
             TrainingAgent agent = FindFirstObjectByType<TrainingAgent>();
             agent.StartCoroutine(FreezeCoroutine(agent));
         }
@@ -20,7 +20,12 @@ namespace Operations
         private IEnumerator FreezeCoroutine(TrainingAgent agent)
         {
             agent.FreezeAgent(true, updateHealthFreeze: false);
-            yield return new WaitForSeconds(freezeDuration);
+
+            for (int i = 0; i < freezeSteps; i++)
+            {
+                yield return new WaitForFixedUpdate();
+            }
+
             agent.FreezeAgent(false);
         }
     }
