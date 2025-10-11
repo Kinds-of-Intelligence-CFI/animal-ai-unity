@@ -59,7 +59,9 @@ public class TrainingAgent : Agent, IPrefab
     private TrainingArena _arena;
     private bool _isCountdownActive = false;
 
-    private CSVWriter _csvWriter = new CSVWriter();
+    private CSVWriter _csvWriter;
+
+    private CSVUploader _csvUploader;
 
     [Header("External References")]
     public PlayerControls playerControls;
@@ -100,6 +102,9 @@ public class TrainingAgent : Agent, IPrefab
         progBar = GameObject.Find("UI ProgressBar").GetComponent<ProgressBar>();
         progBar.AssignAgent(this);
         health = _maxHealth;
+
+        _csvWriter = gameObject.AddComponent<CSVWriter>();
+        _csvUploader = gameObject.AddComponent<CSVUploader>();
 
         ToggleObject.RewardSpawned += _csvWriter.OnRewardSpawned;
 
@@ -400,24 +405,24 @@ public class TrainingAgent : Agent, IPrefab
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {
-        var discreteActionsOut = actionsOut.DiscreteActions;
-        discreteActionsOut[0] = 0;
-        discreteActionsOut[1] = 0;
+        var discreteFActionsOut = actionsOut.DiscreteActions;
+        discreteFActionsOut[0] = 0;
+        discreteFActionsOut[1] = 0;
         if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
         {
-            discreteActionsOut[0] = 1;
+            discreteFActionsOut[0] = 1;
         }
         if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
         {
-            discreteActionsOut[0] = 2;
+            discreteFActionsOut[0] = 2;
         }
         if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
         {
-            discreteActionsOut[1] = 1;
+            discreteFActionsOut[1] = 1;
         }
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
         {
-            discreteActionsOut[1] = 2;
+            discreteFActionsOut[1] = 2;
         }
     }
 
@@ -499,6 +504,21 @@ public class TrainingAgent : Agent, IPrefab
 
     IEnumerator EndEpisodeAfterDelay()
     {
+        if (Application.platform == RuntimePlatform.WebGLPlayer || Application.isEditor)
+        {
+            string currentUrl = Application.absoluteURL;
+            Debug.Log("Current WebGL URL: " + currentUrl);
+            string[] urlParts = currentUrl.Split('?');
+            if (urlParts.Length != 2)
+            {
+                // TODO: Gracefully handle when the URL is incorrectly constructed
+                Debug.LogError($"Unable to find config in URL: {currentUrl}");
+            }
+            string queryString = urlParts[urlParts.Length - 1];
+            string[] queryArgs = queryString.Split('&');
+            string user_id = queryArgs[1];
+            _csvUploader.TriggerUpload(user_id);
+        }
         if (!showNotification)
         {
             EndEpisode();
@@ -508,9 +528,9 @@ public class TrainingAgent : Agent, IPrefab
         yield return new WaitForSeconds(2.5f);
 
         NotificationManager.Instance.HideNotification();
-
         EndEpisode();
         OnEpisodeEnd.Invoke();
+        // TODO: What is the role of this flush?
         _csvWriter.FlushLogQueue();
     }
 

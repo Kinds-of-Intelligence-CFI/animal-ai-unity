@@ -1,7 +1,9 @@
 using System;
 using System.IO;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 using ArenasParameters;
 using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
@@ -95,6 +97,30 @@ public class AAI3EnvironmentManager : MonoBehaviour
 
             LoadYAMLFileInEditor();
         }
+        if (Application.platform == RuntimePlatform.WebGLPlayer)
+        {
+            string currentUrl = Application.absoluteURL;
+            Debug.Log("Current WebGL URL: " + currentUrl);
+            string[] urlParts = currentUrl.Split('?');
+            if (urlParts.Length != 2)
+            {
+                // TODO: Gracefully handle when the URL is incorrectly constructed
+                Debug.LogError($"Unable to find config in URL: {currentUrl}");
+            }
+            string queryString = urlParts[urlParts.Length - 1];
+            string[] queryArgs = queryString.Split('&');
+            string experiment_id = queryArgs[0];
+            Debug.Log(experiment_id);
+            playerMode = true;
+            useCamera = true;
+            resolution = 84;
+            grayscale = false;
+            useRayCasts = true;
+            raysPerSide = 2;
+
+            // LoadYAMLFileInEditor();
+            StartCoroutine(LoadConfigFromS3(experiment_id));
+        }
 
         resolution = Math.Max(minimumResolution, Math.Min(maximumResolution, resolution));
         TrainingArena arena = FindAnyObjectByType<TrainingArena>();
@@ -183,6 +209,60 @@ public class AAI3EnvironmentManager : MonoBehaviour
         GameObject arenaInst = Instantiate(arena, new Vector3(0f, 0f, 0f), Quaternion.identity);
         _instantiatedArena = arenaInst.GetComponent<TrainingArena>();
         _instantiatedArena.arenaID = 0;
+    }
+
+    public IEnumerator LoadConfigFromS3(string experiment_id)
+    {
+        string s3Url = $"https://test-experiment-data-storage.s3.eu-north-1.amazonaws.com/{experiment_id}/config.yaml";
+        Debug.Log($"Loading config from S3: {s3Url}.");
+
+        using (UnityWebRequest webRequest = UnityWebRequest.Get(s3Url))
+        {
+            yield return webRequest.SendWebRequest();
+
+            if (webRequest.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError($"Failed to load config from S3: {webRequest.error}");
+                Debug.LogError($"Failed to load config from S3: {webRequest}");
+
+                #if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+                #else
+                Application.Quit(1);
+                #endif
+
+                yield break;
+            }
+
+            try
+            {
+                string configText = webRequest.downloadHandler.text;
+                var YAMLReader = new YAMLDefs.YAMLReader();
+                var parsed = YAMLReader.deserializer.Deserialize<YAMLDefs.ArenaConfig>(configText);
+
+                if (parsed != null)
+                {
+                    _arenasConfigurations.UpdateWithYAML(parsed);
+                    Debug.Log("Successfully loaded and parsed config from S3");
+                }
+                else
+                {
+                    Debug.LogWarning("Deserialized YAML content is null.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Fatal error while processing the YAML file from S3: {ex.Message}");
+
+                #if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+                #else
+                Application.Quit(1);
+                #endif
+
+                throw;
+            }
+        }
     }
 
     public void LoadYAMLFileInEditor()
@@ -335,6 +415,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
         ArenaConfiguration returnConfiguration;
         if (!_arenasConfigurations.configurations.TryGetValue(arenaID, out returnConfiguration))
         {
+            Debug.LogWarning($"Arena ID not found. Configurations: {_arenasConfigurations.configurations}");
             throw new KeyNotFoundException($"Tried to load arena {arenaID} but it did not exist");
         }
         return returnConfiguration;
