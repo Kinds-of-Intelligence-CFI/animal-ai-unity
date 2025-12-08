@@ -9,6 +9,7 @@ using PrefabInterface;
 using Unity.MLAgents.Sensors;
 using Operations;
 using UnityEngine.Events;
+using System.Runtime.InteropServices;
 
 /// <summary>
 /// The TrainingAgent class is a subclass of the Agent class in the ML-Agents library.
@@ -16,6 +17,12 @@ using UnityEngine.Events;
 /// </summary>
 public class TrainingAgent : Agent, IPrefab
 {
+    // Import the function for notifying a containing website the experiment is complete
+    #if UNITY_WEBGL && !UNITY_EDITOR
+    [DllImport("__Internal")]
+    private static extern void NotifyExperimentComplete();
+    #endif
+
     public static UnityEvent OnEpisodeEnd = new UnityEvent();
 
     [Header("Agent Settings")]
@@ -519,6 +526,27 @@ public class TrainingAgent : Agent, IPrefab
             string user_id = queryArgs[1];
             _csvUploader.TriggerUpload(user_id);
         }
+
+        #if UNITY_WEBGL && !UNITY_EDITOR
+        if (_arena.AllArenasAttempted())
+        {
+            Debug.Log("All arenas completed - notifying web page");
+
+            if (showNotification)
+            {
+                yield return new WaitForSeconds(2.5f);
+                NotificationManager.Instance.HideNotification();
+            }
+
+            _csvWriter.FlushLogQueue();
+
+            NotifyExperimentComplete();
+
+            // Skip EndEpisode() call
+            yield break;
+        }
+        #endif
+
         if (!showNotification)
         {
             EndEpisode();
