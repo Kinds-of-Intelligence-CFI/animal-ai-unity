@@ -38,12 +38,12 @@ public class CSVUploader : MonoBehaviour
     /// <summary>
     /// Call this method to manually trigger an upload
     /// </summary>
-    public void TriggerUpload(string user_id)
+    public void TriggerUpload(string experimentId, string userId)
     {
         if (!isUploading)
         {
             Debug.Log("Pre --");
-            StartCoroutine(UploadCSV(user_id));
+            StartCoroutine(UploadCSV(experimentId, userId));
             Debug.Log("Post --");
         }
         else
@@ -52,7 +52,7 @@ public class CSVUploader : MonoBehaviour
         }
     }
 
-    private IEnumerator UploadCSV(string user_id)
+    private IEnumerator UploadCSV(string experimentId, string userId)
     {
         Debug.Log("During --");
         isUploading = true;
@@ -77,7 +77,7 @@ public class CSVUploader : MonoBehaviour
         Debug.Log($"CSV content loaded: {csvContent.Length} characters");
         
 		// Create the JSON payload
-		string jsonPayload = CreateJsonPayload(csvContent, user_id);
+		string jsonPayload = CreateJsonPayload(csvContent, experimentId, userId);
 
         Debug.Log($"JSON payload preview (first 500 chars): {jsonPayload.Substring(0, Math.Min(500, jsonPayload.Length))}");
 
@@ -178,7 +178,7 @@ public class CSVUploader : MonoBehaviour
         return File.ReadAllText(mostRecent.FullName);
     }
 
-	private string CreateJsonPayload(string csvContent, string userId)
+	private string CreateJsonPayload(string csvContent, string experimentId, string userId)
     {
 		// Escape special characters for JSON - do in correct order!
 		string escapedCsv = csvContent
@@ -200,7 +200,8 @@ public class CSVUploader : MonoBehaviour
 		sb.Append("\"csv_data\":\"").Append(escapedCsv).Append("\",");
 		sb.Append("\"encoding\":\"plain\",");
 		sb.Append("\"session_id\":\"").Append(sessionId).Append("\",");
-		sb.Append("\"user_id\":\"").Append(escapedUserId).Append("\"");
+        sb.Append("\"experiment_id\":\"").Append(experimentId).Append("\",");
+        sb.Append("\"user_id\":\"").Append(escapedUserId).Append("\"");
 		sb.Append("}");
 
         return sb.ToString();

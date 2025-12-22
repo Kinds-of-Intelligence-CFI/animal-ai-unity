@@ -523,8 +523,9 @@ public class TrainingAgent : Agent, IPrefab
             }
             string queryString = urlParts[urlParts.Length - 1];
             string[] queryArgs = queryString.Split('&');
-            string user_id = queryArgs[1];
-            _csvUploader.TriggerUpload(user_id);
+            string experimentId = queryArgs[0];
+            string userId = queryArgs[1];
+            _csvUploader.TriggerUpload(experimentId, userId);
         }
 
         #if UNITY_WEBGL && !UNITY_EDITOR
