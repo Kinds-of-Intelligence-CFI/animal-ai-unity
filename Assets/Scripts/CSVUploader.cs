@@ -8,58 +8,21 @@ using UnityEngine.Networking;
 /// <summary>
 /// Uploads CSV telemetry files to AWS Lambda endpoint
 /// Add this component to the same GameObject as CSVWriter
-/// TODO: If running on browser, don't create a file at all
 /// </summary>
 public class CSVUploader : MonoBehaviour
 {
     [Header("Lambda Endpoint Configuration")]
+    // TODO: Make this endpoint configurable for dev/prod
     [SerializeField] private string lambdaUrl = "https://mjlo2ftcn3.execute-api.eu-north-1.amazonaws.com/Prod/telemetry";
     
-    // private CSVWriter csvWriter;
     private string sessionId = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-    private bool isUploading = false;
-
-    // void Start()
-    // {
-    //     // Find the CSVWriter component
-    //     // csvWriter = GetComponent<CSVWriter>();
-    //     // if (csvWriter == null)
-    //     // {
-    //     //     Debug.LogError("CSVUploader: CSVWriter component not found on this GameObject!");
-    //     //     enabled = false;
-    //     //     return;
-    //     // }
-        
-    //     // Generate unique session ID for this play session
-    //     sessionId = Guid.NewGuid().ToString("N").Substring(0, 12);
-    //     Debug.Log($"CSV Upload Session ID: {sessionId}");
-    // }
 
     /// <summary>
-    /// Call this method to manually trigger an upload
+    /// Upload the CSV file to S3 via a lambda
     /// </summary>
-    public void TriggerUpload(string experimentId, string userId)
+    public IEnumerator UploadCSV(string experimentId, string userId)
     {
-        if (!isUploading)
-        {
-            Debug.Log("Pre --");
-            StartCoroutine(UploadCSV(experimentId, userId));
-            Debug.Log("Post --");
-        }
-        else
-        {
-            Debug.LogWarning("Upload already in progress");
-        }
-    }
-
-    private IEnumerator UploadCSV(string experimentId, string userId)
-    {
-        Debug.Log("During --");
-        isUploading = true;
         Debug.Log("Starting CSV upload...");
-        
-        // Flush any pending logs to the CSV file
-        // csvWriter.FlushLogQueue();
         
         // Wait a frame to ensure file write completes
         yield return new WaitForEndOfFrame();
@@ -70,11 +33,21 @@ public class CSVUploader : MonoBehaviour
         if (string.IsNullOrEmpty(csvContent))
         {
             Debug.LogWarning("No CSV content to upload");
-            isUploading = false;
             yield break;
         }
-        
-        Debug.Log($"CSV content loaded: {csvContent.Length} characters");
+
+        // Check if CSV has data rows (not just header)
+        string[] lines = csvContent.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        int dataRowCount = lines.Length - 1; // Subtract 1 for header row
+
+        if (dataRowCount <= 0)
+        {
+            Debug.LogWarning($"CSV only contains header row with no data. Skipping upload. Lines found: {lines.Length}");
+            Debug.LogWarning($"CSV preview: {csvContent.Substring(0, Math.Min(200, csvContent.Length))}");
+            yield break;
+        }
+
+        Debug.Log($"CSV content loaded: {csvContent.Length} characters, {dataRowCount} data rows");
         
 		// Create the JSON payload
 		string jsonPayload = CreateJsonPayload(csvContent, experimentId, userId);
@@ -101,31 +74,39 @@ public class CSVUploader : MonoBehaviour
             // Handle the response
             if (request.result == UnityWebRequest.Result.Success)
             {
-                Debug.Log($"✓ CSV uploaded successfully!");
                 Debug.Log($"Response: {request.downloadHandler.text}");
-                
-                // Parse response to get details
+
+                // Parse response to check Lambda's statusCode
                 try
                 {
-                    UploadResponse response = JsonUtility.FromJson<UploadResponse>(request.downloadHandler.text);
-                    Debug.Log($"S3 Key: {response.s3_key}");
-                    Debug.Log($"Rows uploaded: {response.row_count}");
+                    LambdaResponse lambdaResponse = JsonUtility.FromJson<LambdaResponse>(request.downloadHandler.text);
+
+                    if (lambdaResponse.statusCode == 200)
+                    {
+                        // Parse the nested body JSON
+                        UploadResponse uploadResponse = JsonUtility.FromJson<UploadResponse>(lambdaResponse.body);
+                    }
+                    else
+                    {
+                        Debug.LogError($"Lambda returned error status {lambdaResponse.statusCode}");
+                        Debug.LogError($"Lambda response body: {lambdaResponse.body}");
+                    }
                 }
                 catch (Exception e)
                 {
-                    Debug.LogWarning($"Could not parse response JSON: {e.Message}");
+                    Debug.LogWarning($"Could not parse Lambda response JSON: {e.Message}");
+                    Debug.LogWarning($"Raw response: {request.downloadHandler.text}");
                 }
             }
             else
             {
-                Debug.LogError($"✗ CSV upload failed!");
+                Debug.LogError($"HTTP request failed!");
                 Debug.LogError($"Error: {request.error}");
                 Debug.LogError($"Response Code: {request.responseCode}");
                 Debug.LogError($"Response Body: {request.downloadHandler.text}");
             }
         }
         
-        isUploading = false;
     }
 
     private string ReadCurrentCSV()
@@ -180,7 +161,7 @@ public class CSVUploader : MonoBehaviour
 
 	private string CreateJsonPayload(string csvContent, string experimentId, string userId)
     {
-		// Escape special characters for JSON - do in correct order!
+		// Escape special characters for JSON
 		string escapedCsv = csvContent
 			.Replace("\\", "\\\\")   // Backslashes first
 			.Replace("\"", "\\\"")   // Then quotes
@@ -194,7 +175,7 @@ public class CSVUploader : MonoBehaviour
 			.Replace("\\", "\\\\")
 			.Replace("\"", "\\\"");
 
-        // Create JSON using StringBuilder for better performance with large strings
+        // Use StringBuilder for better performance with large strings
 		StringBuilder sb = new StringBuilder();
 		sb.Append("{");
 		sb.Append("\"csv_data\":\"").Append(escapedCsv).Append("\",");
@@ -209,7 +190,17 @@ public class CSVUploader : MonoBehaviour
 }
 
 /// <summary>
-/// Response structure from Lambda
+/// Lambda API Gateway response wrapper
+/// </summary>
+[Serializable]
+public class LambdaResponse
+{
+    public int statusCode;
+    public string body;
+}
+
+/// <summary>
+/// Response structure from Lambda (nested in body)
 /// </summary>
 [Serializable]
 public class UploadResponse
