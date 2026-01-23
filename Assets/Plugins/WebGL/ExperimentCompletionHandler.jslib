@@ -7,7 +7,6 @@ mergeInto(LibraryManager.library, {
             console.error("Unexpected deployment environment: Detected parent window");
         }
 
-        // Also send to current window (for direct embedding)
         window.postMessage({type: 'experiment_complete'}, '*');
     }
 });
