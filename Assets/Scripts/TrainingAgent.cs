@@ -569,7 +569,6 @@ public class TrainingAgent : Agent, IPrefab
         NotificationManager.Instance.HideNotification();
         EndEpisode();
         OnEpisodeEnd.Invoke();
-        // TODO: What is the role of this flush?
         _csvWriter.FlushLogQueue();
     }
 
