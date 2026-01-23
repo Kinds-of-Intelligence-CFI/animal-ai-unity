@@ -9,7 +9,6 @@ using PrefabInterface;
 using Unity.MLAgents.Sensors;
 using Operations;
 using UnityEngine.Events;
-using System.Runtime.InteropServices;
 
 /// <summary>
 /// The TrainingAgent class is a subclass of the Agent class in the ML-Agents library.
@@ -511,23 +510,6 @@ public class TrainingAgent : Agent, IPrefab
 
     IEnumerator EndEpisodeAfterDelay()
     {
-        if (Application.platform == RuntimePlatform.WebGLPlayer || Application.isEditor)
-        {
-            string currentUrl = Application.absoluteURL;
-            Debug.Log("Current WebGL URL: " + currentUrl);
-            string[] urlParts = currentUrl.Split('?');
-            if (urlParts.Length != 2)
-            {
-                // TODO: Gracefully handle when the URL is incorrectly constructed
-                Debug.LogError($"Unable to find config in URL: {currentUrl}");
-            }
-            string queryString = urlParts[urlParts.Length - 1];
-            string[] queryArgs = queryString.Split('&');
-            string experimentId = queryArgs[0];
-            string userId = queryArgs[1];
-            _csvUploader.TriggerUpload(experimentId, userId);
-        }
-
         #if UNITY_WEBGL && !UNITY_EDITOR
         if (_arena.AllArenasAttempted())
         {
@@ -541,7 +523,35 @@ public class TrainingAgent : Agent, IPrefab
 
             _csvWriter.FlushLogQueue();
 
+            // Show "Thank You! Redirecting..." message immediately to hide game UI
             NotifyExperimentComplete();
+
+            // Extract experiment and user IDs from URL for CSV upload
+            string currentUrl = Application.absoluteURL;
+            Debug.Log("Current WebGL URL: " + currentUrl);
+            string[] urlParts = currentUrl.Split('?');
+            if (urlParts.Length == 2)
+            {
+                string queryString = urlParts[urlParts.Length - 1];
+                string[] queryArgs = queryString.Split('&');
+                if (queryArgs.Length >= 2)
+                {
+                    string experimentId = queryArgs[0];
+                    string userId = queryArgs[1];
+
+                    // Upload happens while "Thank You! Redirecting..." message is displayed
+                    yield return StartCoroutine(_csvUploader.UploadCSV(experimentId, userId));
+                    Debug.Log("CSV upload completed");
+                }
+                else
+                {
+                    Debug.LogError($"Unable to parse experiment/user ID from URL: {currentUrl}");
+                }
+            }
+            else
+            {
+                Debug.LogError($"Unable to find config in URL: {currentUrl}");
+            }
 
             // Skip EndEpisode() call
             yield break;
