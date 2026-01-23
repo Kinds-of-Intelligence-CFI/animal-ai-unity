@@ -411,24 +411,24 @@ public class TrainingAgent : Agent, IPrefab
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {
-        var discreteFActionsOut = actionsOut.DiscreteActions;
-        discreteFActionsOut[0] = 0;
-        discreteFActionsOut[1] = 0;
+        var discreteActionsOut = actionsOut.DiscreteActions;
+        discreteActionsOut[0] = 0;
+        discreteActionsOut[1] = 0;
         if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
         {
-            discreteFActionsOut[0] = 1;
+            discreteActionsOut[0] = 1;
         }
         if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
         {
-            discreteFActionsOut[0] = 2;
+            discreteActionsOut[0] = 2;
         }
         if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
         {
-            discreteFActionsOut[1] = 1;
+            discreteActionsOut[1] = 1;
         }
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
         {
-            discreteFActionsOut[1] = 2;
+            discreteActionsOut[1] = 2;
         }
     }
 
