@@ -110,15 +110,11 @@ public class AAI3EnvironmentManager : MonoBehaviour
             string queryString = urlParts[urlParts.Length - 1];
             string[] queryArgs = queryString.Split('&');
             string experiment_id = queryArgs[0];
-            Debug.Log(experiment_id);
             playerMode = true;
             useCamera = true;
             resolution = 84;
-            grayscale = false;
-            useRayCasts = true;
-            raysPerSide = 2;
+            useRayCasts = false;
 
-            // LoadYAMLFileInEditor();
             StartCoroutine(LoadConfigFromS3(experiment_id));
         }
 
@@ -213,6 +209,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
 
     public IEnumerator LoadConfigFromS3(string experiment_id)
     {
+        // TODO: Make this endpoint configurable for dev/prod
         string s3Url = $"https://test-experiment-data-storage.s3.eu-north-1.amazonaws.com/{experiment_id}/config.yaml";
         Debug.Log($"Loading config from S3: {s3Url}.");
 
@@ -247,7 +244,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning("Deserialized YAML content is null.");
+                    Debug.LogError("Deserialized YAML content is null.");
                 }
             }
             catch (Exception ex)
@@ -415,7 +412,6 @@ public class AAI3EnvironmentManager : MonoBehaviour
         ArenaConfiguration returnConfiguration;
         if (!_arenasConfigurations.configurations.TryGetValue(arenaID, out returnConfiguration))
         {
-            Debug.LogWarning($"Arena ID not found. Configurations: {_arenasConfigurations.configurations}");
             throw new KeyNotFoundException($"Tried to load arena {arenaID} but it did not exist");
         }
         return returnConfiguration;
