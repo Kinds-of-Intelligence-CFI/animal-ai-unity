@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System;
 using System.Collections;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using Unity.MLAgents;
@@ -16,6 +17,12 @@ using UnityEngine.Events;
 /// </summary>
 public class TrainingAgent : Agent, IPrefab
 {
+    // Import the function for notifying a containing website the experiment is complete
+    #if UNITY_WEBGL && !UNITY_EDITOR
+    [DllImport("__Internal")]
+    private static extern void NotifyExperimentComplete();
+    #endif
+
     public static UnityEvent OnEpisodeEnd = new UnityEvent();
 
     [Header("Agent Settings")]
@@ -59,7 +66,9 @@ public class TrainingAgent : Agent, IPrefab
     private TrainingArena _arena;
     private bool _isCountdownActive = false;
 
-    private CSVWriter _csvWriter = new CSVWriter();
+    private CSVWriter _csvWriter;
+
+    private CSVUploader _csvUploader;
 
     [Header("External References")]
     public PlayerControls playerControls;
@@ -100,6 +109,9 @@ public class TrainingAgent : Agent, IPrefab
         progBar = GameObject.Find("UI ProgressBar").GetComponent<ProgressBar>();
         progBar.AssignAgent(this);
         health = _maxHealth;
+
+        _csvWriter = gameObject.AddComponent<CSVWriter>();
+        _csvUploader = gameObject.AddComponent<CSVUploader>();
 
         ToggleObject.RewardSpawned += _csvWriter.OnRewardSpawned;
 
@@ -499,6 +511,54 @@ public class TrainingAgent : Agent, IPrefab
 
     IEnumerator EndEpisodeAfterDelay()
     {
+        #if UNITY_WEBGL && !UNITY_EDITOR
+        if (_arena.AllArenasAttempted())
+        {
+            Debug.Log("All arenas completed - notifying web page");
+
+            if (showNotification)
+            {
+                yield return new WaitForSeconds(2.5f);
+                NotificationManager.Instance.HideNotification();
+            }
+
+            _csvWriter.FlushLogQueue();
+
+            // Show "Thank You! Redirecting..." message immediately to hide game UI
+            NotifyExperimentComplete();
+
+            // Extract experiment and user IDs from URL for CSV upload
+            string currentUrl = Application.absoluteURL;
+            Debug.Log("Current WebGL URL: " + currentUrl);
+            string[] urlParts = currentUrl.Split('?');
+            if (urlParts.Length == 2)
+            {
+                string queryString = urlParts[urlParts.Length - 1];
+                string[] queryArgs = queryString.Split('&');
+                if (queryArgs.Length >= 2)
+                {
+                    string experimentId = queryArgs[0];
+                    string userId = queryArgs[1];
+
+                    // Upload happens while "Thank You! Redirecting..." message is displayed
+                    yield return StartCoroutine(_csvUploader.UploadCSV(experimentId, userId));
+                    Debug.Log("CSV upload completed");
+                }
+                else
+                {
+                    Debug.LogError($"Unable to parse experiment/user ID from URL: {currentUrl}");
+                }
+            }
+            else
+            {
+                Debug.LogError($"Unable to find config in URL: {currentUrl}");
+            }
+
+            // Skip EndEpisode() call
+            yield break;
+        }
+        #endif
+
         if (!showNotification)
         {
             EndEpisode();
@@ -508,7 +568,6 @@ public class TrainingAgent : Agent, IPrefab
         yield return new WaitForSeconds(2.5f);
 
         NotificationManager.Instance.HideNotification();
-
         EndEpisode();
         OnEpisodeEnd.Invoke();
         _csvWriter.FlushLogQueue();

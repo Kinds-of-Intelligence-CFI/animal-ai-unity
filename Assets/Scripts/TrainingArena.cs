@@ -54,6 +54,29 @@ public class TrainingArena : MonoBehaviour
         set { isFirstArenaReset = value; }
     }
 
+    public bool AllArenasAttempted()
+    {
+        if (isFirstArenaReset)
+        {
+            Debug.LogError("Unexpected flow: AllArenasAttempted() called before first arena was reset");
+            return false;
+        }
+
+        int totalArenas = _environmentManager.GetTotalArenas();
+        bool randomizeArenas = _environmentManager.GetRandomizeArenasStatus();
+
+        if (randomizeArenas)
+        {
+            // For randomized arenas: check if we've played all arenas at least once
+            return playedArenas.Count >= totalArenas;
+        }
+        else
+        {
+            // For sequential arenas: check if we're currently on the last arena
+            return arenaID >= totalArenas - 1;
+        }
+    }
+
     public bool mergeNextArena
     {
         get { return _arenaConfiguration.mergeNextArena; }
