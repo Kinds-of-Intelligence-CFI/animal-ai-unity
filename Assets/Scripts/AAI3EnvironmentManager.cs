@@ -209,8 +209,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
 
     public IEnumerator LoadConfigFromS3(string experiment_id)
     {
-        // TODO: Make this endpoint configurable for dev/prod
-        string s3Url = $"https://test-experiment-data-storage.s3.eu-north-1.amazonaws.com/{experiment_id}/config.yaml";
+        string s3Url = $"{CloudEndpoints.S3_BUCKET}/{experiment_id}/config.yaml";
         Debug.Log($"Loading config from S3: {s3Url}.");
 
         using (UnityWebRequest webRequest = UnityWebRequest.Get(s3Url))

@@ -12,8 +12,7 @@ using UnityEngine.Networking;
 public class CSVUploader : MonoBehaviour
 {
     [Header("Lambda Endpoint Configuration")]
-    // TODO: Make this endpoint configurable for dev/prod
-    [SerializeField] private string lambdaUrl = "https://mjlo2ftcn3.execute-api.eu-north-1.amazonaws.com/Prod/telemetry";
+    [SerializeField] private string lambdaUrl = CloudEndpoints.LAMBDA_ENDPOINT;
     
     private string sessionId = DateTime.Now.ToString("yyyyMMdd_HHmmss");
 
