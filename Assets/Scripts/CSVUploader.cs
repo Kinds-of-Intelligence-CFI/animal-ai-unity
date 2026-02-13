@@ -17,6 +17,14 @@ public class CSVUploader : MonoBehaviour
     private string sessionId = DateTime.Now.ToString("yyyyMMdd_HHmmss");
 
     /// <summary>
+    /// Starts the CSV upload process in the background (non-blocking)
+    /// </summary>
+    public void StartUpload(string experimentId, string userId)
+    {
+        StartCoroutine(UploadCSV(experimentId, userId));
+    }
+
+    /// <summary>
     /// Upload the CSV file to S3 via a lambda
     /// </summary>
     public IEnumerator UploadCSV(string experimentId, string userId)
@@ -111,7 +119,7 @@ public class CSVUploader : MonoBehaviour
     private string ReadCurrentCSV()
     {
         CSVWriter csvWriter = GetComponent<CSVWriter>();
-        csvWriter.Shutdown();
+        csvWriter.FlushLogQueue();
         // Determine the base path (same logic as CSVWriter)
         string basePath;
         

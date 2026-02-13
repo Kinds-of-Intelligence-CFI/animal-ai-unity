@@ -512,50 +512,56 @@ public class TrainingAgent : Agent, IPrefab
     IEnumerator EndEpisodeAfterDelay()
     {
         #if UNITY_WEBGL && !UNITY_EDITOR
-        if (_arena.AllArenasAttempted())
+        // Upload CSV after each arena completion (in background, non-blocking)
+        _csvWriter.FlushLogQueue();
+
+        // Extract experiment and user IDs from URL for CSV upload
+        string currentUrl = Application.absoluteURL;
+        Debug.Log("Current WebGL URL: " + currentUrl);
+        string[] urlParts = currentUrl.Split('?');
+        if (urlParts.Length == 2)
         {
-            Debug.Log("All arenas completed - notifying web page");
-
-            if (showNotification)
+            string queryString = urlParts[urlParts.Length - 1];
+            string[] queryArgs = queryString.Split('&');
+            if (queryArgs.Length >= 2)
             {
-                yield return new WaitForSeconds(2.5f);
-                NotificationManager.Instance.HideNotification();
-            }
+                string experimentId = queryArgs[0];
+                string userId = queryArgs[1];
 
-            _csvWriter.FlushLogQueue();
-
-            // Show "Thank You! Redirecting..." message immediately to hide game UI
-            NotifyExperimentComplete();
-
-            // Extract experiment and user IDs from URL for CSV upload
-            string currentUrl = Application.absoluteURL;
-            Debug.Log("Current WebGL URL: " + currentUrl);
-            string[] urlParts = currentUrl.Split('?');
-            if (urlParts.Length == 2)
-            {
-                string queryString = urlParts[urlParts.Length - 1];
-                string[] queryArgs = queryString.Split('&');
-                if (queryArgs.Length >= 2)
+                if (_arena.AllArenasAttempted())
                 {
-                    string experimentId = queryArgs[0];
-                    string userId = queryArgs[1];
+                    Debug.Log("All arenas completed - notifying web page");
 
-                    // Upload happens while "Thank You! Redirecting..." message is displayed
+                    if (showNotification)
+                    {
+                        yield return new WaitForSeconds(2.5f);
+                        NotificationManager.Instance.HideNotification();
+                    }
+
+                    // Show "Thank You! Redirecting..." message immediately to hide game UI
+                    NotifyExperimentComplete();
+
+                    // Final blocking upload to ensure all data is captured before redirect
                     yield return StartCoroutine(_csvUploader.UploadCSV(experimentId, userId));
-                    Debug.Log("CSV upload completed");
+                    Debug.Log("Final CSV upload completed");
+
+                    // Skip EndEpisode() call
+                    yield break;
                 }
                 else
                 {
-                    Debug.LogError($"Unable to parse experiment/user ID from URL: {currentUrl}");
+                    Debug.Log("Arena completed - uploading CSV in background");
+                    _csvUploader.StartUpload(experimentId, userId);
                 }
             }
             else
             {
-                Debug.LogError($"Unable to find config in URL: {currentUrl}");
+                Debug.LogError($"Unable to parse experiment/user ID from URL: {currentUrl}");
             }
-
-            // Skip EndEpisode() call
-            yield break;
+        }
+        else
+        {
+            Debug.LogError($"Unable to find config in URL: {currentUrl}");
         }
         #endif
 

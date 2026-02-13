@@ -237,6 +237,7 @@ public class CSVWriter : MonoBehaviour
                 {
                     writer.WriteLine(logEntry);
                 }
+                writer.Flush();
             }
         }
         catch (Exception ex)
