@@ -60,7 +60,8 @@ public class CSVWriter : MonoBehaviour
         string activeCameraDescription,
         string combinedRaycastData,
         int stepCount,
-        float health
+        float health,
+        int arenaID
     )
     {
         /* Check if the current step has already been logged */
@@ -70,7 +71,7 @@ public class CSVWriter : MonoBehaviour
             return;
         }
         string logEntry = string.Format(
-            "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21}",
+            "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21},{22}",
             episodeCount,
             stepCount,
             health,
@@ -92,7 +93,8 @@ public class CSVWriter : MonoBehaviour
             combinedSpawnerInfo.Replace(",", ";"),
             dataZoneMessage ?? "None",
             activeCameraDescription,
-            combinedRaycastData
+            combinedRaycastData,
+            arenaID
         );
 
         logQueue.Enqueue(logEntry);
@@ -191,7 +193,7 @@ public class CSVWriter : MonoBehaviour
             if (!headerWritten)
             {
                 writer.WriteLine(
-                    "Episode,Step,Health,Reward,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,WasNotificationShown?,WasRewardDispensed?,DispensedRewardType,CollectedRewardType,WasSpawnerButtonTriggered?,CombinedSpawnerInfo,DataZoneMessage,ActiveCamera,CombinedRaycastData"
+                    "Episode,Step,Health,Reward,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,WasNotificationShown?,WasRewardDispensed?,DispensedRewardType,CollectedRewardType,WasSpawnerButtonTriggered?,CombinedSpawnerInfo,DataZoneMessage,ActiveCamera,CombinedRaycastData,arenaID"
                 );
                 headerWritten = true;
             }

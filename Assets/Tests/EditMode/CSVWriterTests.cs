@@ -26,6 +26,7 @@ public class CSVWriterTests
     private string combinedRaycastData = "rayData";
     private int stepCount = 1;
     private float health = 100f;
+    private int arenaID = 0;
 
     [SetUp]
     public void Setup()
@@ -96,7 +97,8 @@ public class CSVWriterTests
             activeCameraDescription,
             combinedRaycastData,
             stepCount,
-            health);
+            health,
+            arenaID);
 
         // Manually flush and shut down to ensure the file is written.
         csvWriter.FlushLogQueue();
@@ -110,7 +112,7 @@ public class CSVWriterTests
         Assert.IsTrue(lines.Length >= 2, "CSV file does not contain both header and log entry.");
 
         // Verify the header line.
-        string expectedHeader = "Episode,Step,Health,Reward,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,WasNotificationShown?,WasRewardDispensed?,DispensedRewardType,CollectedRewardType,WasSpawnerButtonTriggered?,CombinedSpawnerInfo,DataZoneMessage,ActiveCamera,CombinedRaycastData";
+        string expectedHeader = "Episode,Step,Health,Reward,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,WasNotificationShown?,WasRewardDispensed?,DispensedRewardType,CollectedRewardType,WasSpawnerButtonTriggered?,CombinedSpawnerInfo,DataZoneMessage,ActiveCamera,CombinedRaycastData,arenaID";
         Assert.AreEqual(expectedHeader, lines[0]);
 
         // Verify the log entry.
@@ -119,8 +121,8 @@ public class CSVWriterTests
         // actionForward, actionRotate, wasAgentFrozen, notificationState,
         // wasRewardDispensed ("Yes" because RecordDispensedReward() was called),
         // dispensedRewardType, lastCollectedRewardType, wasSpawnerButtonTriggered ("No" by default),
-        // combinedSpawnerInfo ("N/A"), dataZoneMessage, activeCameraDescription, combinedRaycastData
-        string expectedLogEntry = "1,1,100,0.5,1,2,3,4,5,6,forward,rotate,false,none,Yes,DispensedTestReward,TestReward,No,N/A,None,mainCamera,rayData";
+        // combinedSpawnerInfo ("N/A"), dataZoneMessage, activeCameraDescription, combinedRaycastData, arenaID
+        string expectedLogEntry = "1,1,100,0.5,1,2,3,4,5,6,forward,rotate,false,none,Yes,DispensedTestReward,TestReward,No,N/A,None,mainCamera,rayData,0";
         Assert.AreEqual(expectedLogEntry, lines[1]);
     }
 
@@ -156,7 +158,8 @@ public class CSVWriterTests
             activeCameraDescription,
             combinedRaycastData,
             stepCount,
-            health);
+            health,
+            arenaID);
 
         csvWriter.LogToCSV(
             velocity,
@@ -170,7 +173,8 @@ public class CSVWriterTests
             activeCameraDescription,
             combinedRaycastData,
             stepCount+1,
-            health);
+            health,
+            arenaID);
 
         // Manually flush and shut down to ensure the file is written.
         csvWriter.FlushLogQueue();
@@ -190,10 +194,10 @@ public class CSVWriterTests
         // wasRewardDispensed ("Yes" because RecordDispensedReward() was called),
         // dispensedRewardType, lastCollectedRewardType, wasSpawnerButtonTriggered ("No" by default),
         // combinedSpawnerInfo ("N/A"), dataZoneMessage, activeCameraDescription, combinedRaycastData
-        string expectedLogEntry_1 = "1,1,100,0.5,1,2,3,4,5,6,forward,rotate,false,none,Yes,DispensedTestReward,TestReward,Yes,TestSpawner,None,mainCamera,rayData";
+        string expectedLogEntry_1 = "1,1,100,0.5,1,2,3,4,5,6,forward,rotate,false,none,Yes,DispensedTestReward,TestReward,Yes,TestSpawner,None,mainCamera,rayData,0";
         Assert.AreEqual(expectedLogEntry_1, lines[1]);
         // Verify that expected loglines have been reset after one step
-        string expectedLogEntry_2 = "1,2,100,0.5,1,2,3,4,5,6,forward,rotate,false,none,No,None,None,No,N/A,None,mainCamera,rayData";
+        string expectedLogEntry_2 = "1,2,100,0.5,1,2,3,4,5,6,forward,rotate,false,none,No,None,None,No,N/A,None,mainCamera,rayData,0";
         Assert.AreEqual(expectedLogEntry_2, lines[2]);
     }
 
@@ -215,7 +219,8 @@ public class CSVWriterTests
             activeCameraDescription,
             combinedRaycastData,
             stepCount,
-            health);
+            health,
+            arenaID);
 
         csvWriter.ReportGoalsCollected(5);
 
@@ -230,7 +235,7 @@ public class CSVWriterTests
         Assert.IsTrue(lines.Length == 3, "CSV file does not contain both header and log entry.");
 
         // Verify the header line.
-        string expectedHeader = "Episode,Step,Health,Reward,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,WasNotificationShown?,WasRewardDispensed?,DispensedRewardType,CollectedRewardType,WasSpawnerButtonTriggered?,CombinedSpawnerInfo,DataZoneMessage,ActiveCamera,CombinedRaycastData";
+        string expectedHeader = "Episode,Step,Health,Reward,XVelocity,YVelocity,ZVelocity,XPosition,YPosition,ZPosition,ActionForwardWithDescription,ActionRotateWithDescription,WasAgentFrozen?,WasNotificationShown?,WasRewardDispensed?,DispensedRewardType,CollectedRewardType,WasSpawnerButtonTriggered?,CombinedSpawnerInfo,DataZoneMessage,ActiveCamera,CombinedRaycastData,arenaID";
         Assert.AreEqual(expectedHeader, lines[0]);
 
         // Verify the log entry.
@@ -239,8 +244,8 @@ public class CSVWriterTests
         // actionForward, actionRotate, wasAgentFrozen, notificationState,
         // wasRewardDispensed ("Yes" because RecordDispensedReward() was called),
         // dispensedRewardType, lastCollectedRewardType, wasSpawnerButtonTriggered ("No" by default),
-        // combinedSpawnerInfo ("N/A"), dataZoneMessage, activeCameraDescription, combinedRaycastData
-        string expectedLogEntry = "1,1,100,0.5,1,2,3,4,5,6,forward,rotate,false,none,No,None,None,No,N/A,None,mainCamera,rayData";
+        // combinedSpawnerInfo ("N/A"), dataZoneMessage, activeCameraDescription, combinedRaycastData, arenaID
+        string expectedLogEntry = "1,1,100,0.5,1,2,3,4,5,6,forward,rotate,false,none,No,None,None,No,N/A,None,mainCamera,rayData,0";
         Assert.AreEqual(expectedLogEntry, lines[1]);
 
         string expectedGoalsCollectedLine = "Positive Goals Collected: 5";
@@ -265,8 +270,8 @@ public class CSVWriterTests
         float health = 90f;
 
         // Act: Call LogToCSV twice with the same step count.
-        csvWriter.LogToCSV(velocity, position, actionForward, actionRotate, wasAgentFrozen, reward, notificationState, dataZoneMessage, activeCameraDescription, combinedRaycastData, stepCount, health);
-        csvWriter.LogToCSV(velocity, position, actionForward, actionRotate, wasAgentFrozen, reward, notificationState, dataZoneMessage, activeCameraDescription, combinedRaycastData, stepCount, health);
+        csvWriter.LogToCSV(velocity, position, actionForward, actionRotate, wasAgentFrozen, reward, notificationState, dataZoneMessage, activeCameraDescription, combinedRaycastData, stepCount, health, arenaID);
+        csvWriter.LogToCSV(velocity, position, actionForward, actionRotate, wasAgentFrozen, reward, notificationState, dataZoneMessage, activeCameraDescription, combinedRaycastData, stepCount, health, arenaID);
 
         csvWriter.FlushLogQueue();
         csvWriter.Shutdown();

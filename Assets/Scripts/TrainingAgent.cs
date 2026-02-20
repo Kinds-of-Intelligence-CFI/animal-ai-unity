@@ -257,7 +257,8 @@ public class TrainingAgent : Agent, IPrefab
             activeCameraDescription,
             combinedRaycastData,
             StepCount,
-            health
+            health,
+            _arena.arenaID
         );
     }
 
@@ -297,7 +298,8 @@ public class TrainingAgent : Agent, IPrefab
             playerControlsDescription,
             combinedRaycastData,
             StepCount,
-            health
+            health,
+            _arena.arenaID
         );
 
         UpdateHealth(_rewardPerStep);
