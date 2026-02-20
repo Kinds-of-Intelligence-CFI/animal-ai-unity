@@ -63,18 +63,8 @@ public class TrainingArena : MonoBehaviour
         }
 
         int totalArenas = _environmentManager.GetTotalArenas();
-        bool randomizeArenas = _environmentManager.GetRandomizeArenasStatus();
 
-        if (randomizeArenas)
-        {
-            // For randomized arenas: check if we've played all arenas at least once
-            return playedArenas.Count >= totalArenas;
-        }
-        else
-        {
-            // For sequential arenas: check if we're currently on the last arena
-            return arenaID >= totalArenas - 1;
-        }
+        return playedArenas.Count >= totalArenas;
     }
 
     public bool mergeNextArena
@@ -234,7 +224,42 @@ public class TrainingArena : MonoBehaviour
         if (isFirstArenaReset)
         {
             isFirstArenaReset = false;
-            arenaID = randomizeArenas ? ChooseRandomArenaID(totalArenas) : 0;
+
+            List<int> attemptedArenas = _environmentManager.GetAttemptedArenas();
+            if (attemptedArenas != null && attemptedArenas.Count > 0)
+            {
+                playedArenas = new List<int>(attemptedArenas);
+                Debug.Log($"Initialized with {playedArenas.Count} attempted arenas");
+            }
+
+            if (randomizeArenas)
+            {
+                arenaID = ChooseRandomArenaID(totalArenas);
+            }
+            else
+            {
+                // For sequential mode: start from the first unattempted arena
+                if (playedArenas.Count > 0)
+                {
+                    // Find the first arena not in playedArenas
+                    arenaID = GetFirstArenaID();
+                    while (arenaID < totalArenas && playedArenas.Contains(arenaID))
+                    {
+                        arenaID++;
+                    }
+                    // If all arenas were attempted, wrap around to the first arena
+                    if (arenaID >= totalArenas)
+                    {
+                        arenaID = GetFirstArenaID();
+                        playedArenas = new List<int>();
+                    }
+                    Debug.Log($"Sequential mode: starting from arena {arenaID}");
+                }
+                else
+                {
+                    arenaID = GetFirstArenaID();
+                }
+            }
         }
         else
         {
@@ -244,6 +269,12 @@ public class TrainingArena : MonoBehaviour
             }
             else
             {
+                // Track the current arena as completed
+                if (!playedArenas.Contains(arenaID))
+                {
+                    playedArenas.Add(arenaID);
+                }
+
                 /* If the next arena is merged, sequentially search for the next unmerged one */
                 ArenaConfiguration precedingArena = _arenaConfiguration;
                 arenaID = (arenaID + 1) % totalArenas;
@@ -252,8 +283,25 @@ public class TrainingArena : MonoBehaviour
                     precedingArena = _environmentManager.GetConfiguration(arenaID);
                     arenaID = (arenaID + 1) % totalArenas;
                 }
+
+                // Reset playedArenas when we've completed all arenas
+                if (playedArenas.Count >= totalArenas)
+                {
+                    playedArenas = new List<int>();
+                }
             }
         }
+    }
+
+    private int GetFirstArenaID()
+    {
+        if (!_environmentManager._arenasConfigurations.configurations.ContainsKey(0))
+        {
+            // TODO: Don't allow running arenas with nonstandard arena numbering (ATB-103)
+            Debug.LogWarning("Arena 0 not found in configuration. Starting from arena 1.");
+            return 1;
+        }
+        return 0;
     }
 
     private int ChooseRandomArenaID(int totalArenas)
@@ -263,14 +311,18 @@ public class TrainingArena : MonoBehaviour
             _mergedArenas = GetMergedArenas();
         }
 
-        playedArenas.Add(arenaID);
+        // Track the current arena as played
+        if (!playedArenas.Contains(arenaID))
+        {
+            playedArenas.Add(arenaID);
+        }
+
         if (playedArenas.Count >= totalArenas)
         {
             playedArenas = new List<int> { arenaID };
         }
 
-        var availableArenas = Enumerable
-            .Range(0, totalArenas)
+        var availableArenas = _environmentManager._arenasConfigurations.configurations.Keys
             .Except(playedArenas)
             .Except(_mergedArenas)
             .ToList();

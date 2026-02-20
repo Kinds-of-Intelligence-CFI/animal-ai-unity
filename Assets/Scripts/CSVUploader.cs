@@ -12,7 +12,7 @@ using UnityEngine.Networking;
 public class CSVUploader : MonoBehaviour
 {
     [Header("Lambda Endpoint Configuration")]
-    [SerializeField] private string lambdaUrl = CloudEndpoints.LAMBDA_ENDPOINT;
+    [SerializeField] private string lambdaUrl = CloudEndpoints.CSV_UPLOAD_LAMBDA_ENDPOINT;
     
     private string sessionId = DateTime.Now.ToString("yyyyMMdd_HHmmss");
 

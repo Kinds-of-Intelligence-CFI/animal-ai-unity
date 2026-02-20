@@ -57,6 +57,9 @@ public class AAI3EnvironmentManager : MonoBehaviour
 
     public static event Action<int, int> OnArenaChanged;
 
+    private List<int> _attemptedArenas = new List<int>();
+    public List<int> GetAttemptedArenas() => _attemptedArenas;
+
     public void Awake()
     {
         _arenasConfigurations = new ArenasConfigurations();
@@ -110,12 +113,22 @@ public class AAI3EnvironmentManager : MonoBehaviour
             string queryString = urlParts[urlParts.Length - 1];
             string[] queryArgs = queryString.Split('&');
             string experiment_id = queryArgs[0];
+            string user_id = "";
+            if (queryArgs.Length > 1)
+            {
+                user_id = queryArgs[1];
+            }
+            else
+            {
+                Debug.LogError($"Unable to find user_id in URL query parameters: {currentUrl}");
+            }
             playerMode = true;
             useCamera = true;
             resolution = 84;
             useRayCasts = false;
 
             StartCoroutine(LoadConfigFromS3(experiment_id));
+            StartCoroutine(FetchAttemptedArenas(experiment_id, user_id));
         }
 
         resolution = Math.Max(minimumResolution, Math.Min(maximumResolution, resolution));
@@ -259,6 +272,87 @@ public class AAI3EnvironmentManager : MonoBehaviour
                 throw;
             }
         }
+    }
+
+    public IEnumerator FetchAttemptedArenas(string experiment_id, string user_id)
+    {
+        string apiUrl = CloudEndpoints.GET_USER_LIFECYCLE_STATE_LAMBDA_ENDPOINT;
+        Debug.Log($"Fetching attempted arenas from API Gateway: {apiUrl}");
+
+        // Create JSON payload
+        string jsonPayload = $"{{\"experiment_id\": \"{experiment_id}\", \"user_id\": \"{user_id}\"}}";
+        Debug.Log($"Payload: {jsonPayload}");
+
+        using (UnityWebRequest webRequest = new UnityWebRequest(apiUrl, "POST"))
+        {
+            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonPayload);
+            webRequest.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            webRequest.downloadHandler = new DownloadHandlerBuffer();
+            webRequest.SetRequestHeader("Content-Type", "application/json");
+
+            yield return webRequest.SendWebRequest();
+
+            Debug.Log($"API Gateway Status Code: {webRequest.responseCode}");
+
+            if (webRequest.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogWarning($"API Gateway request failed: {webRequest.error}");
+                Debug.LogWarning($"Response: {webRequest.downloadHandler.text}");
+                Debug.LogWarning($"Starting from beginning (no attempted arenas)");
+                _attemptedArenas = new List<int>();
+            }
+            else
+            {
+                Debug.Log($"API Gateway Response: {webRequest.downloadHandler.text}");
+
+                try
+                {
+                    // Parse the outer response
+                    ApiGatewayResponse apiResponse = JsonUtility.FromJson<ApiGatewayResponse>(webRequest.downloadHandler.text);
+
+                    if (apiResponse.statusCode == 200)
+                    {
+                        // Parse the nested body JSON
+                        AttemptedArenasResponse attemptedResponse = JsonUtility.FromJson<AttemptedArenasResponse>(apiResponse.body);
+
+                        if (attemptedResponse.attempted_arenas != null && attemptedResponse.attempted_arenas.Length > 0)
+                        {
+                            _attemptedArenas = new List<int>(attemptedResponse.attempted_arenas);
+                            Debug.Log($"Loaded {_attemptedArenas.Count} attempted arenas: [{string.Join(", ", _attemptedArenas)}]");
+                        }
+                        else
+                        {
+                            Debug.Log("No attempted arenas found in response, starting from beginning");
+                            _attemptedArenas = new List<int>();
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"API returned status code {apiResponse.statusCode}, starting from beginning");
+                        _attemptedArenas = new List<int>();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning($"Failed to parse API response: {ex.Message}");
+                    Debug.LogWarning($"Starting from beginning (no attempted arenas)");
+                    _attemptedArenas = new List<int>();
+                }
+            }
+        }
+    }
+
+    [Serializable]
+    public class ApiGatewayResponse
+    {
+        public int statusCode;
+        public string body;
+    }
+
+    [Serializable]
+    public class AttemptedArenasResponse
+    {
+        public int[] attempted_arenas;
     }
 
     public void LoadYAMLFileInEditor()
