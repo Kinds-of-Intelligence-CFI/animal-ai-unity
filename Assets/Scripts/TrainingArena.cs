@@ -64,7 +64,9 @@ public class TrainingArena : MonoBehaviour
 
         int totalArenas = _environmentManager.GetTotalArenas();
 
-        return playedArenas.Count >= totalArenas;
+        // arenaID has just ended but not yet been recorded in playedArenas (that happens in the
+        // next SetNextArenaID call), so include it explicitly in the count.
+        return playedArenas.Count + 1 >= totalArenas;
     }
 
     public bool mergeNextArena
@@ -243,12 +245,13 @@ public class TrainingArena : MonoBehaviour
                 {
                     // Find the first arena not in playedArenas
                     arenaID = GetFirstArenaID();
-                    while (arenaID < totalArenas && playedArenas.Contains(arenaID))
+                    // TODO: Replace ContainsKey bound with < totalArenas once YAMLs are validated to start from 0 (ATB-103)
+                    while (_environmentManager._arenasConfigurations.configurations.ContainsKey(arenaID) && playedArenas.Contains(arenaID))
                     {
                         arenaID++;
                     }
                     // If all arenas were attempted, wrap around to the first arena
-                    if (arenaID >= totalArenas)
+                    if (!_environmentManager._arenasConfigurations.configurations.ContainsKey(arenaID))
                     {
                         arenaID = GetFirstArenaID();
                         playedArenas = new List<int>();
@@ -277,11 +280,12 @@ public class TrainingArena : MonoBehaviour
 
                 /* If the next arena is merged, sequentially search for the next unmerged one */
                 ArenaConfiguration precedingArena = _arenaConfiguration;
-                arenaID = (arenaID + 1) % totalArenas;
+                // TODO: Replace ContainsKey wrap with % totalArenas once YAMLs are validated to start from 0 (ATB-103)
+                arenaID = _environmentManager._arenasConfigurations.configurations.ContainsKey(arenaID + 1) ? arenaID + 1 : GetFirstArenaID();
                 while (precedingArena.mergeNextArena)
                 {
                     precedingArena = _environmentManager.GetConfiguration(arenaID);
-                    arenaID = (arenaID + 1) % totalArenas;
+                    arenaID = _environmentManager._arenasConfigurations.configurations.ContainsKey(arenaID + 1) ? arenaID + 1 : GetFirstArenaID();
                 }
 
                 // Reset playedArenas when we've completed all arenas
