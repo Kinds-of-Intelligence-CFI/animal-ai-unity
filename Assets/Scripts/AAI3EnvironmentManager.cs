@@ -127,7 +127,9 @@ public class AAI3EnvironmentManager : MonoBehaviour
             resolution = 84;
             useRayCasts = false;
 
-            StartCoroutine(LoadConfigFromS3(experiment_id));
+            bool isTutorial = currentUrl.Contains("tutorial");
+            string configFilename = isTutorial ? WebGLConstants.TUTORIAL_CONFIG_FILENAME : WebGLConstants.EXPERIMENT_CONFIG_FILENAME;
+            StartCoroutine(LoadConfigFromS3(experiment_id, configFilename));
             StartCoroutine(FetchAttemptedArenas(experiment_id, user_id));
         }
 
@@ -220,9 +222,9 @@ public class AAI3EnvironmentManager : MonoBehaviour
         _instantiatedArena.arenaID = 0;
     }
 
-    public IEnumerator LoadConfigFromS3(string experiment_id)
+    public IEnumerator LoadConfigFromS3(string experiment_id, string configFilename = WebGLConstants.EXPERIMENT_CONFIG_FILENAME)
     {
-        string s3Url = $"{CloudEndpoints.S3_BUCKET}/{experiment_id}/config.yaml";
+        string s3Url = $"{WebGLConstants.S3_BUCKET}/{experiment_id}/{configFilename}";
         Debug.Log($"Loading config from S3: {s3Url}.");
 
         using (UnityWebRequest webRequest = UnityWebRequest.Get(s3Url))
@@ -276,7 +278,7 @@ public class AAI3EnvironmentManager : MonoBehaviour
 
     public IEnumerator FetchAttemptedArenas(string experiment_id, string user_id)
     {
-        string apiUrl = CloudEndpoints.GET_USER_LIFECYCLE_STATE_LAMBDA_ENDPOINT;
+        string apiUrl = WebGLConstants.GET_USER_LIFECYCLE_STATE_LAMBDA_ENDPOINT;
         Debug.Log($"Fetching attempted arenas from API Gateway: {apiUrl}");
 
         // Create JSON payload
