@@ -530,6 +530,13 @@ public class TrainingAgent : Agent, IPrefab
                 string experimentId = queryArgs[0];
                 string userId = queryArgs[1];
 
+                // Don't write CSV files for tutorial runs
+                if (currentUrl.Contains("tutorial"))
+                {
+                    NotifyExperimentComplete();
+                    yield break;
+                }
+
                 if (_arena.AllArenasAttempted())
                 {
                     Debug.Log("All arenas completed - notifying web page");
