@@ -551,7 +551,9 @@ namespace ArenaBuilders
             position =
                 (agentSpawnableFromUser == null || !agentSpawnableFromUser.positions.Any())
                     ? -Vector3.one
-                    : agentSpawnableFromUser.positions[0];
+                    : agentSpawnableFromUser.positions.Count == 1
+                        ? agentSpawnableFromUser.positions[0]
+                        : agentSpawnableFromUser.positions[UnityEngine.Random.Range(0, agentSpawnableFromUser.positions.Count)];
             rotation =
                 (agentSpawnableFromUser == null || !agentSpawnableFromUser.rotations.Any())
                     ? -1
