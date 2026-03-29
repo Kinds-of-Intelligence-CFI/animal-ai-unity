@@ -130,7 +130,10 @@ public class AAI3EnvironmentManager : MonoBehaviour
             bool isTutorial = currentUrl.Contains("tutorial");
             string configFilename = isTutorial ? WebGLConstants.TUTORIAL_CONFIG_FILENAME : WebGLConstants.EXPERIMENT_CONFIG_FILENAME;
             StartCoroutine(LoadConfigFromS3(experiment_id, configFilename));
-            StartCoroutine(FetchAttemptedArenas(experiment_id, user_id));
+            if (!isTutorial)
+            {
+                StartCoroutine(FetchAttemptedArenas(experiment_id, user_id));
+            }
         }
 
         resolution = Math.Max(minimumResolution, Math.Min(maximumResolution, resolution));
