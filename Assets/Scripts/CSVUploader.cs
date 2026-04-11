@@ -185,8 +185,9 @@ public class CSVUploader : MonoBehaviour
         // Use StringBuilder for better performance with large strings
 		StringBuilder sb = new StringBuilder();
 		sb.Append("{");
-		sb.Append("\"csv_data\":\"").Append(escapedCsv).Append("\",");
+		sb.Append("\"file_data\":\"").Append(escapedCsv).Append("\",");
 		sb.Append("\"encoding\":\"plain\",");
+		sb.Append("\"file_type\":\"csv\",");
 		sb.Append("\"session_id\":\"").Append(sessionId).Append("\",");
         sb.Append("\"experiment_id\":\"").Append(experimentId).Append("\",");
         sb.Append("\"user_id\":\"").Append(escapedUserId).Append("\"");
