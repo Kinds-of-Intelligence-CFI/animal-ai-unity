@@ -22,6 +22,7 @@ public class ArenasParametersSideChannel : SideChannel
     {
         byte[] rawData = msg.GetRawBytes();
         string potentialFilePath = Encoding.UTF8.GetString(rawData);
+        ArenasParametersEventArgs args = null;
 
         // Check if the received string is a valid file path
         if (!string.IsNullOrEmpty(potentialFilePath) && File.Exists(potentialFilePath))
@@ -30,16 +31,19 @@ public class ArenasParametersSideChannel : SideChannel
             byte[] yamlData = ReadArenaConfigFile(potentialFilePath);
             if (yamlData != null)
             {
-                ArenasParametersEventArgs args = new ArenasParametersEventArgs { arenas_yaml = yamlData, };
-                OnArenasParametersReceived(args);
+                args = new ArenasParametersEventArgs { arenas_yaml = yamlData, };
+            }
+            else
+            {
+                Debug.LogError($"Failed to read arena config from file: {potentialFilePath}");
             }
         }
         else
         {
             // treat raw data as arena content directly
-            ArenasParametersEventArgs args = new ArenasParametersEventArgs { arenas_yaml = rawData, };
-            OnArenasParametersReceived(args);
+            args = new ArenasParametersEventArgs { arenas_yaml = rawData, };
         }
+        OnArenasParametersReceived(args);
     }
 
     private byte[] ReadArenaConfigFile(string filePath)
