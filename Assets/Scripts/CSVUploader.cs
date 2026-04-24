@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.IO;
+using System.IO.Compression;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -168,33 +169,37 @@ public class CSVUploader : MonoBehaviour
 
 	private string CreateJsonPayload(string csvContent, string experimentId, string userId)
     {
-		// Escape special characters for JSON
-		string escapedCsv = csvContent
-			.Replace("\\", "\\\\")   // Backslashes first
-			.Replace("\"", "\\\"")   // Then quotes
-			.Replace("\n", "\\n")    // Then newlines (handles both \r\n and \n)
-			.Replace("\r", "\\r")    // Then carriage returns
-			.Replace("\t", "\\t")    // Tabs
-			.Replace("\b", "\\b")    // Backspace
-			.Replace("\f", "\\f");   // Form feed
+		string compressedCsv = CompressToBase64Gzip(csvContent);
 
 		string escapedUserId = userId
 			.Replace("\\", "\\\\")
 			.Replace("\"", "\\\"");
 
-        // Use StringBuilder for better performance with large strings
 		StringBuilder sb = new StringBuilder();
 		sb.Append("{");
-		sb.Append("\"file_data\":\"").Append(escapedCsv).Append("\",");
-		sb.Append("\"encoding\":\"plain\",");
+		sb.Append("\"file_data\":\"").Append(compressedCsv).Append("\",");
+		sb.Append("\"encoding\":\"base64_gzip\",");
 		sb.Append("\"file_type\":\"csv\",");
 		sb.Append("\"session_id\":\"").Append(sessionId).Append("\",");
-        sb.Append("\"experiment_id\":\"").Append(experimentId).Append("\",");
-        sb.Append("\"user_id\":\"").Append(escapedUserId).Append("\"");
+		sb.Append("\"experiment_id\":\"").Append(experimentId).Append("\",");
+		sb.Append("\"user_id\":\"").Append(escapedUserId).Append("\"");
 		sb.Append("}");
 
-        return sb.ToString();
+		return sb.ToString();
     }
+
+	private string CompressToBase64Gzip(string content)
+	{
+		byte[] bytes = Encoding.UTF8.GetBytes(content);
+		using (MemoryStream output = new MemoryStream())
+		{
+			using (GZipStream gzip = new GZipStream(output, CompressionMode.Compress))
+			{
+				gzip.Write(bytes, 0, bytes.Length);
+			}
+			return Convert.ToBase64String(output.ToArray());
+		}
+	}
 }
 
 /// <summary>
