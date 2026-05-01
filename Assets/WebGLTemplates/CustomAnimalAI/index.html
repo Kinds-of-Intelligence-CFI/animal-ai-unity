@@ -190,60 +190,80 @@
 
       document.body.appendChild(script);
 
-      // Listen for experiment completion message from Unity
-      window.addEventListener('message', function(event) {
-        console.log('Received message:', event.data);
+      // Listen for experiment completion and upload complete messages from Unity
+      (function() {
+        var completionUrl = null;
+        var redirectTimer = null;
 
-        if (event.data && event.data.type === 'experiment_complete') {
-          console.log('Received experiment completion notification from Unity');
+        function redirect() {
+          if (completionUrl) {
+            window.location.href = completionUrl;
+          }
+        }
 
-          // Hide the Unity canvas and game UI immediately
-          document.getElementById('unity-canvas').style.display = 'none';
-          document.getElementById('unity-footer').style.display = 'none';
+        window.addEventListener('message', function(event) {
+          console.log('Received message:', event.data);
 
-          // Replace the container content with a thank you message
-          var container = document.getElementById('unity-container');
-          container.style.display = 'flex';
-          container.style.alignItems = 'center';
-          container.style.justifyContent = 'center';
-          container.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-          container.style.width = '100%';
-          container.style.height = '100vh';
-          container.style.position = 'fixed';
-          container.style.top = '0';
-          container.style.left = '0';
-          container.style.transform = 'none';
+          if (event.data && event.data.type === 'experiment_complete') {
+            console.log('Received experiment completion notification from Unity');
 
-          container.innerHTML = '<div style="background: white; border-radius: 12px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); max-width: 500px; padding: 50px 40px; text-align: center; animation: fadeIn 0.5s ease-in;">' +
-            '<div style="width: 80px; height: 80px; margin: 0 auto 30px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center;">' +
-            '<svg viewBox="0 0 24 24" style="width: 50px; height: 50px; stroke: white; stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round;"><polyline points="20 6 9 17 4 12"></polyline></svg>' +
-            '</div>' +
-            '<h1 style="font-size: 2.5rem; color: #667eea; margin-bottom: 20px; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif;">Thank You!</h1>' +
-            '<p style="font-size: 1.2rem; color: #666; margin-bottom: 20px; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif;">Experiment Completed Successfully</p>' +
-            '<p style="font-size: 1rem; color: #888; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif;">Redirecting to completion page...</p>' +
-            '</div>' +
-            '<style>@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }</style>';
+            // Hide the Unity canvas and game UI immediately
+            document.getElementById('unity-canvas').style.display = 'none';
+            document.getElementById('unity-footer').style.display = 'none';
 
-          // Extract experiment and participant IDs from URL
-          const urlParams = new URLSearchParams(window.location.search);
-          const params = Array.from(urlParams.keys());
-          const experimentId = params[0] || '';
-          const participantId = params[1] || '';
+            // Replace the container content with a thank you message
+            var container = document.getElementById('unity-container');
+            container.style.display = 'flex';
+            container.style.alignItems = 'center';
+            container.style.justifyContent = 'center';
+            container.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            container.style.width = '100%';
+            container.style.height = '100vh';
+            container.style.position = 'fixed';
+            container.style.top = '0';
+            container.style.left = '0';
+            container.style.transform = 'none';
 
-          // Build completion URL with parameters
-          let completionUrl = '../completion.html';
-          if (experimentId && participantId) {
-            completionUrl += '?experiment_id=' + encodeURIComponent(experimentId) + '&participant_id=' + encodeURIComponent(participantId);
+            container.innerHTML = '<div style="background: white; border-radius: 12px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); max-width: 500px; padding: 50px 40px; text-align: center; animation: fadeIn 0.5s ease-in;">' +
+              '<div style="width: 80px; height: 80px; margin: 0 auto 30px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center;">' +
+              '<svg viewBox="0 0 24 24" style="width: 50px; height: 50px; stroke: white; stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round;"><polyline points="20 6 9 17 4 12"></polyline></svg>' +
+              '</div>' +
+              '<h1 style="font-size: 2.5rem; color: #667eea; margin-bottom: 20px; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif;">Thank You!</h1>' +
+              '<p style="font-size: 1.2rem; color: #666; margin-bottom: 20px; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif;">Experiment Completed Successfully</p>' +
+              '<p style="font-size: 1rem; color: #888; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif;">Redirecting to completion page...</p>' +
+              '</div>' +
+              '<style>@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }</style>';
+
+            // Extract experiment and participant IDs from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const params = Array.from(urlParams.keys());
+            const experimentId = params[0] || '';
+            const participantId = params[1] || '';
+
+            // Build completion URL with parameters
+            completionUrl = '../completion.html';
+            if (experimentId && participantId) {
+              completionUrl += '?experiment_id=' + encodeURIComponent(experimentId) + '&participant_id=' + encodeURIComponent(participantId);
+            }
+
+            console.log('Will redirect to:', completionUrl);
+
+            // Fallback: redirect after 30s if upload_complete is never received
+            redirectTimer = setTimeout(function() {
+              console.warn('Upload complete signal not received within 30s, redirecting anyway');
+              redirect();
+            }, 30000);
           }
 
-          console.log('Redirecting to:', completionUrl);
-
-          // Delay redirect to allow CSV upload to complete
-          setTimeout(function() {
-            window.location.href = completionUrl;
-          }, 5000);
-        }
-      });
+          if (event.data && event.data.type === 'upload_complete') {
+            console.log('Received upload complete notification from Unity');
+            if (redirectTimer) {
+              clearTimeout(redirectTimer);
+            }
+            redirect();
+          }
+        });
+      })();
 
     </script>
   </body>
