@@ -8,5 +8,10 @@ mergeInto(LibraryManager.library, {
         }
 
         window.postMessage({type: 'experiment_complete'}, '*');
+    },
+
+    NotifyUploadComplete: function() {
+        console.log("Unity: CSV upload complete, notifying parent page");
+        window.postMessage({type: 'upload_complete'}, '*');
     }
 });

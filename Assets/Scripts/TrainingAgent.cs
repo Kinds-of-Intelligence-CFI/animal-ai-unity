@@ -21,6 +21,8 @@ public class TrainingAgent : Agent, IPrefab
     #if UNITY_WEBGL && !UNITY_EDITOR
     [DllImport("__Internal")]
     private static extern void NotifyExperimentComplete();
+    [DllImport("__Internal")]
+    private static extern void NotifyUploadComplete();
     #endif
 
     public static UnityEvent OnEpisodeEnd = new UnityEvent();
@@ -553,6 +555,7 @@ public class TrainingAgent : Agent, IPrefab
                     // Final blocking upload to ensure all data is captured before redirect
                     yield return StartCoroutine(_csvUploader.UploadCSV(experimentId, userId));
                     Debug.Log("Final CSV upload completed");
+                    NotifyUploadComplete();
 
                     // Skip EndEpisode() call
                     yield break;
