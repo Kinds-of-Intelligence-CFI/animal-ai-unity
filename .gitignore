@@ -117,3 +117,5 @@ Assets/Prefabs/Other-Unique/SignPosterboard.prefab
 /ObservationLogs
 .DS_Store
 Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Anton SDF.asset
+*.lscache
+*.slnx
