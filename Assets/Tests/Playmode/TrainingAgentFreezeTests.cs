@@ -16,7 +16,7 @@ public class TrainingAgentFreezeTests
     }
 
     [UnityTest]
-    public IEnumerator SetFreezeDelay_StillUnfreezesAfterAnEarlierCountdownWasInterrupted()
+    public IEnumerator OnEpisodeBegin_StillUnfreezesAfterAnEarlierCountdownWasInterrupted()
     {
         yield return null;
 
@@ -26,10 +26,12 @@ public class TrainingAgentFreezeTests
         float freezeDelay = 0.2f;
 
         // Episode 1: a freeze countdown starts, but the episode ends early (e.g. via an
-        // EndEpisode operation) before the countdown completes. OnEpisodeBegin always calls
-        // StopAllCoroutines(), which kills the countdown mid-flight.
+        // EndEpisode operation) before the countdown completes. ML-Agents then calls
+        // OnEpisodeBegin() for the next episode, which always calls StopAllCoroutines() -
+        // killing the countdown mid-flight. Calling OnEpisodeBegin() directly (rather than just
+        // StopAllCoroutines()) is what actually exercises the fix.
         agent.SetFreezeDelay(freezeDelay);
-        agent.StopAllCoroutines();
+        agent.OnEpisodeBegin();
 
         // Episode 2: spawning applies a fresh freeze delay, exactly as ArenaBuilders.SpawnAgent
         // does on every arena reset.
