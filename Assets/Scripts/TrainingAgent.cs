@@ -602,6 +602,7 @@ public class TrainingAgent : Agent, IPrefab
         }
 
         StopAllCoroutines();
+        _isCountdownActive = false;
         _previousScore = _currentScore;
         numberOfGoalsCollected = 0;
         _arena.ResetArena();
