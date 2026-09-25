@@ -76,7 +76,7 @@ public class ToggleObjectTests
         Assert.IsTrue(Vector3.Distance(objectToDespawn.transform.position, expectedObjectPositionCentre) < 0.5f,
                      $"{objectTypeName} should spawn at expected position behind agent. Expected: {expectedObjectPositionCentre}, Actual: {objectToDespawn.transform.position}");
 
-        operation.execute();
+        operation.execute(agent);
 
         // Wait a frame for the object to be destroyed
         yield return null;
@@ -99,7 +99,7 @@ public class ToggleObjectTests
         Assert.IsTrue(objects_initial.Length == 0, $"Exactly zero {objectTypeName}s should be present initially, got " + objects_initial.Length);
 
         ToggleObject operation = GetToggleObjectOperation(objectTypeName, false);
-        operation.execute();
+        operation.execute(agent);
 
         // Find the spawned object
         GameObject[] objects = FindGameObjectsByName(objectTypeName);

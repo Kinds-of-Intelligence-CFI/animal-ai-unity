@@ -28,7 +28,7 @@ public class GrantRewardTests
 
         var operation = CreateGrantRewardOperation();
 
-        operation.execute();
+        operation.execute(agent);
 
         float expectedHealth = initialHealth + (operation.reward * 100);
         Assert.AreEqual(expectedHealth, agent.health, 0.001f,

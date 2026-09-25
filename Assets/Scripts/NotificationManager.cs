@@ -21,14 +21,12 @@ public class NotificationManager : MonoBehaviour
     private Coroutine gifCoroutine;
     private string currentNotificationState = "None";
 
-    public TrainingAgent trainingAgent;
     public GameObject notificationPanel;
     public static NotificationManager Instance;
 
     void Start()
     {
         LoadFrames();
-        trainingAgent = FindAnyObjectByType<TrainingAgent>();
         HideNotification();
     }
 
@@ -59,14 +57,12 @@ public class NotificationManager : MonoBehaviour
     public void ShowSuccessNotification()
     {
         ShowNotification(true);
-        trainingAgent.FreezeAgent(true);
         currentNotificationState = "Success";
     }
 
     public void ShowFailureNotification()
     {
         ShowNotification(false);
-        trainingAgent.FreezeAgent(true);
         currentNotificationState = "Failure";
     }
 
@@ -94,6 +90,10 @@ public class NotificationManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Hides the notification. Freezing/unfreezing agents while a notification is shown is the
+    /// arena's responsibility (see TrainingArena.OnAgentFinished).
+    /// </summary>
     public void HideNotification()
     {
         notificationPanel.SetActive(false);
@@ -103,7 +103,6 @@ public class NotificationManager : MonoBehaviour
         StopPreviousAnimation();
 
         currentFrame = 0;
-        trainingAgent.FreezeAgent(false);
         currentNotificationState = "None";
     }
 

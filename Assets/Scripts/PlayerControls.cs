@@ -24,7 +24,8 @@ public class PlayerControls : MonoBehaviour
 
     [Header("External References")]
     private ScreenshotCamera screenshotCam;
-    private TrainingAgent agent;
+    private TrainingArena arena;
+    private TrainingAgent agent; // The arena's primary agent: player mode controls and follows agent 0
     private ArenasConfigurations arenasConfigurations;
     private AAI3EnvironmentManager environmentManager;
 
@@ -80,14 +81,25 @@ public class PlayerControls : MonoBehaviour
     private void LoadCamerasAndAgent()
     {
         screenshotCam = FindAnyObjectByType<ScreenshotCamera>();
-        cameras[0] = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
-        cameras[1] = GameObject
-            .FindGameObjectWithTag("agent")
-            .transform.Find("AgentCamMid")
-            .GetComponent<Camera>();
-        cameras[2] = GameObject.FindGameObjectWithTag("camBase").GetComponent<Camera>();
-        agent = GameObject.FindGameObjectWithTag("agent").GetComponent<TrainingAgent>();
         environmentManager = FindAnyObjectByType<AAI3EnvironmentManager>();
+        arena = FindAnyObjectByType<TrainingArena>();
+        agent = arena != null ? arena.PrimaryAgent : null;
+
+        cameras[0] = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
+        if (agent != null)
+        {
+            cameras[1] = agent.transform.Find("AgentCamMid").GetComponent<Camera>();
+            // The bird's-eye camera belongs to the agent's prefab instance, so look it up there rather than by tag
+            // (every agent's prefab instance has one)
+            foreach (Camera camera in agent.transform.parent.GetComponentsInChildren<Camera>(true))
+            {
+                if (camera.CompareTag("camBase"))
+                {
+                    cameras[2] = camera;
+                    break;
+                }
+            }
+        }
     }
 
     private void LoadConfigurationSettings()
@@ -137,7 +149,7 @@ public class PlayerControls : MonoBehaviour
         }
         if (canResetEpisode && Input.GetKeyDown(KeyCode.R))
         {
-            agent.EndEpisode();
+            arena.EndArenaEpisode();
         }
         if (Input.GetKeyDown(KeyCode.Q))
         {

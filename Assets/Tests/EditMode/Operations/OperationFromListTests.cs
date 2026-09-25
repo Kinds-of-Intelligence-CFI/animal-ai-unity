@@ -22,7 +22,7 @@ public class OperationFromListTests
             operationName = name;
         }
 
-        public override void execute()
+        public override void execute(TrainingAgent triggeringAgent)
         {
             executionCount++;
         }
@@ -76,7 +76,7 @@ public class OperationFromListTests
 
         for (int i = 0; i < iterations; i++)
         {
-            operationFromList.execute();
+            operationFromList.execute(null);
         }
 
         float expectedCount = iterations / 2.0f;
@@ -106,7 +106,7 @@ public class OperationFromListTests
 
         for (int i = 0; i < iterations; i++)
         {
-            operationFromList.execute();
+            operationFromList.execute(null);
         }
 
         float expectedOperation1Count = iterations * 0.75f; // 3/4 of total
@@ -135,7 +135,7 @@ public class OperationFromListTests
 
         for (int i = 0; i < iterations; i++)
         {
-            operationFromList.execute();
+            operationFromList.execute(null);
         }
 
         Assert.AreEqual(iterations, singleOperation.executionCount,
@@ -156,7 +156,7 @@ public class OperationFromListTests
 
         for (int i = 0; i < iterations; i++)
         {
-            operationFromList.execute();
+            operationFromList.execute(null);
         }
 
         Assert.AreEqual(iterations, normalOperation.executionCount,
@@ -182,7 +182,7 @@ public class OperationFromListTests
 
         for (int i = 0; i < iterations; i++)
         {
-            operationFromList.execute();
+            operationFromList.execute(null);
         }
 
         float expectedOperation1Count = iterations * 0.5f;  // 3/6 of total
@@ -214,7 +214,7 @@ public class OperationFromListTests
 
         for (int i = 0; i < iterations; i++)
         {
-            operationFromList.execute();
+            operationFromList.execute(null);
         }
 
         float expectedCount = iterations / 2.0f;
@@ -254,7 +254,7 @@ public class OperationFromListTests
 
         for (int i = 0; i < iterations; i++)
         {
-            operationFromList.execute();
+            operationFromList.execute(null);
         }
 
         Assert.AreEqual(iterations, operation1.executionCount + operation2.executionCount,

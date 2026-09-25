@@ -32,8 +32,13 @@ namespace Operations
         {
             _attachedObjectDetails = attachedObjectDetails;
         }
-        public abstract void execute();
-        public virtual void completeExecution() {}
+
+        /// <summary>
+        /// Perform the operation. <paramref name="triggeringAgent"/> is the agent that pressed the button or
+        /// entered the zone.
+        /// </summary>
+        public abstract void execute(TrainingAgent triggeringAgent);
+        public virtual void completeExecution(TrainingAgent triggeringAgent) {}
     }
 
     /// <summary>

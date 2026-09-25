@@ -11,14 +11,15 @@ namespace Operations
         private string rewardType = "End Episode Operation";
 
 
-        public override void execute()
+        public override void execute(TrainingAgent triggeringAgent)
         {
-            TrainingAgent agent = FindAnyObjectByType<TrainingAgent>();
-            if (agent != null)
+            if (triggeringAgent == null)
             {
-                agent.RecordRewardType(rewardType);
-                agent.UpdateHealth(reward, true);
+                Debug.LogError("EndEpisode was executed without a triggering agent");
+                return;
             }
+            triggeringAgent.RecordRewardType(rewardType);
+            triggeringAgent.UpdateHealth(reward, true);
         }
     }
 }

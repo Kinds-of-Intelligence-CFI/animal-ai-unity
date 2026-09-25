@@ -20,7 +20,7 @@ public class LimitedInvocationsOperationTests
             operationName = name;
         }
 
-        public override void execute()
+        public override void execute(TrainingAgent triggeringAgent)
         {
             executionCount++;
         }
@@ -66,7 +66,7 @@ public class LimitedInvocationsOperationTests
 
         for (int i = 0; i < iterations; i++)
         {
-            limitedInvocationsOperation.execute();
+            limitedInvocationsOperation.execute(null);
         }
 
         Assert.That(operation1.executionCount, Is.EqualTo(maxInvocations),

@@ -24,10 +24,10 @@ namespace Operations
                 }
             }
         }
-        public override void execute()
+        public override void execute(TrainingAgent triggeringAgent)
         {
             Operation operation = ChooseOperation();
-            operation.execute();
+            operation.execute(triggeringAgent);
         }
 
         private Operation ChooseOperation()

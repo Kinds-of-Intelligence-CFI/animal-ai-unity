@@ -10,11 +10,15 @@ namespace Operations
     {
         public int freezeSteps;
 
-        public override void execute()
+        public override void execute(TrainingAgent triggeringAgent)
         {
             Debug.Log("Freezing agent for " + freezeSteps + " FixedUpdate steps");
-            TrainingAgent agent = FindFirstObjectByType<TrainingAgent>();
-            agent.StartCoroutine(FreezeCoroutine(agent));
+            if (triggeringAgent == null)
+            {
+                Debug.LogError("FreezeAgent was executed without a triggering agent");
+                return;
+            }
+            triggeringAgent.StartCoroutine(FreezeCoroutine(triggeringAgent));
         }
 
         private IEnumerator FreezeCoroutine(TrainingAgent agent)

@@ -40,7 +40,7 @@ public class EndEpisodeTests
 
         var operation = CreateEndEpisodeOperation();
 
-        operation.execute();
+        operation.execute(arena.PrimaryAgent);
 
         Assert.AreEqual(1, arena.arenaID, "Arena should advance to ID 1 after EndEpisode operation");
     }

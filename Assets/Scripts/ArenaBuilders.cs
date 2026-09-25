@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Reflection;
 using System;
 using System.Linq;
@@ -29,13 +29,9 @@ namespace ArenaBuilders
         private GameObject _spawnedObjectsHolder;
         public int _maxSpawnAttemptsForPrefabs;
         public int _maxSpawnAttemptsForAgent;
-        private GameObject _agent;
-        private Collider _agentCollider;
-        private Rigidbody _agentRigidbody;
         private List<Goal> _goodGoalsMultiSpawned;
         private List<Goal> _badGoalsMultiSpawned;
         private int _totalObjectsSpawned;
-        private AAI3EnvironmentManager _environmentManager;
 
         [HideInInspector]
         public List<Spawnable> Spawnables { get; set; }
@@ -53,10 +49,6 @@ namespace ArenaBuilders
                 .GetComponent<Transform>();
             _rangeX = spawnArenaTransform.localScale.x;
             _rangeZ = spawnArenaTransform.localScale.z;
-            _agent = _arena.Find("AAI3Agent").Find("Agent").gameObject;
-
-            _agentCollider = _agent.GetComponent<Collider>();
-            _agentRigidbody = _agent.GetComponent<Rigidbody>();
             _spawnedObjectsHolder = spawnedObjectsHolder;
             _maxSpawnAttemptsForPrefabs = maxSpawnAttemptsForPrefabs;
             _maxSpawnAttemptsForAgent = maxSpawnAttemptsForAgent;
@@ -65,7 +57,11 @@ namespace ArenaBuilders
             _badGoalsMultiSpawned = new List<Goal>();
         }
 
-        public void Build()
+        /// <summary>
+        /// Builds the arena's objects and positions <paramref name="agents"/> (the arena's active agents,
+        /// in agent-index order) at their spawn positions.
+        /// </summary>
+        public void Build(IReadOnlyList<TrainingAgent> agents)
         {
             _totalObjectsSpawned = 0;
 
@@ -83,56 +79,47 @@ namespace ArenaBuilders
             }
             spawnedObjectsHolder.transform.parent = _arena;
 
-            InstantiateSpawnables(spawnedObjectsHolder);
-
-            TrainingAgent agentInstance = UnityEngine.Object.FindAnyObjectByType<TrainingAgent>();
-            if (agentInstance != null && _environmentManager != null)
-            {
-                var arenasConfigurations = _environmentManager.GetArenasConfigurations();
-                if (arenasConfigurations != null)
-                {
-                    agentInstance.showNotification = arenasConfigurations.showNotification;
-                }
-                else
-                {
-                    Debug.LogError("ArenasConfigurations is not initialized.");
-                }
-            }
+            InstantiateSpawnables(spawnedObjectsHolder, agents);
 
             updateGoodGoalsMulti();
             updateBadGoalsMulti();
         }
 
-        private void InstantiateSpawnables(GameObject spawnedObjectsHolder)
+        private void InstantiateSpawnables(GameObject spawnedObjectsHolder, IReadOnlyList<TrainingAgent> agents)
         {
             Debug.Log("Spawnables has " + Spawnables.Capacity + " entries");
-            List<Spawnable> agentSpawnablesFromUser = Spawnables
-                .Where(x => x.gameObject != null && x.gameObject.CompareTag("agent"))
-                .ToList();
+            List<Spawnable> agentSpawnablesFromUser = Spawnables.Where(spawnable => spawnable.IsAgent).ToList();
+
+            // Agents' colliders are disabled while spawn positions are sampled so they don't block
+            // their own placement; each is re-enabled as soon as that agent is placed.
+            foreach (TrainingAgent agent in agents)
+            {
+                agent.GetComponent<Collider>().enabled = false;
+            }
 
             if (agentSpawnablesFromUser.Any())
             {
-                _agentCollider.enabled = false;
-
                 // Check for problematic positions and adjust if necessary
-                Vector3 agentPosition = agentSpawnablesFromUser[0].positions[0];
-                if (IsProblematicPosition(agentPosition))
+                for (int k = 0; k < agentSpawnablesFromUser.Count; k++)
                 {
-                    Debug.LogWarning("Agent position is problematic. Adjusting to (1, 0, 1)");
-                    agentPosition = new Vector3(1, 0, 1);
-                    agentSpawnablesFromUser[0].positions[0] = agentPosition;
+                    List<Vector3> positions = agentSpawnablesFromUser[k].positions;
+                    for (int i = 0; i < positions.Count; i++)
+                    {
+                        if (IsProblematicPosition(positions[i]))
+                        {
+                            Debug.LogWarning($"Agent {k} position {i} is problematic. Adjusting to (1, 0, 1)");
+                            positions[i] = new Vector3(1, 0, 1);
+                        }
+                    }
                 }
 
-                SpawnAgent(agentSpawnablesFromUser[0]);
-                _agentCollider.enabled = true;
+                PlaceAgents(agentSpawnablesFromUser, agents);
                 SpawnObjects(spawnedObjectsHolder);
             }
             else
             {
-                _agentCollider.enabled = false;
                 SpawnObjects(spawnedObjectsHolder);
-                SpawnAgent(null);
-                _agentCollider.enabled = true;
+                PlaceAgents(agentSpawnablesFromUser, agents);
             }
         }
 
@@ -145,12 +132,9 @@ namespace ArenaBuilders
         {
             foreach (Spawnable spawnable in Spawnables)
             {
-                if (spawnable.gameObject != null)
+                if (spawnable.gameObject != null && !spawnable.IsAgent)
                 {
-                    if (!spawnable.gameObject.CompareTag("agent"))
-                    {
-                        InstantiateSpawnable(spawnable, spawnedObjectsHolder);
-                    }
+                    InstantiateSpawnable(spawnable, spawnedObjectsHolder);
                 }
             }
         }
@@ -539,62 +523,82 @@ namespace ArenaBuilders
             }
         }
 
-        private void SpawnAgent(Spawnable agentSpawnableFromUser)
+        /// <summary>
+        /// Moves each agent to its spawn position. Agent k uses the k-th Agent item: its position (chosen at
+        /// random when the item lists several), and its first rotation, skin and freeze delay. An agent with
+        /// no item, or an item without a value, gets the default: random position and rotation, random skin,
+        /// no freeze.
+        /// </summary>
+        /// <param name="agentSpawnablesFromUser">The arena's Agent items, in order (empty when there are none)</param>
+        private void PlaceAgents(List<Spawnable> agentSpawnablesFromUser, IReadOnlyList<TrainingAgent> agents)
         {
-            PositionRotation agentToSpawnPosRot;
-            Vector3 agentSize = _agent.transform.localScale;
-            Vector3 position;
-            float rotation;
-            string skin;
-            float freezeDelay;
-
-            position =
-                (agentSpawnableFromUser == null || !agentSpawnableFromUser.positions.Any())
-                    ? -Vector3.one
-                    : agentSpawnableFromUser.positions.Count == 1
-                        ? agentSpawnableFromUser.positions[0]
-                        : agentSpawnableFromUser.positions[UnityEngine.Random.Range(0, agentSpawnableFromUser.positions.Count)];
-            rotation =
-                (agentSpawnableFromUser == null || !agentSpawnableFromUser.rotations.Any())
-                    ? -1
-                    : agentSpawnableFromUser.rotations[0];
-
-            // Extra check for skins because optional param is not always initialised as a List<string> in Spawnable class
-            if (agentSpawnableFromUser != null && agentSpawnableFromUser.skins == null)
+            for (int k = 0; k < agents.Count; k++)
             {
-                agentSpawnableFromUser.skins = new List<string>();
-            }
-            skin =
-                (agentSpawnableFromUser == null || !agentSpawnableFromUser.skins.Any())
-                    ? "random"
-                    : agentSpawnableFromUser.skins[0];
+                Spawnable agentSpawnable = k < agentSpawnablesFromUser.Count ? agentSpawnablesFromUser[k] : null;
+                Vector3 position = ChooseAgentPosition(agentSpawnable);
+                float rotation = OptionalEntry(agentSpawnable?.rotations, 0, -1f);
+                string skin = OptionalEntry(agentSpawnable?.skins, 0, "random");
+                float freezeDelay = OptionalEntry(agentSpawnable?.frozenAgentDelays, 0, 0f);
 
-            // Extra check for freeze delay for same reason as above w/skins
-            if (agentSpawnableFromUser != null && agentSpawnableFromUser.frozenAgentDelays == null)
+                PlaceAgent(agents[k], position, rotation, skin, freezeDelay);
+            }
+        }
+
+        /// <summary>
+        /// An Agent item that lists several positions spawns its agent at one of them, chosen at random.
+        /// </summary>
+        private static Vector3 ChooseAgentPosition(Spawnable agentSpawnable)
+        {
+            if (agentSpawnable == null || agentSpawnable.positions == null || !agentSpawnable.positions.Any())
             {
-                agentSpawnableFromUser.frozenAgentDelays = new List<float>();
+                return -Vector3.one;
             }
-            freezeDelay =
-                (agentSpawnableFromUser == null || !agentSpawnableFromUser.frozenAgentDelays.Any())
-                    ? 0
-                    : agentSpawnableFromUser.frozenAgentDelays[0];
+            return agentSpawnable.positions.Count == 1
+                ? agentSpawnable.positions[0]
+                : agentSpawnable.positions[UnityEngine.Random.Range(0, agentSpawnable.positions.Count)];
+        }
 
-            agentToSpawnPosRot = SamplePositionRotation(
-                _agent,
+        private void PlaceAgent(
+            TrainingAgent agent,
+            Vector3 position,
+            float rotation,
+            string skin,
+            float freezeDelay
+        )
+        {
+            GameObject agentObject = agent.gameObject;
+            PositionRotation agentToSpawnPosRot = SamplePositionRotation(
+                agentObject,
                 _maxSpawnAttemptsForAgent,
                 position,
                 rotation,
-                agentSize
+                agentObject.transform.localScale
             );
+            if (agentToSpawnPosRot == null)
+            {
+                throw new InvalidOperationException(
+                    $"Could not find a free spawn position for agent {agent.agentIndex} (requested position {position})"
+                );
+            }
 
-            _agentRigidbody.angularVelocity = Vector3.zero;
-            _agentRigidbody.linearVelocity = Vector3.zero;
-            _agent.transform.localPosition = agentToSpawnPosRot.Position;
-            _agent.transform.rotation = Quaternion.Euler(agentToSpawnPosRot.Rotation);
+            Rigidbody agentRigidbody = agentObject.GetComponent<Rigidbody>();
+            agentRigidbody.angularVelocity = Vector3.zero;
+            agentRigidbody.linearVelocity = Vector3.zero;
+            agentObject.transform.localPosition = agentToSpawnPosRot.Position;
+            agentObject.transform.rotation = Quaternion.Euler(agentToSpawnPosRot.Rotation);
 
-            AnimalSkinManager ASM = _agent.GetComponentInChildren<AnimalSkinManager>();
+            AnimalSkinManager ASM = agentObject.GetComponentInChildren<AnimalSkinManager>();
             ASM.SetAnimalSkin(skin);
-            _agent.GetComponent<TrainingAgent>().SetFreezeDelay(freezeDelay);
+            agent.SetFreezeDelay(freezeDelay);
+
+            // Now that this agent is placed, later agents and objects must avoid it
+            agentObject.GetComponent<Collider>().enabled = true;
+            Physics.SyncTransforms();
+        }
+
+        private static T OptionalEntry<T>(List<T> list, int index, T defaultValue)
+        {
+            return list != null && index < list.Count ? list[index] : defaultValue;
         }
 
         private PositionRotation SamplePositionRotation(

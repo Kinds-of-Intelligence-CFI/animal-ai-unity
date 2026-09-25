@@ -26,7 +26,7 @@ namespace Operations
             }
         }
 
-        public override void execute()
+        public override void execute(TrainingAgent triggeringAgent)
         {
             if (spawnedObject == null)
             {
@@ -53,19 +53,15 @@ namespace Operations
                 if (string.IsNullOrEmpty(attachedObjectDetails.ID)) {
                     Debug.LogWarning("Spawn Object Operation attached object details not initialised: spawn details will not be logged in the CSV");
                 }
-                TrainingAgent agent = FindAnyObjectByType<TrainingAgent>();
-                if (agent != null)
+                Vector3 spawnerPos = attachedObjectDetails.location;
+                string rewardType = current_spawnedObject.name.Replace("(Clone)", "");
+                string spawnerInfo =
+                    $"SpawnerButtonID:{attachedObjectDetails.ID}, Position:{spawnerPos.x},{spawnerPos.y},{spawnerPos.z}, RewardType:{rewardType}";
+                Debug.Log($"Logging SpawnerButton Info: {spawnerInfo}");
+                // A spawned reward is an arena-wide event, so every agent's log records it
+                foreach (TrainingAgent agent in trainingArena.Agents)
                 {
-                    Vector3 spawnerPos = attachedObjectDetails.location;
-                    string rewardType = current_spawnedObject.name.Replace("(Clone)", "");
-                    string spawnerInfo =
-                        $"SpawnerButtonID:{attachedObjectDetails.ID}, Position:{spawnerPos.x},{spawnerPos.y},{spawnerPos.z}, RewardType:{rewardType}";
-                    Debug.Log($"Logging SpawnerButton Info: {spawnerInfo}");
                     agent.RecordSpawnerInfo(spawnerInfo);
-                }
-                else
-                {
-                    Debug.LogError("Training Agent not found in the scene.");
                 }
 
                 RewardSpawned?.Invoke(current_spawnedObject);

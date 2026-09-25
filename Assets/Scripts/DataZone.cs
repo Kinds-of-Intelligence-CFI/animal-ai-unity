@@ -58,7 +58,7 @@ public class DataZone : Prefab
             }
             for (int i = 0; i < Operations.Count; i++)
             {
-                Operations[i].execute();
+                Operations[i].execute(other.GetComponent<TrainingAgent>());
             }
         }
     }
@@ -75,7 +75,7 @@ public class DataZone : Prefab
             }
             for (int i = 0; i < Operations.Count; i++)
             {
-                Operations[i].completeExecution();
+                Operations[i].completeExecution(other.GetComponent<TrainingAgent>());
             }
         }
     }

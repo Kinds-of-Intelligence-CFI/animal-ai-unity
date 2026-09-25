@@ -1,27 +1,30 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Operations
 {
     /// <summary>
-    /// Grant a reward every fixed update
+    /// Grant a reward every fixed update to each agent in the DataZone, from when it enters until it
+    /// leaves (or its episode ends)
     /// </summary>
     public class GrantContinuousReward : Operation
     {
         public float rewardPerStep;
-        private Coroutine grantRewardCoroutine;
+        /* One reward per agent in the zone: several agents can be inside at once */
+        private readonly Dictionary<TrainingAgent, Coroutine> rewardCoroutines =
+            new Dictionary<TrainingAgent, Coroutine>();
 
-        private IEnumerator GrantRewardEveryStep()
+        private IEnumerator GrantRewardEveryStep(TrainingAgent agent)
         {
             while (true)
             {
-                TrainingAgent agent = FindFirstObjectByType<TrainingAgent>();
-                agent.UpdateHealth(rewardPerStep);               
+                agent.UpdateHealth(rewardPerStep);
                 yield return new WaitForFixedUpdate();
             }
         }
 
-        public override void execute() {
+        public override void execute(TrainingAgent triggeringAgent) {
             Debug.Log(rewardPerStep);
             if (attachedObjectDetails.obj is not DataZone)
             {
@@ -29,36 +32,40 @@ namespace Operations
                 return;
             }
 
-            if (grantRewardCoroutine != null)
+            if (triggeringAgent == null)
             {
-                Debug.LogError("Attempted to start GrantContinuousReward while it is already in progress");
+                Debug.LogError("GrantContinuousReward was executed without a triggering agent");
                 return;
             }
 
-            TrainingAgent.OnEpisodeEnd.AddListener(StopReward);
-            grantRewardCoroutine = attachedObjectDetails.obj.StartCoroutine(GrantRewardEveryStep());
-        }
-
-        private void StopReward()
-        {
-            if (grantRewardCoroutine != null)
+            if (rewardCoroutines.ContainsKey(triggeringAgent))
             {
-                attachedObjectDetails.obj.StopCoroutine(grantRewardCoroutine);
-                grantRewardCoroutine = null;
+                Debug.LogError($"Attempted to start GrantContinuousReward for agent {triggeringAgent.agentIndex} while it is already in progress");
+                return;
             }
-            TrainingAgent.OnEpisodeEnd.RemoveListener(StopReward);
+
+            triggeringAgent.EpisodeEnded += StopReward;
+            rewardCoroutines[triggeringAgent] = attachedObjectDetails.obj.StartCoroutine(GrantRewardEveryStep(triggeringAgent));
         }
 
-        public override void completeExecution() {
-            if (grantRewardCoroutine == null)
+        public override void completeExecution(TrainingAgent triggeringAgent) {
+            if (triggeringAgent == null || !rewardCoroutines.ContainsKey(triggeringAgent))
             {
                 Debug.LogError("Attempted to stop GrantContinuousReward while it is not in progress");
                 return;
             }
 
-            attachedObjectDetails.obj.StopCoroutine(grantRewardCoroutine);
-            grantRewardCoroutine = null;
-            TrainingAgent.OnEpisodeEnd.RemoveListener(StopReward);
+            StopReward(triggeringAgent);
+        }
+
+        private void StopReward(TrainingAgent agent)
+        {
+            if (rewardCoroutines.TryGetValue(agent, out Coroutine coroutine))
+            {
+                attachedObjectDetails.obj.StopCoroutine(coroutine);
+                rewardCoroutines.Remove(agent);
+            }
+            agent.EpisodeEnded -= StopReward;
         }
     }
 }

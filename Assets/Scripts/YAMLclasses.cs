@@ -101,6 +101,12 @@ namespace YAMLDefs
         public List<int> blackouts { get; set; } = new List<int>();
         public int randomSeed { get; set; } = 0;
         public bool mergeNextArena { get; set; } = false;
+
+        /// <summary>
+        /// When the arena episode ends in a multi-agent arena: "any" (default) ends the episode for every
+        /// agent as soon as one agent finishes; "all" waits until every agent has finished.
+        /// </summary>
+        public string episodeEnd { get; set; } = "any";
     }
 
     /// <summary>
@@ -119,6 +125,9 @@ namespace YAMLDefs
         /* EXTRA OR OPTIONAL PARAMETERS */
         public List<string> skins { get; set; } = new List<string>();
         public List<float> frozenAgentDelays { get; set; } = new List<float>();
+        // Agent only: this agent's ML-Agents TeamId as a one-entry list, e.g. [1] (defaults to 0).
+        // Each Agent item is one agent; the k-th Agent item is agent k.
+        public List<int> teams { get; set; } = new List<int>();
 
         // SignBoard
         public List<string> symbolNames { get; set; } = new List<string>();

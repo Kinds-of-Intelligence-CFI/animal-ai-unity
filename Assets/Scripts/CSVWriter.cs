@@ -156,8 +156,14 @@ public class CSVWriter : MonoBehaviour
         writer.Close(); /* Close the writer */
     }
 
-    public void InitialiseCSVProcess()
+    /// <param name="agentIndex">Index of the agent this writer logs; each agent writes its own file</param>
+    public void InitialiseCSVProcess(int agentIndex = 0)
     {
+        /* An agent that is deactivated (Shutdown) and later reactivated starts a fresh file and flush thread */
+        threadRunning = true;
+        headerWritten = false;
+        lastLoggedStep = -1;
+
         /* Base path for the logs to be stored */
         string basePath;
 
@@ -179,9 +185,9 @@ public class CSVWriter : MonoBehaviour
             Directory.CreateDirectory(directoryPath);
         }
 
-        /* Generate a filename with a date stamp to prevent overwriting */
+        /* Generate a filename with a date stamp and agent index to prevent overwriting */
         string dateTimeString = DateTime.Now.ToString("dd-MM-yy_HHmmss");
-        string filename = $"Observations_{dateTimeString}.csv";
+        string filename = $"Observations_{dateTimeString}_agent{agentIndex}.csv";
         csvFilePath = Path.Combine(directoryPath, filename);
 
         writer = new StreamWriter(

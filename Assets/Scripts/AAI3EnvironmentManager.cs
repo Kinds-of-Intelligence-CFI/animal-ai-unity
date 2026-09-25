@@ -55,6 +55,38 @@ public class AAI3EnvironmentManager : MonoBehaviour
     private ArenasParametersSideChannel _arenasParametersSideChannel;
     public ArenasParametersSideChannel ArenasParametersSideChannel => _arenasParametersSideChannel;
 
+    /// <summary>
+    /// Agent settings from the command line (or the editor and WebGL defaults), applied to every agent the
+    /// arena creates.
+    /// </summary>
+    private struct AgentSettings
+    {
+        public bool PlayerMode;
+        public bool UseCamera;
+        public int Resolution;
+        public bool Grayscale;
+        public bool UseRayCasts;
+        public int RaysPerSide;
+        public int RayMaxDegrees;
+        public int DecisionPeriod;
+    }
+
+    private AgentSettings _agentSettings;
+
+    /// <summary>
+    /// Whether agents are keyboard-controlled. Player mode supports a single agent.
+    /// </summary>
+    public bool AgentsUsePlayerMode => _agentSettings.PlayerMode;
+
+    /// <summary>
+    /// Turns player mode off for agents created from now on. The editor always starts in player mode, so
+    /// play mode tests that need several agents call this before loading their configuration.
+    /// </summary>
+    public void DisablePlayerModeForTesting()
+    {
+        _agentSettings.PlayerMode = false;
+    }
+
     public static event Action<int, int> OnArenaChanged;
 
     private List<int> _attemptedArenas = new List<int>();
@@ -137,57 +169,66 @@ public class AAI3EnvironmentManager : MonoBehaviour
         }
 
         resolution = Math.Max(minimumResolution, Math.Min(maximumResolution, resolution));
-        TrainingArena arena = FindAnyObjectByType<TrainingArena>();
+
+        /* Stored before the arena is instantiated: the arena configures each agent it creates
+           through ConfigureAgent, including the primary agent it creates in its Awake */
+        _agentSettings = new AgentSettings
+        {
+            PlayerMode = playerMode,
+            UseCamera = useCamera,
+            Resolution = resolution,
+            Grayscale = grayscale,
+            UseRayCasts = useRayCasts,
+            RaysPerSide = raysPerSide,
+            RayMaxDegrees = rayMaxDegrees,
+            DecisionPeriod = decisionPeriod,
+        };
 
         InstantiateArenas();
 
         playerControls.SetActive(playerMode);
         uiCanvas.GetComponent<Canvas>().enabled = playerMode;
 
-        foreach (Agent a in FindObjectsByType<Agent>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        PrintDebugInfo(_agentSettings);
+    }
+
+    /// <summary>
+    /// Applies the environment's sensor, decision period and control settings to an agent. Called by the
+    /// arena for every agent it creates, before the agent is activated.
+    /// </summary>
+    public void ConfigureAgent(Agent agent)
+    {
+        agent.GetComponentInChildren<DecisionRequester>().DecisionPeriod = _agentSettings.DecisionPeriod;
+        if (!_agentSettings.UseRayCasts)
         {
-            a.GetComponentInChildren<DecisionRequester>().DecisionPeriod = decisionPeriod;
-            if (!useRayCasts)
-            {
-                DestroyImmediate(a.GetComponentInChildren<RayPerceptionSensorComponent3D>());
-            }
-            else
-            {
-                ChangeRayCasts(
-                    a.GetComponentInChildren<RayPerceptionSensorComponent3D>(),
-                    raysPerSide,
-                    rayMaxDegrees
-                );
-            }
-            if (!useCamera)
-            {
-                DestroyImmediate(a.GetComponentInChildren<CameraSensorComponent>());
-            }
-            else
-            {
-                ChangeResolution(
-                    a.GetComponentInChildren<CameraSensorComponent>(),
-                    resolution,
-                    resolution,
-                    grayscale
-                );
-            }
-            if (playerMode)
-            {
-                a.GetComponentInChildren<BehaviorParameters>().BehaviorType =
-                    BehaviorType.HeuristicOnly;
-            }
+            DestroyImmediate(agent.GetComponentInChildren<RayPerceptionSensorComponent3D>());
         }
-        PrintDebugInfo(
-            playerMode,
-            useCamera,
-            resolution,
-            grayscale,
-            useRayCasts,
-            raysPerSide,
-            rayMaxDegrees
-        );
-        _instantiatedArena._agent.gameObject.SetActive(true);
+        else
+        {
+            ChangeRayCasts(
+                agent.GetComponentInChildren<RayPerceptionSensorComponent3D>(),
+                _agentSettings.RaysPerSide,
+                _agentSettings.RayMaxDegrees
+            );
+        }
+        if (!_agentSettings.UseCamera)
+        {
+            DestroyImmediate(agent.GetComponentInChildren<CameraSensorComponent>());
+        }
+        else
+        {
+            ChangeResolution(
+                agent.GetComponentInChildren<CameraSensorComponent>(),
+                _agentSettings.Resolution,
+                _agentSettings.Resolution,
+                _agentSettings.Grayscale
+            );
+        }
+        if (_agentSettings.PlayerMode)
+        {
+            agent.GetComponentInChildren<BehaviorParameters>().BehaviorType =
+                BehaviorType.HeuristicOnly;
+        }
     }
 
     public void InitialiseSideChannel()
@@ -528,32 +569,24 @@ public class AAI3EnvironmentManager : MonoBehaviour
         }
     }
 
-    private void PrintDebugInfo(
-        bool playerMode,
-        bool useCamera,
-        int resolution,
-        bool grayscale,
-        bool useRayCasts,
-        int raysPerSide,
-        int rayMaxDegrees
-    )
+    private void PrintDebugInfo(AgentSettings settings)
     {
         Debug.Log(
             "Environment loaded with options:"
                 + "\n  PlayerMode: "
-                + playerMode
+                + settings.PlayerMode
                 + "\n  useCamera: "
-                + useCamera
+                + settings.UseCamera
                 + "\n  Resolution: "
-                + resolution
+                + settings.Resolution
                 + "\n  grayscale: "
-                + grayscale
+                + settings.Grayscale
                 + "\n  useRayCasts: "
-                + useRayCasts
+                + settings.UseRayCasts
                 + "\n  raysPerSide: "
-                + raysPerSide
+                + settings.RaysPerSide
                 + "\n  rayMaxDegrees: "
-                + rayMaxDegrees
+                + settings.RayMaxDegrees
         );
     }
 

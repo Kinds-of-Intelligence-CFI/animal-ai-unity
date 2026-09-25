@@ -1,7 +1,6 @@
-﻿using System.Linq;
+using System.Linq;
 using System;
 using System.Collections;
-using System.Runtime.InteropServices;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using Unity.MLAgents;
@@ -9,23 +8,46 @@ using Unity.MLAgents.Actuators;
 using PrefabInterface;
 using Unity.MLAgents.Sensors;
 using Operations;
-using UnityEngine.Events;
+
+/// <summary>
+/// Why an agent has finished its part of the current arena episode.
+/// </summary>
+public enum AgentFinishReason
+{
+    /// <summary>The agent's health reached zero (including running out of time).</summary>
+    HealthDepleted,
+
+    /// <summary>The agent completed the arena, e.g. collected the goal or triggered an EndEpisode operation.</summary>
+    ArenaCompleted,
+}
 
 /// <summary>
 /// The TrainingAgent class is a subclass of the Agent class in the ML-Agents library.
 /// Actions are currently discrete. 2 branches of 0,1,2, 0,1,2 for forward and rotate respectively.
+///
+/// An agent never ends the arena episode itself: it reports to its <see cref="TrainingArena"/>
+/// when it finishes and the arena decides when the episode ends for every agent.
 /// </summary>
 public class TrainingAgent : Agent, IPrefab
 {
-    // Import the function for notifying a containing website the experiment is complete
-    #if UNITY_WEBGL && !UNITY_EDITOR
-    [DllImport("__Internal")]
-    private static extern void NotifyExperimentComplete();
-    [DllImport("__Internal")]
-    private static extern void NotifyUploadComplete();
-    #endif
+    /// <summary>
+    /// Raised when this agent's episode ends (just before the next episode begins, or when the agent is disabled).
+    /// </summary>
+    public event Action<TrainingAgent> EpisodeEnded;
 
-    public static UnityEvent OnEpisodeEnd = new UnityEvent();
+    [Header("Multi-Agent")]
+    /* Set by the arena when it creates the agent; -1 means unassigned */
+    [HideInInspector]
+    public int agentIndex = -1;
+
+    /// <summary>The arena this agent belongs to. Set by the arena when it creates the agent.</summary>
+    public TrainingArena Arena { get; set; }
+
+    /// <summary>The primary agent (index 0) is the one player controls, the UI and the cameras follow.</summary>
+    public bool IsPrimaryAgent
+    {
+        get { return agentIndex == 0; }
+    }
 
     [Header("Agent Settings")]
     public float speed = 25f;
@@ -60,13 +82,11 @@ public class TrainingAgent : Agent, IPrefab
     private float _freezeDelay = 0f;
     private bool _isMovementFrozen = false;
     private bool _isHealthFrozen = false;
+    private Coroutine _unfreezeCountdown;
 
     private bool _nextUpdateCompleteArena = false;
-
-    [Header("Agent Notification")]
-    public bool showNotification = false;
-    private TrainingArena _arena;
-    private bool _isCountdownActive = false;
+    private bool _episodeInProgress = false;
+    private string _pendingDataZoneMessage = null;
 
     private CSVWriter _csvWriter;
 
@@ -95,6 +115,41 @@ public class TrainingAgent : Agent, IPrefab
         _csvWriter.RecordDispensedRewardType(type);
     }
 
+    /// <summary>Writes this agent's queued observation log entries to its CSV file.</summary>
+    public void FlushLog()
+    {
+        _csvWriter.FlushLogQueue();
+    }
+
+    /// <summary>Browser builds: uploads this agent's CSV in the background.</summary>
+    public void StartLogUpload(string experimentId, string userId)
+    {
+        _csvUploader.StartUpload(experimentId, userId);
+    }
+
+    /// <summary>Browser builds: uploads this agent's CSV; run it as a coroutine to wait for the upload.</summary>
+    public IEnumerator UploadLog(string experimentId, string userId)
+    {
+        return _csvUploader.UploadCSV(experimentId, userId);
+    }
+
+    /// <summary>
+    /// Records a DataZone event for this agent's next log entry. The first event in a step is logged
+    /// in full; later ones append their zone ID.
+    /// </summary>
+    public void RecordDataZoneMessage(string message, string zoneID)
+    {
+        _pendingDataZoneMessage =
+            _pendingDataZoneMessage == null ? message : _pendingDataZoneMessage + " | " + zoneID;
+    }
+
+    private string ConsumeDataZoneMessage()
+    {
+        string message = _pendingDataZoneMessage;
+        _pendingDataZoneMessage = null;
+        return message;
+    }
+
     private string CombineRaycastData(float[] observations, string[] tags)
     {
         return string.Join(";", observations.Zip(tags, (obs, tag) => $"{obs}:{tag}"));
@@ -105,21 +160,44 @@ public class TrainingAgent : Agent, IPrefab
     /// </summary>
     public override void Initialize()
     {
-        _arena = GetComponentInParent<TrainingArena>();
+        /* Agents are only ever created by an arena (TrainingArena.CreateAgent), which sets both of these */
+        if (Arena == null)
+        {
+            throw new InvalidOperationException($"Agent {name} has no arena; agents must be created by a TrainingArena");
+        }
+        if (agentIndex < 0)
+        {
+            throw new InvalidOperationException($"Agent {name} has no agent index; agents must be created by a TrainingArena");
+        }
         _rigidBody = GetComponent<Rigidbody>();
         _rewardPerStep = timeLimit > 0 ? -1f / timeLimit : 0;
-        progBar = GameObject.Find("UI ProgressBar").GetComponent<ProgressBar>();
-        progBar.AssignAgent(this);
         health = _maxHealth;
 
-        _csvWriter = gameObject.AddComponent<CSVWriter>();
-        _csvUploader = gameObject.AddComponent<CSVUploader>();
+        /* An agent that is deactivated and reactivated initialises again; reuse its components */
+        if (_csvWriter == null)
+        {
+            _csvWriter = gameObject.AddComponent<CSVWriter>();
+        }
+        if (_csvUploader == null)
+        {
+            _csvUploader = gameObject.AddComponent<CSVUploader>();
+        }
+
+        if (IsPrimaryAgent)
+        {
+            GameObject progBarObject = GameObject.Find("UI ProgressBar");
+            if (progBarObject != null)
+            {
+                progBar = progBarObject.GetComponent<ProgressBar>();
+                progBar.AssignAgent(this);
+            }
+        }
 
         ToggleObject.RewardSpawned += _csvWriter.OnRewardSpawned;
 
         playerControls = GameObject.FindAnyObjectByType<PlayerControls>();
 
-        _csvWriter.InitialiseCSVProcess();
+        _csvWriter.InitialiseCSVProcess(agentIndex);
     }
 
     /// <summary>
@@ -129,6 +207,12 @@ public class TrainingAgent : Agent, IPrefab
     protected override void OnDisable()
     {
         base.OnDisable(); /* Call the base class method */
+
+        if (_episodeInProgress)
+        {
+            _episodeInProgress = false;
+            EpisodeEnded?.Invoke(this);
+        }
 
         _csvWriter.ReportGoalsCollected(numberOfGoalsCollected);
         _csvWriter.Shutdown();
@@ -146,20 +230,45 @@ public class TrainingAgent : Agent, IPrefab
         return _previousScore;
     }
 
+    /// <summary>
+    /// Sets the episode time limit (in steps) and the per-step health cost that makes the agent run out of health when it expires.
+    /// </summary>
+    public void SetTimeLimit(float steps)
+    {
+        timeLimit = steps;
+        _rewardPerStep = timeLimit > 0 ? -1f / timeLimit : 0;
+    }
+
     public float GetFreezeDelay()
     {
         return _freezeDelay;
     }
 
+    /// <summary>
+    /// Freezes the agent for <paramref name="v"/> seconds from now. Calling it again restarts the countdown.
+    /// </summary>
     public void SetFreezeDelay(float v)
     {
-        _freezeDelay = Mathf.Clamp(v, 0f, v);
-        if (v != 0f && !_isCountdownActive)
+        _freezeDelay = Mathf.Max(v, 0f);
+        if (_unfreezeCountdown != null)
         {
+            StopCoroutine(_unfreezeCountdown);
+            _unfreezeCountdown = null;
+        }
+        if (_freezeDelay > 0f)
+        {
+            if (!gameObject.activeInHierarchy)
+            {
+                /* The countdown is the only thing that ends the freeze, and it can't run on an inactive agent */
+                Debug.LogError(
+                    $"Agent {agentIndex} was given a {_freezeDelay}s freeze while inactive; it stays frozen until its next episode"
+                );
+                return;
+            }
             Debug.Log(
                 "Starting coroutine UnfreezeCountdown() with wait seconds == " + GetFreezeDelay()
             );
-            StartCoroutine(UnfreezeCountdown());
+            _unfreezeCountdown = StartCoroutine(UnfreezeCountdown());
         }
     }
 
@@ -190,12 +299,11 @@ public class TrainingAgent : Agent, IPrefab
 
     private IEnumerator UnfreezeCountdown()
     {
-        _isCountdownActive = true;
-        yield return new WaitForSeconds(GetFreezeDelay());
+        yield return new WaitForSeconds(_freezeDelay);
 
         Debug.Log("Unfreezing Agent!");
-        SetFreezeDelay(0f);
-        _isCountdownActive = false;
+        _freezeDelay = 0f;
+        _unfreezeCountdown = null;
     }
 
     private string GetNotificationState()
@@ -245,7 +353,7 @@ public class TrainingAgent : Agent, IPrefab
         (float[] raycastObservations, string[] raycastTags) = CollectRaycastObservations();
         string combinedRaycastData = CombineRaycastData(raycastObservations, raycastTags);
         string activeCameraDescription = GetActiveCameraDescription();
-        string dataZoneMessage = DataZone.ConsumeDataZoneMessage();
+        string dataZoneMessage = ConsumeDataZoneMessage();
 
         _csvWriter.LogToCSV(
             localVel,
@@ -260,7 +368,7 @@ public class TrainingAgent : Agent, IPrefab
             combinedRaycastData,
             StepCount,
             health,
-            _arena.arenaID
+            Arena.arenaID
         );
     }
 
@@ -286,7 +394,7 @@ public class TrainingAgent : Agent, IPrefab
         (float[] raycastObservations, string[] raycastTags) = CollectRaycastObservations();
         string combinedRaycastData = CombineRaycastData(raycastObservations, raycastTags);
         string playerControlsDescription = GetActiveCameraDescription();
-        string dataZoneMessage = DataZone.ConsumeDataZoneMessage();
+        string dataZoneMessage = ConsumeDataZoneMessage();
 
         _csvWriter.LogToCSV(
             localVel,
@@ -301,7 +409,7 @@ public class TrainingAgent : Agent, IPrefab
             combinedRaycastData,
             StepCount,
             health,
-            _arena.arenaID
+            Arena.arenaID
         );
 
         UpdateHealth(_rewardPerStep);
@@ -471,145 +579,60 @@ public class TrainingAgent : Agent, IPrefab
         else if (health <= 0)
         {
             health = 0;
-
-            if (showNotification)
-            {
-                NotificationManager.Instance.ShowFailureNotification();
-            }
-            StartCoroutine(EndEpisodeAfterDelay());
+            ReportFinishedToArena(AgentFinishReason.HealthDepleted);
             return;
         }
 
         if (andCompleteArena || _nextUpdateCompleteArena)
         {
             _nextUpdateCompleteArena = false;
-            float cumulativeReward = GetCumulativeReward();
-            float passMark = _arena.ArenaConfig.passMark;
-
-            bool proceedToNext = passMark == 0 || cumulativeReward >= passMark;
-
-            if (proceedToNext)
-            {
-                if (_arena.mergeNextArena)
-                {
-                    _arena.LoadNextArena();
-                    return;
-                }
-
-                if (showNotification)
-                {
-                    NotificationManager.Instance.ShowSuccessNotification();
-                }
-            }
-            else
-            {
-                if (showNotification)
-                {
-                    NotificationManager.Instance.ShowFailureNotification();
-                }
-            }
-
-            StartCoroutine(EndEpisodeAfterDelay());
+            ReportFinishedToArena(AgentFinishReason.ArenaCompleted);
         }
     }
 
-    IEnumerator EndEpisodeAfterDelay()
+    /// <summary>
+    /// Reports to the arena that this agent has finished. The arena decides whether the episode ends
+    /// now (see TrainingArena.OnAgentFinished).
+    /// </summary>
+    private void ReportFinishedToArena(AgentFinishReason reason)
     {
-        #if UNITY_WEBGL && !UNITY_EDITOR
-        // Upload CSV after each arena completion (in background, non-blocking)
-        _csvWriter.FlushLogQueue();
-
-        // Extract experiment and user IDs from URL for CSV upload
-        string currentUrl = Application.absoluteURL;
-        Debug.Log("Current WebGL URL: " + currentUrl);
-        string[] urlParts = currentUrl.Split('?');
-        if (urlParts.Length == 2)
-        {
-            string queryString = urlParts[urlParts.Length - 1];
-            string[] queryArgs = queryString.Split('&');
-            if (queryArgs.Length >= 2)
-            {
-                string experimentId = queryArgs[0];
-                string userId = queryArgs[1];
-
-                // Don't write CSV files for tutorial runs
-                if (currentUrl.Contains("tutorial"))
-                {
-                    NotifyExperimentComplete();
-                    yield break;
-                }
-
-                if (_arena.AllArenasAttempted())
-                {
-                    Debug.Log("All arenas completed - notifying web page");
-
-                    if (showNotification)
-                    {
-                        yield return new WaitForSeconds(2.5f);
-                        NotificationManager.Instance.HideNotification();
-                    }
-
-                    // Show "Thank You! Redirecting..." message immediately to hide game UI
-                    NotifyExperimentComplete();
-
-                    // Final blocking upload to ensure all data is captured before redirect
-                    yield return StartCoroutine(_csvUploader.UploadCSV(experimentId, userId));
-                    Debug.Log("Final CSV upload completed");
-                    NotifyUploadComplete();
-
-                    // Skip EndEpisode() call
-                    yield break;
-                }
-                else
-                {
-                    Debug.Log("Arena completed - uploading CSV in background");
-                    _csvUploader.StartUpload(experimentId, userId);
-                }
-            }
-            else
-            {
-                Debug.LogError($"Unable to parse experiment/user ID from URL: {currentUrl}");
-            }
-        }
-        else
-        {
-            Debug.LogError($"Unable to find config in URL: {currentUrl}");
-        }
-        #endif
-
-        if (!showNotification)
-        {
-            EndEpisode();
-            OnEpisodeEnd.Invoke();
-            yield break;
-        }
-        yield return new WaitForSeconds(2.5f);
-
-        NotificationManager.Instance.HideNotification();
-        EndEpisode();
-        OnEpisodeEnd.Invoke();
-        _csvWriter.FlushLogQueue();
+        Arena.OnAgentFinished(this, reason);
     }
 
+    /// <summary>
+    /// Resets this agent's per-episode state. The arena has either already been rebuilt (ML-Agents
+    /// environment reset) or is rebuilt straight after (TrainingArena.EndArenaEpisode), so nothing here
+    /// depends on the arena.
+    /// </summary>
     public override void OnEpisodeBegin()
     {
-        Debug.Log("Episode Begin");
+        Debug.Log($"Episode Begin (agent {agentIndex})");
         _csvWriter.EpisodeBegin();
 
-        if (!_arena.IsFirstArenaReset)
+        /* ML-Agents has no end-of-episode hook: EndEpisode() goes straight into OnEpisodeBegin, and when
+           Python resets the environment it calls OnEpisodeBegin without EndEpisode() at all. So this is the
+           first point that sees every way a previous episode can end. */
+        if (_episodeInProgress)
         {
+            EpisodeEnded?.Invoke(this);
             _csvWriter.ReportGoalsCollected(numberOfGoalsCollected);
         }
+        _episodeInProgress = true;
 
         StopAllCoroutines();
-        _isCountdownActive = false;
+        _unfreezeCountdown = null;
         _previousScore = _currentScore;
         numberOfGoalsCollected = 0;
-        _arena.ResetArena();
-        _rewardPerStep = timeLimit > 0 ? -1f / timeLimit : 0;
         _isGrounded = false;
         health = _maxHealth;
+        _nextUpdateHealth = 0f;
+        _nextUpdateCompleteArena = false;
+        FreezeAgent(false);
 
+        /* Restart the freeze countdown. When Python resets the environment the arena places agents (which
+           starts their countdowns) before this runs, and StopAllCoroutines above has just stopped that
+           countdown. When a round ends normally the arena places agents after this, replacing it, so here it
+           does nothing. */
         SetFreezeDelay(GetFreezeDelay());
     }
 

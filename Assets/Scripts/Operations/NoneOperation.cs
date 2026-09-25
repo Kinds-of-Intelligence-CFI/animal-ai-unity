@@ -5,6 +5,6 @@ namespace Operations
     /// </summary>
     public class NoneOperation : Operation
     {
-        public override void execute() { }
+        public override void execute(TrainingAgent triggeringAgent) { }
     }
 }

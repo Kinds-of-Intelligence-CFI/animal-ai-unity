@@ -82,7 +82,7 @@ public class SpawnerButton : MonoBehaviour
             }
 
             ButtonPressCount++;
-            StartCoroutine(MoveAndReset());
+            StartCoroutine(MoveAndReset(other.GetComponent<TrainingAgent>()));
         }
     }
 
@@ -93,7 +93,8 @@ public class SpawnerButton : MonoBehaviour
         return Time.time < startTime + duration;
     }
 
-    public IEnumerator MoveAndReset()
+    /// <param name="triggeringAgent">The agent that pressed the button</param>
+    public IEnumerator MoveAndReset(TrainingAgent triggeringAgent)
     {
         IsMoving = true;
 
@@ -110,7 +111,7 @@ public class SpawnerButton : MonoBehaviour
 
         for (int i = 0; i < Operations.Count; i++)
         {
-            Operations[i].execute();
+            Operations[i].execute(triggeringAgent);
         }
 
         startTime = Time.time;

@@ -22,7 +22,7 @@ namespace Operations
 
         private int invocations = 0;
 
-        public override void execute()
+        public override void execute(TrainingAgent triggeringAgent)
         {
             if (
                 maxInvocations != -1
@@ -32,7 +32,7 @@ namespace Operations
                 Debug.Log($"Max invocations reached for operation: {operation.GetType().Name}");
                 return;
             }
-            operation.execute();
+            operation.execute(triggeringAgent);
             invocations += 1;
         }
     }

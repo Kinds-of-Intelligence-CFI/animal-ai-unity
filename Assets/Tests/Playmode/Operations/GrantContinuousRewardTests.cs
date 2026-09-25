@@ -26,9 +26,9 @@ public class GrantContinuousRewardTests
 
         var operation = CreateGrantContinuousRewardOperation();
 
-        operation.execute();
+        operation.execute(agent);
         yield return new WaitForSeconds(0.5f);
-        operation.completeExecution();
+        operation.completeExecution(agent);
 
         float expectedHealth = 100f;
         Assert.AreEqual(expectedHealth, agent.health, 0.01f,
