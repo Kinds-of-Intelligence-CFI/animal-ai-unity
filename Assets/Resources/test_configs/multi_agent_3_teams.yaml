@@ -1,0 +1,22 @@
+# Three agents in two teams: agents 0 and 1 share team 0 (behavior "AnimalAI?team=0"),
+# agent 2 is on team 1 ("AnimalAI?team=1"). Agent 2 has no position, so it spawns randomly.
+!ArenaConfig
+arenas:
+  0: !Arena
+    passMark: 0
+    timeLimit: 250
+    episodeEnd: any
+    items:
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 10, y: 0, z: 10}
+      teams: [0]
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 30, y: 0, z: 10}
+      teams: [0]
+    - !Item
+      name: Agent
+      teams: [1]

@@ -1,0 +1,25 @@
+# Two agents in one arena: one Agent item per agent (the k-th Agent item is agent k).
+!ArenaConfig
+arenas:
+  0: !Arena
+    passMark: 0
+    timeLimit: 250
+    items:
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 10, y: 0, z: 20}
+      rotations: [90]
+      skins: [hedgehog]
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 30, y: 0, z: 20}
+      rotations: [270]
+      skins: [panda]
+    - !Item
+      name: GoodGoal
+      positions:
+      - !Vector3 {x: 20, y: 0, z: 30}
+      sizes:
+      - !Vector3 {x: 1, y: 1, z: 1}
