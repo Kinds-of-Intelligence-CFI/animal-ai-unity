@@ -9,13 +9,14 @@ using Operations;
 public class DataZone : Prefab
 {
     public string TriggerZoneID { get; set; }
-    public bool isAgentInZone { get; set; } = false;
     public List<Operation> Operations { get; set; } = new List<Operation>();
 
-    // Note: There is a race condition on this variable
-    // (If multiple DataZones try to write to this simultaneously one will come first in the message arbitrarily)
-    // TODO: Currently concurrent entries/exits are gracefully handled, but simultaneously entering one and exiting another is not
-    private static string LastDataZoneMessage = null;
+    private readonly HashSet<TrainingAgent> _agentsInZone = new HashSet<TrainingAgent>();
+
+    public bool isAgentInZone
+    {
+        get { return _agentsInZone.Count > 0; }
+    }
 
     private void Start()
     {
@@ -48,42 +49,34 @@ public class DataZone : Prefab
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("agent") && !isAgentInZone)
+        TrainingAgent agent = AgentFrom(other);
+        if (agent == null || !_agentsInZone.Add(agent))
         {
-            isAgentInZone = true;
-            if (LastDataZoneMessage == null) {
-                LastDataZoneMessage = "Agent was in DataZone: " + TriggerZoneID;
-            } else {
-                LastDataZoneMessage += " | " + TriggerZoneID;
-            }
-            for (int i = 0; i < Operations.Count; i++)
-            {
-                Operations[i].execute(other.GetComponent<TrainingAgent>());
-            }
+            return;
+        }
+        agent.RecordDataZoneMessage("Agent was in DataZone: " + TriggerZoneID, TriggerZoneID);
+        for (int i = 0; i < Operations.Count; i++)
+        {
+            Operations[i].execute(agent);
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("agent"))
+        TrainingAgent agent = AgentFrom(other);
+        if (agent == null || !_agentsInZone.Remove(agent))
         {
-            isAgentInZone = false;
-            if (LastDataZoneMessage == null) {
-                LastDataZoneMessage = "Agent left DataZone: " + TriggerZoneID;
-            } else {
-                LastDataZoneMessage += " | " + TriggerZoneID;
-            }
-            for (int i = 0; i < Operations.Count; i++)
-            {
-                Operations[i].completeExecution(other.GetComponent<TrainingAgent>());
-            }
+            return;
+        }
+        agent.RecordDataZoneMessage("Agent left DataZone: " + TriggerZoneID, TriggerZoneID);
+        for (int i = 0; i < Operations.Count; i++)
+        {
+            Operations[i].completeExecution(agent);
         }
     }
 
-    public static string ConsumeDataZoneMessage()
+    private static TrainingAgent AgentFrom(Collider other)
     {
-        string message = LastDataZoneMessage;
-        LastDataZoneMessage = null;
-        return message;
+        return other.CompareTag("agent") ? other.GetComponent<TrainingAgent>() : null;
     }
 }

@@ -125,18 +125,22 @@ public class GoalSpawner : Prefab
         if (variableSize)
             SetVariableSize(newGoal);
 
-        TrainingAgent agent = FindAnyObjectByType<TrainingAgent>();
-        if (agent != null)
+        // A dispensed reward is an arena-wide event, so every agent's log records it
+        TrainingArena arena = GetComponentInParent<TrainingArena>();
+        if (arena != null)
         {
             string combinedSpawnerInfo =
                 $" SpawnerID:{spawnerID}, Position:{transform.position.x},{transform.position.y},{transform.position.z}, RewardType:{newGoal.rewardType}";
-            agent.RecordSpawnerInfo(combinedSpawnerInfo);
-            agent.RecordDispensedRewardType(newGoal.rewardType);
-            agent.RecordDispensedReward();
+            foreach (TrainingAgent agent in arena.Agents)
+            {
+                agent.RecordSpawnerInfo(combinedSpawnerInfo);
+                agent.RecordDispensedRewardType(newGoal.rewardType);
+                agent.RecordDispensedReward();
+            }
         }
         else
         {
-            Debug.LogError("Training Agent not found in the scene.");
+            Debug.LogError("Training Arena not found for GoalSpawner.");
         }
 
         return newGoal;
