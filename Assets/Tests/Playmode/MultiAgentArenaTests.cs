@@ -1,9 +1,12 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.SceneManagement;
+using Unity.MLAgents;
 using Unity.MLAgents.Policies;
 using Unity.MLAgents.Sensors;
 
@@ -164,6 +167,59 @@ public class MultiAgentArenaTests
         Assert.AreEqual(2, _arena.Agents.Count);
         Assert.AreSame(second, _arena.Agents[1]);
         Assert.IsTrue(second.gameObject.activeInHierarchy);
+    }
+
+    /// <summary>
+    /// Loads another configuration into the running arena and rebuilds it, as the next arena would be.
+    /// </summary>
+    private IEnumerator SwitchConfiguration(string configFile)
+    {
+        _environmentManager.configFile = configFile;
+        _environmentManager.LoadYAMLFileInEditor();
+        _arena.EndArenaEpisode();
+        yield return null;
+    }
+
+    /// <summary>
+    /// The agents in the order ML-Agents calls them each step, which is the order of their rows on the Python
+    /// side. That's the order they subscribed to the Academy's AgentSendState event (agents subscribe when
+    /// enabled); the event is internal to ML-Agents, so its subscribers are read by reflection.
+    /// </summary>
+    private static List<TrainingAgent> AgentsInPythonRowOrder()
+    {
+        FieldInfo sendStateField = typeof(Academy).GetField(
+            "AgentSendState",
+            BindingFlags.Instance | BindingFlags.NonPublic
+        );
+        Assert.IsNotNull(
+            sendStateField,
+            "Academy.AgentSendState wasn't found: check how this ML-Agents version orders agents' rows"
+        );
+        var sendState = (System.Action)sendStateField.GetValue(Academy.Instance);
+        return sendState.GetInvocationList().Select(handler => handler.Target).OfType<TrainingAgent>().ToList();
+    }
+
+    /* Python gets the agents' rows in the order of the Agent items in the YAML (documented in the Multi-Agent
+       Guide). The hard case is an arena that both brings back an agent that sat out and creates a new one. */
+    [UnityTest]
+    public IEnumerator PythonRowOrder_FollowsAgentIndex_WhenReturningAndNewAgentsJoinTogether()
+    {
+        yield return LoadConfiguration("test_configs/multi_agent_2");
+        CollectionAssert.AreEqual(_arena.Agents, AgentsInPythonRowOrder());
+
+        /* Agent 1 sits out */
+        yield return SwitchConfiguration("test_configs/empty-arena");
+        CollectionAssert.AreEqual(_arena.Agents, AgentsInPythonRowOrder());
+
+        /* Agent 1 comes back while agent 2 is created */
+        yield return SwitchConfiguration("test_configs/multi_agent_3");
+        Assert.AreEqual(3, _arena.Agents.Count);
+        CollectionAssert.AreEqual(
+            _arena.Agents,
+            AgentsInPythonRowOrder(),
+            "Rows should follow agent index, got agents "
+                + string.Join(", ", AgentsInPythonRowOrder().Select(agent => agent.agentIndex))
+        );
     }
 
     /* Episode ends are counted with TrainingAgent.EpisodeEnded rather than Agent.CompletedEpisodes: ML-Agents

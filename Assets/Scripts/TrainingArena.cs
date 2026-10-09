@@ -496,11 +496,6 @@ public class TrainingArena : MonoBehaviour
             );
         }
 
-        for (int index = _agents.Count; index < count; index++)
-        {
-            CreateAgent(index, TeamForAgent(index));
-        }
-
         /* The primary agent is created before any configuration arrives from Python, so its team is
            only known now; teams are otherwise fixed (the configuration validates they agree across arenas) */
         for (int index = 0; index < _agents.Count; index++)
@@ -522,6 +517,11 @@ public class TrainingArena : MonoBehaviour
                 _agentGroup.RegisterAgent(_agents[index]);
             }
             instance.SetActive(active);
+        }
+
+        for (int index = _agents.Count; index < count; index++)
+        {
+            CreateAgent(index, TeamForAgent(index));
         }
 
         _activeAgents.Clear();
