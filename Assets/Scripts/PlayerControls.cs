@@ -21,6 +21,7 @@ public class PlayerControls : MonoBehaviour
     [Header("Gameplay Settings")]
     private bool canResetEpisode = true;
     private bool canChangePerspective = true;
+    private int? initialPerspective = null;
 
     [Header("External References")]
     private ScreenshotCamera screenshotCam;
@@ -109,6 +110,7 @@ public class PlayerControls : MonoBehaviour
             arenasConfigurations = environmentManager.GetArenasConfigurations();
             canResetEpisode = arenasConfigurations?.canResetEpisode ?? true;
             canChangePerspective = arenasConfigurations?.canChangePerspective ?? true;
+            initialPerspective = arenasConfigurations?.initialPerspective;
         }
         else
         {
@@ -132,13 +134,42 @@ public class PlayerControls : MonoBehaviour
             return;
         }
 
-        activeCameraIndex = canChangePerspective ? 0 : 2; /* If can't change perspectives, use the bird's-eye camera */
+        activeCameraIndex = ResolveInitialCameraIndex(
+            initialPerspective,
+            canChangePerspective,
+            cameras.Length
+        );
         Debug.Log(
-            $"Initializing Cameras. Can Change Perspective: {canChangePerspective}, Active Camera Index: {activeCameraIndex}"
+            $"Initializing Cameras. Can Change Perspective: {canChangePerspective}, Initial Perspective: {initialPerspective?.ToString() ?? "unset"}, Active Camera Index: {activeCameraIndex}"
         );
 
         SetActiveCamera(activeCameraIndex);
         camerasInitialized = true;
+    }
+
+    /// <summary>
+    /// Picks the camera to start in. An explicit, valid initialPerspective wins; otherwise the default is
+    /// first-person (0), or bird's eye (2) when the player can't change perspective (the previous behaviour).
+    /// </summary>
+    public static int ResolveInitialCameraIndex(
+        int? initialPerspective,
+        bool canChangePerspective,
+        int cameraCount
+    )
+    {
+        int defaultIndex = canChangePerspective ? 0 : 2;
+        if (!initialPerspective.HasValue)
+        {
+            return defaultIndex;
+        }
+        if (initialPerspective.Value < 0 || initialPerspective.Value >= cameraCount)
+        {
+            Debug.LogWarning(
+                $"initialPerspective {initialPerspective.Value} is out of range (0 to {cameraCount - 1}). Using {defaultIndex} instead."
+            );
+            return defaultIndex;
+        }
+        return initialPerspective.Value;
     }
 
     private void HandleInput()

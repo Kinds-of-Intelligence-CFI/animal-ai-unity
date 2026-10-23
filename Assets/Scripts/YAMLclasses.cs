@@ -44,6 +44,11 @@ namespace YAMLDefs
         public bool showNotification { get; set; } = false;
         public bool canResetEpisode { get; set; } = true;
         public bool canChangePerspective { get; set; } = true;
+        /// <summary>
+        /// Camera the player starts in: 0 = first-person, 1 = third-person, 2 = bird's eye.
+        /// Unset keeps the previous behaviour (first-person, or bird's eye when canChangePerspective is false).
+        /// </summary>
+        public int? initialPerspective { get; set; } = null;
     }
 
     /// <summary>
