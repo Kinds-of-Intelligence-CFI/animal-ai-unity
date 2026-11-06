@@ -26,6 +26,7 @@ public class AnimalSkinManager : MonoBehaviour
 
     private MeshRenderer meshRenderer;
     private MeshFilter meshFilter;
+    private bool initialized = false;
 
     void Start()
     {
@@ -41,8 +42,21 @@ public class AnimalSkinManager : MonoBehaviour
         {
             animalDict[AnimalNames[i]] = (AnimalMeshes[i], AnimalMaterials[i].array);
         }
+        initialized = true;
 
         RefreshSkin();
+    }
+
+    /// <summary>
+    /// Agents created at runtime are given their skin as soon as the arena is built, which can be before this
+    /// component's Start has run. Without this, a skin name would not be found and a random skin chosen.
+    /// </summary>
+    private void EnsureInitialized()
+    {
+        if (!initialized)
+        {
+            Initialize();
+        }
     }
 
     void RefreshSkin()
@@ -56,6 +70,7 @@ public class AnimalSkinManager : MonoBehaviour
 
     public void SetAnimalSkin(string skinName)
     {
+        EnsureInitialized();
         if (animalDict.ContainsKey(skinName))
         {
             AnimalSkinID = System.Array.IndexOf(AnimalNames, skinName);
@@ -69,6 +84,7 @@ public class AnimalSkinManager : MonoBehaviour
 
     public void SetAnimalSkin(int skinID)
     {
+        EnsureInitialized();
         if (skinID >= 0 && skinID < AnimalCount)
         {
             AnimalSkinID = skinID;

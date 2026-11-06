@@ -160,4 +160,35 @@ public class AnimalSkinManagerTests
 
         yield return null;
     }
+
+    /// <summary>
+    /// A skin set by name before Start has run (as the arena builder does for agents created at runtime)
+    /// must be applied. Start has not run yet when the test body begins.
+    /// </summary>
+    [UnityTest]
+    public IEnumerator SetAnimalSkin_ByName_BeforeStart_UsesThatSkin()
+    {
+        Color[] colours = { Color.red, Color.green, Color.blue };
+        for (int i = 0; i < AnimalSkinManager.AnimalCount; i++)
+        {
+            skinManager.AnimalMaterials[i].array[0].color = colours[i];
+        }
+
+        for (int i = 0; i < AnimalSkinManager.AnimalCount; i++)
+        {
+            skinManager.SetAnimalSkin(skinManager.AnimalNames[i]);
+
+            Assert.AreEqual(i, skinManager.AnimalSkinID, $"Skin '{skinManager.AnimalNames[i]}' was not selected");
+            Assert.AreEqual(
+                colours[i],
+                skinManager.GetComponent<MeshRenderer>().materials[0].color,
+                $"Skin '{skinManager.AnimalNames[i]}' was not applied"
+            );
+        }
+
+        /* Start runs now; it must keep the last requested skin */
+        yield return null;
+
+        Assert.AreEqual(AnimalSkinManager.AnimalCount - 1, skinManager.AnimalSkinID, "Start replaced the requested skin");
+    }
 }
