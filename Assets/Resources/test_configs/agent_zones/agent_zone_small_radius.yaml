@@ -1,0 +1,21 @@
+# Agent zones: a radius smaller than an agent's body (0.5) is clamped to it with a warning. Used by AgentZoneTests.
+!ArenaConfig
+arenas:
+  0: !Arena
+    passMark: 0
+    timeLimit: 250
+    items:
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 10, y: 0, z: 20}
+      rotations: [90]
+      zone:
+        radius: 0.2
+        operations:
+        - !noneOperation {}
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 30, y: 0, z: 20}
+      rotations: [270]

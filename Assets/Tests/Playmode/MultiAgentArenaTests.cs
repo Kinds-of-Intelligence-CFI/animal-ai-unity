@@ -277,7 +277,7 @@ public class MultiAgentArenaTests
         Operations.GrantContinuousReward operation = zoneObject.AddComponent<Operations.GrantContinuousReward>();
         operation.initialise(new Operations.AttachedObjectDetails
         {
-            obj = zoneObject.AddComponent<DataZone>(),
+            obj = zoneObject.AddComponent<DataZone>().Volume,
             ID = "test-zone",
             location = Vector3.zero
         });

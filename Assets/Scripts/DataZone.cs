@@ -1,21 +1,64 @@
+using System;
 using UnityEngine;
 using System.Collections.Generic;
 using Operations;
 
 /// <summary>
-/// A zone that triggers an event when an agent enters it.
-/// It's primary use is to trigger a log event when an agent enters a datazone gameobject.
+/// A zone placed in the arena that triggers an event when an agent enters it.
+/// Its primary use is to trigger a log event when an agent enters a datazone gameobject; it can also run
+/// operations on the agents that enter it. The entering, leaving and operations are handled by the
+/// <see cref="TriggerVolume"/> on the same object (the prefab carries one), which an agent's own zone
+/// (<see cref="AgentZone"/>) shares; this class adds the prefab behaviour (sizing, visibility) and is
+/// configured exactly once, when the arena builder spawns it.
 /// </summary>
+[RequireComponent(typeof(TriggerVolume))]
 public class DataZone : Prefab
 {
-    public string TriggerZoneID { get; set; }
-    public List<Operation> Operations { get; set; } = new List<Operation>();
+    private TriggerVolume _volume;
+    private bool _configured = false;
 
-    private readonly HashSet<TrainingAgent> _agentsInZone = new HashSet<TrainingAgent>();
+    /// <summary>The trigger logic of this zone.</summary>
+    public TriggerVolume Volume
+    {
+        get
+        {
+            if (_volume == null)
+            {
+                _volume = GetComponent<TriggerVolume>();
+            }
+            return _volume;
+        }
+    }
+
+    public string TriggerZoneID
+    {
+        get { return Volume.TriggerZoneID; }
+    }
+
+    public List<Operation> Operations
+    {
+        get { return Volume.Operations; }
+    }
 
     public bool isAgentInZone
     {
-        get { return _agentsInZone.Count > 0; }
+        get { return Volume.IsAgentInZone; }
+    }
+
+    /// <summary>
+    /// Gives the zone its ID and operations. A DataZone is spawned afresh for every arena, so this is called
+    /// once per instance; a second call is a bug.
+    /// </summary>
+    public void Configure(string triggerZoneID, List<Operation> operations)
+    {
+        if (_configured)
+        {
+            throw new InvalidOperationException(
+                $"DataZone '{TriggerZoneID}' is already configured; a DataZone is configured once, when it is spawned"
+            );
+        }
+        _configured = true;
+        Volume.Configure(triggerZoneID, operations);
     }
 
     private void Start()
@@ -24,17 +67,6 @@ public class DataZone : Prefab
         if (collider != null)
         {
             collider.isTrigger = true;
-        }
-        foreach (var operation in Operations)
-        {
-            operation.initialise(
-                new AttachedObjectDetails
-                {
-                    obj = this,
-                    ID = TriggerZoneID,
-                    location = transform.position
-                }
-            );
         }
     }
 
@@ -45,38 +77,5 @@ public class DataZone : Prefab
         {
             renderer.enabled = visibility;
         }
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        TrainingAgent agent = AgentFrom(other);
-        if (agent == null || !_agentsInZone.Add(agent))
-        {
-            return;
-        }
-        agent.RecordDataZoneMessage("Agent was in DataZone: " + TriggerZoneID, TriggerZoneID);
-        for (int i = 0; i < Operations.Count; i++)
-        {
-            Operations[i].execute(agent);
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        TrainingAgent agent = AgentFrom(other);
-        if (agent == null || !_agentsInZone.Remove(agent))
-        {
-            return;
-        }
-        agent.RecordDataZoneMessage("Agent left DataZone: " + TriggerZoneID, TriggerZoneID);
-        for (int i = 0; i < Operations.Count; i++)
-        {
-            Operations[i].completeExecution(agent);
-        }
-    }
-
-    private static TrainingAgent AgentFrom(Collider other)
-    {
-        return other.CompareTag("agent") ? other.GetComponent<TrainingAgent>() : null;
     }
 }

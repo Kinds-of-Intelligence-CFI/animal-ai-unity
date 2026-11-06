@@ -67,6 +67,9 @@ namespace ArenasParameters
         public List<string> triggerZoneID = null;
         public bool zoneVisibility = true;
 
+        // Agent
+        public YAMLDefs.Zone zone = null;
+
         // Generic
         public List<Operations.Operation> operations { get; private set; }
 
@@ -122,6 +125,7 @@ namespace ArenasParameters
 
             triggerZoneID = yamlItem.triggerZoneID;
             zoneVisibility = yamlItem.zoneVisibility;
+            zone = yamlItem.zone;
 
             operations = yamlItem.operations;
         }
@@ -226,6 +230,51 @@ namespace ArenasParameters
             episodeEndPolicy = ParseEpisodeEndPolicy(yamlArena.episodeEnd);
 
             ValidateAgentTeams();
+            ValidateAgentZones();
+        }
+
+        /// <summary>
+        /// A zone needs a positive radius and only an Agent item can carry one. A radius smaller than an
+        /// agent's body would never trigger before the agents touch anyway, so it is raised to the minimum
+        /// with a warning rather than rejected.
+        /// </summary>
+        private void ValidateAgentZones()
+        {
+            foreach (Spawnable spawnable in spawnables)
+            {
+                if (spawnable.zone != null && !spawnable.IsAgent)
+                {
+                    throw new ArgumentException(
+                        $"Item '{spawnable.name}' has a zone, but only Agent items can carry a zone. Use a "
+                            + "DataZone item for a zone placed in the arena."
+                    );
+                }
+            }
+
+            List<Spawnable> agents = AgentSpawnables;
+            for (int k = 0; k < agents.Count; k++)
+            {
+                YAMLDefs.Zone zone = agents[k].zone;
+                if (zone == null)
+                {
+                    continue;
+                }
+                if (zone.radius <= 0f)
+                {
+                    throw new ArgumentException(
+                        $"Agent item {k}'s zone needs a positive radius (e.g. zone: {{radius: 3}}), got {zone.radius}."
+                    );
+                }
+                if (zone.radius < AgentZone.MinimumRadius)
+                {
+                    Debug.LogWarning(
+                        $"Agent item {k}'s zone radius {zone.radius} is smaller than an agent's body radius "
+                            + $"({AgentZone.MinimumRadius}), so the zone could never trigger before the agents "
+                            + $"touch; using {AgentZone.MinimumRadius}."
+                    );
+                    zone.radius = AgentZone.MinimumRadius;
+                }
+            }
         }
 
         private static EpisodeEndPolicy ParseEpisodeEndPolicy(string value)

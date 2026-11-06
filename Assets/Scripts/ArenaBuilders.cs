@@ -91,10 +91,13 @@ namespace ArenaBuilders
             List<Spawnable> agentSpawnablesFromUser = Spawnables.Where(spawnable => spawnable.IsAgent).ToList();
 
             // Agents' colliders are disabled while spawn positions are sampled so they don't block
-            // their own placement; each is re-enabled as soon as that agent is placed.
+            // their own placement; each is re-enabled as soon as that agent is placed. An agent's zone
+            // from the previous arena is switched off too, so the agent's footprint is just its body;
+            // PlaceAgents configures each agent's zone for this arena once the agent is placed.
             foreach (TrainingAgent agent in agents)
             {
                 agent.GetComponent<Collider>().enabled = false;
+                AgentZone.Deactivate(agent);
             }
 
             if (agentSpawnablesFromUser.Any())
@@ -491,14 +494,19 @@ namespace ArenaBuilders
                         DataZone dataZone = gameObjectInstance.GetComponent<DataZone>();
                         if (dataZone != null)
                         {
-                            if (
+                            string triggerZoneID =
                                 optionals.TryGetValue("triggerZoneID", out var triggerZoneIDsValue)
                                 && triggerZoneIDsValue is List<string> triggerZoneIDs
                                 && triggerZoneIDs.Count > 0
-                            )
-                            {
-                                dataZone.TriggerZoneID = triggerZoneIDs[0];
-                            }
+                                    ? triggerZoneIDs[0]
+                                    : "";
+                            List<Operations.Operation> operations =
+                                optionals.TryGetValue("operations", out var operationsValue)
+                                && operationsValue is List<Operations.Operation> operationsList
+                                    ? operationsList
+                                    : null;
+                            /* The zone is already in position, so its operations get the right location */
+                            dataZone.Configure(triggerZoneID, operations);
 
                             if (
                                 optionals.TryGetValue("zoneVisibility", out var zoneVisibilityValue)
@@ -506,11 +514,6 @@ namespace ArenaBuilders
                             )
                             {
                                 dataZone.SetVisibility(zoneVisibility);
-                            }
-                            if (optionals.TryGetValue("operations", out var operationsValue)
-                                && operationsValue is List<Operations.Operation> operations)
-                            {
-                                dataZone.Operations = operations;
                             }
                         }
                     }
@@ -525,9 +528,9 @@ namespace ArenaBuilders
 
         /// <summary>
         /// Moves each agent to its spawn position. Agent k uses the k-th Agent item: its position (chosen at
-        /// random when the item lists several), and its first rotation, skin and freeze delay. An agent with
-        /// no item, or an item without a value, gets the default: random position and rotation, random skin,
-        /// no freeze.
+        /// random when the item lists several), its first rotation, skin and freeze delay, and its zone. An
+        /// agent with no item, or an item without a value, gets the default: random position and rotation,
+        /// random skin, no freeze, no zone.
         /// </summary>
         /// <param name="agentSpawnablesFromUser">The arena's Agent items, in order (empty when there are none)</param>
         private void PlaceAgents(List<Spawnable> agentSpawnablesFromUser, IReadOnlyList<TrainingAgent> agents)
@@ -541,6 +544,8 @@ namespace ArenaBuilders
                 float freezeDelay = OptionalEntry(agentSpawnable?.frozenAgentDelays, 0, 0f);
 
                 PlaceAgent(agents[k], position, rotation, skin, freezeDelay);
+                /* After placing, so the zone's collider plays no part in finding the agent a free spot */
+                AgentZone.Configure(agents[k], agentSpawnable?.zone);
             }
         }
 

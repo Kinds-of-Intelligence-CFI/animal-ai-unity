@@ -5,8 +5,8 @@ using UnityEngine;
 namespace Operations
 {
     /// <summary>
-    /// Grant a reward every fixed update to each agent in the DataZone, from when it enters until it
-    /// leaves (or its episode ends)
+    /// Grant a reward every fixed update to each agent in the zone (a DataZone or an agent's zone), from
+    /// when it enters until it leaves (or its episode ends)
     /// </summary>
     public class GrantContinuousReward : Operation
     {
@@ -25,10 +25,9 @@ namespace Operations
         }
 
         public override void execute(TrainingAgent triggeringAgent) {
-            Debug.Log(rewardPerStep);
-            if (attachedObjectDetails.obj is not DataZone)
+            if (attachedObjectDetails.obj is not TriggerVolume)
             {
-                Debug.LogError("GrantContinuousReward can only be used with a Datazone");
+                Debug.LogError("GrantContinuousReward can only be used with a zone (a DataZone or an agent's zone)");
                 return;
             }
 

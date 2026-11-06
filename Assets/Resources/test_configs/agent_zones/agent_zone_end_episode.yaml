@@ -1,0 +1,24 @@
+# Agent zones: agent 0 is a predator whose 1m zone ends the episode of any agent that comes inside it.
+# Used by AgentZoneTests.
+!ArenaConfig
+arenas:
+  0: !Arena
+    passMark: 0
+    timeLimit: 250
+    items:
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 10, y: 0, z: 20}
+      rotations: [90]
+      zone:
+        radius: 1
+        triggerZoneID: predator
+        operations:
+        - !endEpisode
+          reward: -1
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 30, y: 0, z: 20}
+      rotations: [270]

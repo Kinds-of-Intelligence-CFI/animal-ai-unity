@@ -1,0 +1,24 @@
+# Agent zones under episodeEnd: all, where an agent that finishes waits frozen: agent 0's zone should
+# keep working after agent 0 has finished. Used by AgentZoneTests.
+!ArenaConfig
+arenas:
+  0: !Arena
+    passMark: 0
+    timeLimit: 250
+    episodeEnd: all
+    items:
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 10, y: 0, z: 20}
+      rotations: [90]
+      zone:
+        radius: 3
+        operations:
+        - !grantContinuousReward
+          rewardPerStep: 0.1
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 30, y: 0, z: 20}
+      rotations: [270]

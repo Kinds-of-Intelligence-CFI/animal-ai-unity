@@ -128,6 +128,9 @@ namespace YAMLDefs
         // Agent only: this agent's ML-Agents TeamId as a one-entry list, e.g. [1] (defaults to 0).
         // Each Agent item is one agent; the k-th Agent item is agent k.
         public List<int> teams { get; set; } = new List<int>();
+        // Agent only: a sphere around the agent whose operations run on any other agent inside it
+        // (see the Multi-Agent Guide). Null when the item has no zone block.
+        public Zone zone { get; set; } = null;
 
         // SignBoard
         public List<string> symbolNames { get; set; } = new List<string>();
@@ -159,6 +162,22 @@ namespace YAMLDefs
         public bool zoneVisibility { get; set; } = true;
 
         // Generic for interactive objects
+        public List<Operations.Operation> operations { get; set; } = new List<Operations.Operation>();
+    }
+
+    /// <summary>
+    /// The `zone` block of an Agent item: a sphere of `radius` around the agent whose `operations` run on
+    /// any other agent that comes inside it (see AgentZone). Written without a tag, e.g.
+    /// <code>zone: {radius: 3, operations: [...]}</code>.
+    /// </summary>
+    public class Zone
+    {
+        // Required; at least AgentZone.MinimumRadius (smaller values are clamped with a warning)
+        public float radius { get; set; } = 0f;
+        // Logged in the CSV of an agent entering or leaving, like a DataZone's; defaults to "agent<k>"
+        public string triggerZoneID { get; set; } = "";
+        // Draws the zone as a translucent sphere (cameras only; rays never see it)
+        public bool zoneVisibility { get; set; } = false;
         public List<Operations.Operation> operations { get; set; } = new List<Operations.Operation>();
     }
 

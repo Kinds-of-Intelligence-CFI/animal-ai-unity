@@ -1,0 +1,28 @@
+# Agent zones are blocked by other agents: agents 1 and 2 both spawn inside agent 0's 10m zone, in a
+# line, so agent 1 stands between agent 0 and agent 2. Used by AgentZoneTests.
+!ArenaConfig
+arenas:
+  0: !Arena
+    passMark: 0
+    timeLimit: 250
+    items:
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 10, y: 0, z: 20}
+      rotations: [90]
+      zone:
+        radius: 10
+        operations:
+        - !grantContinuousReward
+          rewardPerStep: 0.1
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 14, y: 0, z: 20}
+      rotations: [90]
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 18, y: 0, z: 20}
+      rotations: [270]

@@ -1,0 +1,24 @@
+# A DataZone that rewards the agent inside it every step, 15m from the agent. Used by AgentZoneTests to
+# check a DataZone still runs its operations through the TriggerVolume it shares with agent zones.
+!ArenaConfig
+arenas:
+  0: !Arena
+    passMark: 0
+    timeLimit: 250
+    items:
+    - !Item
+      name: Agent
+      positions:
+      - !Vector3 {x: 10, y: 0, z: 20}
+      rotations: [90]
+    - !Item
+      name: DataZone
+      positions:
+      - !Vector3 {x: 25, y: 0, z: 20}
+      sizes:
+      - !Vector3 {x: 4, y: 0, z: 4}
+      rotations: [0]
+      triggerZoneID: ["D1"]
+      operations:
+      - !grantContinuousReward
+        rewardPerStep: 0.1

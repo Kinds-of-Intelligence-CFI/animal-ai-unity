@@ -45,7 +45,7 @@ public class GrantContinuousRewardTests
         var dataZone = gameObject.AddComponent<DataZone>();
         operation.initialise(new AttachedObjectDetails
                 {
-                    obj = dataZone,
+                    obj = dataZone.Volume,
                     ID = "dummy-id",
                     location = new Vector3()
                 });
