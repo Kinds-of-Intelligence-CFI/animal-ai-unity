@@ -299,6 +299,11 @@ public class AAI3EnvironmentManager : MonoBehaviour
                 {
                     _arenasConfigurations.UpdateWithYAML(parsed);
                     Debug.Log("Successfully loaded and parsed config from S3");
+                    PlayerControls playerControls = FindAnyObjectByType<PlayerControls>();
+                    if (playerControls != null)
+                    {
+                        playerControls.ApplyConfiguration();
+                    }
                 }
                 else
                 {

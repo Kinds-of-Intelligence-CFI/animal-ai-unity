@@ -63,6 +63,22 @@ public class PlayerControlsTests
         Assert.AreEqual(initialCameraID, playerControls.cameraID);
     }
     [UnityTest]
+    public IEnumerator TestApplyConfigurationUsesSettingsThatArriveAfterStart()
+    {
+        yield return null;
+        playerControls = GameObject.FindAnyObjectByType<PlayerControls>();
+        AAI3EnvironmentManager environmentManager = GameObject.FindAnyObjectByType<AAI3EnvironmentManager>();
+
+        environmentManager.GetArenasConfigurations().canChangePerspective = false;
+        environmentManager.GetArenasConfigurations().initialPerspective = "third";
+        playerControls.ApplyConfiguration();
+
+        Assert.AreEqual(2, playerControls.cameraID);
+        Assert.IsTrue(playerControls.Cameras[2].enabled);
+        Assert.IsFalse(playerControls.Cameras[0].enabled);
+    }
+
+    [UnityTest]
     public IEnumerator TestGetActiveCameraDescription()
     {
         yield return null;

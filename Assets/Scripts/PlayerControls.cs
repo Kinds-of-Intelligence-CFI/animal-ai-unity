@@ -15,6 +15,7 @@ public class PlayerControls : MonoBehaviour
     public int cameraID => activeCameraIndex;
     private int activeCameraIndex = 0;
     private bool camerasInitialized = false;
+    private bool started = false;
 
     [Header("UI Components")]
     public TMP_Text scoreText;
@@ -60,6 +61,21 @@ public class PlayerControls : MonoBehaviour
     {
         InitializeCanvas();
         LoadCamerasAndAgent();
+        LoadConfigurationSettings();
+        InitializeCameras();
+        started = true;
+    }
+
+    /// <summary>
+    /// Re-reads the global settings from the arena configuration and resets the camera.
+    /// Call this when the configuration arrives after Start, as it does in WebGL.
+    /// </summary>
+    public void ApplyConfiguration()
+    {
+        if (!started)
+        {
+            return; /* Start reads the configuration itself */
+        }
         LoadConfigurationSettings();
         InitializeCameras();
     }
