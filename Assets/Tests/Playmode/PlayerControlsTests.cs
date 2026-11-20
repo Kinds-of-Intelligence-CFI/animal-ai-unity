@@ -72,9 +72,9 @@ public class PlayerControlsTests
         {
             string expectedDescription = i switch
             {
-                0 => "0 (First-Person)",
-                1 => "1 (Third-Person)",
-                2 => "2 (Bird's Eye)",
+                0 => "0 (Bird's Eye)",
+                1 => "1 (First-Person)",
+                2 => "2 (Third-Person)",
                 _ => $"{i} (unknown)"
             };
             Assert.AreEqual(expectedDescription, playerControls.GetActiveCameraDescription());

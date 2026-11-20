@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.TestTools;
 using ArenasParameters;
 using YAMLDefs;
 
@@ -96,7 +97,8 @@ public class ArenasParametersTests
             randomizeArenas = true,
             showNotification = true,
             canResetEpisode = false,
-            canChangePerspective = false
+            canChangePerspective = false,
+            initialPerspective = "third"
         };
 
         _arenasConfigurations.UpdateWithYAML(yamlConfig);
@@ -106,6 +108,63 @@ public class ArenasParametersTests
         Assert.IsTrue(_arenasConfigurations.showNotification);
         Assert.IsFalse(_arenasConfigurations.canResetEpisode);
         Assert.IsFalse(_arenasConfigurations.canChangePerspective);
+        Assert.AreEqual("third", _arenasConfigurations.initialPerspective);
+    }
+
+    [Test]
+    public void ArenasConfigurations_UpdateWithYAML_InitialPerspectiveDefaultsToUnset()
+    {
+        YAMLDefs.ArenaConfig yamlConfig = new YAMLDefs.ArenaConfig
+        {
+            arenas = new Dictionary<int, YAMLDefs.Arena> { { 0, new YAMLDefs.Arena() } }
+        };
+
+        _arenasConfigurations.UpdateWithYAML(yamlConfig);
+
+        Assert.IsNull(_arenasConfigurations.initialPerspective);
+    }
+
+    [Test]
+    public void ArenaConfig_Deserialize_ReadsInitialPerspective()
+    {
+        string yaml = "!ArenaConfig\ncanChangePerspective: false\ninitialPerspective: first\narenas:\n  0: !Arena\n    timeLimit: 100\n";
+        YAMLDefs.ArenaConfig config = new YAMLReader().deserializer.Deserialize<YAMLDefs.ArenaConfig>(yaml);
+
+        Assert.IsFalse(config.canChangePerspective);
+        Assert.AreEqual("first", config.initialPerspective);
+    }
+
+    [TestCase(null, true, 0)]
+    [TestCase(null, false, 2)]
+    [TestCase("birds_eye", false, 0)]
+    [TestCase("Birds_Eye", true, 0)]
+    [TestCase("first", false, 1)]
+    [TestCase("third", true, 2)]
+    public void ResolveInitialCameraIndex_ReturnsExpectedCamera(
+        string initialPerspective,
+        bool canChangePerspective,
+        int expected
+    )
+    {
+        Assert.AreEqual(
+            expected,
+            PlayerControls.ResolveInitialCameraIndex(initialPerspective, canChangePerspective)
+        );
+    }
+
+    [TestCase("sideways", true, 0)]
+    [TestCase("0", false, 2)]
+    public void ResolveInitialCameraIndex_UnknownValueFallsBackToDefault(
+        string initialPerspective,
+        bool canChangePerspective,
+        int expected
+    )
+    {
+        LogAssert.Expect(LogType.Warning, new System.Text.RegularExpressions.Regex("isn't recognised"));
+        Assert.AreEqual(
+            expected,
+            PlayerControls.ResolveInitialCameraIndex(initialPerspective, canChangePerspective)
+        );
     }
 
     [Test]

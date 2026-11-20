@@ -430,15 +430,15 @@ public class TrainingAgent : Agent, IPrefab
             {
                 if (activeCamera.CompareTag("MainCamera"))
                 {
-                    return "0 (First-Person)";
+                    return "0 (Bird's Eye)";
                 }
                 else if (activeCamera.CompareTag("AgentCamMid"))
                 {
-                    return "1 (Third-Person)";
+                    return "1 (First-Person)";
                 }
                 else if (activeCamera.CompareTag("camBase"))
                 {
-                    return "2 (Bird's Eye)";
+                    return "2 (Third-Person)";
                 }
                 else
                 {

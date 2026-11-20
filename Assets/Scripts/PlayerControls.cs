@@ -8,6 +8,8 @@ using ArenasParameters;
 public class PlayerControls : MonoBehaviour
 {
     [Header("Camera Settings")]
+    /* 0 = bird's eye (the scene's Main Camera, fixed above the arena), 1 = first-person (AgentCamMid),
+       2 = third-person (the camBase camera behind the agent) */
     private Camera[] cameras = new Camera[3];
     public Camera[] Cameras => cameras;
     public int cameraID => activeCameraIndex;
@@ -21,6 +23,7 @@ public class PlayerControls : MonoBehaviour
     [Header("Gameplay Settings")]
     private bool canResetEpisode = true;
     private bool canChangePerspective = true;
+    private string initialPerspective = null;
 
     [Header("External References")]
     private ScreenshotCamera screenshotCam;
@@ -36,9 +39,9 @@ public class PlayerControls : MonoBehaviour
     {
         return activeCameraIndex switch
         {
-            0 => "0 (First-Person)",
-            1 => "1 (Third-Person)",
-            2 => "2 (Bird's Eye)",
+            0 => "0 (Bird's Eye)",
+            1 => "1 (First-Person)",
+            2 => "2 (Third-Person)",
             _ => $"{activeCameraIndex} (unknown)"
         };
     }
@@ -109,6 +112,7 @@ public class PlayerControls : MonoBehaviour
             arenasConfigurations = environmentManager.GetArenasConfigurations();
             canResetEpisode = arenasConfigurations?.canResetEpisode ?? true;
             canChangePerspective = arenasConfigurations?.canChangePerspective ?? true;
+            initialPerspective = arenasConfigurations?.initialPerspective;
         }
         else
         {
@@ -132,13 +136,41 @@ public class PlayerControls : MonoBehaviour
             return;
         }
 
-        activeCameraIndex = canChangePerspective ? 0 : 2; /* If can't change perspectives, use the bird's-eye camera */
+        activeCameraIndex = ResolveInitialCameraIndex(initialPerspective, canChangePerspective);
         Debug.Log(
-            $"Initializing Cameras. Can Change Perspective: {canChangePerspective}, Active Camera Index: {activeCameraIndex}"
+            $"Initializing Cameras. Can Change Perspective: {canChangePerspective}, Initial Perspective: {initialPerspective ?? "unset"}, Active Camera Index: {activeCameraIndex}"
         );
 
         SetActiveCamera(activeCameraIndex);
         camerasInitialized = true;
+    }
+
+    /// <summary>
+    /// Returns the index of the camera to start in: the one named by initialPerspective ("first", "third" or
+    /// "birds_eye"), or if that's unset or unrecognised, bird's eye when the player can change perspective
+    /// and third-person when they can't.
+    /// </summary>
+    public static int ResolveInitialCameraIndex(string initialPerspective, bool canChangePerspective)
+    {
+        int defaultIndex = canChangePerspective ? 0 : 2;
+        if (initialPerspective == null)
+        {
+            return defaultIndex;
+        }
+        switch (initialPerspective.Trim().ToLowerInvariant())
+        {
+            case "birds_eye":
+                return 0;
+            case "first":
+                return 1;
+            case "third":
+                return 2;
+            default:
+                Debug.LogWarning(
+                    $"initialPerspective '{initialPerspective}' isn't recognised (use first, third or birds_eye). Using camera {defaultIndex} instead."
+                );
+                return defaultIndex;
+        }
     }
 
     private void HandleInput()

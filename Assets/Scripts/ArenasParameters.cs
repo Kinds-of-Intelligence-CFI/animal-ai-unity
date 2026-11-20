@@ -338,6 +338,7 @@ namespace ArenasParameters
         public bool showNotification { get; set; } = false;
         public bool canResetEpisode { get; set; } = true;
         public bool canChangePerspective { get; set; } = true;
+        public string initialPerspective { get; set; } = null;
         public int CurrentArenaID { get; set; } = 0;
 
         public ArenasConfigurations()
@@ -411,6 +412,7 @@ namespace ArenasParameters
             showNotification = yamlArenaConfig.showNotification;
             canResetEpisode = yamlArenaConfig.canResetEpisode;
             canChangePerspective = yamlArenaConfig.canChangePerspective;
+            initialPerspective = yamlArenaConfig.initialPerspective;
 
             ValidateAgentTeamsAcrossArenas();
             ValidateMergedArenaAgentCounts();
