@@ -236,15 +236,11 @@
 
             // Extract experiment and participant IDs from URL
             const urlParams = new URLSearchParams(window.location.search);
-            const params = Array.from(urlParams.keys());
-            const experimentId = params[0] || '';
-            const participantId = params[1] || '';
+            const experimentId = urlParams.get('experiment_id') || '';
+            const participantId = urlParams.get('participant_id') || '';
 
             // Build completion URL with parameters
-            completionUrl = '../completion.html';
-            if (experimentId && participantId) {
-              completionUrl += '?experiment_id=' + encodeURIComponent(experimentId) + '&participant_id=' + encodeURIComponent(participantId);
-            }
+            completionUrl = '../completion.html?experiment_id=' + encodeURIComponent(experimentId) + '&participant_id=' + encodeURIComponent(participantId);
 
             console.log('Will redirect to:', completionUrl);
 

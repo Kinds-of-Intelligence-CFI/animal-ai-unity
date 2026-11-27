@@ -719,60 +719,48 @@ public class TrainingArena : MonoBehaviour
         // Extract experiment and user IDs from URL for CSV upload
         string currentUrl = Application.absoluteURL;
         Debug.Log("Current WebGL URL: " + currentUrl);
-        string[] urlParts = currentUrl.Split('?');
-        if (urlParts.Length == 2)
+        string experimentId = WebGLUrl.QueryParameter(currentUrl, WebGLUrl.EXPERIMENT_ID_PARAMETER);
+        string userId = WebGLUrl.QueryParameter(currentUrl, WebGLUrl.PARTICIPANT_ID_PARAMETER);
+        if (experimentId == "" || userId == "")
         {
-            string queryString = urlParts[urlParts.Length - 1];
-            string[] queryArgs = queryString.Split('&');
-            if (queryArgs.Length >= 2)
+            Debug.LogError($"Unable to find the experiment and participant IDs in URL: {currentUrl}");
+            yield break;
+        }
+
+        // Don't write CSV files for tutorial runs
+        if (WebGLUrl.IsTutorial(currentUrl))
+        {
+            NotifyExperimentComplete();
+            _experimentOver = true;
+            yield break;
+        }
+
+        if (AllArenasAttempted())
+        {
+            Debug.Log("All arenas completed - notifying web page");
+
+            if (_notificationShown)
             {
-                string experimentId = queryArgs[0];
-                string userId = queryArgs[1];
-
-                // Don't write CSV files for tutorial runs
-                if (currentUrl.Contains("tutorial"))
-                {
-                    NotifyExperimentComplete();
-                    _experimentOver = true;
-                    yield break;
-                }
-
-                if (AllArenasAttempted())
-                {
-                    Debug.Log("All arenas completed - notifying web page");
-
-                    if (_notificationShown)
-                    {
-                        yield return new WaitForSeconds(NotificationDisplaySeconds);
-                        NotificationManager.Instance.HideNotification();
-                    }
-
-                    // Show "Thank You! Redirecting..." message immediately to hide game UI
-                    NotifyExperimentComplete();
-
-                    // Final blocking upload to ensure all data is captured before redirect
-                    yield return StartCoroutine(PrimaryAgent.UploadLog(experimentId, userId));
-                    Debug.Log("Final CSV upload completed");
-                    NotifyUploadComplete();
-
-                    // No further arenas are played, so the episode isn't ended
-                    _experimentOver = true;
-                    yield break;
-                }
-                else
-                {
-                    Debug.Log("Arena completed - uploading CSV in background");
-                    PrimaryAgent.StartLogUpload(experimentId, userId);
-                }
+                yield return new WaitForSeconds(NotificationDisplaySeconds);
+                NotificationManager.Instance.HideNotification();
             }
-            else
-            {
-                Debug.LogError($"Unable to parse experiment/user ID from URL: {currentUrl}");
-            }
+
+            // Show "Thank You! Redirecting..." message immediately to hide game UI
+            NotifyExperimentComplete();
+
+            // Final blocking upload to ensure all data is captured before redirect
+            yield return StartCoroutine(PrimaryAgent.UploadLog(experimentId, userId));
+            Debug.Log("Final CSV upload completed");
+            NotifyUploadComplete();
+
+            // No further arenas are played, so the episode isn't ended
+            _experimentOver = true;
+            yield break;
         }
         else
         {
-            Debug.LogError($"Unable to find config in URL: {currentUrl}");
+            Debug.Log("Arena completed - uploading CSV in background");
+            PrimaryAgent.StartLogUpload(experimentId, userId);
         }
         #endif
 

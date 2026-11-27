@@ -136,30 +136,19 @@ public class AAI3EnvironmentManager : MonoBehaviour
         {
             string currentUrl = Application.absoluteURL;
             Debug.Log("Current WebGL URL: " + currentUrl);
-            string[] urlParts = currentUrl.Split('?');
-            if (urlParts.Length != 2)
+            string experiment_id = WebGLUrl.QueryParameter(currentUrl, WebGLUrl.EXPERIMENT_ID_PARAMETER);
+            string user_id = WebGLUrl.QueryParameter(currentUrl, WebGLUrl.PARTICIPANT_ID_PARAMETER);
+            if (experiment_id == "" || user_id == "")
             {
                 // TODO: Gracefully handle when the URL is incorrectly constructed
-                Debug.LogError($"Unable to find config in URL: {currentUrl}");
-            }
-            string queryString = urlParts[urlParts.Length - 1];
-            string[] queryArgs = queryString.Split('&');
-            string experiment_id = queryArgs[0];
-            string user_id = "";
-            if (queryArgs.Length > 1)
-            {
-                user_id = queryArgs[1];
-            }
-            else
-            {
-                Debug.LogError($"Unable to find user_id in URL query parameters: {currentUrl}");
+                Debug.LogError($"Unable to find the experiment and participant IDs in URL: {currentUrl}");
             }
             playerMode = true;
             useCamera = true;
             resolution = 84;
             useRayCasts = false;
 
-            bool isTutorial = currentUrl.Contains("tutorial");
+            bool isTutorial = WebGLUrl.IsTutorial(currentUrl);
             string configFilename = isTutorial ? WebGLConstants.TUTORIAL_CONFIG_FILENAME : WebGLConstants.EXPERIMENT_CONFIG_FILENAME;
             StartCoroutine(LoadConfigFromS3(experiment_id, configFilename));
             if (!isTutorial)
