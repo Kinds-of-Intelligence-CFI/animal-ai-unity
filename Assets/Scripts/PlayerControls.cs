@@ -199,6 +199,8 @@ public class PlayerControls : MonoBehaviour
         {
             arena.EndArenaEpisode();
         }
+        /* Quitting and screenshots aren't available in the browser */
+        #if !UNITY_WEBGL || UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.Q))
         {
             Application.Quit();
@@ -207,6 +209,7 @@ public class PlayerControls : MonoBehaviour
         {
             screenshotCam.Activate();
         }
+        #endif
     }
 
     private void UpdateScoreText()
